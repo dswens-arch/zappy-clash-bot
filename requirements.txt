@@ -2,5 +2,6 @@ discord.py>=2.3.0
 supabase>=2.0.0
 aiohttp>=3.9.0
 python-dotenv>=1.0.0
-algosdk>=2.4.0
+py-algorand-sdk>=2.4.0
 base58>=2.1.1
+ 
