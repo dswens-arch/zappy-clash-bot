@@ -56,13 +56,13 @@ CLASH_CHANNEL   = int(os.environ["CLASH_CHANNEL_ID"])    # #zappy-clash channel 
 ANNOUNCE_CHANNEL= int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
 
 # Session timing (UTC)
-MORNING_OPEN    = dtime(9,  0,  tzinfo=timezone.utc)
-MORNING_CLOSE   = dtime(9, 30,  tzinfo=timezone.utc)   # 30 min registration window
-MORNING_RESOLVE = dtime(9, 35,  tzinfo=timezone.utc)
+MORNING_OPEN    = dtime(3,  0,  tzinfo=timezone.utc)
+MORNING_CLOSE   = dtime(3, 30,  tzinfo=timezone.utc)
+MORNING_RESOLVE = dtime(3, 35,  tzinfo=timezone.utc)
 
-EVENING_OPEN    = dtime(21,  0, tzinfo=timezone.utc)
-EVENING_CLOSE   = dtime(21, 30, tzinfo=timezone.utc)
-EVENING_RESOLVE = dtime(21, 35, tzinfo=timezone.utc)
+EVENING_OPEN    = dtime(15,  0, tzinfo=timezone.utc)
+EVENING_CLOSE   = dtime(15, 30, tzinfo=timezone.utc)
+EVENING_RESOLVE = dtime(15, 35, tzinfo=timezone.utc)
 
 # ─────────────────────────────────────────────
 # Bot setup
@@ -216,9 +216,14 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
         chosen_asset_id = all_assets[0]["asset_id"]
     else:
         # Multiple — ask them to specify
-        names = "\n".join(f"  • {a.get('name', a.get('unit_name', ''))} — `{a['asset_id']}`" for a in all_assets)
+        # Fetch names for all assets so we show friendly names not just IDs
+        lines = []
+        for a in all_assets:
+            display = a.get('name') or a.get('unit_name') or f"ASA {a['asset_id']}"
+            lines.append(f"  • **{display}** — `/clash asset_id:{a['asset_id']}`")
+        names = "\n".join(lines)
         await interaction.followup.send(
-            f"You have multiple Zappies! Use `/clash asset_id:XXXXX` to specify which one.\n\n{names}",
+            f"You have **{len(all_assets)} Zappies**! Reply with the one you want to enter:\n\n{names}",
             ephemeral=True
         )
         return
@@ -291,8 +296,15 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
     elif len(all_assets) == 1:
         chosen_id = all_assets[0]["asset_id"]
     else:
-        names = "\n".join(f"  • ASA `{a['asset_id']}`" for a in all_assets)
-        await interaction.followup.send(f"Multiple Zappies found. Specify one:\n{names}", ephemeral=True)
+        names = "\n".join(
+            f"  • **{a.get('name', a.get('unit_name', f'ASA {a["asset_id"]}'))}** — `{a['asset_id']}`"
+            for a in all_assets
+        )
+        await interaction.followup.send(
+            f"You have {len(all_assets)} Zappies! Use `/stats asset_id:XXXXX` to pick one, "
+            f"or check `/clash` to see them all.\n\n{names}",
+            ephemeral=True
+        )
         return
 
     zappy = await fetch_zappy_traits(chosen_id)
@@ -382,6 +394,56 @@ async def cmd_top(interaction: discord.Interaction):
         lines.append(f"{medals[i]} **{name}** — {cp:,} CP")
 
     await interaction.response.send_message("\n".join(lines), ephemeral=False)
+
+
+@tree.command(name="myzappies", description="List all your Zappies with names and ASA IDs")
+async def cmd_myzappies(interaction: discord.Interaction):
+    """Show all Zappies in the linked wallet with names."""
+    await interaction.response.defer(ephemeral=True)
+
+    user_id = str(interaction.user.id)
+    wallet  = get_wallet(user_id)
+
+    if not wallet:
+        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+        return
+
+    ownership = await verify_wallet(user_id, wallet)
+    if not ownership["owns"]:
+        await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
+        return
+
+    zappies = ownership["zappies"]
+    heroes  = ownership["heroes"]
+    collabs = ownership["collabs"]
+
+    embed = discord.Embed(
+        title=f"⚡ Your Zappies ({len(zappies) + len(heroes) + len(collabs)} total)",
+        color=0xF5E642,
+    )
+
+    # Main collection — paginate into chunks of 20 per field (Discord limit)
+    if zappies:
+        chunk_size = 20
+        for i in range(0, len(zappies), chunk_size):
+            chunk = zappies[i:i+chunk_size]
+            lines = [
+                f"**{z.get('name', z.get('unit_name', f'ASA {z["asset_id"]}'))}** `{z['asset_id']}`"
+                for z in chunk
+            ]
+            field_name = "Zappies" if i == 0 else f"Zappies (cont.)"
+            embed.add_field(name=field_name, value="\n".join(lines), inline=False)
+
+    if heroes:
+        hero_lines = [f"🦸 **Zappy Hero — {h['hero_type']}** `{h['asset_id']}`" for h in heroes]
+        embed.add_field(name="Heroes", value="\n".join(hero_lines), inline=False)
+
+    if collabs:
+        collab_lines = [f"🐱 **Shitty Zappy Kitty** `{c['asset_id']}`" for c in collabs]
+        embed.add_field(name="Collabs", value="\n".join(collab_lines), inline=False)
+
+    embed.set_footer(text="Use /stats asset_id:XXXXX to see a Zappy's battle stats")
+    await interaction.followup.send(embed=embed, ephemeral=True)
 
 
 @tree.command(name="debug", description="ADMIN ONLY — debug a Zappy's image URL")
