@@ -20,11 +20,12 @@ INDEXER_URL  = "https://mainnet-idx.algonode.cloud"
 ALGOD_URL    = "https://mainnet-api.algonode.cloud"
 
 # IPFS gateways — tried in order until one responds
+# nftstorage.link and dweb.link tend to be fastest for Algorand NFTs
 IPFS_GATEWAYS = [
-    "https://ipfs.io/ipfs/",
-    "https://cloudflare-ipfs.com/ipfs/",
-    "https://gateway.pinata.cloud/ipfs/",
+    "https://nftstorage.link/ipfs/",
     "https://dweb.link/ipfs/",
+    "https://cloudflare-ipfs.com/ipfs/",
+    "https://ipfs.io/ipfs/",
 ]
 
 # ─────────────────────────────────────────────
@@ -116,12 +117,18 @@ def decode_arc19_reserve(asset_url: str, reserve_address: str) -> str | None:
 
 
 def ipfs_to_gateway_url(ipfs_url: str) -> str:
-    """Convert ipfs://CID to a usable HTTPS gateway URL."""
+    """
+    Convert ipfs://CID to a Discord-friendly HTTPS image URL.
+    Uses nftstorage.link which returns proper content-type headers
+    that Discord needs to render images in embeds.
+    """
     if not ipfs_url:
         return ""
     if ipfs_url.startswith("ipfs://"):
+        # Remove ipfs:// prefix and any trailing path
         cid = ipfs_url.replace("ipfs://", "").split("/")[0]
-        return f"{IPFS_GATEWAYS[0]}{cid}"
+        # nftstorage.link is fastest and Discord-compatible
+        return f"https://nftstorage.link/ipfs/{cid}"
     return ipfs_url  # already an https URL
 
 
