@@ -12,8 +12,8 @@ Commands:
   /streak   — View your daily streak
 
 Scheduled sessions:
-  3:00 AM UTC — Morning Bracket
-  3:00 PM UTC — Evening Bracket
+  9:00 AM UTC — Morning Bracket
+  9:00 PM UTC — Evening Bracket
 
 Setup:
   1. Copy .env.example to .env and fill in your keys
@@ -56,13 +56,13 @@ CLASH_CHANNEL   = int(os.environ["CLASH_CHANNEL_ID"])    # #zappy-clash channel 
 ANNOUNCE_CHANNEL= int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
 
 # Session timing (UTC)
-MORNING_OPEN    = dtime(3,  0,  tzinfo=timezone.utc)
-MORNING_CLOSE   = dtime(3, 30,  tzinfo=timezone.utc)
-MORNING_RESOLVE = dtime(3, 35,  tzinfo=timezone.utc)
+MORNING_OPEN    = dtime(9,  0,  tzinfo=timezone.utc)
+MORNING_CLOSE   = dtime(9, 30,  tzinfo=timezone.utc)   # 30 min registration window
+MORNING_RESOLVE = dtime(9, 35,  tzinfo=timezone.utc)
 
-EVENING_OPEN    = dtime(15,  0, tzinfo=timezone.utc)
-EVENING_CLOSE   = dtime(15, 30, tzinfo=timezone.utc)
-EVENING_RESOLVE = dtime(15, 35, tzinfo=timezone.utc)
+EVENING_OPEN    = dtime(21,  0, tzinfo=timezone.utc)
+EVENING_CLOSE   = dtime(21, 30, tzinfo=timezone.utc)
+EVENING_RESOLVE = dtime(21, 35, tzinfo=timezone.utc)
 
 # ─────────────────────────────────────────────
 # Bot setup
@@ -382,6 +382,40 @@ async def cmd_top(interaction: discord.Interaction):
         lines.append(f"{medals[i]} **{name}** — {cp:,} CP")
 
     await interaction.response.send_message("\n".join(lines), ephemeral=False)
+
+
+@tree.command(name="debug", description="ADMIN ONLY — debug a Zappy's image URL")
+@app_commands.describe(asset_id="The Zappy ASA ID to debug")
+async def cmd_debug(interaction: discord.Interaction, asset_id: int):
+    """Show raw image URL for debugging. Owner only."""
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+    zappy = await fetch_zappy_traits(asset_id)
+
+    if not zappy:
+        await interaction.followup.send("❌ Could not fetch Zappy.", ephemeral=True)
+        return
+
+    image_url = zappy.get("image_url", "NONE")
+    traits    = zappy.get("traits", {})
+
+    lines = [
+        f"**Name:** {zappy.get('name')}",
+        f"**Image URL:** `{image_url}`",
+        f"**Raw image from metadata:** `{traits.get('image_url', 'not in traits')}`",
+        f"**Traits loaded:** {bool(traits)}",
+    ]
+
+    # Also try posting the image directly
+    embed = discord.Embed(title="Image test", color=0xF5E642)
+    if image_url and image_url != "NONE":
+        embed.set_image(url=image_url)
+        lines.append("*(image embed attempted below)*")
+
+    await interaction.followup.send("\n".join(lines), embed=embed, ephemeral=True)
 
 
 @tree.command(name="testbracket", description="ADMIN ONLY — trigger a test bracket right now")
