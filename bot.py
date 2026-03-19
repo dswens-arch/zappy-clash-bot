@@ -56,13 +56,13 @@ CLASH_CHANNEL   = int(os.environ["CLASH_CHANNEL_ID"])    # #zappy-clash channel 
 ANNOUNCE_CHANNEL= int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
 
 # Session timing (UTC)
-MORNING_OPEN    = dtime(9,  0,  tzinfo=timezone.utc)
-MORNING_CLOSE   = dtime(9, 30,  tzinfo=timezone.utc)   # 30 min registration window
-MORNING_RESOLVE = dtime(9, 35,  tzinfo=timezone.utc)
+MORNING_OPEN    = dtime(3,  0,  tzinfo=timezone.utc)
+MORNING_CLOSE   = dtime(3, 30,  tzinfo=timezone.utc)
+MORNING_RESOLVE = dtime(3, 35,  tzinfo=timezone.utc)
 
-EVENING_OPEN    = dtime(21,  0, tzinfo=timezone.utc)
-EVENING_CLOSE   = dtime(21, 30, tzinfo=timezone.utc)
-EVENING_RESOLVE = dtime(21, 35, tzinfo=timezone.utc)
+EVENING_OPEN    = dtime(15,  0, tzinfo=timezone.utc)
+EVENING_CLOSE   = dtime(15, 30, tzinfo=timezone.utc)
+EVENING_RESOLVE = dtime(15, 35, tzinfo=timezone.utc)
 
 # ─────────────────────────────────────────────
 # Bot setup
