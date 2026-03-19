@@ -12,8 +12,8 @@ Commands:
   /streak   — View your daily streak
 
 Scheduled sessions:
-  9:00 AM UTC — Morning Bracket
-  9:00 PM UTC — Evening Bracket
+  3:00 AM UTC — Morning Bracket
+  3:00 PM UTC — Evening Bracket
 
 Setup:
   1. Copy .env.example to .env and fill in your keys
@@ -235,20 +235,25 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
     # Register
     register_for_bracket(user_id, chosen_asset_id, active_bracket_id)
 
-    # Show their stats
-    stats = zappy.get("stats", {})
-    name  = zappy.get("name", f"ASA {chosen_asset_id}")
-    lines = [
-        f"✅ **{name}** is in the bracket!",
-        f"⚡ VLT {stats.get('VLT', '?')} · 🛡️ INS {stats.get('INS', '?')} · 🎲 SPK {stats.get('SPK', '?')}",
-    ]
-    if stats.get("combo"):
-        lines.append(f"✨ Combo: {stats['combo']}")
-    if stats.get("ability"):
-        lines.append(f"⚡ Ability: **{stats['ability']['name']}** — {stats['ability']['desc']}")
+    # Show their stats as an embed with image
+    stats     = zappy.get("stats", {})
+    name      = zappy.get("name", f"ASA {chosen_asset_id}")
+    image_url = zappy.get("image_url", "")
 
-    lines.append(f"\nFights start when registration closes. Watch <#{CLASH_CHANNEL}>!")
-    await interaction.followup.send("\n".join(lines), ephemeral=True)
+    embed = discord.Embed(
+        title=f"✅ {name} is in the bracket!",
+        description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
+        color=0xF5E642,
+    )
+    if stats.get("combo"):
+        embed.add_field(name="Combo", value=stats["combo"], inline=False)
+    if stats.get("ability"):
+        ab = stats["ability"]
+        embed.add_field(name=f"⚡ {ab['name']}", value=ab["desc"], inline=False)
+    if image_url:
+        embed.set_thumbnail(url=image_url)
+    embed.set_footer(text=f"Fights start when registration closes · Watch #{CLASH_CHANNEL}")
+    await interaction.followup.send(embed=embed, ephemeral=True)
 
     # Announce in clash channel
     clash_ch = bot.get_channel(CLASH_CHANNEL)
@@ -299,29 +304,39 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
     traits = zappy.get("traits", {})
     name   = zappy.get("name", f"ASA {chosen_id}")
 
-    lines = [
-        f"**{name}**",
-        f"",
-        f"⚡ **VLT** {stats.get('VLT', '?')} — Attack power",
-        f"🛡️ **INS** {stats.get('INS', '?')} — Defense",
-        f"🎲 **SPK** {stats.get('SPK', '?')} — Crit chance",
-        f"",
-        f"🎨 Background: {traits.get('background', '?')}",
-        f"👕 Body: {traits.get('body', '?')}",
-        f"💍 Earring: {traits.get('earring', 'None')}",
-        f"👁️ Eyes: {traits.get('eyes', '?')}",
-        f"🕶️ Eyewear: {traits.get('eyewear', 'None')}",
-        f"🎩 Head: {traits.get('head', '?')}",
-        f"👄 Mouth: {traits.get('mouth', '?')}",
-        f"🎨 Skin: {traits.get('skin', '?')}",
-    ]
+    embed = discord.Embed(title=name, color=0xF5E642)
+
+    embed.add_field(
+        name="Battle Stats",
+        value=f"⚡ **VLT** {stats.get('VLT','?')} — Attack\n"
+              f"🛡️ **INS** {stats.get('INS','?')} — Defense\n"
+              f"🎲 **SPK** {stats.get('SPK','?')} — Crit chance",
+        inline=True,
+    )
+    embed.add_field(
+        name="Traits",
+        value=f"🎨 {traits.get('background','?')} bg\n"
+              f"👕 {traits.get('body','?')}\n"
+              f"💍 {traits.get('earring','None')}\n"
+              f"👁️ {traits.get('eyes','?')}\n"
+              f"🕶️ {traits.get('eyewear','None')}\n"
+              f"🎩 {traits.get('head','?')}\n"
+              f"👄 {traits.get('mouth','?')}\n"
+              f"🎨 {traits.get('skin','?')} skin",
+        inline=True,
+    )
     if stats.get("combo"):
-        lines += ["", f"✨ **Combo:** {stats['combo']}"]
+        embed.add_field(name="Combo", value=stats["combo"], inline=False)
     if stats.get("ability"):
         ab = stats["ability"]
-        lines += ["", f"⚡ **Ability:** {ab['name']}", f"  ↳ {ab['desc']}"]
+        embed.add_field(name=f"⚡ Ability: {ab['name']}", value=ab["desc"], inline=False)
 
-    await interaction.followup.send("\n".join(lines), ephemeral=True)
+    image_url = zappy.get("image_url", "")
+    if image_url:
+        embed.set_thumbnail(url=image_url)
+
+    embed.set_footer(text=f"ASA {chosen_id}")
+    await interaction.followup.send(embed=embed, ephemeral=True)
 
 
 @tree.command(name="rank", description="Check your Clash Points and rank")
@@ -547,20 +562,48 @@ async def close_and_resolve(channel: discord.TextChannel):
             # Run the battle
             result = resolve_battle(fighter_a, fighter_b)
 
-            # Post the battle log
-            # Split into chunks for Discord's 2000 char limit
-            battle_text = result["log_text"]
-            chunks = [battle_text[i:i+1800] for i in range(0, len(battle_text), 1800)]
+            # ── Pre-fight embed: both Zappies side by side ──
+            pre_embed = discord.Embed(
+                title="⚡ BRACKET MATCH",
+                color=0xF5E642,
+            )
+            pre_embed.add_field(
+                name=fighter_a.display_name,
+                value=f"⚡ VLT {fighter_a.VLT} · 🛡️ INS {fighter_a.INS} · 🎲 SPK {fighter_a.SPK}"
+                      + (f"\n✨ {fighter_a.combo}" if fighter_a.combo else ""),
+                inline=True,
+            )
+            pre_embed.add_field(name="vs.", value="⚡", inline=True)
+            pre_embed.add_field(
+                name=fighter_b.display_name,
+                value=f"⚡ VLT {fighter_b.VLT} · 🛡️ INS {fighter_b.INS} · 🎲 SPK {fighter_b.SPK}"
+                      + (f"\n✨ {fighter_b.combo}" if fighter_b.combo else ""),
+                inline=True,
+            )
+            # Show both images — A as thumbnail, B as image
+            if fighter_a.image_url:
+                pre_embed.set_thumbnail(url=fighter_a.image_url)
+            if fighter_b.image_url:
+                pre_embed.set_image(url=fighter_b.image_url)
+            await channel.send(embed=pre_embed)
+            await asyncio.sleep(2)
+
+            # ── Play-by-play text (skip the header lines, already in embed) ──
+            log_lines = result["log"]
+            # Skip first 6 lines (the stat header we already showed in embed)
+            play_by_play = "\n".join(log_lines[6:])
+            chunks = [play_by_play[i:i+1800] for i in range(0, len(play_by_play), 1800)]
             for chunk in chunks:
-                await channel.send(chunk)
-                await asyncio.sleep(1)
+                if chunk.strip():
+                    await channel.send(chunk)
+                    await asyncio.sleep(1)
 
             # Award CP
             winner_id = player_a["discord_user_id"] if result["winner"].asset_id == player_a["asset_id"] else player_b["discord_user_id"]
             loser_id  = player_b["discord_user_id"] if winner_id == player_a["discord_user_id"] else player_a["discord_user_id"]
 
-            win_cp = int(CP_WIN * cp_multiplier)
-            lose_cp = int(CP_LOSS * cp_multiplier)
+            win_cp   = int(CP_WIN * cp_multiplier)
+            lose_cp  = int(CP_LOSS * cp_multiplier)
             upset_cp = int(CP_UPSET_BONUS * cp_multiplier) if result["is_upset"] else 0
 
             award_cp(winner_id, win_cp + upset_cp, f"bracket_win_{bracket_id}")
@@ -581,11 +624,22 @@ async def close_and_resolve(channel: discord.TextChannel):
                 round_num=round_num,
             )
 
-            cp_msg = f"💰 **+{win_cp + upset_cp} CP** → <@{winner_id}>"
+            # ── Winner embed with image ──
+            winner   = result["winner"]
+            win_desc = f"💰 **+{win_cp + upset_cp} CP** → <@{winner_id}>"
             if result["is_upset"]:
-                cp_msg += f" (includes +{upset_cp} upset bonus!)"
-            cp_msg += f" · **+{lose_cp} CP** → <@{loser_id}>"
-            await channel.send(cp_msg)
+                win_desc += f" *(+{upset_cp} upset bonus!)*"
+            win_desc += f"\n💰 **+{lose_cp} CP** → <@{loser_id}>"
+
+            win_embed = discord.Embed(
+                title=f"🏆 {winner.display_name} wins!",
+                description=win_desc,
+                color=0xF5E642,
+            )
+            if winner.image_url:
+                win_embed.set_image(url=winner.image_url)
+            win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
+            await channel.send(embed=win_embed)
 
             # Determine who advances
             if result["winner"].asset_id == player_a["asset_id"]:
