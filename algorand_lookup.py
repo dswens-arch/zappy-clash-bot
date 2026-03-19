@@ -119,16 +119,16 @@ def decode_arc19_reserve(asset_url: str, reserve_address: str) -> str | None:
 def ipfs_to_gateway_url(ipfs_url: str) -> str:
     """
     Convert ipfs://CID to a Discord-friendly HTTPS image URL.
-    Uses nftstorage.link which returns proper content-type headers
-    that Discord needs to render images in embeds.
+    Uses the CID subdomain format which correctly sets image/png
+    content-type headers that Discord requires for embed images.
     """
     if not ipfs_url:
         return ""
     if ipfs_url.startswith("ipfs://"):
-        # Remove ipfs:// prefix and any trailing path
         cid = ipfs_url.replace("ipfs://", "").split("/")[0]
-        # nftstorage.link is fastest and Discord-compatible
-        return f"https://nftstorage.link/ipfs/{cid}"
+        # Subdomain format: Discord handles this better than path format
+        # because the server sets Content-Type: image/png correctly
+        return f"https://{cid}.ipfs.nftstorage.link"
     return ipfs_url  # already an https URL
 
 
