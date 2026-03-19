@@ -29,6 +29,7 @@ class Fighter:
     VLT:         int
     INS:         int
     SPK:         int
+    image_url:   str            = ""
     ability:     Optional[dict] = None
     combo:       Optional[str]  = None
     is_hero:     bool           = False
@@ -58,6 +59,7 @@ def build_fighter(zappy_data: dict) -> Fighter:
     return Fighter(
         asset_id   = zappy_data["asset_id"],
         name       = zappy_data.get("name", ""),
+        image_url  = zappy_data.get("image_url", ""),
         unit_name  = zappy_data.get("unit_name", ""),
         VLT        = stats.get("VLT", 50),
         INS        = stats.get("INS", 50),
