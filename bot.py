@@ -369,6 +369,38 @@ async def cmd_top(interaction: discord.Interaction):
     await interaction.response.send_message("\n".join(lines), ephemeral=False)
 
 
+@tree.command(name="testbracket", description="ADMIN ONLY — trigger a test bracket right now")
+async def cmd_testbracket(interaction: discord.Interaction):
+    """Manually trigger a bracket for testing. Only works for the server owner."""
+    global active_bracket_id, registration_open
+
+    # Only server owner can run this
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+        return
+
+    await interaction.response.send_message("⚡ Starting test bracket — registration open for 2 minutes!", ephemeral=True)
+
+    bracket_id = f"test_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+    active_bracket_id = bracket_id
+    registration_open = True
+
+    channel = bot.get_channel(CLASH_CHANNEL)
+
+    await channel.send(
+        "⚡ **ZAPPY CLASH — TEST BRACKET**\n"
+        "\n"
+        "Registration is open for **2 minutes**.\n"
+        "Use `/clash` to enter your Zappy!"
+    )
+
+    # Wait 2 minutes
+    await asyncio.sleep(120)
+
+    # Close and resolve
+    await close_and_resolve(channel)
+
+
 @tree.command(name="streak", description="Check your daily play streak")
 async def cmd_streak(interaction: discord.Interaction):
     """Show streak details and milestones."""
