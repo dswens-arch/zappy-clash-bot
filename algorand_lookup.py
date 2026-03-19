@@ -13,6 +13,10 @@ import base64
 import re
 from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
 
+# In-memory cache: asset_id -> full zappy data dict
+# Avoids repeat IPFS fetches within the same bot session
+_zappy_cache: dict = {}
+
 # ─────────────────────────────────────────────
 # Algorand public endpoints
 # ─────────────────────────────────────────────
@@ -119,17 +123,21 @@ def decode_arc19_reserve(asset_url: str, reserve_address: str) -> str | None:
 def ipfs_to_gateway_url(ipfs_url: str) -> str:
     """
     Convert ipfs://CID to a Discord-friendly HTTPS image URL.
-    Uses the CID subdomain format which correctly sets image/png
-    content-type headers that Discord requires for embed images.
+    CIDv1 (bafkrei...) uses subdomain format on nftstorage.link.
+    CIDv0 (Qm...) uses path format on cloudflare-ipfs.com.
+    Both formats return correct Content-Type headers for Discord embeds.
     """
     if not ipfs_url:
         return ""
     if ipfs_url.startswith("ipfs://"):
         cid = ipfs_url.replace("ipfs://", "").split("/")[0]
-        # Subdomain format: Discord handles this better than path format
-        # because the server sets Content-Type: image/png correctly
-        return f"https://{cid}.ipfs.nftstorage.link"
-    return ipfs_url  # already an https URL
+        if cid.startswith("Qm"):
+            # CIDv0 — use cloudflare path format
+            return f"https://cloudflare-ipfs.com/ipfs/{cid}"
+        else:
+            # CIDv1 — use nftstorage subdomain format
+            return f"https://{cid}.ipfs.nftstorage.link"
+    return ipfs_url
 
 
 # ─────────────────────────────────────────────
@@ -320,7 +328,12 @@ async def fetch_zappy_traits(asset_id: int) -> dict | None:
     """
     Fetch full metadata for a Zappy: name, image URL, traits, and calculated stats.
     Main entry point used by the battle system and /stats command.
+    Results are cached in memory to avoid repeat IPFS fetches.
     """
+    # Return cached result if available
+    if asset_id in _zappy_cache:
+        return _zappy_cache[asset_id]
+
     try:
         async with aiohttp.ClientSession() as session:
 
@@ -374,7 +387,7 @@ async def fetch_zappy_traits(asset_id: int) -> dict | None:
 
             stats = calculate_stats(traits)
 
-            return {
+            result = {
                 "asset_id":  asset_id,
                 "name":      asset_info["name"],
                 "unit_name": asset_info["unit_name"],
@@ -384,6 +397,9 @@ async def fetch_zappy_traits(asset_id: int) -> dict | None:
                 "stats":     stats,
                 "image_url": traits.get("image_url", ""),
             }
+            # Cache it so subsequent fetches are instant
+            _zappy_cache[asset_id] = result
+            return result
 
     except Exception as e:
         print(f"Error fetching Zappy {asset_id}: {e}")
