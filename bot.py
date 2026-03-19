@@ -602,6 +602,8 @@ async def on_ready():
     print(f"⚡ Zappy Clash bot online as {bot.user}")
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
+    await tree.sync()
+    print(f"✅ Slash commands synced globally")
     session_scheduler.start()
     print("⏰ Session scheduler running")
 
