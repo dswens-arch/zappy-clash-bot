@@ -32,6 +32,13 @@ from dotenv import load_dotenv
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
 from battle_engine   import build_fighter, resolve_battle
+from token_rewards   import award_win_tokens, award_streak_tokens
+from expedition_engine import (
+    start_run, get_run, end_run, advance_beat, check_nft_drop,
+    build_scene_embed, build_outcome_embed, build_run_complete_embed,
+    ExpeditionView, ZoneSelectView, ZappySelectView, get_collection_bonus,
+)
+from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -539,6 +546,319 @@ async def cmd_streak(interaction: discord.Interaction):
 # SCHEDULED SESSIONS
 # ─────────────────────────────────────────────
 
+
+
+# ─────────────────────────────────────────────
+# Expedition DB helpers
+# ─────────────────────────────────────────────
+
+def expedition_already_ran_today(discord_user_id: str) -> bool:
+    """Check if a user has already completed an expedition today."""
+    from database import get_supabase
+    from datetime import date
+    db   = get_supabase()
+    today = date.today().isoformat()
+    result = (
+        db.table("expedition_runs")
+        .select("id")
+        .eq("discord_user_id", discord_user_id)
+        .eq("run_date", today)
+        .execute()
+    )
+    return len(result.data) > 0
+
+
+def save_expedition_run(discord_user_id: str, zone_num: int, cp: int, tokens: int, nft: bool):
+    """Save completed expedition run and update leaderboard."""
+    from database import get_supabase, award_cp
+    from datetime import date, timezone
+    from datetime import datetime
+    db    = get_supabase()
+    today = date.today().isoformat()
+
+    db.table("expedition_runs").insert({
+        "discord_user_id": discord_user_id,
+        "zone_num":        zone_num,
+        "cp_earned":       cp,
+        "tokens_earned":   tokens,
+        "nft_dropped":     nft,
+        "run_date":        today,
+        "completed_at":    datetime.now(timezone.utc).isoformat(),
+    }).execute()
+
+    # Update expedition leaderboard
+    existing = db.table("expedition_leaderboard").select("*").eq(
+        "discord_user_id", discord_user_id
+    ).execute()
+
+    if existing.data:
+        row = existing.data[0]
+        db.table("expedition_leaderboard").update({
+            "exp_cp_total":  row["exp_cp_total"] + cp,
+            "runs_completed": row["runs_completed"] + 1,
+            "updated_at":    datetime.now(timezone.utc).isoformat(),
+        }).eq("discord_user_id", discord_user_id).execute()
+    else:
+        db.table("expedition_leaderboard").insert({
+            "discord_user_id": discord_user_id,
+            "exp_cp_total":    cp,
+            "runs_completed":  1,
+        }).execute()
+
+    # Also award CP to the main leaderboard (zones unlock from combined CP)
+    award_cp(discord_user_id, cp, f"expedition_zone{zone_num}")
+
+
+def get_expedition_leaderboard(limit: int = 10) -> list:
+    from database import get_supabase
+    db = get_supabase()
+    result = (
+        db.table("expedition_leaderboard")
+        .select("*")
+        .order("exp_cp_total", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return result.data or []
+
+
+# ─────────────────────────────────────────────
+# /expedition command
+# ─────────────────────────────────────────────
+
+@tree.command(name="expedition", description="Send your Zappy on a solo expedition")
+async def cmd_expedition(interaction: discord.Interaction):
+    """Start an expedition run."""
+    await interaction.response.defer(ephemeral=True)
+    user_id = str(interaction.user.id)
+
+    # Check already ran today
+    if expedition_already_ran_today(user_id):
+        await interaction.followup.send(
+            "⏳ You've already run an expedition today. Come back tomorrow!",
+            ephemeral=True
+        )
+        return
+
+    # Check wallet linked
+    wallet = get_wallet(user_id)
+    if not wallet:
+        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+        return
+
+    # Verify wallet and get Zappies
+    ownership = await verify_wallet(user_id, wallet)
+    if not ownership["owns"]:
+        await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
+        return
+
+    # Get combined CP for zone unlock
+    from database import get_player_rank
+    rank_data  = get_player_rank(user_id)
+    cp_total   = rank_data.get("cp_total", 0)
+    eligible   = get_eligible_zones(cp_total)
+    zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
+    bonus = get_collection_bonus(zappy_count)
+
+    # Build Zappy list
+    all_zappies = ownership["zappies"] + [
+        {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"} 
+        for h in ownership["heroes"]
+    ]
+
+    # If only one Zappy, skip selection
+    if len(all_zappies) == 1:
+        chosen_id = all_zappies[0]["asset_id"]
+        await _start_expedition_zone_select(interaction, user_id, chosen_id, eligible, cp_total, zappy_count, bonus)
+        return
+
+    # Multiple Zappies — show selection
+    async def on_zappy_selected(inter: discord.Interaction, asset_id: int):
+        await _start_expedition_zone_select(inter, user_id, asset_id, eligible, cp_total, zappy_count, bonus)
+
+    embed = discord.Embed(
+        title       = "⚡ Choose your Zappy",
+        description = f"You have **{zappy_count} Zappy/Zappies** — pick one to send on expedition.",
+        color       = 0xF5E642,
+    )
+    embed.set_footer(text=f"Collection bonus: {bonus['label']} · Showing first 5")
+    view = ZappySelectView(all_zappies, on_zappy_selected)
+    await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+
+
+async def _start_expedition_zone_select(
+    interaction: discord.Interaction,
+    user_id: str,
+    asset_id: int,
+    eligible: list,
+    cp_total: int,
+    zappy_count: int,
+    bonus: dict,
+):
+    """Show zone selection after Zappy is chosen."""
+    from algorand_lookup import fetch_zappy_traits
+    zappy = await fetch_zappy_traits(asset_id)
+    if not zappy:
+        await interaction.followup.send("❌ Couldn't load Zappy data.", ephemeral=True)
+        return
+
+    async def on_zone_selected(inter: discord.Interaction, zone_num: int):
+        await _run_expedition_beat(inter, user_id, zone_num, zappy, zappy_count)
+
+    zone_lines = []
+    for z in eligible:
+        zone = ZONES[z]
+        zone_lines.append(f"{zone['emoji']} **{zone['name']}** — {zone['cp_required']:,} CP required")
+
+    locked_lines = []
+    for z in range(1, 6):
+        if z not in eligible:
+            zone = ZONES[z]
+            locked_lines.append(f"🔒 {zone['name']} — need {zone['cp_required']:,} CP (you have {cp_total:,})")
+
+    embed = discord.Embed(
+        title       = f"🗺️ Choose a Zone — {zappy.get('name', 'Your Zappy')}",
+        description = "Pick which zone to explore today.",
+        color       = 0xF5E642,
+    )
+    if zone_lines:
+        embed.add_field(name="Available", value="\n".join(zone_lines), inline=False)
+    if locked_lines:
+        embed.add_field(name="Locked", value="\n".join(locked_lines), inline=False)
+    embed.set_footer(text=f"CP: {cp_total:,} · {bonus['label']}")
+    if zappy.get("image_url"):
+        embed.set_thumbnail(url=zappy["image_url"])
+
+    view = ZoneSelectView(eligible, cp_total, on_zone_selected)
+    await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+
+
+async def _run_expedition_beat(
+    interaction: discord.Interaction,
+    user_id: str,
+    zone_num: int,
+    zappy: dict,
+    zappy_count: int,
+):
+    """Start or continue an expedition beat."""
+    # Start fresh run
+    run = start_run(user_id, zone_num, zappy, zappy_count)
+
+    async def on_choice(inter: discord.Interaction, choice_index: int):
+        updated_run = advance_beat(user_id, choice_index)
+        if not updated_run:
+            await inter.followup.send("Something went wrong with your run.", ephemeral=True)
+            return
+
+        # Post outcome
+        outcome_embed = build_outcome_embed(updated_run)
+        await inter.followup.send(embed=outcome_embed, ephemeral=True)
+
+        if updated_run["complete"]:
+            # Run is done
+            nft_drop = check_nft_drop(updated_run)
+            final_embed = build_run_complete_embed(updated_run, nft_drop)
+
+            # Save to DB
+            save_expedition_run(
+                discord_user_id = user_id,
+                zone_num        = zone_num,
+                cp              = updated_run["total_cp"],
+                tokens          = updated_run["total_tokens"],
+                nft             = nft_drop,
+            )
+
+            # Send token rewards if any
+            wallet = get_wallet(user_id)
+            if wallet and updated_run["total_tokens"] > 0:
+                from token_rewards import check_opted_in, send_token_reward, REWARD_TOKEN_ID
+                import asyncio
+                if await check_opted_in(wallet, REWARD_TOKEN_ID):
+                    note = f"Zappy Expedition reward - Zone {zone_num}"
+                    await asyncio.to_thread(
+                        send_token_reward, wallet, updated_run["total_tokens"], note
+                    )
+
+            # Post to expedition channel (or clash channel)
+            channel = bot.get_channel(CLASH_CHANNEL)
+            if channel:
+                public_embed = discord.Embed(
+                    title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
+                    description = (
+                        f"<@{user_id}> completed a **{ZONES[zone_num]['name']}** run "
+                        f"with **{zappy.get('name', 'their Zappy')}**!
+"
+                        f"⚡ +{updated_run['total_cp']} Exp CP · "
+                        f"🪙 +{updated_run['total_tokens']} tokens"
+                        + (" · 🎉 **NFT DROP!**" if nft_drop else "")
+                    ),
+                    color = ZONES[zone_num]["color"],
+                )
+                if zappy.get("image_url"):
+                    public_embed.set_thumbnail(url=zappy["image_url"])
+                await channel.send(embed=public_embed)
+
+            await inter.followup.send(embed=final_embed, ephemeral=True)
+            end_run(user_id)
+        else:
+            # Next beat
+            scene_embed = build_scene_embed(updated_run)
+            image_path  = f"./images/{updated_run['events'][updated_run['beat']].get('image', '')}.png"
+            view        = ExpeditionView(updated_run, on_choice)
+
+            files = []
+            if os.path.exists(image_path):
+                files.append(discord.File(image_path))
+
+            if files:
+                await inter.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
+            else:
+                await inter.followup.send(embed=scene_embed, view=view, ephemeral=True)
+
+    # Post first beat
+    scene_embed = build_scene_embed(run)
+    image_path  = f"./images/{run['events'][0].get('image', '')}.png"
+    view        = ExpeditionView(run, on_choice)
+
+    files = []
+    if os.path.exists(image_path):
+        files.append(discord.File(image_path))
+
+    if files:
+        await interaction.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
+    else:
+        await interaction.followup.send(embed=scene_embed, view=view, ephemeral=True)
+
+
+@tree.command(name="exprank", description="View the Expedition leaderboard")
+async def cmd_exprank(interaction: discord.Interaction):
+    """Show top expedition players."""
+    top = get_expedition_leaderboard(10)
+
+    if not top:
+        await interaction.response.send_message(
+            "No expeditions completed yet — be the first!", ephemeral=False
+        )
+        return
+
+    medals = ["🥇", "🥈", "🥉"] + ["  " for _ in range(10)]
+    lines  = ["**⚡ Expedition Leaderboard**", ""]
+
+    for i, player in enumerate(top):
+        uid = player["discord_user_id"]
+        cp  = player["exp_cp_total"]
+        runs = player["runs_completed"]
+        try:
+            member = interaction.guild.get_member(int(uid))
+            name   = member.display_name if member else f"Explorer {uid[:6]}"
+        except Exception:
+            name = f"Explorer {uid[:6]}"
+        lines.append(f"{medals[i]} **{name}** — {cp:,} Exp CP · {runs} runs")
+
+    await interaction.response.send_message("\n".join(lines), ephemeral=False)
+
+
+
 @tasks.loop(minutes=1)
 async def session_scheduler():
     """Checks every minute and triggers session events at the right time."""
@@ -706,8 +1026,20 @@ async def close_and_resolve(channel: discord.TextChannel):
             award_cp(loser_id,  lose_cp,            f"bracket_loss_{bracket_id}")
 
             # Update streaks
-            update_streak(winner_id, won=True)
-            update_streak(loser_id,  won=False)
+            winner_streak = update_streak(winner_id, won=True)
+            update_streak(loser_id, won=False)
+
+            # Streak milestone token rewards
+            if winner_wallet and winner_streak.get("rewards"):
+                for reward in winner_streak["rewards"]:
+                    days = reward.get("days")
+                    if days in (7, 30):
+                        streak_token = await award_streak_tokens(winner_wallet, days)
+                        if streak_token.get("success"):
+                            await channel.send(
+                                f"🔥 <@{winner_id}> hit a **{days}-day streak!** "
+                                f"{streak_token['message']}"
+                            )
 
             # Save result
             save_battle_result(
@@ -720,12 +1052,33 @@ async def close_and_resolve(channel: discord.TextChannel):
                 round_num=round_num,
             )
 
+            # ── Token rewards ──
+            winner_wallet = get_wallet(winner_id)
+            loser_wallet  = get_wallet(loser_id)
+            is_evening    = "evening" in bracket_id
+            token_msg     = ""
+
+            if winner_wallet:
+                token_result = await award_win_tokens(
+                    discord_user_id = winner_id,
+                    wallet_address  = winner_wallet,
+                    is_upset        = result["is_upset"],
+                    is_champion     = False,
+                    is_evening      = is_evening,
+                )
+                if token_result["success"]:
+                    token_msg = f"\n{token_result['message']}"
+                elif token_result.get("reason") == "not_opted_in":
+                    token_msg = f"\n⚠️ <@{winner_id}>: {token_result['message']}"
+
             # ── Winner embed with image ──
             winner   = result["winner"]
             win_desc = f"💰 **+{win_cp + upset_cp} CP** → <@{winner_id}>"
             if result["is_upset"]:
                 win_desc += f" *(+{upset_cp} upset bonus!)*"
             win_desc += f"\n💰 **+{lose_cp} CP** → <@{loser_id}>"
+            if token_msg:
+                win_desc += token_msg
 
             win_embed = discord.Embed(
                 title=f"🏆 {winner.display_name} wins!",
@@ -763,10 +1116,27 @@ async def close_and_resolve(channel: discord.TextChannel):
             bonus_cp = int(CP_BRACKET_WIN * cp_multiplier)
             award_cp(champion_id, bonus_cp, f"bracket_champion_{bracket_id}")
 
+            # Champion token reward
+            champ_wallet = get_wallet(champion_id)
+            champ_token_msg = ""
+            if champ_wallet:
+                champ_token = await award_win_tokens(
+                    discord_user_id = champion_id,
+                    wallet_address  = champ_wallet,
+                    is_upset        = False,
+                    is_champion     = True,
+                    is_evening      = is_evening,
+                )
+                if champ_token["success"]:
+                    champ_token_msg = f"\n{champ_token['message']}"
+                elif champ_token.get("reason") == "not_opted_in":
+                    champ_token_msg = f"\n⚠️ Opt in to ASA {os.environ.get('REWARD_TOKEN_ID', '2572874483')} to receive token rewards!"
+
             await channel.send(
                 f"\n🏆 **BRACKET CHAMPION!**\n"
                 f"<@{champion_id}> wins it all with **{champ_name}**!\n"
-                f"💰 **+{bonus_cp} CP** bracket champion bonus!\n"
+                f"💰 **+{bonus_cp} CP** bracket champion bonus!"
+                f"{champ_token_msg}\n"
                 f"\n"
                 f"⚡ Use `/top` to see the updated leaderboard."
             )
