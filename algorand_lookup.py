@@ -40,6 +40,13 @@ HERO_IMAGES = {
 # In-memory cache (traits are already local, but cache computed stats)
 _zappy_cache: dict = {}
 
+# Wallet ownership cache — avoids re-hitting the indexer on every command
+# Expires after 5 minutes so it stays fresh if someone buys/sells
+import time as _time
+_wallet_cache: dict = {}
+_wallet_cache_ts: dict = {}
+WALLET_CACHE_TTL = 300   # seconds
+
 
 # ─────────────────────────────────────────────
 # Main Zappy fetch — pure local lookup
@@ -127,8 +134,13 @@ async def fetch_zappy_traits(asset_id: int) -> dict | None:
 async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
     """
     Verify wallet holdings via Algorand indexer.
-    Identifies Zappies using the local collection table — no per-asset calls.
+    Results cached for 5 minutes to avoid repeat indexer calls.
     """
+    # Return cached result if fresh
+    now = _time.monotonic()
+    if wallet_address in _wallet_cache:
+        if now - _wallet_cache_ts[wallet_address] < WALLET_CACHE_TTL:
+            return _wallet_cache[wallet_address]
     result = {
         "owns":    False,
         "zappies": [],
@@ -183,6 +195,9 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
     except Exception as e:
         result["error"] = f"Error: {e}"
 
+    # Cache the result (even errors, to avoid hammering on failures)
+    _wallet_cache[wallet_address]    = result
+    _wallet_cache_ts[wallet_address] = _time.monotonic()
     return result
 
 
