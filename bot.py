@@ -190,9 +190,15 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
         )
         return
 
-    # Verify ownership and get Zappy
-    await interaction.followup.send("⚡ Verifying your Zappy...", ephemeral=True)
-    ownership = await verify_wallet(user_id, wallet)
+    # Verify ownership using cache — avoids slow indexer call
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+    import time as _t
+    _now = _t.monotonic()
+    if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+        ownership = _wallet_cache[wallet]
+    else:
+        await interaction.followup.send("⚡ Verifying your Zappy...", ephemeral=True)
+        ownership = await verify_wallet(user_id, wallet)
 
     if not ownership["owns"]:
         await interaction.followup.send(
@@ -289,27 +295,18 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
         await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
         return
 
-    ownership = await verify_wallet(user_id, wallet)
-    if not ownership["owns"]:
-        await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
-        return
-
-    all_assets = ownership["zappies"] + [
-        {"asset_id": h["asset_id"]} for h in ownership["heroes"]
-    ]
+    # Use local collection table — no indexer call needed
+    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
+    from algorand_lookup import HERO_ASSET_IDS
 
     if asset_id:
         chosen_id = asset_id
-    elif len(all_assets) == 1:
-        chosen_id = all_assets[0]["asset_id"]
     else:
-        names = "\n".join(
-            f"  • **{a.get('name', a.get('unit_name', f'ASA {a["asset_id"]}'))}** — `{a['asset_id']}`"
-            for a in all_assets
-        )
+        # Find all Zappies in local table that might belong to this wallet
+        # We can't know without indexer, so prompt for asset_id if ambiguous
         await interaction.followup.send(
-            f"You have {len(all_assets)} Zappies! Use `/stats asset_id:XXXXX` to pick one, "
-            f"or check `/clash` to see them all.\n\n{names}",
+            "Use `/stats asset_id:XXXXX` with your Zappy's ASA ID, "
+            "or use `/myzappies` to see all your Zappies and their IDs.",
             ephemeral=True
         )
         return
@@ -415,7 +412,14 @@ async def cmd_myzappies(interaction: discord.Interaction):
         await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
         return
 
-    ownership = await verify_wallet(user_id, wallet)
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+    import time as _t
+    _now = _t.monotonic()
+    if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+        ownership = _wallet_cache[wallet]
+    else:
+        ownership = await verify_wallet(user_id, wallet)
+
     if not ownership["owns"]:
         await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
         return
@@ -646,23 +650,34 @@ async def cmd_expedition(interaction: discord.Interaction):
         await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
         return
 
-    # Verify wallet and get Zappies
-    ownership = await verify_wallet(user_id, wallet)
+    # Use cached wallet verification — fast, no indexer call
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+    import time as _t
+    now = _t.monotonic()
+    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+        ownership = _wallet_cache[wallet]
+    else:
+        # Cache miss — do the indexer call
+        ownership = await verify_wallet(user_id, wallet)
+
     if not ownership["owns"]:
-        await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
+        await interaction.followup.send(
+            "❌ No Zappies found. If you just linked your wallet, wait a moment and try again.",
+            ephemeral=True
+        )
         return
 
     # Get combined CP for zone unlock
     from database import get_player_rank
-    rank_data  = get_player_rank(user_id)
-    cp_total   = rank_data.get("cp_total", 0)
-    eligible   = get_eligible_zones(cp_total)
+    rank_data   = get_player_rank(user_id)
+    cp_total    = rank_data.get("cp_total", 0)
+    eligible    = get_eligible_zones(cp_total)
     zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
-    bonus = get_collection_bonus(zappy_count)
+    bonus       = get_collection_bonus(zappy_count)
 
     # Build Zappy list
     all_zappies = ownership["zappies"] + [
-        {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"} 
+        {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"}
         for h in ownership["heroes"]
     ]
 
