@@ -12,8 +12,8 @@ Commands:
   /streak   — View your daily streak
 
 Scheduled sessions:
-  9:00 AM UTC — Morning Bracket
-  9:00 PM UTC — Evening Bracket
+  3:00 AM UTC — Morning Bracket
+  3:00 PM UTC — Evening Bracket
 
 Setup:
   1. Copy .env.example to .env and fill in your keys
@@ -64,7 +64,7 @@ ANNOUNCE_CHANNEL= int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
 
 # Session timing (UTC)
 MORNING_OPEN    = dtime(3,  0,  tzinfo=timezone.utc)
-MORNING_CLOSE   = dtime(3, 30,  tzinfo=timezone.utc)
+MORNING_CLOSE   = dtime(3, 30,  tzinfo=timezone.utc)   # 30 min registration window
 MORNING_RESOLVE = dtime(3, 35,  tzinfo=timezone.utc)
 
 EVENING_OPEN    = dtime(15,  0, tzinfo=timezone.utc)
@@ -786,8 +786,7 @@ async def _run_expedition_beat(
                     title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
                     description = (
                         f"<@{user_id}> completed a **{ZONES[zone_num]['name']}** run "
-                        f"with **{zappy.get('name', 'their Zappy')}**!
-"
+                        f"with **{zappy.get('name', 'their Zappy')}**!\n"
                         f"⚡ +{updated_run['total_cp']} Exp CP · "
                         f"🪙 +{updated_run['total_tokens']} tokens"
                         + (" · 🎉 **NFT DROP!**" if nft_drop else "")
@@ -897,7 +896,7 @@ async def open_registration(session: str, channel: discord.TextChannel):
     registration_open = True
 
     session_name = "☀️ Morning" if session == "morning" else "🌙 Evening"
-    emoji_time = "9:00 AM UTC" if session == "morning" else "9:00 PM UTC"
+    emoji_time = "3:00 AM UTC" if session == "morning" else "3:00 PM UTC"
 
     await channel.send(
         f"⚡ **ZAPPY CLASH — {session_name} Bracket is OPEN!**\n"
