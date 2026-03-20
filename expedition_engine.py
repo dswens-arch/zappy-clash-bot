@@ -203,10 +203,9 @@ class ExpeditionView(discord.ui.View):
                 return
 
             self.chosen = True
-            # Disable all buttons
             for item in self.children:
                 item.disabled = True
-            await interaction.response.edit_message(view=self)
+            await interaction.response.defer(ephemeral=True)
 
             # Process the choice
             await self.callback(interaction, choice_index)
@@ -247,7 +246,7 @@ class ZoneSelectView(discord.ui.View):
             self.chosen = True
             for item in self.children:
                 item.disabled = True
-            await interaction.response.edit_message(view=self)
+            await interaction.response.defer(ephemeral=True)
             await self.callback(interaction, zone_num)
 
         return button_callback
@@ -279,7 +278,7 @@ class ZappySelectView(discord.ui.View):
             self.chosen = True
             for item in self.children:
                 item.disabled = True
-            await interaction.response.edit_message(view=self)
+            await interaction.response.defer(ephemeral=True)
             await self.callback(interaction, asset_id)
 
         return button_callback
