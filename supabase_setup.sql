@@ -88,3 +88,27 @@ CREATE TABLE IF NOT EXISTS streaks (
 -- Done! All tables created.
 -- Next: go back to Railway and deploy your bot.
 -- ============================================
+
+
+-- ── Expedition runs ───────────────────────────
+CREATE TABLE IF NOT EXISTS expedition_runs (
+    id               BIGSERIAL PRIMARY KEY,
+    discord_user_id  TEXT NOT NULL,
+    zone_num         INT NOT NULL,
+    cp_earned        INT DEFAULT 0,
+    tokens_earned    INT DEFAULT 0,
+    nft_dropped      BOOLEAN DEFAULT FALSE,
+    run_date         DATE NOT NULL DEFAULT CURRENT_DATE,
+    completed_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_expedition_one_per_day
+    ON expedition_runs (discord_user_id, run_date);
+
+-- ── Expedition leaderboard ────────────────────
+CREATE TABLE IF NOT EXISTS expedition_leaderboard (
+    discord_user_id  TEXT PRIMARY KEY,
+    exp_cp_total     BIGINT DEFAULT 0,
+    runs_completed   INT DEFAULT 0,
+    updated_at       TIMESTAMPTZ DEFAULT NOW()
+);
