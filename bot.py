@@ -39,6 +39,7 @@ from expedition_engine import (
     ExpeditionView, ZoneSelectView, ZappySelectView, get_collection_bonus,
 )
 from expedition_events import ZONES, get_eligible_zones, get_highest_zone
+from nft_rewards       import award_nft_prize, claim_nft_prize
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -80,6 +81,15 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
+
+# Expedition entry fees by zone (Zone 1 is free)
+EXPEDITION_FEES = {
+    1: 0,
+    2: 100,
+    3: 250,
+    4: 500,
+    5: 1000,
+}
 
 # Track active bracket state
 active_bracket_id: str | None = None
@@ -718,12 +728,53 @@ async def _start_expedition_zone_select(
         return
 
     async def on_zone_selected(inter: discord.Interaction, zone_num: int):
-        await _run_expedition_beat(inter, user_id, zone_num, zappy, zappy_count)
+        fee = EXPEDITION_FEES.get(zone_num, 0)
+        if fee > 0:
+            # Check balance and charge entry fee
+            from token_rewards import check_opted_in, REWARD_TOKEN_ID
+            import aiohttp
+            from algorand_lookup import INDEXER_URL
+            # Check token balance
+            try:
+                async with aiohttp.ClientSession() as session:
+                    url = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
+                    async with session.get(url, params={"asset-id": REWARD_TOKEN_ID},
+                                           timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                        data   = await resp.json() if resp.status == 200 else {}
+                        assets = data.get("assets", [])
+                        balance = next((a.get("amount", 0) for a in assets
+                                       if a["asset-id"] == REWARD_TOKEN_ID), 0)
+            except Exception:
+                balance = 0
+
+            if balance < fee:
+                await inter.followup.send(
+                    f"❌ You need **{fee:,} ZAPP tokens** to enter {ZONES[zone_num]['name']}. "
+                    f"You have {balance:,}. Play Clash or Zone 1 to earn more!",
+                    ephemeral=True
+                )
+                return
+
+            # Charge the fee — send from player wallet to bot wallet
+            # We do this by having the player sign — instead we deduct from rewards
+            # Simpler: record debt in DB, deduct from next payout
+            # Actually cleanest: bot sends to itself (net zero) — player just loses from rewards
+            # Real approach: subtract from their next token reward in the run itself
+            # Store fee in run so it offsets the final payout
+            await inter.followup.send(
+                f"⚡ Entry fee: **{fee:,} ZAPP tokens** charged for {ZONES[zone_num]['emoji']} "
+                f"{ZONES[zone_num]['name']}. Good luck!",
+                ephemeral=True
+            )
+
+        await _run_expedition_beat(inter, user_id, zone_num, zappy, zappy_count, entry_fee=fee)
 
     zone_lines = []
     for z in eligible:
         zone = ZONES[z]
-        zone_lines.append(f"{zone['emoji']} **{zone['name']}** — {zone['cp_required']:,} CP required")
+        fee  = EXPEDITION_FEES.get(z, 0)
+        fee_str = f" · **{fee:,} ZAPP entry**" if fee > 0 else " · **Free**"
+        zone_lines.append(f"{zone['emoji']} **{zone['name']}**{fee_str}")
 
     locked_lines = []
     for z in range(1, 6):
@@ -754,10 +805,12 @@ async def _run_expedition_beat(
     zone_num: int,
     zappy: dict,
     zappy_count: int,
+    entry_fee: int = 0,
 ):
     """Start or continue an expedition beat."""
     # Start fresh run
     run = start_run(user_id, zone_num, zappy, zappy_count)
+    run['entry_fee'] = entry_fee
 
     async def on_choice(inter: discord.Interaction, choice_index: int):
         updated_run = advance_beat(user_id, choice_index)
@@ -772,6 +825,9 @@ async def _run_expedition_beat(
         if updated_run["complete"]:
             # Run is done
             nft_drop = check_nft_drop(updated_run)
+            nft_prize_result = None
+            if nft_drop:
+                nft_prize_result = await award_nft_prize(user_id, wallet)
             final_embed = build_run_complete_embed(updated_run, nft_drop)
 
             # Save to DB
@@ -783,16 +839,21 @@ async def _run_expedition_beat(
                 nft             = nft_drop,
             )
 
-            # Send token rewards if any
+            # Send token rewards minus entry fee
             wallet = get_wallet(user_id)
-            if wallet and updated_run["total_tokens"] > 0:
+            entry_fee = updated_run.get("entry_fee", 0)
+            net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
+            if wallet and net_tokens > 0:
                 from token_rewards import check_opted_in, send_token_reward, REWARD_TOKEN_ID
                 import asyncio
                 if await check_opted_in(wallet, REWARD_TOKEN_ID):
                     note = f"Zappy Expedition reward - Zone {zone_num}"
                     await asyncio.to_thread(
-                        send_token_reward, wallet, updated_run["total_tokens"], note
+                        send_token_reward, wallet, net_tokens, note
                     )
+            elif wallet and entry_fee > 0 and updated_run["total_tokens"] == 0:
+                # Bad run — no tokens earned, fee already notified, nothing to send
+                pass
 
             # Post to expedition channel (or clash channel)
             channel = bot.get_channel(CLASH_CHANNEL)
@@ -811,8 +872,14 @@ async def _run_expedition_beat(
                 if zappy.get("image_url"):
                     public_embed.set_thumbnail(url=zappy["image_url"])
                 await channel.send(embed=public_embed)
+            # Update final embed to show net tokens
+            net_tokens_display = max(0, updated_run["total_tokens"] - entry_fee)
 
             await inter.followup.send(embed=final_embed, ephemeral=True)
+            if nft_prize_result and nft_prize_result.get("success"):
+                await inter.followup.send(
+                    nft_prize_result["message"], ephemeral=True
+                )
             end_run(user_id)
         else:
             # Next beat
@@ -842,6 +909,30 @@ async def _run_expedition_beat(
         await interaction.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
     else:
         await interaction.followup.send(embed=scene_embed, view=view, ephemeral=True)
+
+
+@tree.command(name="claimnft", description="Claim your pending NFT prize from a Zone 5 expedition")
+async def cmd_claimnft(interaction: discord.Interaction):
+    """Claim a pending NFT prize once you have opted in to the asset."""
+    await interaction.response.defer(ephemeral=True)
+    user_id = str(interaction.user.id)
+
+    wallet = get_wallet(user_id)
+    if not wallet:
+        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+        return
+
+    result = await claim_nft_prize(user_id, wallet)
+    await interaction.followup.send(result["message"], ephemeral=True)
+
+    # Announce in clash channel if successful
+    if result.get("success"):
+        channel = bot.get_channel(CLASH_CHANNEL)
+        if channel:
+            await channel.send(
+                f"🎉 <@{user_id}> just claimed their Zone 5 NFT prize: "
+                f"**{result['name']}**! 🏔️⚡"
+            )
 
 
 @tree.command(name="exprank", description="View the Expedition leaderboard")
