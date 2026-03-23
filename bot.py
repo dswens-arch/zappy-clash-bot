@@ -60,8 +60,9 @@ from database        import (
 load_dotenv()
 BOT_TOKEN       = os.environ["DISCORD_BOT_TOKEN"]
 GUILD_ID        = int(os.environ["DISCORD_GUILD_ID"])
-CLASH_CHANNEL   = int(os.environ["CLASH_CHANNEL_ID"])    # #zappy-clash channel ID
-ANNOUNCE_CHANNEL= int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
+CLASH_CHANNEL      = int(os.environ["CLASH_CHANNEL_ID"])    # #zappy-clash channel ID
+ANNOUNCE_CHANNEL   = int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
+EXPEDITION_CHANNEL = int(os.environ["EXPEDITION_CHANNEL_ID"]) if os.environ.get("EXPEDITION_CHANNEL_ID") else None   # Optional — if not set, works anywhere
 
 # Session timing (UTC)
 MORNING_OPEN    = dtime(3,  0,  tzinfo=timezone.utc)
@@ -90,6 +91,19 @@ EXPEDITION_FEES = {
     4: 500,
     5: 1000,
 }
+
+
+
+def check_clash_channel(interaction: discord.Interaction) -> bool:
+    """Returns True if the interaction is in the clash channel."""
+    return interaction.channel_id == CLASH_CHANNEL
+
+
+def check_expedition_channel(interaction: discord.Interaction) -> bool:
+    """Returns True if expedition channel is set and matches, or if no channel is set (works anywhere)."""
+    if EXPEDITION_CHANNEL is None:
+        return True
+    return interaction.channel_id == EXPEDITION_CHANNEL
 
 # Track active bracket state
 active_bracket_id: str | None = None
@@ -169,7 +183,12 @@ async def cmd_link(interaction: discord.Interaction, wallet: str):
 @app_commands.describe(asset_id="Your Zappy's ASA ID (optional if you only have one)")
 async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = None):
     """Register for the active bracket."""
-    await interaction.response.defer(ephemeral=True)
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+        await interaction.response.defer(ephemeral=True)
 
     user_id = str(interaction.user.id)
 
@@ -296,7 +315,12 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
 @app_commands.describe(asset_id="Your Zappy's ASA ID (optional if you only have one)")
 async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = None):
     """Show a Zappy's stats without registering."""
-    await interaction.response.defer(ephemeral=True)
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+        await interaction.response.defer(ephemeral=True)
 
     user_id = str(interaction.user.id)
     wallet  = get_wallet(user_id)
@@ -382,12 +406,23 @@ async def cmd_rank(interaction: discord.Interaction):
         f"⚔️ Total wins: **{streak_data.get('total_wins', 0)}**",
         f"🎮 Total played: **{streak_data.get('total_played', 0)}**",
     ]
-    await interaction.response.send_message("\n".join(lines), ephemeral=True)
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+        await interaction.response.send_message("\n".join(lines), ephemeral=True)
 
 
 @tree.command(name="top", description="View the Zappy Clash leaderboard")
 async def cmd_top(interaction: discord.Interaction):
     """Show top 10 players by CP."""
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+
     top = get_leaderboard(10)
 
     if not top:
@@ -413,7 +448,12 @@ async def cmd_top(interaction: discord.Interaction):
 @tree.command(name="myzappies", description="List all your Zappies with names and ASA IDs")
 async def cmd_myzappies(interaction: discord.Interaction):
     """Show all Zappies in the linked wallet with names."""
-    await interaction.response.defer(ephemeral=True)
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+        await interaction.response.defer(ephemeral=True)
 
     user_id = str(interaction.user.id)
     wallet  = get_wallet(user_id)
@@ -553,7 +593,12 @@ async def cmd_streak(interaction: discord.Interaction):
         f"",
         f"Play both sessions daily to keep your streak alive!",
     ]
-    await interaction.response.send_message("\n".join(lines), ephemeral=True)
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+        await interaction.response.send_message("\n".join(lines), ephemeral=True)
 
 
 # ─────────────────────────────────────────────
@@ -643,7 +688,13 @@ def get_expedition_leaderboard(limit: int = 10) -> list:
 @tree.command(name="expedition", description="Send your Zappy on a solo expedition")
 async def cmd_expedition(interaction: discord.Interaction):
     """Start an expedition run."""
-    await interaction.response.defer(ephemeral=True)
+    if not check_expedition_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands." if EXPEDITION_CHANNEL else "❌ Expedition commands are restricted.",
+            ephemeral=True
+        )
+        return
+        await interaction.response.defer(ephemeral=True)
     user_id = str(interaction.user.id)
 
     # Check already ran today
@@ -1089,7 +1140,13 @@ async def _run_expedition_beat(
 @tree.command(name="claimnft", description="Claim your pending NFT prize from a Zone 5 expedition")
 async def cmd_claimnft(interaction: discord.Interaction):
     """Claim a pending NFT prize once you have opted in to the asset."""
-    await interaction.response.defer(ephemeral=True)
+    if not check_expedition_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands." if EXPEDITION_CHANNEL else "❌ Expedition commands are restricted.",
+            ephemeral=True
+        )
+        return
+        await interaction.response.defer(ephemeral=True)
     user_id = str(interaction.user.id)
 
     wallet = get_wallet(user_id)
@@ -1114,6 +1171,13 @@ async def cmd_claimnft(interaction: discord.Interaction):
 async def cmd_exprank(interaction: discord.Interaction):
     """Show top expedition players."""
     top = get_expedition_leaderboard(10)
+
+    if not check_expedition_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands." if EXPEDITION_CHANNEL else "❌ Expedition commands are restricted.",
+            ephemeral=True
+        )
+        return
 
     if not top:
         await interaction.response.send_message(
