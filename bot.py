@@ -188,7 +188,7 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
             f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
         )
         return
-        await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer(ephemeral=True)
 
     user_id = str(interaction.user.id)
 
@@ -320,7 +320,7 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
             f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
         )
         return
-        await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer(ephemeral=True)
 
     user_id = str(interaction.user.id)
     wallet  = get_wallet(user_id)
@@ -453,7 +453,7 @@ async def cmd_myzappies(interaction: discord.Interaction):
             f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
         )
         return
-        await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer(ephemeral=True)
 
     user_id = str(interaction.user.id)
     wallet  = get_wallet(user_id)
@@ -694,7 +694,7 @@ async def cmd_expedition(interaction: discord.Interaction):
             ephemeral=True
         )
         return
-        await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer(ephemeral=True)
     user_id = str(interaction.user.id)
 
     # Check already ran today
@@ -1146,7 +1146,7 @@ async def cmd_claimnft(interaction: discord.Interaction):
             ephemeral=True
         )
         return
-        await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer(ephemeral=True)
     user_id = str(interaction.user.id)
 
     wallet = get_wallet(user_id)
