@@ -691,24 +691,8 @@ async def cmd_expedition(interaction: discord.Interaction):
         for h in ownership["heroes"]
     ]
 
-    # If only one Zappy, skip selection
-    if len(all_zappies) == 1:
-        chosen_id = all_zappies[0]["asset_id"]
-        await _start_expedition_zone_select(interaction, user_id, chosen_id, eligible, cp_total, zappy_count, bonus)
-        return
-
-    # Multiple Zappies — show selection
-    async def on_zappy_selected(inter: discord.Interaction, asset_id: int):
-        await _start_expedition_zone_select(inter, user_id, asset_id, eligible, cp_total, zappy_count, bonus)
-
-    embed = discord.Embed(
-        title       = "⚡ Choose your Zappy",
-        description = f"You have **{zappy_count} Zappy/Zappies** — pick one to send on expedition.",
-        color       = 0xF5E642,
-    )
-    embed.set_footer(text=f"Collection bonus: {bonus['label']} · Showing first 5")
-    view = ZappySelectView(all_zappies, on_zappy_selected)
-    await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+    # Go straight to zone selection — Zappy pick happens after zone choice
+    await _start_expedition_zone_select(interaction, user_id, all_zappies, eligible, cp_total, zappy_count, bonus, wallet)
 
 
 async def _start_expedition_zone_select(
@@ -730,18 +714,16 @@ async def _start_expedition_zone_select(
     async def on_zone_selected(inter: discord.Interaction, zone_num: int):
         fee = EXPEDITION_FEES.get(zone_num, 0)
         if fee > 0:
-            # Check balance and charge entry fee
-            from token_rewards import check_opted_in, REWARD_TOKEN_ID
+            from token_rewards import REWARD_TOKEN_ID
             import aiohttp
             from algorand_lookup import INDEXER_URL
-            # Check token balance
             try:
                 async with aiohttp.ClientSession() as session:
                     url = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
                     async with session.get(url, params={"asset-id": REWARD_TOKEN_ID},
                                            timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                        data   = await resp.json() if resp.status == 200 else {}
-                        assets = data.get("assets", [])
+                        data    = await resp.json() if resp.status == 200 else {}
+                        assets  = data.get("assets", [])
                         balance = next((a.get("amount", 0) for a in assets
                                        if a["asset-id"] == REWARD_TOKEN_ID), 0)
             except Exception:
@@ -755,19 +737,8 @@ async def _start_expedition_zone_select(
                 )
                 return
 
-            # Charge the fee — send from player wallet to bot wallet
-            # We do this by having the player sign — instead we deduct from rewards
-            # Simpler: record debt in DB, deduct from next payout
-            # Actually cleanest: bot sends to itself (net zero) — player just loses from rewards
-            # Real approach: subtract from their next token reward in the run itself
-            # Store fee in run so it offsets the final payout
-            await inter.followup.send(
-                f"⚡ Entry fee: **{fee:,} ZAPP tokens** charged for {ZONES[zone_num]['emoji']} "
-                f"{ZONES[zone_num]['name']}. Good luck!",
-                ephemeral=True
-            )
-
-        await _run_expedition_beat(inter, user_id, zone_num, zappy, zappy_count, entry_fee=fee)
+        # Show smart Zappy picker for this zone
+        await _show_smart_zappy_select(inter, user_id, zone_num, all_zappies, zappy_count, wallet, fee)
 
     zone_lines = []
     for z in eligible:
@@ -783,8 +754,8 @@ async def _start_expedition_zone_select(
             locked_lines.append(f"🔒 {zone['name']} — need {zone['cp_required']:,} CP (you have {cp_total:,})")
 
     embed = discord.Embed(
-        title       = f"🗺️ Choose a Zone — {zappy.get('name', 'Your Zappy')}",
-        description = "Pick which zone to explore today.",
+        title       = "🗺️ Choose a Zone",
+        description = f"You have **{zappy_count} Zappy/Zappies**. Pick a zone — the bot will show your best Zappies for it.",
         color       = 0xF5E642,
     )
     if zone_lines:
@@ -792,11 +763,215 @@ async def _start_expedition_zone_select(
     if locked_lines:
         embed.add_field(name="Locked", value="\n".join(locked_lines), inline=False)
     embed.set_footer(text=f"CP: {cp_total:,} · {bonus['label']}")
-    if zappy.get("image_url"):
-        embed.set_thumbnail(url=zappy["image_url"])
 
     view = ZoneSelectView(eligible, cp_total, on_zone_selected)
     await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+
+
+
+
+# ─────────────────────────────────────────────
+# Zone stat priorities and Zappy ranking
+# ─────────────────────────────────────────────
+
+ZONE_STAT_PRIORITY = {
+    1: ("SPK", "VLT", "INS"),   # Mixed — SPK edges out for hidden paths
+    2: ("SPK", "VLT", "INS"),   # Voltage Bay — luck and crits rule coastal events
+    3: ("VLT", "INS", "SPK"),   # Molten Circuit — raw power breaks through
+    4: ("SPK", "INS", "VLT"),   # Null Space — luck navigates the strange
+    5: ("INS", "VLT", "SPK"),   # Apex Summit — survival first
+}
+
+ZONE_STAT_REASON = {
+    1: {
+        "SPK": "High SPK finds hidden paths and lucky breaks in the Fields.",
+        "VLT": "Strong VLT powers through obstacles.",
+        "INS": "Good INS absorbs minor hazards.",
+    },
+    2: {
+        "SPK": "High SPK rides the surge tides and wins the coastal bets.",
+        "VLT": "Strong VLT forces open wrecks and breaks barriers.",
+        "INS": "Good INS weathers the storm cells.",
+    },
+    3: {
+        "VLT": "High VLT is essential — Molten Circuit rewards raw power above all.",
+        "INS": "Strong INS survives the heat and the rogue automaton.",
+        "SPK": "Good SPK helps with timing the thermal vents.",
+    },
+    4: {
+        "SPK": "High SPK navigates probability storms and strange frequencies.",
+        "INS": "Strong INS survives the Null Space's unpredictable dangers.",
+        "VLT": "Good VLT handles the gravity zones.",
+    },
+    5: {
+        "INS": "High INS is critical — the Apex Storm Crown hits hard.",
+        "VLT": "Strong VLT powers through the Infinite Generator.",
+        "SPK": "Good SPK finds hidden paths at the summit.",
+    },
+}
+
+
+def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
+    """
+    Rank a list of Zappies by their suitability for a specific zone.
+    Returns top 5 with scores and explanations.
+    Each zappy dict must have: asset_id, name, unit_name
+    Traits/stats loaded via fetch_zappy_traits.
+    """
+    priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
+    primary, secondary, tertiary = priority
+
+    ranked = []
+    for z in zappies:
+        from zappy_collection import ZAPPY_COLLECTION
+        entry = ZAPPY_COLLECTION.get(z["asset_id"])
+        if not entry:
+            continue
+        from stats_engine import calculate_stats
+        traits = {
+            "background": entry["background"],
+            "body":       entry["body"],
+            "earring":    entry["earring"],
+            "eyes":       entry["eyes"],
+            "eyewear":    entry["eyewear"],
+            "head":       entry["head"],
+            "mouth":      entry["mouth"],
+            "skin":       entry["skin"],
+        }
+        stats = calculate_stats(traits)
+        # Weighted score: primary=3x, secondary=2x, tertiary=1x
+        score = (
+            stats[primary]   * 3 +
+            stats[secondary] * 2 +
+            stats[tertiary]  * 1
+        )
+        ranked.append({
+            **z,
+            "stats":  stats,
+            "score":  score,
+            "traits": traits,
+            "image_url": entry.get("image_url", ""),
+        })
+
+    ranked.sort(key=lambda x: x["score"], reverse=True)
+    return ranked[:5]
+
+
+def build_zappy_reason(zappy: dict, zone_num: int) -> str:
+    """Build a short explanation of why this Zappy is good for this zone."""
+    priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
+    primary, secondary, tertiary = priority
+    stats    = zappy["stats"]
+    reasons  = ZONE_STAT_REASON.get(zone_num, {})
+
+    # Find their strongest stat from the priority list
+    best_stat = max(priority, key=lambda s: stats[s])
+    reason    = reasons.get(best_stat, "")
+
+    return (
+        f"⚡ {stats['VLT']} · 🛡️ {stats['INS']} · 🎲 {stats['SPK']}"
+        + (f"\n_{reason}_" if reason else "")
+    )
+
+
+class SmartZappyView(discord.ui.View):
+    """Button view showing top 5 Zappies for a zone with explanations."""
+
+    def __init__(self, ranked_zappies: list, zone_num: int, on_zappy_callback):
+        super().__init__(timeout=120)
+        self.callback = on_zappy_callback
+        self.chosen   = False
+
+        for z in ranked_zappies:
+            name = z.get("name", z.get("unit_name", f"ASA {z['asset_id']}"))
+            btn  = discord.ui.Button(
+                label     = name[:80],
+                style     = discord.ButtonStyle.primary,
+                custom_id = f"smart_zappy_{z['asset_id']}",
+            )
+            btn.callback = self._make_callback(z["asset_id"])
+            self.add_item(btn)
+
+    def _make_callback(self, asset_id: int):
+        async def button_callback(interaction: discord.Interaction):
+            if self.chosen:
+                return
+            self.chosen = True
+            for item in self.children:
+                item.disabled = True
+            await interaction.response.defer(ephemeral=True)
+            await self.callback(interaction, asset_id)
+        return button_callback
+
+
+async def _show_smart_zappy_select(
+    inter: discord.Interaction,
+    user_id: str,
+    zone_num: int,
+    all_zappies: list,
+    zappy_count: int,
+    wallet: str,
+    fee: int,
+):
+    """Show the top 5 Zappies for a zone with stat explanations."""
+    zone = ZONES[zone_num]
+    priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
+    primary  = priority[0]
+
+    stat_labels = {"VLT": "Voltage (attack)", "INS": "Insulation (defense)", "SPK": "Spark (luck)"}
+
+    # Rank Zappies
+    ranked = rank_zappies_for_zone(all_zappies, zone_num)
+    if not ranked:
+        await inter.followup.send("❌ Couldn't load Zappy stats.", ephemeral=True)
+        return
+
+    embed = discord.Embed(
+        title       = f"{zone['emoji']} {zone['name']} — Pick your Zappy",
+        description = (
+            f"**Key stat for this zone: {stat_labels.get(primary, primary)}**\n"
+            f"Here are your top 5 Zappies ranked for this zone. "
+            f"Stats and reasons shown below."
+            + (f"\n\n💰 Entry fee: **{fee:,} ZAPP** (deducted from rewards)" if fee > 0 else "")
+        ),
+        color = zone["color"],
+    )
+
+    for i, z in enumerate(ranked):
+        medal = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"][i]
+        reason = build_zappy_reason(z, zone_num)
+        embed.add_field(
+            name   = f"{medal} {z.get('name', z.get('unit_name', 'Zappy'))}",
+            value  = reason,
+            inline = False,
+        )
+
+    embed.set_footer(text=f"You have {zappy_count} Zappies · Showing best 5 for {zone['name']}")
+
+    # Show image of top Zappy
+    if ranked[0].get("image_url"):
+        embed.set_thumbnail(url=ranked[0]["image_url"])
+
+    async def on_zappy_chosen(chosen_inter: discord.Interaction, asset_id: int):
+        chosen = next((z for z in ranked if z["asset_id"] == asset_id), None)
+        if not chosen:
+            await chosen_inter.followup.send("❌ Zappy not found.", ephemeral=True)
+            return
+        # Build full zappy data dict compatible with run system
+        zappy_data = {
+            "asset_id":  chosen["asset_id"],
+            "name":      chosen.get("name", chosen.get("unit_name", "")),
+            "unit_name": chosen.get("unit_name", ""),
+            "is_hero":   False,
+            "is_collab": False,
+            "traits":    chosen["traits"],
+            "stats":     chosen["stats"],
+            "image_url": chosen.get("image_url", ""),
+        }
+        await _run_expedition_beat(chosen_inter, user_id, zone_num, zappy_data, zappy_count, entry_fee=fee)
+
+    view = SmartZappyView(ranked, zone_num, on_zappy_chosen)
+    await inter.followup.send(embed=embed, view=view, ephemeral=True)
 
 
 async def _run_expedition_beat(
