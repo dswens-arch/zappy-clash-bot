@@ -312,7 +312,7 @@ def build_scene_embed(run: dict) -> discord.Embed:
     )
 
     if zappy.get("image_url"):
-        embed.set_thumbnail(url=zappy["image_url"])
+        embed.set_image(url=zappy["image_url"])
 
     return embed
 
