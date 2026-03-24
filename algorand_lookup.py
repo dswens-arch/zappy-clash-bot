@@ -151,14 +151,26 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
 
     try:
         async with aiohttp.ClientSession() as session:
-            url = f"{INDEXER_URL}/v2/accounts/{wallet_address}/assets"
-            async with session.get(url, params={"limit": 1000},
-                                   timeout=aiohttp.ClientTimeout(total=15)) as resp:
-                if resp.status != 200:
-                    result["error"] = f"Indexer returned {resp.status}"
-                    return result
-                data   = await resp.json()
-                assets = data.get("assets", [])
+            url    = f"{INDEXER_URL}/v2/accounts/{wallet_address}/assets"
+            assets = []
+            next_token = None
+
+            # Paginate through all assets — wallets with many ASAs need multiple calls
+            while True:
+                params = {"limit": 1000}
+                if next_token:
+                    params["next"] = next_token
+
+                async with session.get(url, params=params,
+                                       timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                    if resp.status != 200:
+                        result["error"] = f"Indexer returned {resp.status}"
+                        return result
+                    data = await resp.json()
+                    assets.extend(data.get("assets", []))
+                    next_token = data.get("next-token")
+                    if not next_token:
+                        break
 
         for asset in assets:
             if asset.get("amount", 0) <= 0:
