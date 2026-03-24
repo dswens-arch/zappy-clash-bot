@@ -1078,25 +1078,34 @@ async def _run_expedition_beat(
                 # Bad run — no tokens earned, fee already notified, nothing to send
                 pass
 
-            # Post to expedition channel (or clash channel)
-            channel = bot.get_channel(CLASH_CHANNEL)
-            if channel:
+            # Post to expedition channel
+            exp_channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
+            if exp_channel:
+                token_line = f"🪙 +{net_tokens} tokens"
+                if entry_fee > 0:
+                    token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_cp']} earned − {entry_fee} entry fee)"
                 public_embed = discord.Embed(
                     title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
                     description = (
                         f"<@{user_id}> completed a **{ZONES[zone_num]['name']}** run "
                         f"with **{zappy.get('name', 'their Zappy')}**!\n"
                         f"⚡ +{updated_run['total_cp']} Exp CP · "
-                        f"🪙 +{updated_run['total_tokens']} tokens"
+                        + token_line
                         + (" · 🎉 **NFT DROP!**" if nft_drop else "")
                     ),
                     color = ZONES[zone_num]["color"],
                 )
                 if zappy.get("image_url"):
                     public_embed.set_thumbnail(url=zappy["image_url"])
-                await channel.send(embed=public_embed)
-            # Update final embed to show net tokens
-            net_tokens_display = max(0, updated_run["total_tokens"] - entry_fee)
+                await exp_channel.send(embed=public_embed)
+
+            # Final summary with fee breakdown
+            fee_breakdown = f" ({updated_run['total_tokens']} earned − {entry_fee} entry fee)" if entry_fee > 0 else ""
+            final_embed.description = (
+                f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
+                f"🪙 **{net_tokens} tokens** sent to your wallet{fee_breakdown}\n"
+                f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
+            )
 
             await inter.followup.send(embed=final_embed, ephemeral=True)
             if nft_prize_result and nft_prize_result.get("success"):
