@@ -356,11 +356,12 @@ def build_outcome_embed(run: dict) -> discord.Embed:
 
 def build_run_complete_embed(run: dict, nft_drop: bool = False) -> discord.Embed:
     """Build the final embed when a run completes."""
-    zone = ZONES[run["zone_num"]]
+    zone  = ZONES[run["zone_num"]]
+    zappy = run.get("zappy", {})
 
     embed = discord.Embed(
-        title       = f"🏁 Expedition Complete — {zone['name']}",
-        color       = zone["color"],
+        title = f"🏁 Expedition Complete — {zone['name']}",
+        color = zone["color"],
     )
 
     embed.add_field(
@@ -380,5 +381,8 @@ def build_run_complete_embed(run: dict, nft_drop: bool = False) -> discord.Embed
             inline=False,
         )
 
-    embed.set_footer(text="Use /exprank to see the Expedition leaderboard")
+    if zappy.get("image_url"):
+        embed.set_thumbnail(url=zappy["image_url"])
+
+    embed.set_footer(text=f"{zappy.get('name', 'Your Zappy')} · Use /exprank to see the Expedition leaderboard")
     return embed
