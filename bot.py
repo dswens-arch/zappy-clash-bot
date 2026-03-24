@@ -392,6 +392,11 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
 @tree.command(name="rank", description="Check your Clash Points and rank")
 async def cmd_rank(interaction: discord.Interaction):
     """Show a player's rank and CP."""
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
     user_id = str(interaction.user.id)
     rank_data = get_player_rank(user_id)
     streak_data = get_streak(user_id)
@@ -406,12 +411,7 @@ async def cmd_rank(interaction: discord.Interaction):
         f"⚔️ Total wins: **{streak_data.get('total_wins', 0)}**",
         f"🎮 Total played: **{streak_data.get('total_played', 0)}**",
     ]
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
-        await interaction.response.send_message("\n".join(lines), ephemeral=True)
+    await interaction.response.send_message("\n".join(lines), ephemeral=True)
 
 
 @tree.command(name="top", description="View the Zappy Clash leaderboard")
@@ -576,6 +576,11 @@ async def cmd_testbracket(interaction: discord.Interaction):
 @tree.command(name="streak", description="Check your daily play streak")
 async def cmd_streak(interaction: discord.Interaction):
     """Show streak details and milestones."""
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
     user_id = str(interaction.user.id)
     streak_data = get_streak(user_id)
     current = streak_data.get("current_streak", 0)
@@ -593,12 +598,7 @@ async def cmd_streak(interaction: discord.Interaction):
         f"",
         f"Play both sessions daily to keep your streak alive!",
     ]
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
-        await interaction.response.send_message("\n".join(lines), ephemeral=True)
+    await interaction.response.send_message("\n".join(lines), ephemeral=True)
 
 
 # ─────────────────────────────────────────────
