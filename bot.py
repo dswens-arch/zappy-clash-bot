@@ -749,18 +749,14 @@ async def cmd_expedition(interaction: discord.Interaction):
 async def _start_expedition_zone_select(
     interaction: discord.Interaction,
     user_id: str,
-    asset_id: int,
+    all_zappies: list,
     eligible: list,
     cp_total: int,
     zappy_count: int,
     bonus: dict,
+    wallet: str,
 ):
-    """Show zone selection after Zappy is chosen."""
-    from algorand_lookup import fetch_zappy_traits
-    zappy = await fetch_zappy_traits(asset_id)
-    if not zappy:
-        await interaction.followup.send("❌ Couldn't load Zappy data.", ephemeral=True)
-        return
+    """Show zone selection — Zappy pick happens after zone choice."""
 
     async def on_zone_selected(inter: discord.Interaction, zone_num: int):
         fee = EXPEDITION_FEES.get(zone_num, 0)
@@ -817,6 +813,7 @@ async def _start_expedition_zone_select(
 
     view = ZoneSelectView(eligible, cp_total, on_zone_selected)
     await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+
 
 
 
