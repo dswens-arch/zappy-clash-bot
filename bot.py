@@ -1,25 +1,26 @@
-"""
+## “””
 bot.py
-------
+
 Zappy Clash Discord bot — main entry point.
 
 Commands:
-  /link     — Connect your Algorand wallet
-  /clash    — Register for the current bracket
-  /stats    — View your Zappy's stats
-  /rank     — View your CP and rank
-  /top      — Leaderboard
-  /streak   — View your daily streak
+/link     — Connect your Algorand wallet
+/clash    — Register for the current bracket
+/stats    — View your Zappy’s stats
+/rank     — View your CP and rank
+/top      — Leaderboard
+/streak   — View your daily streak
 
 Scheduled sessions:
-  3:00 AM UTC — Morning Bracket
-  3:00 PM UTC — Evening Bracket
+3:00 AM UTC — Morning Bracket
+3:00 PM UTC — Evening Bracket
 
 Setup:
-  1. Copy .env.example to .env and fill in your keys
-  2. Run: pip install -r requirements.txt
-  3. Run: python bot.py
-"""
+
+1. Copy .env.example to .env and fill in your keys
+1. Run: pip install -r requirements.txt
+1. Run: python bot.py
+   “””
 
 import os
 import asyncio
@@ -30,41 +31,46 @@ from datetime import datetime, timezone, time as dtime
 from dotenv import load_dotenv
 
 # Our modules
+
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
 from battle_engine   import build_fighter, resolve_battle
 from token_rewards   import award_win_tokens, award_streak_tokens
 from expedition_engine import (
-    start_run, get_run, end_run, advance_beat, check_nft_drop,
-    build_scene_embed, build_outcome_embed, build_run_complete_embed,
-    ExpeditionView, ZoneSelectView, ZappySelectView, get_collection_bonus,
+start_run, get_run, end_run, advance_beat, check_nft_drop,
+build_scene_embed, build_outcome_embed, build_run_complete_embed,
+ExpeditionView, ZoneSelectView, ZappySelectView, get_collection_bonus,
 )
 from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from nft_rewards       import award_nft_prize, claim_nft_prize
 from database        import (
-    link_wallet as db_link_wallet,
-    get_wallet,
-    register_for_bracket,
-    get_bracket_entries,
-    is_registered,
-    close_registration,
-    save_battle_result,
-    award_cp, get_leaderboard, get_player_rank,
-    update_streak, get_streak,
-    seed_bracket,
-    CP_WIN, CP_LOSS, CP_UPSET_BONUS, CP_BRACKET_WIN,
+link_wallet as db_link_wallet,
+get_wallet,
+register_for_bracket,
+get_bracket_entries,
+is_registered,
+close_registration,
+save_battle_result,
+award_cp, get_leaderboard, get_player_rank,
+update_streak, get_streak,
+seed_bracket,
+CP_WIN, CP_LOSS, CP_UPSET_BONUS, CP_BRACKET_WIN,
 )
 
 # ─────────────────────────────────────────────
+
 # Config
+
 # ─────────────────────────────────────────────
+
 load_dotenv()
-BOT_TOKEN       = os.environ["DISCORD_BOT_TOKEN"]
-GUILD_ID        = int(os.environ["DISCORD_GUILD_ID"])
-CLASH_CHANNEL      = int(os.environ["CLASH_CHANNEL_ID"])    # #zappy-clash channel ID
-ANNOUNCE_CHANNEL   = int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
-EXPEDITION_CHANNEL = int(os.environ["EXPEDITION_CHANNEL_ID"]) if os.environ.get("EXPEDITION_CHANNEL_ID") else None   # Optional — if not set, works anywhere
+BOT_TOKEN       = os.environ[“DISCORD_BOT_TOKEN”]
+GUILD_ID        = int(os.environ[“DISCORD_GUILD_ID”])
+CLASH_CHANNEL      = int(os.environ[“CLASH_CHANNEL_ID”])    # #zappy-clash channel ID
+ANNOUNCE_CHANNEL   = int(os.environ.get(“ANNOUNCE_CHANNEL_ID”, CLASH_CHANNEL))
+EXPEDITION_CHANNEL = int(os.environ[“EXPEDITION_CHANNEL_ID”]) if os.environ.get(“EXPEDITION_CHANNEL_ID”) else None   # Optional — if not set, works anywhere
 
 # Session timing (UTC)
+
 MORNING_OPEN    = dtime(3,  0,  tzinfo=timezone.utc)
 MORNING_CLOSE   = dtime(3, 30,  tzinfo=timezone.utc)   # 30 min registration window
 MORNING_RESOLVE = dtime(3, 35,  tzinfo=timezone.utc)
@@ -74,1660 +80,1707 @@ EVENING_CLOSE   = dtime(15, 30, tzinfo=timezone.utc)
 EVENING_RESOLVE = dtime(15, 35, tzinfo=timezone.utc)
 
 # ─────────────────────────────────────────────
+
 # Bot setup
+
 # ─────────────────────────────────────────────
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix=”!”, intents=intents)
 tree = bot.tree
 
 # Expedition entry fees by zone (Zone 1 is free)
+
 EXPEDITION_FEES = {
-    1: 0,
-    2: 100,
-    3: 250,
-    4: 500,
-    5: 1000,
+1: 0,
+2: 100,
+3: 250,
+4: 500,
+5: 1000,
 }
 
-
-
 def check_clash_channel(interaction: discord.Interaction) -> bool:
-    """Returns True if the interaction is in the clash channel."""
-    return interaction.channel_id == CLASH_CHANNEL
-
+“”“Returns True if the interaction is in the clash channel.”””
+return interaction.channel_id == CLASH_CHANNEL
 
 def check_expedition_channel(interaction: discord.Interaction) -> bool:
-    """Returns True if expedition channel is set and matches, or if no channel is set (works anywhere)."""
-    if EXPEDITION_CHANNEL is None:
-        return True
-    return interaction.channel_id == EXPEDITION_CHANNEL
+“”“Returns True if expedition channel is set and matches, or if no channel is set (works anywhere).”””
+if EXPEDITION_CHANNEL is None:
+return True
+return interaction.channel_id == EXPEDITION_CHANNEL
 
 # Track active bracket state
+
 active_bracket_id: str | None = None
 registration_open: bool = False
 
-
 # ─────────────────────────────────────────────
+
 # Helper: get current bracket ID
+
 # ─────────────────────────────────────────────
+
 def get_bracket_id(session: str) -> str:
-    today = datetime.now(timezone.utc).date().isoformat()
-    return f"{session}_{today}"
-
+today = datetime.now(timezone.utc).date().isoformat()
+return f”{session}_{today}”
 
 # ─────────────────────────────────────────────
+
 # SLASH COMMANDS
+
 # ─────────────────────────────────────────────
 
-@tree.command(name="link", description="Connect your Algorand wallet to play Zappy Clash")
-@app_commands.describe(wallet="Your Algorand wallet address (starts with A-Z)")
+@tree.command(name=“link”, description=“Connect your Algorand wallet to play Zappy Clash”)
+@app_commands.describe(wallet=“Your Algorand wallet address (starts with A-Z)”)
 async def cmd_link(interaction: discord.Interaction, wallet: str):
-    """Link a wallet and verify Zappy ownership."""
-    await interaction.response.defer(ephemeral=True)
+“”“Link a wallet and verify Zappy ownership.”””
+await interaction.response.defer(ephemeral=True)
 
-    user_id = str(interaction.user.id)
+```
+user_id = str(interaction.user.id)
 
-    # Basic address validation
-    if len(wallet) != 58 or not wallet.isupper():
-        await interaction.followup.send(
-            "❌ That doesn't look like a valid Algorand address. "
-            "It should be 58 uppercase characters.",
-            ephemeral=True
-        )
-        return
+# Basic address validation
+if len(wallet) != 58 or not wallet.isupper():
+    await interaction.followup.send(
+        "❌ That doesn't look like a valid Algorand address. "
+        "It should be 58 uppercase characters.",
+        ephemeral=True
+    )
+    return
 
-    # Verify wallet on-chain
-    await interaction.followup.send("🔍 Checking your wallet on Algorand...", ephemeral=True)
-    result = await verify_wallet(user_id, wallet)
+# Verify wallet on-chain
+await interaction.followup.send("🔍 Checking your wallet on Algorand...", ephemeral=True)
+result = await verify_wallet(user_id, wallet)
 
-    if result.get("error"):
-        await interaction.followup.send(
-            f"❌ Couldn't reach the Algorand network: {result['error']}\nTry again in a moment.",
-            ephemeral=True
-        )
-        return
+if result.get("error"):
+    await interaction.followup.send(
+        f"❌ Couldn't reach the Algorand network: {result['error']}\nTry again in a moment.",
+        ephemeral=True
+    )
+    return
 
-    if not result["owns"]:
-        await interaction.followup.send(
-            "❌ No Zappies found in that wallet. Make sure you're using the wallet "
-            "that holds your Zappy ASA.",
-            ephemeral=True
-        )
-        return
+if not result["owns"]:
+    await interaction.followup.send(
+        "❌ No Zappies found in that wallet. Make sure you're using the wallet "
+        "that holds your Zappy ASA.",
+        ephemeral=True
+    )
+    return
 
-    # Save to database
-    db_link_wallet(user_id, wallet)
+# Save to database
+db_link_wallet(user_id, wallet)
 
-    # Build response
-    zappies   = result["zappies"]
-    heroes    = result["heroes"]
-    collabs   = result["collabs"]
+# Build response
+zappies   = result["zappies"]
+heroes    = result["heroes"]
+collabs   = result["collabs"]
 
-    lines = [f"✅ Wallet linked! Found **{len(zappies)} Zappy/Zappies**"]
-    if heroes:
-        lines.append(f"🦸 **{len(heroes)} Hero(es):** {', '.join(h['hero_type'] for h in heroes)}")
-    if collabs:
-        lines.append(f"🐱 **Collab token detected:** ShittyKitties crossover!")
+lines = [f"✅ Wallet linked! Found **{len(zappies)} Zappy/Zappies**"]
+if heroes:
+    lines.append(f"🦸 **{len(heroes)} Hero(es):** {', '.join(h['hero_type'] for h in heroes)}")
+if collabs:
+    lines.append(f"🐱 **Collab token detected:** ShittyKitties crossover!")
 
-    lines.append("")
-    lines.append("Use `/clash` when registration opens to enter the next bracket.")
-    lines.append("Use `/stats` to preview your Zappy's battle stats.")
+lines.append("")
+lines.append("Use `/clash` when registration opens to enter the next bracket.")
+lines.append("Use `/stats` to preview your Zappy's battle stats.")
 
-    await interaction.followup.send("\n".join(lines), ephemeral=True)
+await interaction.followup.send("\n".join(lines), ephemeral=True)
+```
 
-
-@tree.command(name="clash", description="Enter your Zappy into the current bracket")
-@app_commands.describe(asset_id="Your Zappy's ASA ID (optional if you only have one)")
+@tree.command(name=“clash”, description=“Enter your Zappy into the current bracket”)
+@app_commands.describe(asset_id=“Your Zappy’s ASA ID (optional if you only have one)”)
 async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = None):
-    """Register for the active bracket."""
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
-    await interaction.response.defer(ephemeral=True)
+“”“Register for the active bracket.”””
+if not check_clash_channel(interaction):
+await interaction.response.send_message(
+f”❌ Use <#{CLASH_CHANNEL}> for Clash commands.”, ephemeral=True
+)
+return
+await interaction.response.defer(ephemeral=True)
 
-    user_id = str(interaction.user.id)
+```
+user_id = str(interaction.user.id)
 
-    # Check registration is open
-    if not registration_open or not active_bracket_id:
-        await interaction.followup.send(
-            "⏳ Registration isn't open right now. Watch for the announcement in "
-            f"<#{CLASH_CHANNEL}> when the next bracket opens!",
-            ephemeral=True
-        )
-        return
-
-    # Check wallet is linked
-    wallet = get_wallet(user_id)
-    if not wallet:
-        await interaction.followup.send(
-            "❌ You haven't linked your wallet yet. Use `/link` first!",
-            ephemeral=True
-        )
-        return
-
-    # Check if already registered
-    if is_registered(user_id, active_bracket_id):
-        await interaction.followup.send(
-            "✅ You're already registered for this bracket! Check "
-            f"<#{CLASH_CHANNEL}> when fights start.",
-            ephemeral=True
-        )
-        return
-
-    # Verify ownership using cache — avoids slow indexer call
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    _now = _t.monotonic()
-    if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        await interaction.followup.send("⚡ Verifying your Zappy...", ephemeral=True)
-        ownership = await verify_wallet(user_id, wallet)
-
-    if not ownership["owns"]:
-        await interaction.followup.send(
-            "❌ No Zappies found in your linked wallet. "
-            "Use `/link` to update your wallet address.",
-            ephemeral=True
-        )
-        return
-
-    # Determine which asset to use
-    all_assets = (
-        ownership["zappies"] +
-        [{"asset_id": h["asset_id"], "unit_name": h["hero_type"]} for h in ownership["heroes"]] +
-        [{"asset_id": c["asset_id"], "unit_name": "ShittyKitties"} for c in ownership["collabs"]]
+# Check registration is open
+if not registration_open or not active_bracket_id:
+    await interaction.followup.send(
+        "⏳ Registration isn't open right now. Watch for the announcement in "
+        f"<#{CLASH_CHANNEL}> when the next bracket opens!",
+        ephemeral=True
     )
+    return
 
-    if asset_id:
-        # Validate the specified asset belongs to them
-        found = next((a for a in all_assets if a["asset_id"] == asset_id), None)
-        if not found:
-            await interaction.followup.send(
-                f"❌ ASA {asset_id} not found in your wallet.",
-                ephemeral=True
-            )
-            return
-        chosen_asset_id = asset_id
-    elif len(all_assets) == 1:
-        chosen_asset_id = all_assets[0]["asset_id"]
-    else:
-        # Multiple — ask them to specify
-        # Fetch names for all assets so we show friendly names not just IDs
-        lines = []
-        for a in all_assets:
-            display = a.get('name') or a.get('unit_name') or f"ASA {a['asset_id']}"
-            lines.append(f"  • **{display}** — `/clash asset_id:{a['asset_id']}`")
-        names = "\n".join(lines)
-        await interaction.followup.send(
-            f"You have **{len(all_assets)} Zappies**! Reply with the one you want to enter:\n\n{names}",
-            ephemeral=True
-        )
-        return
-
-    # Fetch stats for the chosen Zappy
-    zappy = await fetch_zappy_traits(chosen_asset_id)
-    if not zappy:
-        await interaction.followup.send(
-            "❌ Couldn't load your Zappy's traits from IPFS. Try again in a moment.",
-            ephemeral=True
-        )
-        return
-
-    # Register
-    register_for_bracket(user_id, chosen_asset_id, active_bracket_id)
-
-    # Show their stats as an embed with image
-    stats     = zappy.get("stats", {})
-    name      = zappy.get("name", f"ASA {chosen_asset_id}")
-    image_url = zappy.get("image_url", "")
-
-    embed = discord.Embed(
-        title=f"✅ {name} is in the bracket!",
-        description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
-        color=0xF5E642,
+# Check wallet is linked
+wallet = get_wallet(user_id)
+if not wallet:
+    await interaction.followup.send(
+        "❌ You haven't linked your wallet yet. Use `/link` first!",
+        ephemeral=True
     )
-    if stats.get("combo"):
-        embed.add_field(name="Combo", value=stats["combo"], inline=False)
-    if stats.get("ability"):
-        ab = stats["ability"]
-        embed.add_field(name=f"⚡ {ab['name']}", value=ab["desc"], inline=False)
-    if image_url:
-        embed.set_thumbnail(url=image_url)
-    embed.set_footer(text=f"Fights start when registration closes · Watch #{CLASH_CHANNEL}")
-    await interaction.followup.send(embed=embed, ephemeral=True)
+    return
 
-    # Announce in clash channel
-    clash_ch = bot.get_channel(CLASH_CHANNEL)
-    if clash_ch:
-        await clash_ch.send(
-            f"⚡ **{interaction.user.display_name}** enters the bracket with "
-            f"**{name}** — VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
+# Check if already registered
+if is_registered(user_id, active_bracket_id):
+    await interaction.followup.send(
+        "✅ You're already registered for this bracket! Check "
+        f"<#{CLASH_CHANNEL}> when fights start.",
+        ephemeral=True
+    )
+    return
+
+# Verify ownership using cache — avoids slow indexer call
+from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+import time as _t
+_now = _t.monotonic()
+if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+    ownership = _wallet_cache[wallet]
+else:
+    await interaction.followup.send("⚡ Verifying your Zappy...", ephemeral=True)
+    ownership = await verify_wallet(user_id, wallet)
+
+if not ownership["owns"]:
+    await interaction.followup.send(
+        "❌ No Zappies found in your linked wallet. "
+        "Use `/link` to update your wallet address.",
+        ephemeral=True
+    )
+    return
+
+# Determine which asset to use
+all_assets = (
+    ownership["zappies"] +
+    [{"asset_id": h["asset_id"], "unit_name": h["hero_type"]} for h in ownership["heroes"]] +
+    [{"asset_id": c["asset_id"], "unit_name": "ShittyKitties"} for c in ownership["collabs"]]
+)
+
+if asset_id:
+    # Validate the specified asset belongs to them
+    found = next((a for a in all_assets if a["asset_id"] == asset_id), None)
+    if not found:
+        await interaction.followup.send(
+            f"❌ ASA {asset_id} not found in your wallet.",
+            ephemeral=True
         )
+        return
+    chosen_asset_id = asset_id
+elif len(all_assets) == 1:
+    chosen_asset_id = all_assets[0]["asset_id"]
+else:
+    # Multiple — ask them to specify
+    # Fetch names for all assets so we show friendly names not just IDs
+    lines = []
+    for a in all_assets:
+        display = a.get('name') or a.get('unit_name') or f"ASA {a['asset_id']}"
+        lines.append(f"  • **{display}** — `/clash asset_id:{a['asset_id']}`")
+    names = "\n".join(lines)
+    await interaction.followup.send(
+        f"You have **{len(all_assets)} Zappies**! Reply with the one you want to enter:\n\n{names}",
+        ephemeral=True
+    )
+    return
 
+# Fetch stats for the chosen Zappy
+zappy = await fetch_zappy_traits(chosen_asset_id)
+if not zappy:
+    await interaction.followup.send(
+        "❌ Couldn't load your Zappy's traits from IPFS. Try again in a moment.",
+        ephemeral=True
+    )
+    return
 
-@tree.command(name="stats", description="Preview your Zappy's battle stats")
-@app_commands.describe(asset_id="Your Zappy's ASA ID (optional if you only have one)")
+# Register
+register_for_bracket(user_id, chosen_asset_id, active_bracket_id)
+
+# Show their stats as an embed with image
+stats     = zappy.get("stats", {})
+name      = zappy.get("name", f"ASA {chosen_asset_id}")
+image_url = zappy.get("image_url", "")
+
+embed = discord.Embed(
+    title=f"✅ {name} is in the bracket!",
+    description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
+    color=0xF5E642,
+)
+if stats.get("combo"):
+    embed.add_field(name="Combo", value=stats["combo"], inline=False)
+if stats.get("ability"):
+    ab = stats["ability"]
+    embed.add_field(name=f"⚡ {ab['name']}", value=ab["desc"], inline=False)
+if image_url:
+    embed.set_thumbnail(url=image_url)
+embed.set_footer(text=f"Fights start when registration closes · Watch #{CLASH_CHANNEL}")
+await interaction.followup.send(embed=embed, ephemeral=True)
+
+# Announce in clash channel
+clash_ch = bot.get_channel(CLASH_CHANNEL)
+if clash_ch:
+    await clash_ch.send(
+        f"⚡ **{interaction.user.display_name}** enters the bracket with "
+        f"**{name}** — VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
+    )
+```
+
+@tree.command(name=“stats”, description=“Preview your Zappy’s battle stats”)
+@app_commands.describe(asset_id=“Your Zappy’s ASA ID (optional if you only have one)”)
 async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = None):
-    """Show a Zappy's stats without registering."""
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
-    await interaction.response.defer(ephemeral=True)
+“”“Show a Zappy’s stats without registering.”””
+if not check_clash_channel(interaction):
+await interaction.response.send_message(
+f”❌ Use <#{CLASH_CHANNEL}> for Clash commands.”, ephemeral=True
+)
+return
+await interaction.response.defer(ephemeral=True)
 
-    user_id = str(interaction.user.id)
-    wallet  = get_wallet(user_id)
+```
+user_id = str(interaction.user.id)
+wallet  = get_wallet(user_id)
 
-    if not wallet:
-        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
-        return
+if not wallet:
+    await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+    return
 
-    # Use local collection table — no indexer call needed
-    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
-    from algorand_lookup import HERO_ASSET_IDS
+# Use local collection table — no indexer call needed
+from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
+from algorand_lookup import HERO_ASSET_IDS
 
-    if asset_id:
-        chosen_id = asset_id
-    else:
-        # Find all Zappies in local table that might belong to this wallet
-        # We can't know without indexer, so prompt for asset_id if ambiguous
-        await interaction.followup.send(
-            "Use `/stats asset_id:XXXXX` with your Zappy's ASA ID, "
-            "or use `/myzappies` to see all your Zappies and their IDs.",
-            ephemeral=True
-        )
-        return
-
-    zappy = await fetch_zappy_traits(chosen_id)
-    if not zappy:
-        await interaction.followup.send("❌ Couldn't load traits. Try again.", ephemeral=True)
-        return
-
-    stats = zappy.get("stats", {})
-    traits = zappy.get("traits", {})
-    name   = zappy.get("name", f"ASA {chosen_id}")
-
-    embed = discord.Embed(title=name, color=0xF5E642)
-
-    embed.add_field(
-        name="Battle Stats",
-        value=f"⚡ **VLT** {stats.get('VLT','?')} — Attack\n"
-              f"🛡️ **INS** {stats.get('INS','?')} — Defense\n"
-              f"🎲 **SPK** {stats.get('SPK','?')} — Crit chance",
-        inline=True,
+if asset_id:
+    chosen_id = asset_id
+else:
+    # Find all Zappies in local table that might belong to this wallet
+    # We can't know without indexer, so prompt for asset_id if ambiguous
+    await interaction.followup.send(
+        "Use `/stats asset_id:XXXXX` with your Zappy's ASA ID, "
+        "or use `/myzappies` to see all your Zappies and their IDs.",
+        ephemeral=True
     )
-    embed.add_field(
-        name="Traits",
-        value=f"🎨 {traits.get('background','?')} bg\n"
-              f"👕 {traits.get('body','?')}\n"
-              f"💍 {traits.get('earring','None')}\n"
-              f"👁️ {traits.get('eyes','?')}\n"
-              f"🕶️ {traits.get('eyewear','None')}\n"
-              f"🎩 {traits.get('head','?')}\n"
-              f"👄 {traits.get('mouth','?')}\n"
-              f"🎨 {traits.get('skin','?')} skin",
-        inline=True,
-    )
-    if stats.get("combo"):
-        embed.add_field(name="Combo", value=stats["combo"], inline=False)
-    if stats.get("ability"):
-        ab = stats["ability"]
-        embed.add_field(name=f"⚡ Ability: {ab['name']}", value=ab["desc"], inline=False)
+    return
 
-    image_url = zappy.get("image_url", "")
-    if image_url:
-        embed.set_thumbnail(url=image_url)
+zappy = await fetch_zappy_traits(chosen_id)
+if not zappy:
+    await interaction.followup.send("❌ Couldn't load traits. Try again.", ephemeral=True)
+    return
 
-    embed.set_footer(text=f"ASA {chosen_id}")
-    await interaction.followup.send(embed=embed, ephemeral=True)
+stats = zappy.get("stats", {})
+traits = zappy.get("traits", {})
+name   = zappy.get("name", f"ASA {chosen_id}")
 
+embed = discord.Embed(title=name, color=0xF5E642)
 
-@tree.command(name="rank", description="Check your Clash Points and rank")
+embed.add_field(
+    name="Battle Stats",
+    value=f"⚡ **VLT** {stats.get('VLT','?')} — Attack\n"
+          f"🛡️ **INS** {stats.get('INS','?')} — Defense\n"
+          f"🎲 **SPK** {stats.get('SPK','?')} — Crit chance",
+    inline=True,
+)
+embed.add_field(
+    name="Traits",
+    value=f"🎨 {traits.get('background','?')} bg\n"
+          f"👕 {traits.get('body','?')}\n"
+          f"💍 {traits.get('earring','None')}\n"
+          f"👁️ {traits.get('eyes','?')}\n"
+          f"🕶️ {traits.get('eyewear','None')}\n"
+          f"🎩 {traits.get('head','?')}\n"
+          f"👄 {traits.get('mouth','?')}\n"
+          f"🎨 {traits.get('skin','?')} skin",
+    inline=True,
+)
+if stats.get("combo"):
+    embed.add_field(name="Combo", value=stats["combo"], inline=False)
+if stats.get("ability"):
+    ab = stats["ability"]
+    embed.add_field(name=f"⚡ Ability: {ab['name']}", value=ab["desc"], inline=False)
+
+image_url = zappy.get("image_url", "")
+if image_url:
+    embed.set_thumbnail(url=image_url)
+
+embed.set_footer(text=f"ASA {chosen_id}")
+await interaction.followup.send(embed=embed, ephemeral=True)
+```
+
+@tree.command(name=“rank”, description=“Check your Clash Points and rank”)
 async def cmd_rank(interaction: discord.Interaction):
-    """Show a player's rank and CP."""
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
-    user_id = str(interaction.user.id)
-    rank_data = get_player_rank(user_id)
-    streak_data = get_streak(user_id)
+“”“Show a player’s rank and CP.”””
+if not check_clash_channel(interaction):
+await interaction.response.send_message(
+f”❌ Use <#{CLASH_CHANNEL}> for Clash commands.”, ephemeral=True
+)
+return
+user_id = str(interaction.user.id)
+rank_data = get_player_rank(user_id)
+streak_data = get_streak(user_id)
 
-    lines = [
-        f"**{interaction.user.display_name}**",
-        f"",
-        f"🏆 Rank: **#{rank_data.get('rank', '?')}**",
-        f"⚡ Clash Points: **{rank_data.get('cp_total', 0):,} CP**",
-        f"",
-        f"🔥 Daily streak: **{streak_data.get('current_streak', 0)} days**",
-        f"⚔️ Total wins: **{streak_data.get('total_wins', 0)}**",
-        f"🎮 Total played: **{streak_data.get('total_played', 0)}**",
-    ]
-    await interaction.response.send_message("\n".join(lines), ephemeral=True)
+```
+lines = [
+    f"**{interaction.user.display_name}**",
+    f"",
+    f"🏆 Rank: **#{rank_data.get('rank', '?')}**",
+    f"⚡ Clash Points: **{rank_data.get('cp_total', 0):,} CP**",
+    f"",
+    f"🔥 Daily streak: **{streak_data.get('current_streak', 0)} days**",
+    f"⚔️ Total wins: **{streak_data.get('total_wins', 0)}**",
+    f"🎮 Total played: **{streak_data.get('total_played', 0)}**",
+]
+await interaction.response.send_message("\n".join(lines), ephemeral=True)
+```
 
-
-@tree.command(name="top", description="View the Zappy Clash leaderboard")
+@tree.command(name=“top”, description=“View the Zappy Clash leaderboard”)
 async def cmd_top(interaction: discord.Interaction):
-    """Show top 10 players by CP."""
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
+“”“Show top 10 players by CP.”””
+if not check_clash_channel(interaction):
+await interaction.response.send_message(
+f”❌ Use <#{CLASH_CHANNEL}> for Clash commands.”, ephemeral=True
+)
+return
 
-    top = get_leaderboard(10)
+```
+top = get_leaderboard(10)
 
-    if not top:
-        await interaction.response.send_message("No players on the board yet — be the first!", ephemeral=False)
-        return
+if not top:
+    await interaction.response.send_message("No players on the board yet — be the first!", ephemeral=False)
+    return
 
-    lines = ["**⚡ Zappy Clash Leaderboard**", ""]
-    medals = ["🥇", "🥈", "🥉"] + ["  " for _ in range(10)]
+lines = ["**⚡ Zappy Clash Leaderboard**", ""]
+medals = ["🥇", "🥈", "🥉"] + ["  " for _ in range(10)]
 
-    for i, player in enumerate(top):
-        user_id = player["discord_user_id"]
-        cp = player["cp_total"]
-        try:
-            member = interaction.guild.get_member(int(user_id))
-            name = member.display_name if member else f"Player {user_id[:6]}"
-        except Exception:
-            name = f"Player {user_id[:6]}"
-        lines.append(f"{medals[i]} **{name}** — {cp:,} CP")
+for i, player in enumerate(top):
+    user_id = player["discord_user_id"]
+    cp = player["cp_total"]
+    try:
+        member = interaction.guild.get_member(int(user_id))
+        name = member.display_name if member else f"Player {user_id[:6]}"
+    except Exception:
+        name = f"Player {user_id[:6]}"
+    lines.append(f"{medals[i]} **{name}** — {cp:,} CP")
 
-    await interaction.response.send_message("\n".join(lines), ephemeral=False)
+await interaction.response.send_message("\n".join(lines), ephemeral=False)
+```
 
-
-@tree.command(name="myzappies", description="List all your Zappies with names and ASA IDs")
+@tree.command(name=“myzappies”, description=“List all your Zappies with names and ASA IDs”)
 async def cmd_myzappies(interaction: discord.Interaction):
-    """Show all Zappies in the linked wallet with names."""
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
-    await interaction.response.defer(ephemeral=True)
+“”“Show all Zappies in the linked wallet with names.”””
+if not check_clash_channel(interaction):
+await interaction.response.send_message(
+f”❌ Use <#{CLASH_CHANNEL}> for Clash commands.”, ephemeral=True
+)
+return
+await interaction.response.defer(ephemeral=True)
 
-    user_id = str(interaction.user.id)
-    wallet  = get_wallet(user_id)
+```
+user_id = str(interaction.user.id)
+wallet  = get_wallet(user_id)
 
-    if not wallet:
-        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
-        return
+if not wallet:
+    await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+    return
 
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    _now = _t.monotonic()
-    if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        ownership = await verify_wallet(user_id, wallet)
+from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+import time as _t
+_now = _t.monotonic()
+if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+    ownership = _wallet_cache[wallet]
+else:
+    ownership = await verify_wallet(user_id, wallet)
 
-    if not ownership["owns"]:
-        await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
-        return
+if not ownership["owns"]:
+    await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
+    return
 
-    zappies = ownership["zappies"]
-    heroes  = ownership["heroes"]
-    collabs = ownership["collabs"]
+zappies = ownership["zappies"]
+heroes  = ownership["heroes"]
+collabs = ownership["collabs"]
 
-    embed = discord.Embed(
-        title=f"⚡ Your Zappies ({len(zappies) + len(heroes) + len(collabs)} total)",
-        color=0xF5E642,
-    )
+embed = discord.Embed(
+    title=f"⚡ Your Zappies ({len(zappies) + len(heroes) + len(collabs)} total)",
+    color=0xF5E642,
+)
 
-    # Main collection — paginate into chunks of 20 per field (Discord limit)
-    if zappies:
-        chunk_size = 20
-        for i in range(0, len(zappies), chunk_size):
-            chunk = zappies[i:i+chunk_size]
-            lines = [
-                f"**{z.get('name', z.get('unit_name', f'ASA {z["asset_id"]}'))}** `{z['asset_id']}`"
-                for z in chunk
-            ]
-            field_name = "Zappies" if i == 0 else f"Zappies (cont.)"
-            embed.add_field(name=field_name, value="\n".join(lines), inline=False)
+# Main collection — paginate into chunks of 20 per field (Discord limit)
+if zappies:
+    chunk_size = 20
+    for i in range(0, len(zappies), chunk_size):
+        chunk = zappies[i:i+chunk_size]
+        lines = [
+            f"**{z.get('name', z.get('unit_name', f'ASA {z["asset_id"]}'))}** `{z['asset_id']}`"
+            for z in chunk
+        ]
+        field_name = "Zappies" if i == 0 else f"Zappies (cont.)"
+        embed.add_field(name=field_name, value="\n".join(lines), inline=False)
 
-    if heroes:
-        hero_lines = [f"🦸 **Zappy Hero — {h['hero_type']}** `{h['asset_id']}`" for h in heroes]
-        embed.add_field(name="Heroes", value="\n".join(hero_lines), inline=False)
+if heroes:
+    hero_lines = [f"🦸 **Zappy Hero — {h['hero_type']}** `{h['asset_id']}`" for h in heroes]
+    embed.add_field(name="Heroes", value="\n".join(hero_lines), inline=False)
 
-    if collabs:
-        collab_lines = [f"🐱 **Shitty Zappy Kitty** `{c['asset_id']}`" for c in collabs]
-        embed.add_field(name="Collabs", value="\n".join(collab_lines), inline=False)
+if collabs:
+    collab_lines = [f"🐱 **Shitty Zappy Kitty** `{c['asset_id']}`" for c in collabs]
+    embed.add_field(name="Collabs", value="\n".join(collab_lines), inline=False)
 
-    embed.set_footer(text="Use /stats asset_id:XXXXX to see a Zappy's battle stats")
-    await interaction.followup.send(embed=embed, ephemeral=True)
+embed.set_footer(text="Use /stats asset_id:XXXXX to see a Zappy's battle stats")
+await interaction.followup.send(embed=embed, ephemeral=True)
+```
 
-
-@tree.command(name="debug", description="ADMIN ONLY — debug a Zappy's image URL")
-@app_commands.describe(asset_id="The Zappy ASA ID to debug")
+@tree.command(name=“debug”, description=“ADMIN ONLY — debug a Zappy’s image URL”)
+@app_commands.describe(asset_id=“The Zappy ASA ID to debug”)
 async def cmd_debug(interaction: discord.Interaction, asset_id: int):
-    """Show raw image URL for debugging. Owner only."""
-    if interaction.user.id != interaction.guild.owner_id:
-        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
-        return
+“”“Show raw image URL for debugging. Owner only.”””
+if interaction.user.id != interaction.guild.owner_id:
+await interaction.response.send_message(“❌ Admin only.”, ephemeral=True)
+return
 
-    await interaction.response.defer(ephemeral=True)
-    zappy = await fetch_zappy_traits(asset_id)
+```
+await interaction.response.defer(ephemeral=True)
+zappy = await fetch_zappy_traits(asset_id)
 
-    if not zappy:
-        await interaction.followup.send("❌ Could not fetch Zappy.", ephemeral=True)
-        return
+if not zappy:
+    await interaction.followup.send("❌ Could not fetch Zappy.", ephemeral=True)
+    return
 
-    image_url = zappy.get("image_url", "NONE")
-    traits    = zappy.get("traits", {})
+image_url = zappy.get("image_url", "NONE")
+traits    = zappy.get("traits", {})
 
-    lines = [
-        f"**Name:** {zappy.get('name')}",
-        f"**Image URL:** `{image_url}`",
-        f"**Raw image from metadata:** `{traits.get('image_url', 'not in traits')}`",
-        f"**Traits loaded:** {bool(traits)}",
-    ]
+lines = [
+    f"**Name:** {zappy.get('name')}",
+    f"**Image URL:** `{image_url}`",
+    f"**Raw image from metadata:** `{traits.get('image_url', 'not in traits')}`",
+    f"**Traits loaded:** {bool(traits)}",
+]
 
-    # Also try posting the image directly
-    embed = discord.Embed(title="Image test", color=0xF5E642)
-    if image_url and image_url != "NONE":
-        embed.set_image(url=image_url)
-        lines.append("*(image embed attempted below)*")
+# Also try posting the image directly
+embed = discord.Embed(title="Image test", color=0xF5E642)
+if image_url and image_url != "NONE":
+    embed.set_image(url=image_url)
+    lines.append("*(image embed attempted below)*")
 
-    await interaction.followup.send("\n".join(lines), embed=embed, ephemeral=True)
+await interaction.followup.send("\n".join(lines), embed=embed, ephemeral=True)
+```
 
-
-@tree.command(name="testbracket", description="ADMIN ONLY — trigger a test bracket right now")
+@tree.command(name=“testbracket”, description=“ADMIN ONLY — trigger a test bracket right now”)
 async def cmd_testbracket(interaction: discord.Interaction):
-    """Manually trigger a bracket for testing. Only works for the server owner."""
-    global active_bracket_id, registration_open
+“”“Manually trigger a bracket for testing. Only works for the server owner.”””
+global active_bracket_id, registration_open
 
-    # Only server owner can run this
-    if interaction.user.id != interaction.guild.owner_id:
-        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
-        return
+```
+# Only server owner can run this
+if interaction.user.id != interaction.guild.owner_id:
+    await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+    return
 
-    await interaction.response.send_message("⚡ Starting test bracket — registration open for 2 minutes!", ephemeral=True)
+await interaction.response.send_message("⚡ Starting test bracket — registration open for 2 minutes!", ephemeral=True)
 
-    bracket_id = f"test_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
-    active_bracket_id = bracket_id
-    registration_open = True
+bracket_id = f"test_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+active_bracket_id = bracket_id
+registration_open = True
 
-    channel = bot.get_channel(CLASH_CHANNEL)
+channel = bot.get_channel(CLASH_CHANNEL)
 
-    await channel.send(
-        "⚡ **ZAPPY CLASH — TEST BRACKET**\n"
-        "\n"
-        "Registration is open for **2 minutes**.\n"
-        "Use `/clash` to enter your Zappy!"
-    )
+await channel.send(
+    "⚡ **ZAPPY CLASH — TEST BRACKET**\n"
+    "\n"
+    "Registration is open for **2 minutes**.\n"
+    "Use `/clash` to enter your Zappy!"
+)
 
-    # Wait 2 minutes
-    await asyncio.sleep(120)
+# Wait 2 minutes
+await asyncio.sleep(120)
 
-    # Close and resolve
-    await close_and_resolve(channel)
+# Close and resolve
+await close_and_resolve(channel)
+```
 
-
-@tree.command(name="streak", description="Check your daily play streak")
+@tree.command(name=“streak”, description=“Check your daily play streak”)
 async def cmd_streak(interaction: discord.Interaction):
-    """Show streak details and milestones."""
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
-    user_id = str(interaction.user.id)
-    streak_data = get_streak(user_id)
-    current = streak_data.get("current_streak", 0)
+“”“Show streak details and milestones.”””
+if not check_clash_channel(interaction):
+await interaction.response.send_message(
+f”❌ Use <#{CLASH_CHANNEL}> for Clash commands.”, ephemeral=True
+)
+return
+user_id = str(interaction.user.id)
+streak_data = get_streak(user_id)
+current = streak_data.get(“current_streak”, 0)
 
-    lines = [
-        f"**🔥 Daily Streak: {current} days**",
-        f"",
-        f"Longest ever: {streak_data.get('longest_streak', 0)} days",
-        f"",
-        "**Milestone rewards:**",
-        f"  3 days  → +50 CP + \"On a Roll 🔥\" role {'✅' if current >= 3 else ''}",
-        f"  7 days  → +200 CP + \"Charged Up ⚡\" role {'✅' if current >= 7 else ''}",
-        f"  14 days → \"Veteran Zappy 🏆\" role + early drop access {'✅' if current >= 14 else ''}",
-        f"  30 days → Hall of Fame ⭐ nameplate {'✅' if current >= 30 else ''}",
-        f"",
-        f"Play both sessions daily to keep your streak alive!",
-    ]
-    await interaction.response.send_message("\n".join(lines), ephemeral=True)
-
+```
+lines = [
+    f"**🔥 Daily Streak: {current} days**",
+    f"",
+    f"Longest ever: {streak_data.get('longest_streak', 0)} days",
+    f"",
+    "**Milestone rewards:**",
+    f"  3 days  → +50 CP + \"On a Roll 🔥\" role {'✅' if current >= 3 else ''}",
+    f"  7 days  → +200 CP + \"Charged Up ⚡\" role {'✅' if current >= 7 else ''}",
+    f"  14 days → \"Veteran Zappy 🏆\" role + early drop access {'✅' if current >= 14 else ''}",
+    f"  30 days → Hall of Fame ⭐ nameplate {'✅' if current >= 30 else ''}",
+    f"",
+    f"Play both sessions daily to keep your streak alive!",
+]
+await interaction.response.send_message("\n".join(lines), ephemeral=True)
+```
 
 # ─────────────────────────────────────────────
+
 # SCHEDULED SESSIONS
-# ─────────────────────────────────────────────
-
-
 
 # ─────────────────────────────────────────────
+
+# ─────────────────────────────────────────────
+
 # Expedition DB helpers
+
 # ─────────────────────────────────────────────
 
 def expedition_already_ran_today(discord_user_id: str) -> bool:
-    """Check if a user has already completed an expedition today."""
-    from database import get_supabase
-    from datetime import date
-    db   = get_supabase()
-    today = date.today().isoformat()
-    result = (
-        db.table("expedition_runs")
-        .select("id")
-        .eq("discord_user_id", discord_user_id)
-        .eq("run_date", today)
-        .execute()
-    )
-    return len(result.data) > 0
-
+“”“Check if a user has already completed an expedition today.”””
+from database import get_supabase
+from datetime import date
+db   = get_supabase()
+today = date.today().isoformat()
+result = (
+db.table(“expedition_runs”)
+.select(“id”)
+.eq(“discord_user_id”, discord_user_id)
+.eq(“run_date”, today)
+.execute()
+)
+return len(result.data) > 0
 
 def save_expedition_run(discord_user_id: str, zone_num: int, cp: int, tokens: int, nft: bool):
-    """Save completed expedition run and update leaderboard."""
-    from database import get_supabase, award_cp
-    from datetime import date, timezone
-    from datetime import datetime
-    db    = get_supabase()
-    today = date.today().isoformat()
+“”“Save completed expedition run and update leaderboard.”””
+from database import get_supabase, award_cp
+from datetime import date, timezone
+from datetime import datetime
+db    = get_supabase()
+today = date.today().isoformat()
 
-    db.table("expedition_runs").insert({
+```
+db.table("expedition_runs").insert({
+    "discord_user_id": discord_user_id,
+    "zone_num":        zone_num,
+    "cp_earned":       cp,
+    "tokens_earned":   tokens,
+    "nft_dropped":     nft,
+    "run_date":        today,
+    "completed_at":    datetime.now(timezone.utc).isoformat(),
+}).execute()
+
+# Update expedition leaderboard
+existing = db.table("expedition_leaderboard").select("*").eq(
+    "discord_user_id", discord_user_id
+).execute()
+
+if existing.data:
+    row = existing.data[0]
+    db.table("expedition_leaderboard").update({
+        "exp_cp_total":  row["exp_cp_total"] + cp,
+        "runs_completed": row["runs_completed"] + 1,
+        "updated_at":    datetime.now(timezone.utc).isoformat(),
+    }).eq("discord_user_id", discord_user_id).execute()
+else:
+    db.table("expedition_leaderboard").insert({
         "discord_user_id": discord_user_id,
-        "zone_num":        zone_num,
-        "cp_earned":       cp,
-        "tokens_earned":   tokens,
-        "nft_dropped":     nft,
-        "run_date":        today,
-        "completed_at":    datetime.now(timezone.utc).isoformat(),
+        "exp_cp_total":    cp,
+        "runs_completed":  1,
     }).execute()
 
-    # Update expedition leaderboard
-    existing = db.table("expedition_leaderboard").select("*").eq(
-        "discord_user_id", discord_user_id
-    ).execute()
-
-    if existing.data:
-        row = existing.data[0]
-        db.table("expedition_leaderboard").update({
-            "exp_cp_total":  row["exp_cp_total"] + cp,
-            "runs_completed": row["runs_completed"] + 1,
-            "updated_at":    datetime.now(timezone.utc).isoformat(),
-        }).eq("discord_user_id", discord_user_id).execute()
-    else:
-        db.table("expedition_leaderboard").insert({
-            "discord_user_id": discord_user_id,
-            "exp_cp_total":    cp,
-            "runs_completed":  1,
-        }).execute()
-
-    # Also award CP to the main leaderboard (zones unlock from combined CP)
-    award_cp(discord_user_id, cp, f"expedition_zone{zone_num}")
-
+# Also award CP to the main leaderboard (zones unlock from combined CP)
+award_cp(discord_user_id, cp, f"expedition_zone{zone_num}")
+```
 
 def get_expedition_leaderboard(limit: int = 10) -> list:
-    from database import get_supabase
-    db = get_supabase()
-    result = (
-        db.table("expedition_leaderboard")
-        .select("*")
-        .order("exp_cp_total", desc=True)
-        .limit(limit)
-        .execute()
-    )
-    return result.data or []
-
+from database import get_supabase
+db = get_supabase()
+result = (
+db.table(“expedition_leaderboard”)
+.select(”*”)
+.order(“exp_cp_total”, desc=True)
+.limit(limit)
+.execute()
+)
+return result.data or []
 
 # ─────────────────────────────────────────────
+
 # /expedition command
+
 # ─────────────────────────────────────────────
 
-@tree.command(name="expedition", description="Send your Zappy on a solo expedition")
+@tree.command(name=“expedition”, description=“Send your Zappy on a solo expedition”)
 async def cmd_expedition(interaction: discord.Interaction):
-    """Start an expedition run."""
-    if not check_expedition_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands." if EXPEDITION_CHANNEL else "❌ Expedition commands are restricted.",
-            ephemeral=True
-        )
-        return
-    await interaction.response.defer(ephemeral=True)
-    user_id = str(interaction.user.id)
+“”“Start an expedition run.”””
+if not check_expedition_channel(interaction):
+await interaction.response.send_message(
+f”❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands.” if EXPEDITION_CHANNEL else “❌ Expedition commands are restricted.”,
+ephemeral=True
+)
+return
+await interaction.response.defer(ephemeral=True)
+user_id = str(interaction.user.id)
 
-    # Check already ran today
-    if expedition_already_ran_today(user_id):
-        await interaction.followup.send(
-            "⏳ You've already run an expedition today. Come back tomorrow!",
-            ephemeral=True
-        )
-        return
+```
+# Check already ran today
+if expedition_already_ran_today(user_id):
+    await interaction.followup.send(
+        "⏳ You've already run an expedition today. Come back tomorrow!",
+        ephemeral=True
+    )
+    return
 
-    # Check wallet linked
-    wallet = get_wallet(user_id)
-    if not wallet:
-        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
-        return
+# Check wallet linked
+wallet = get_wallet(user_id)
+if not wallet:
+    await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+    return
 
-    # Use cached wallet verification — fast, no indexer call
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    now = _t.monotonic()
-    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        # Cache miss — do the indexer call
-        ownership = await verify_wallet(user_id, wallet)
+# Use cached wallet verification — fast, no indexer call
+from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+import time as _t
+now = _t.monotonic()
+if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+    ownership = _wallet_cache[wallet]
+else:
+    # Cache miss — do the indexer call
+    ownership = await verify_wallet(user_id, wallet)
 
-    if not ownership["owns"]:
-        await interaction.followup.send(
-            "❌ No Zappies found. If you just linked your wallet, wait a moment and try again.",
-            ephemeral=True
-        )
-        return
+if not ownership["owns"]:
+    await interaction.followup.send(
+        "❌ No Zappies found. If you just linked your wallet, wait a moment and try again.",
+        ephemeral=True
+    )
+    return
 
-    # Get combined CP for zone unlock
-    from database import get_player_rank
-    rank_data   = get_player_rank(user_id)
-    cp_total    = rank_data.get("cp_total", 0)
-    eligible    = get_eligible_zones(cp_total)
-    zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
-    bonus       = get_collection_bonus(zappy_count)
+# Get combined CP for zone unlock
+from database import get_player_rank
+rank_data   = get_player_rank(user_id)
+cp_total    = rank_data.get("cp_total", 0)
+eligible    = get_eligible_zones(cp_total)
+zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
+bonus       = get_collection_bonus(zappy_count)
 
-    # Build Zappy list
-    all_zappies = ownership["zappies"] + [
-        {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"}
-        for h in ownership["heroes"]
-    ]
+# Build Zappy list
+all_zappies = ownership["zappies"] + [
+    {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"}
+    for h in ownership["heroes"]
+]
 
-    # Go straight to zone selection — Zappy pick happens after zone choice
-    await _start_expedition_zone_select(interaction, user_id, all_zappies, eligible, cp_total, zappy_count, bonus, wallet)
-
+# Go straight to zone selection — Zappy pick happens after zone choice
+await _start_expedition_zone_select(interaction, user_id, all_zappies, eligible, cp_total, zappy_count, bonus, wallet)
+```
 
 async def _start_expedition_zone_select(
-    interaction: discord.Interaction,
-    user_id: str,
-    all_zappies: list,
-    eligible: list,
-    cp_total: int,
-    zappy_count: int,
-    bonus: dict,
-    wallet: str,
+interaction: discord.Interaction,
+user_id: str,
+all_zappies: list,
+eligible: list,
+cp_total: int,
+zappy_count: int,
+bonus: dict,
+wallet: str,
 ):
-    """Show zone selection — Zappy pick happens after zone choice."""
+“”“Show zone selection — Zappy pick happens after zone choice.”””
 
-    async def on_zone_selected(inter: discord.Interaction, zone_num: int):
-        fee = EXPEDITION_FEES.get(zone_num, 0)
-        if fee > 0:
-            from token_rewards import REWARD_TOKEN_ID
-            import aiohttp
-            from algorand_lookup import INDEXER_URL
-            try:
-                async with aiohttp.ClientSession() as session:
-                    url = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
-                    async with session.get(url, params={"asset-id": REWARD_TOKEN_ID},
-                                           timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                        data    = await resp.json() if resp.status == 200 else {}
-                        assets  = data.get("assets", [])
-                        balance = next((a.get("amount", 0) for a in assets
-                                       if a["asset-id"] == REWARD_TOKEN_ID), 0)
-            except Exception:
-                balance = 0
+```
+async def on_zone_selected(inter: discord.Interaction, zone_num: int):
+    fee = EXPEDITION_FEES.get(zone_num, 0)
+    if fee > 0:
+        from token_rewards import REWARD_TOKEN_ID
+        import aiohttp
+        from algorand_lookup import INDEXER_URL
+        try:
+            async with aiohttp.ClientSession() as session:
+                url = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
+                async with session.get(url, params={"asset-id": REWARD_TOKEN_ID},
+                                       timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                    data    = await resp.json() if resp.status == 200 else {}
+                    assets  = data.get("assets", [])
+                    balance = next((a.get("amount", 0) for a in assets
+                                   if a["asset-id"] == REWARD_TOKEN_ID), 0)
+        except Exception:
+            balance = 0
 
-            if balance < fee:
-                await inter.followup.send(
-                    f"❌ You need **{fee:,} ZAPP tokens** to enter {ZONES[zone_num]['name']}. "
-                    f"You have {balance:,}. Play Clash or Zone 1 to earn more!",
-                    ephemeral=True
-                )
-                return
+        if balance < fee:
+            await inter.followup.send(
+                f"❌ You need **{fee:,} ZAPP tokens** to enter {ZONES[zone_num]['name']}. "
+                f"You have {balance:,}. Play Clash or Zone 1 to earn more!",
+                ephemeral=True
+            )
+            return
 
-        # Show smart Zappy picker for this zone
-        await _show_smart_zappy_select(inter, user_id, zone_num, all_zappies, zappy_count, wallet, fee)
+    # Show smart Zappy picker for this zone
+    await _show_smart_zappy_select(inter, user_id, zone_num, all_zappies, zappy_count, wallet, fee)
 
-    zone_lines = []
-    for z in eligible:
+zone_lines = []
+for z in eligible:
+    zone = ZONES[z]
+    fee  = EXPEDITION_FEES.get(z, 0)
+    fee_str = f" · **{fee:,} ZAPP entry**" if fee > 0 else " · **Free**"
+    zone_lines.append(f"{zone['emoji']} **{zone['name']}**{fee_str}")
+
+locked_lines = []
+for z in range(1, 6):
+    if z not in eligible:
         zone = ZONES[z]
-        fee  = EXPEDITION_FEES.get(z, 0)
-        fee_str = f" · **{fee:,} ZAPP entry**" if fee > 0 else " · **Free**"
-        zone_lines.append(f"{zone['emoji']} **{zone['name']}**{fee_str}")
+        locked_lines.append(f"🔒 {zone['name']} — need {zone['cp_required']:,} CP (you have {cp_total:,})")
 
-    locked_lines = []
-    for z in range(1, 6):
-        if z not in eligible:
-            zone = ZONES[z]
-            locked_lines.append(f"🔒 {zone['name']} — need {zone['cp_required']:,} CP (you have {cp_total:,})")
+embed = discord.Embed(
+    title       = "🗺️ Choose a Zone",
+    description = f"You have **{zappy_count} Zappy/Zappies**. Pick a zone — the bot will show your best Zappies for it.",
+    color       = 0xF5E642,
+)
+if zone_lines:
+    embed.add_field(name="Available", value="\n".join(zone_lines), inline=False)
+if locked_lines:
+    embed.add_field(name="Locked", value="\n".join(locked_lines), inline=False)
+embed.set_footer(text=f"CP: {cp_total:,} · {bonus['label']}")
 
-    embed = discord.Embed(
-        title       = "🗺️ Choose a Zone",
-        description = f"You have **{zappy_count} Zappy/Zappies**. Pick a zone — the bot will show your best Zappies for it.",
-        color       = 0xF5E642,
-    )
-    if zone_lines:
-        embed.add_field(name="Available", value="\n".join(zone_lines), inline=False)
-    if locked_lines:
-        embed.add_field(name="Locked", value="\n".join(locked_lines), inline=False)
-    embed.set_footer(text=f"CP: {cp_total:,} · {bonus['label']}")
-
-    view = ZoneSelectView(eligible, cp_total, on_zone_selected)
-    await interaction.followup.send(embed=embed, view=view, ephemeral=True)
-
-
-
-
+view = ZoneSelectView(eligible, cp_total, on_zone_selected)
+await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+```
 
 # ─────────────────────────────────────────────
+
 # Zone stat priorities and Zappy ranking
+
 # ─────────────────────────────────────────────
 
 ZONE_STAT_PRIORITY = {
-    1: ("SPK", "VLT", "INS"),   # Mixed — SPK edges out for hidden paths
-    2: ("SPK", "VLT", "INS"),   # Voltage Bay — luck and crits rule coastal events
-    3: ("VLT", "INS", "SPK"),   # Molten Circuit — raw power breaks through
-    4: ("SPK", "INS", "VLT"),   # Null Space — luck navigates the strange
-    5: ("INS", "VLT", "SPK"),   # Apex Summit — survival first
+1: (“SPK”, “VLT”, “INS”),   # Mixed — SPK edges out for hidden paths
+2: (“SPK”, “VLT”, “INS”),   # Voltage Bay — luck and crits rule coastal events
+3: (“VLT”, “INS”, “SPK”),   # Molten Circuit — raw power breaks through
+4: (“SPK”, “INS”, “VLT”),   # Null Space — luck navigates the strange
+5: (“INS”, “VLT”, “SPK”),   # Apex Summit — survival first
 }
 
 ZONE_STAT_REASON = {
-    1: {
-        "SPK": "High SPK finds hidden paths and lucky breaks in the Fields.",
-        "VLT": "Strong VLT powers through obstacles.",
-        "INS": "Good INS absorbs minor hazards.",
-    },
-    2: {
-        "SPK": "High SPK rides the surge tides and wins the coastal bets.",
-        "VLT": "Strong VLT forces open wrecks and breaks barriers.",
-        "INS": "Good INS weathers the storm cells.",
-    },
-    3: {
-        "VLT": "High VLT is essential — Molten Circuit rewards raw power above all.",
-        "INS": "Strong INS survives the heat and the rogue automaton.",
-        "SPK": "Good SPK helps with timing the thermal vents.",
-    },
-    4: {
-        "SPK": "High SPK navigates probability storms and strange frequencies.",
-        "INS": "Strong INS survives the Null Space's unpredictable dangers.",
-        "VLT": "Good VLT handles the gravity zones.",
-    },
-    5: {
-        "INS": "High INS is critical — the Apex Storm Crown hits hard.",
-        "VLT": "Strong VLT powers through the Infinite Generator.",
-        "SPK": "Good SPK finds hidden paths at the summit.",
-    },
+1: {
+“SPK”: “High SPK finds hidden paths and lucky breaks in the Fields.”,
+“VLT”: “Strong VLT powers through obstacles.”,
+“INS”: “Good INS absorbs minor hazards.”,
+},
+2: {
+“SPK”: “High SPK rides the surge tides and wins the coastal bets.”,
+“VLT”: “Strong VLT forces open wrecks and breaks barriers.”,
+“INS”: “Good INS weathers the storm cells.”,
+},
+3: {
+“VLT”: “High VLT is essential — Molten Circuit rewards raw power above all.”,
+“INS”: “Strong INS survives the heat and the rogue automaton.”,
+“SPK”: “Good SPK helps with timing the thermal vents.”,
+},
+4: {
+“SPK”: “High SPK navigates probability storms and strange frequencies.”,
+“INS”: “Strong INS survives the Null Space’s unpredictable dangers.”,
+“VLT”: “Good VLT handles the gravity zones.”,
+},
+5: {
+“INS”: “High INS is critical — the Apex Storm Crown hits hard.”,
+“VLT”: “Strong VLT powers through the Infinite Generator.”,
+“SPK”: “Good SPK finds hidden paths at the summit.”,
+},
 }
 
-
 def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
-    """
-    Rank a list of Zappies by their suitability for a specific zone.
-    Returns top 5 with scores and explanations.
-    Each zappy dict must have: asset_id, name, unit_name
-    Traits/stats loaded via fetch_zappy_traits.
-    """
-    priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
-    primary, secondary, tertiary = priority
+“””
+Rank a list of Zappies by their suitability for a specific zone.
+Returns top 5 with scores and explanations.
+Each zappy dict must have: asset_id, name, unit_name
+Traits/stats loaded via fetch_zappy_traits.
+“””
+priority = ZONE_STAT_PRIORITY.get(zone_num, (“SPK”, “VLT”, “INS”))
+primary, secondary, tertiary = priority
 
-    ranked = []
-    for z in zappies:
-        from zappy_collection import ZAPPY_COLLECTION
-        entry = ZAPPY_COLLECTION.get(z["asset_id"])
-        if not entry:
-            continue
-        from stats_engine import calculate_stats
-        traits = {
-            "background": entry["background"],
-            "body":       entry["body"],
-            "earring":    entry["earring"],
-            "eyes":       entry["eyes"],
-            "eyewear":    entry["eyewear"],
-            "head":       entry["head"],
-            "mouth":      entry["mouth"],
-            "skin":       entry["skin"],
-        }
-        stats = calculate_stats(traits)
-        # Weighted score: primary=3x, secondary=2x, tertiary=1x
-        score = (
-            stats[primary]   * 3 +
-            stats[secondary] * 2 +
-            stats[tertiary]  * 1
-        )
-        ranked.append({
-            **z,
-            "stats":  stats,
-            "score":  score,
-            "traits": traits,
-            "image_url": entry.get("image_url", ""),
-        })
+```
+ranked = []
+for z in zappies:
+    from zappy_collection import ZAPPY_COLLECTION
+    entry = ZAPPY_COLLECTION.get(z["asset_id"])
+    if not entry:
+        continue
+    from stats_engine import calculate_stats
+    traits = {
+        "background": entry["background"],
+        "body":       entry["body"],
+        "earring":    entry["earring"],
+        "eyes":       entry["eyes"],
+        "eyewear":    entry["eyewear"],
+        "head":       entry["head"],
+        "mouth":      entry["mouth"],
+        "skin":       entry["skin"],
+    }
+    stats = calculate_stats(traits)
+    # Weighted score: primary=3x, secondary=2x, tertiary=1x
+    score = (
+        stats[primary]   * 3 +
+        stats[secondary] * 2 +
+        stats[tertiary]  * 1
+    )
+    ranked.append({
+        **z,
+        "stats":  stats,
+        "score":  score,
+        "traits": traits,
+        "image_url": entry.get("image_url", ""),
+    })
 
-    ranked.sort(key=lambda x: x["score"], reverse=True)
-    return ranked[:5]
-
+ranked.sort(key=lambda x: x["score"], reverse=True)
+return ranked[:5]
+```
 
 def build_zappy_reason(zappy: dict, zone_num: int) -> str:
-    """Build a short explanation of why this Zappy is good for this zone."""
-    priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
-    primary, secondary, tertiary = priority
-    stats    = zappy["stats"]
-    reasons  = ZONE_STAT_REASON.get(zone_num, {})
+“”“Build a short explanation of why this Zappy is good for this zone.”””
+priority = ZONE_STAT_PRIORITY.get(zone_num, (“SPK”, “VLT”, “INS”))
+primary, secondary, tertiary = priority
+stats    = zappy[“stats”]
+reasons  = ZONE_STAT_REASON.get(zone_num, {})
 
-    # Find their strongest stat from the priority list
-    best_stat = max(priority, key=lambda s: stats[s])
-    reason    = reasons.get(best_stat, "")
+```
+# Find their strongest stat from the priority list
+best_stat = max(priority, key=lambda s: stats[s])
+reason    = reasons.get(best_stat, "")
 
-    return (
-        f"⚡ {stats['VLT']} · 🛡️ {stats['INS']} · 🎲 {stats['SPK']}"
-        + (f"\n_{reason}_" if reason else "")
-    )
-
+return (
+    f"⚡ {stats['VLT']} · 🛡️ {stats['INS']} · 🎲 {stats['SPK']}"
+    + (f"\n_{reason}_" if reason else "")
+)
+```
 
 class SmartZappyView(discord.ui.View):
-    """Button view showing top 5 Zappies for a zone with explanations."""
+“”“Button view showing top 5 Zappies for a zone with explanations.”””
 
-    def __init__(self, ranked_zappies: list, zone_num: int, on_zappy_callback):
-        super().__init__(timeout=120)
-        self.callback = on_zappy_callback
-        self.chosen   = False
+```
+def __init__(self, ranked_zappies: list, zone_num: int, on_zappy_callback):
+    super().__init__(timeout=120)
+    self.callback = on_zappy_callback
+    self.chosen   = False
 
-        for z in ranked_zappies:
-            name = z.get("name", z.get("unit_name", f"ASA {z['asset_id']}"))
-            btn  = discord.ui.Button(
-                label     = name[:80],
-                style     = discord.ButtonStyle.primary,
-                custom_id = f"smart_zappy_{z['asset_id']}",
-            )
-            btn.callback = self._make_callback(z["asset_id"])
-            self.add_item(btn)
+    for z in ranked_zappies:
+        name = z.get("name", z.get("unit_name", f"ASA {z['asset_id']}"))
+        btn  = discord.ui.Button(
+            label     = name[:80],
+            style     = discord.ButtonStyle.primary,
+            custom_id = f"smart_zappy_{z['asset_id']}",
+        )
+        btn.callback = self._make_callback(z["asset_id"])
+        self.add_item(btn)
 
-    def _make_callback(self, asset_id: int):
-        async def button_callback(interaction: discord.Interaction):
-            if self.chosen:
-                return
-            self.chosen = True
-            for item in self.children:
-                item.disabled = True
-            await interaction.response.defer(ephemeral=True)
-            await self.callback(interaction, asset_id)
-        return button_callback
-
+def _make_callback(self, asset_id: int):
+    async def button_callback(interaction: discord.Interaction):
+        if self.chosen:
+            return
+        self.chosen = True
+        for item in self.children:
+            item.disabled = True
+        await interaction.response.defer(ephemeral=True)
+        await self.callback(interaction, asset_id)
+    return button_callback
+```
 
 async def _show_smart_zappy_select(
-    inter: discord.Interaction,
-    user_id: str,
-    zone_num: int,
-    all_zappies: list,
-    zappy_count: int,
-    wallet: str,
-    fee: int,
+inter: discord.Interaction,
+user_id: str,
+zone_num: int,
+all_zappies: list,
+zappy_count: int,
+wallet: str,
+fee: int,
 ):
-    """Show the top 5 Zappies for a zone with stat explanations."""
-    zone = ZONES[zone_num]
-    priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
-    primary  = priority[0]
+“”“Show the top 5 Zappies for a zone with stat explanations.”””
+zone = ZONES[zone_num]
+priority = ZONE_STAT_PRIORITY.get(zone_num, (“SPK”, “VLT”, “INS”))
+primary  = priority[0]
 
-    stat_labels = {"VLT": "Voltage (attack)", "INS": "Insulation (defense)", "SPK": "Spark (luck)"}
+```
+stat_labels = {"VLT": "Voltage (attack)", "INS": "Insulation (defense)", "SPK": "Spark (luck)"}
 
-    # Rank Zappies
-    ranked = rank_zappies_for_zone(all_zappies, zone_num)
-    if not ranked:
-        await inter.followup.send("❌ Couldn't load Zappy stats.", ephemeral=True)
-        return
+# Rank Zappies
+ranked = rank_zappies_for_zone(all_zappies, zone_num)
+if not ranked:
+    await inter.followup.send("❌ Couldn't load Zappy stats.", ephemeral=True)
+    return
 
-    embed = discord.Embed(
-        title       = f"{zone['emoji']} {zone['name']} — Pick your Zappy",
-        description = (
-            f"**Key stat for this zone: {stat_labels.get(primary, primary)}**\n"
-            f"Here are your top 5 Zappies ranked for this zone. "
-            f"Stats and reasons shown below."
-            + (f"\n\n💰 Entry fee: **{fee:,} ZAPP** (deducted from rewards)" if fee > 0 else "")
-        ),
-        color = zone["color"],
+embed = discord.Embed(
+    title       = f"{zone['emoji']} {zone['name']} — Pick your Zappy",
+    description = (
+        f"**Key stat for this zone: {stat_labels.get(primary, primary)}**\n"
+        f"Here are your top 5 Zappies ranked for this zone. "
+        f"Stats and reasons shown below."
+        + (f"\n\n💰 Entry fee: **{fee:,} ZAPP** (deducted from rewards)" if fee > 0 else "")
+    ),
+    color = zone["color"],
+)
+
+for i, z in enumerate(ranked):
+    medal = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"][i]
+    reason = build_zappy_reason(z, zone_num)
+    embed.add_field(
+        name   = f"{medal} {z.get('name', z.get('unit_name', 'Zappy'))}",
+        value  = reason,
+        inline = False,
     )
 
-    for i, z in enumerate(ranked):
-        medal = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"][i]
-        reason = build_zappy_reason(z, zone_num)
-        embed.add_field(
-            name   = f"{medal} {z.get('name', z.get('unit_name', 'Zappy'))}",
-            value  = reason,
-            inline = False,
-        )
+embed.set_footer(text=f"You have {zappy_count} Zappies · Showing best 5 for {zone['name']}")
 
-    embed.set_footer(text=f"You have {zappy_count} Zappies · Showing best 5 for {zone['name']}")
+# Show image of top Zappy
+if ranked[0].get("image_url"):
+    embed.set_thumbnail(url=ranked[0]["image_url"])
 
-    # Show image of top Zappy
-    if ranked[0].get("image_url"):
-        embed.set_thumbnail(url=ranked[0]["image_url"])
+async def on_zappy_chosen(chosen_inter: discord.Interaction, asset_id: int):
+    chosen = next((z for z in ranked if z["asset_id"] == asset_id), None)
+    if not chosen:
+        await chosen_inter.followup.send("❌ Zappy not found.", ephemeral=True)
+        return
+    # Build full zappy data dict compatible with run system
+    zappy_data = {
+        "asset_id":  chosen["asset_id"],
+        "name":      chosen.get("name", chosen.get("unit_name", "")),
+        "unit_name": chosen.get("unit_name", ""),
+        "is_hero":   False,
+        "is_collab": False,
+        "traits":    chosen["traits"],
+        "stats":     chosen["stats"],
+        "image_url": chosen.get("image_url", ""),
+    }
+    await _run_expedition_beat(chosen_inter, user_id, zone_num, zappy_data, zappy_count, entry_fee=fee)
 
-    async def on_zappy_chosen(chosen_inter: discord.Interaction, asset_id: int):
-        chosen = next((z for z in ranked if z["asset_id"] == asset_id), None)
-        if not chosen:
-            await chosen_inter.followup.send("❌ Zappy not found.", ephemeral=True)
-            return
-        # Build full zappy data dict compatible with run system
-        zappy_data = {
-            "asset_id":  chosen["asset_id"],
-            "name":      chosen.get("name", chosen.get("unit_name", "")),
-            "unit_name": chosen.get("unit_name", ""),
-            "is_hero":   False,
-            "is_collab": False,
-            "traits":    chosen["traits"],
-            "stats":     chosen["stats"],
-            "image_url": chosen.get("image_url", ""),
-        }
-        await _run_expedition_beat(chosen_inter, user_id, zone_num, zappy_data, zappy_count, entry_fee=fee)
-
-    view = SmartZappyView(ranked, zone_num, on_zappy_chosen)
-    await inter.followup.send(embed=embed, view=view, ephemeral=True)
-
+view = SmartZappyView(ranked, zone_num, on_zappy_chosen)
+await inter.followup.send(embed=embed, view=view, ephemeral=True)
+```
 
 async def _run_expedition_beat(
-    interaction: discord.Interaction,
-    user_id: str,
-    zone_num: int,
-    zappy: dict,
-    zappy_count: int,
-    entry_fee: int = 0,
+interaction: discord.Interaction,
+user_id: str,
+zone_num: int,
+zappy: dict,
+zappy_count: int,
+entry_fee: int = 0,
 ):
-    """Start or continue an expedition beat."""
-    # Start fresh run
-    run = start_run(user_id, zone_num, zappy, zappy_count)
-    run['entry_fee'] = entry_fee
+“”“Start or continue an expedition beat.”””
+# Start fresh run
+run = start_run(user_id, zone_num, zappy, zappy_count)
+run[‘entry_fee’] = entry_fee
 
-    async def on_choice(inter: discord.Interaction, choice_index: int):
-        updated_run = advance_beat(user_id, choice_index)
-        if not updated_run:
-            await inter.followup.send("Something went wrong with your run.", ephemeral=True)
-            return
+```
+async def on_choice(inter: discord.Interaction, choice_index: int):
+    updated_run = advance_beat(user_id, choice_index)
+    if not updated_run:
+        await inter.followup.send("Something went wrong with your run.", ephemeral=True)
+        return
 
-        # Post outcome
-        outcome_embed = build_outcome_embed(updated_run)
-        await inter.followup.send(embed=outcome_embed, ephemeral=True)
+    # Post outcome
+    outcome_embed = build_outcome_embed(updated_run)
+    await inter.followup.send(embed=outcome_embed, ephemeral=True)
 
-        if updated_run["complete"]:
-            # Run is done
-            nft_drop = check_nft_drop(updated_run)
-            nft_prize_result = None
-            if nft_drop:
-                nft_prize_result = await award_nft_prize(user_id, wallet)
-            final_embed = build_run_complete_embed(updated_run, nft_drop)
+    if updated_run["complete"]:
+        # Run is done
+        nft_drop = check_nft_drop(updated_run)
+        nft_prize_result = None
+        if nft_drop:
+            nft_prize_result = await award_nft_prize(user_id, wallet)
+        final_embed = build_run_complete_embed(updated_run, nft_drop)
 
-            # Save to DB
-            save_expedition_run(
-                discord_user_id = user_id,
-                zone_num        = zone_num,
-                cp              = updated_run["total_cp"],
-                tokens          = updated_run["total_tokens"],
-                nft             = nft_drop,
-            )
-
-            # Send token rewards minus entry fee
-            wallet = get_wallet(user_id)
-            entry_fee = updated_run.get("entry_fee", 0)
-            net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
-            if wallet and net_tokens > 0:
-                from token_rewards import check_opted_in, send_token_reward, REWARD_TOKEN_ID
-                import asyncio
-                if await check_opted_in(wallet, REWARD_TOKEN_ID):
-                    note = f"Zappy Expedition reward - Zone {zone_num}"
-                    await asyncio.to_thread(
-                        send_token_reward, wallet, net_tokens, note
-                    )
-            elif wallet and entry_fee > 0 and updated_run["total_tokens"] == 0:
-                # Bad run — no tokens earned, fee already notified, nothing to send
-                pass
-
-            # Post to expedition channel
-            exp_channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
-            if exp_channel:
-                token_line = f"🪙 +{net_tokens} tokens"
-                if entry_fee > 0:
-                    token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_cp']} earned − {entry_fee} entry fee)"
-                public_embed = discord.Embed(
-                    title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
-                    description = (
-                        f"<@{user_id}> completed a **{ZONES[zone_num]['name']}** run "
-                        f"with **{zappy.get('name', 'their Zappy')}**!\n"
-                        f"⚡ +{updated_run['total_cp']} Exp CP · "
-                        + token_line
-                        + (" · 🎉 **NFT DROP!**" if nft_drop else "")
-                    ),
-                    color = ZONES[zone_num]["color"],
-                )
-                if zappy.get("image_url"):
-                    public_embed.set_image(url=zappy["image_url"])
-                await exp_channel.send(embed=public_embed)
-
-            # Final summary with fee breakdown
-            fee_breakdown = f" ({updated_run['total_tokens']} earned − {entry_fee} entry fee)" if entry_fee > 0 else ""
-            final_embed.description = (
-                f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
-                f"🪙 **{net_tokens} tokens** sent to your wallet{fee_breakdown}\n"
-                f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
-            )
-
-            await inter.followup.send(embed=final_embed, ephemeral=True)
-            if nft_prize_result and nft_prize_result.get("success"):
-                await inter.followup.send(
-                    nft_prize_result["message"], ephemeral=True
-                )
-            end_run(user_id)
-        else:
-            # Next beat
-            scene_embed = build_scene_embed(updated_run)
-            image_path  = f"./images/{updated_run['events'][updated_run['beat']].get('image', '')}.png"
-            view        = ExpeditionView(updated_run, on_choice)
-
-            files = []
-            if os.path.exists(image_path):
-                files.append(discord.File(image_path))
-
-            if files:
-                await inter.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
-            else:
-                await inter.followup.send(embed=scene_embed, view=view, ephemeral=True)
-
-    # Post first beat
-    scene_embed = build_scene_embed(run)
-    image_path  = f"./images/{run['events'][0].get('image', '')}.png"
-    view        = ExpeditionView(run, on_choice)
-
-    files = []
-    if os.path.exists(image_path):
-        files.append(discord.File(image_path))
-
-    if files:
-        await interaction.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
-    else:
-        await interaction.followup.send(embed=scene_embed, view=view, ephemeral=True)
-
-
-@tree.command(name="claimnft", description="Claim your pending NFT prize from a Zone 5 expedition")
-async def cmd_claimnft(interaction: discord.Interaction):
-    """Claim a pending NFT prize once you have opted in to the asset."""
-    if not check_expedition_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands." if EXPEDITION_CHANNEL else "❌ Expedition commands are restricted.",
-            ephemeral=True
+        # Save to DB
+        save_expedition_run(
+            discord_user_id = user_id,
+            zone_num        = zone_num,
+            cp              = updated_run["total_cp"],
+            tokens          = updated_run["total_tokens"],
+            nft             = nft_drop,
         )
-        return
-    await interaction.response.defer(ephemeral=True)
-    user_id = str(interaction.user.id)
 
-    wallet = get_wallet(user_id)
-    if not wallet:
-        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
-        return
-
-    result = await claim_nft_prize(user_id, wallet)
-    await interaction.followup.send(result["message"], ephemeral=True)
-
-    # Announce in clash channel if successful
-    if result.get("success"):
-        channel = bot.get_channel(CLASH_CHANNEL)
-        if channel:
-            await channel.send(
-                f"🎉 <@{user_id}> just claimed their Zone 5 NFT prize: "
-                f"**{result['name']}**! 🏔️⚡"
-            )
-
-
-
-
-
-
-@tree.command(name="addzappies", description="ADMIN — add newly minted Zappies to the collection")
-@app_commands.describe(ids="Comma-separated ASA IDs e.g. 12345678,87654321")
-async def cmd_addzappies(interaction: discord.Interaction, ids: str):
-    """Fetch and register new Zappy ASA IDs into the live collection."""
-    if interaction.user.id != interaction.guild.owner_id:
-        await interaction.response.send_message("Admin only.", ephemeral=True)
-        return
-
-    await interaction.response.defer(ephemeral=True)
-
-    raw = [s.strip() for s in ids.replace(" ", "").split(",") if s.strip()]
-    try:
-        asset_ids = [int(x) for x in raw]
-    except ValueError:
-        await interaction.followup.send("Invalid format — use comma-separated ASA IDs.", ephemeral=True)
-        return
-
-    if len(asset_ids) > 50:
-        await interaction.followup.send("Max 50 ASA IDs at once.", ephemeral=True)
-        return
-
-    await interaction.followup.send(f"Fetching {len(asset_ids)} Zappy/Zappies...", ephemeral=True)
-
-    import aiohttp
-    from algorand_lookup import INDEXER_URL
-    import base64, re
-
-    IPFS_GATEWAYS = [
-        "https://nftstorage.link/ipfs/",
-        "https://dweb.link/ipfs/",
-        "https://cloudflare-ipfs.com/ipfs/",
-        "https://ipfs.io/ipfs/",
-    ]
-
-    def _encode_varint(n):
-        buf = []
-        while True:
-            towrite = n & 0x7f
-            n >>= 7
-            if n:
-                buf.append(towrite | 0x80)
-            else:
-                buf.append(towrite)
-                break
-        return bytes(buf)
-
-    def _decode_arc19(asset_url, reserve_address):
-        try:
-            from algosdk import encoding as algo_encoding
-            match = re.search(r'\{ipfscid:(\d+):([^:]+):([^:]+):([^}]+)\}', asset_url)
-            if not match:
-                return None
-            version   = int(match.group(1))
-            codec_str = match.group(2)
-            hash_type = match.group(4)
-            digest    = algo_encoding.decode_address(reserve_address)
-            if version == 0:
-                import base58
-                return base58.b58encode(bytes([0x12, 0x20]) + digest).decode()
-            codec_map = {"raw": 0x55, "dag-pb": 0x70}
-            hash_map  = {"sha2-256": 0x12}
-            multihash = _encode_varint(hash_map.get(hash_type, 0x12)) + _encode_varint(len(digest)) + digest
-            cid_bytes = _encode_varint(1) + _encode_varint(codec_map.get(codec_str, 0x55)) + multihash
-            return 'b' + base64.b32encode(cid_bytes).decode().lower().rstrip('=')
-        except Exception:
-            return None
-    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
-
-    added   = []
-    skipped = []
-    failed  = []
-
-    async with aiohttp.ClientSession() as session:
-        for asset_id in asset_ids:
-            if asset_id in ZAPPY_ASSET_IDS:
-                skipped.append(asset_id)
-                continue
-            try:
-                url = f"{INDEXER_URL}/v2/assets/{asset_id}"
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                    if resp.status != 200:
-                        failed.append((asset_id, f"indexer {resp.status}"))
-                        continue
-                    data   = await resp.json()
-                    params = data.get("asset", {}).get("params", {})
-
-                name      = params.get("name", f"Zappy #{asset_id}")
-                unit_name = params.get("unit-name", "")
-                asset_url = params.get("url", "")
-                reserve   = params.get("reserve", "")
-
-                traits    = {}
-                image_url = ""
-
-                if asset_url.startswith("template-ipfs://") and reserve:
-                    metadata_cid = _decode_arc19(asset_url, reserve)
-                    if metadata_cid:
-                        for gateway in IPFS_GATEWAYS:
-                            try:
-                                async with session.get(
-                                    f"{gateway}{metadata_cid}",
-                                    timeout=aiohttp.ClientTimeout(total=15)
-                                ) as resp:
-                                    if resp.status == 200:
-                                        metadata = await resp.json(content_type=None)
-                                        props = metadata.get("properties", {})
-                                        if isinstance(props, list):
-                                            props = {item["trait_type"]: item["value"] for item in props if "trait_type" in item}
-                                        traits = {
-                                            "background": props.get("Background", ""),
-                                            "body":       props.get("Body", ""),
-                                            "earring":    props.get("Earring", "None"),
-                                            "eyes":       props.get("Eyes", ""),
-                                            "eyewear":    props.get("Eyewear", "None"),
-                                            "head":       props.get("Head", ""),
-                                            "mouth":      props.get("Mouth", ""),
-                                            "skin":       props.get("Skin", ""),
-                                        }
-                                        raw_img = metadata.get("image", "")
-                                        if raw_img.startswith("ipfs://"):
-                                            cid = raw_img.replace("ipfs://", "").split("/")[0]
-                                            image_url = "https://ipfs.io/ipfs/" + cid
-                                        break
-                            except Exception:
-                                continue
-
-                entry = {
-                    "name": name, "unit_name": unit_name, "image_url": image_url,
-                    "background": traits.get("background", ""),
-                    "body":       traits.get("body", ""),
-                    "earring":    traits.get("earring", "None"),
-                    "eyes":       traits.get("eyes", ""),
-                    "eyewear":    traits.get("eyewear", "None"),
-                    "head":       traits.get("head", ""),
-                    "mouth":      traits.get("mouth", ""),
-                    "skin":       traits.get("skin", ""),
-                }
-                ZAPPY_COLLECTION[asset_id] = entry
-                ZAPPY_ASSET_IDS.add(asset_id)
-                added.append((asset_id, name, entry))
-
-            except Exception as e:
-                failed.append((asset_id, str(e)[:80]))
-
-    # Persist new entries to zappy_collection.py
-    if added:
-        try:
-            import os
-            filepath = "/app/zappy_collection.py"
-            if not os.path.exists(filepath):
-                filepath = "./zappy_collection.py"
-
-            with open(filepath) as f:
-                col_content = f.read()
-
-            new_lines = []
-            for asset_id, name, entry in added:
-                def esc(s):
-                    return str(s).replace('"', '\\"')
-                line = (
-                    "    " + str(asset_id) + ": {"
-                    + '"name": "' + esc(entry["name"]) + '", '
-                    + '"unit_name": "' + esc(entry["unit_name"]) + '", '
-                    + '"image_url": "' + esc(entry["image_url"]) + '", '
-                    + '"background": "' + esc(entry["background"]) + '", '
-                    + '"body": "' + esc(entry["body"]) + '", '
-                    + '"earring": "' + esc(entry["earring"]) + '", '
-                    + '"eyes": "' + esc(entry["eyes"]) + '", '
-                    + '"eyewear": "' + esc(entry["eyewear"]) + '", '
-                    + '"head": "' + esc(entry["head"]) + '", '
-                    + '"mouth": "' + esc(entry["mouth"]) + '", '
-                    + '"skin": "' + esc(entry["skin"]) + '"},'
+        # Send token rewards minus entry fee
+        wallet = get_wallet(user_id)
+        entry_fee = updated_run.get("entry_fee", 0)
+        net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
+        if wallet and net_tokens > 0:
+            from token_rewards import check_opted_in, send_token_reward, REWARD_TOKEN_ID
+            import asyncio
+            if await check_opted_in(wallet, REWARD_TOKEN_ID):
+                note = f"Zappy Expedition reward - Zone {zone_num}"
+                await asyncio.to_thread(
+                    send_token_reward, wallet, net_tokens, note
                 )
-                new_lines.append(line)
+        elif wallet and entry_fee > 0 and updated_run["total_tokens"] == 0:
+            # Bad run — no tokens earned, fee already notified, nothing to send
+            pass
 
-            # Insert before closing } of ZAPPY_COLLECTION
-            insert_idx = col_content.rfind("\n}")
-            col_content = col_content[:insert_idx] + "\n" + "\n".join(new_lines) + col_content[insert_idx:]
-
-            # Add new IDs to ZAPPY_ASSET_IDS set
-            new_id_str = ", ".join(str(a) for a, _, _ in added)
-            col_content = col_content.replace(
-                "ZAPPY_ASSET_IDS: set = {\n    ",
-                "ZAPPY_ASSET_IDS: set = {\n    " + new_id_str + ",\n    "
+        # Post to expedition channel
+        exp_channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
+        if exp_channel:
+            token_line = f"🪙 +{net_tokens} tokens"
+            if entry_fee > 0:
+                token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_cp']} earned − {entry_fee} entry fee)"
+            public_embed = discord.Embed(
+                title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
+                description = (
+                    f"<@{user_id}> completed a **{ZONES[zone_num]['name']}** run "
+                    f"with **{zappy.get('name', 'their Zappy')}**!\n"
+                    f"⚡ +{updated_run['total_cp']} Exp CP · "
+                    + token_line
+                    + (" · 🎉 **NFT DROP!**" if nft_drop else "")
+                ),
+                color = ZONES[zone_num]["color"],
             )
+            if zappy.get("image_url"):
+                public_embed.set_image(url=zappy["image_url"])
+            await exp_channel.send(embed=public_embed)
 
-            with open(filepath, "w") as f:
-                f.write(col_content)
+        # Final summary with fee breakdown
+        fee_breakdown = f" ({updated_run['total_tokens']} earned − {entry_fee} entry fee)" if entry_fee > 0 else ""
+        final_embed.description = (
+            f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
+            f"🪙 **{net_tokens} tokens** sent to your wallet{fee_breakdown}\n"
+            f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
+        )
+
+        await inter.followup.send(embed=final_embed, ephemeral=True)
+        if nft_prize_result and nft_prize_result.get("success"):
+            await inter.followup.send(
+                nft_prize_result["message"], ephemeral=True
+            )
+        end_run(user_id)
+    else:
+        # Next beat
+        scene_embed = build_scene_embed(updated_run)
+        image_path  = f"./images/{updated_run['events'][updated_run['beat']].get('image', '')}.png"
+        view        = ExpeditionView(updated_run, on_choice)
+
+        files = []
+        if os.path.exists(image_path):
+            files.append(discord.File(image_path))
+
+        if files:
+            await inter.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
+        else:
+            await inter.followup.send(embed=scene_embed, view=view, ephemeral=True)
+
+# Post first beat
+scene_embed = build_scene_embed(run)
+image_path  = f"./images/{run['events'][0].get('image', '')}.png"
+view        = ExpeditionView(run, on_choice)
+
+files = []
+if os.path.exists(image_path):
+    files.append(discord.File(image_path))
+
+if files:
+    await interaction.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
+else:
+    await interaction.followup.send(embed=scene_embed, view=view, ephemeral=True)
+```
+
+@tree.command(name=“claimnft”, description=“Claim your pending NFT prize from a Zone 5 expedition”)
+async def cmd_claimnft(interaction: discord.Interaction):
+“”“Claim a pending NFT prize once you have opted in to the asset.”””
+if not check_expedition_channel(interaction):
+await interaction.response.send_message(
+f”❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands.” if EXPEDITION_CHANNEL else “❌ Expedition commands are restricted.”,
+ephemeral=True
+)
+return
+await interaction.response.defer(ephemeral=True)
+user_id = str(interaction.user.id)
+
+```
+wallet = get_wallet(user_id)
+if not wallet:
+    await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+    return
+
+result = await claim_nft_prize(user_id, wallet)
+await interaction.followup.send(result["message"], ephemeral=True)
+
+# Announce in clash channel if successful
+if result.get("success"):
+    channel = bot.get_channel(CLASH_CHANNEL)
+    if channel:
+        await channel.send(
+            f"🎉 <@{user_id}> just claimed their Zone 5 NFT prize: "
+            f"**{result['name']}**! 🏔️⚡"
+        )
+```
+
+@tree.command(name=“addzappies”, description=“ADMIN — add newly minted Zappies to the collection”)
+@app_commands.describe(ids=“Comma-separated ASA IDs e.g. 12345678,87654321”)
+async def cmd_addzappies(interaction: discord.Interaction, ids: str):
+“”“Fetch and register new Zappy ASA IDs into the live collection.”””
+if interaction.user.id != interaction.guild.owner_id:
+await interaction.response.send_message(“Admin only.”, ephemeral=True)
+return
+
+```
+await interaction.response.defer(ephemeral=True)
+
+raw = [s.strip() for s in ids.replace(" ", "").split(",") if s.strip()]
+try:
+    asset_ids = [int(x) for x in raw]
+except ValueError:
+    await interaction.followup.send("Invalid format — use comma-separated ASA IDs.", ephemeral=True)
+    return
+
+if len(asset_ids) > 50:
+    await interaction.followup.send("Max 50 ASA IDs at once.", ephemeral=True)
+    return
+
+await interaction.followup.send(f"Fetching {len(asset_ids)} Zappy/Zappies...", ephemeral=True)
+
+import aiohttp
+from algorand_lookup import INDEXER_URL
+import base64, re
+
+IPFS_GATEWAYS = [
+    "https://nftstorage.link/ipfs/",
+    "https://dweb.link/ipfs/",
+    "https://cloudflare-ipfs.com/ipfs/",
+    "https://ipfs.io/ipfs/",
+]
+
+def _encode_varint(n):
+    buf = []
+    while True:
+        towrite = n & 0x7f
+        n >>= 7
+        if n:
+            buf.append(towrite | 0x80)
+        else:
+            buf.append(towrite)
+            break
+    return bytes(buf)
+
+def _decode_arc19(asset_url, reserve_address):
+    try:
+        from algosdk import encoding as algo_encoding
+        match = re.search(r'\{ipfscid:(\d+):([^:]+):([^:]+):([^}]+)\}', asset_url)
+        if not match:
+            return None
+        version   = int(match.group(1))
+        codec_str = match.group(2)
+        hash_type = match.group(4)
+        digest    = algo_encoding.decode_address(reserve_address)
+        if version == 0:
+            import base58
+            return base58.b58encode(bytes([0x12, 0x20]) + digest).decode()
+        codec_map = {"raw": 0x55, "dag-pb": 0x70}
+        hash_map  = {"sha2-256": 0x12}
+        multihash = _encode_varint(hash_map.get(hash_type, 0x12)) + _encode_varint(len(digest)) + digest
+        cid_bytes = _encode_varint(1) + _encode_varint(codec_map.get(codec_str, 0x55)) + multihash
+        return 'b' + base64.b32encode(cid_bytes).decode().lower().rstrip('=')
+    except Exception:
+        return None
+from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
+
+added   = []
+skipped = []
+failed  = []
+
+async with aiohttp.ClientSession() as session:
+    for asset_id in asset_ids:
+        if asset_id in ZAPPY_ASSET_IDS:
+            skipped.append(asset_id)
+            continue
+        try:
+            url = f"{INDEXER_URL}/v2/assets/{asset_id}"
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status != 200:
+                    failed.append((asset_id, f"indexer {resp.status}"))
+                    continue
+                data   = await resp.json()
+                params = data.get("asset", {}).get("params", {})
+
+            name      = params.get("name", f"Zappy #{asset_id}")
+            unit_name = params.get("unit-name", "")
+            asset_url = params.get("url", "")
+            reserve   = params.get("reserve", "")
+
+            traits    = {}
+            image_url = ""
+
+            if asset_url.startswith("template-ipfs://") and reserve:
+                metadata_cid = _decode_arc19(asset_url, reserve)
+                if metadata_cid:
+                    for gateway in IPFS_GATEWAYS:
+                        try:
+                            async with session.get(
+                                f"{gateway}{metadata_cid}",
+                                timeout=aiohttp.ClientTimeout(total=15)
+                            ) as resp:
+                                if resp.status == 200:
+                                    metadata = await resp.json(content_type=None)
+                                    props = metadata.get("properties", {})
+                                    if isinstance(props, list):
+                                        props = {item["trait_type"]: item["value"] for item in props if "trait_type" in item}
+                                    traits = {
+                                        "background": props.get("Background", ""),
+                                        "body":       props.get("Body", ""),
+                                        "earring":    props.get("Earring", "None"),
+                                        "eyes":       props.get("Eyes", ""),
+                                        "eyewear":    props.get("Eyewear", "None"),
+                                        "head":       props.get("Head", ""),
+                                        "mouth":      props.get("Mouth", ""),
+                                        "skin":       props.get("Skin", ""),
+                                    }
+                                    raw_img = metadata.get("image", "")
+                                    if raw_img.startswith("ipfs://"):
+                                        cid = raw_img.replace("ipfs://", "").split("/")[0]
+                                        image_url = "https://ipfs.io/ipfs/" + cid
+                                    break
+                        except Exception:
+                            continue
+
+            entry = {
+                "name": name, "unit_name": unit_name, "image_url": image_url,
+                "background": traits.get("background", ""),
+                "body":       traits.get("body", ""),
+                "earring":    traits.get("earring", "None"),
+                "eyes":       traits.get("eyes", ""),
+                "eyewear":    traits.get("eyewear", "None"),
+                "head":       traits.get("head", ""),
+                "mouth":      traits.get("mouth", ""),
+                "skin":       traits.get("skin", ""),
+            }
+            ZAPPY_COLLECTION[asset_id] = entry
+            ZAPPY_ASSET_IDS.add(asset_id)
+            added.append((asset_id, name, entry))
 
         except Exception as e:
-            await interaction.followup.send(
-                "Added to live cache but could not persist to file — "
-                "run /addzappies again after next bot restart.",
-                ephemeral=True
+            failed.append((asset_id, str(e)[:80]))
+
+# Persist new entries to zappy_collection.py
+if added:
+    try:
+        import os
+        filepath = "/app/zappy_collection.py"
+        if not os.path.exists(filepath):
+            filepath = "./zappy_collection.py"
+
+        with open(filepath) as f:
+            col_content = f.read()
+
+        new_lines = []
+        for asset_id, name, entry in added:
+            def esc(s):
+                return str(s).replace('"', '\\"')
+            line = (
+                "    " + str(asset_id) + ": {"
+                + '"name": "' + esc(entry["name"]) + '", '
+                + '"unit_name": "' + esc(entry["unit_name"]) + '", '
+                + '"image_url": "' + esc(entry["image_url"]) + '", '
+                + '"background": "' + esc(entry["background"]) + '", '
+                + '"body": "' + esc(entry["body"]) + '", '
+                + '"earring": "' + esc(entry["earring"]) + '", '
+                + '"eyes": "' + esc(entry["eyes"]) + '", '
+                + '"eyewear": "' + esc(entry["eyewear"]) + '", '
+                + '"head": "' + esc(entry["head"]) + '", '
+                + '"mouth": "' + esc(entry["mouth"]) + '", '
+                + '"skin": "' + esc(entry["skin"]) + '"},'
             )
+            new_lines.append(line)
 
-    lines = []
-    if added:
-        lines.append(f"Added {len(added)} Zappy/Zappies:")
-        for asset_id, name, _ in added:
-            lines.append(f"  {name} ({asset_id})")
-    if skipped:
-        lines.append(f"Already in collection: {', '.join(str(x) for x in skipped)}")
-    if failed:
-        lines.append(f"Failed:")
-        for asset_id, reason in failed:
-            lines.append(f"  {asset_id} — {reason}")
+        # Insert before closing } of ZAPPY_COLLECTION
+        insert_idx = col_content.rfind("\n}")
+        col_content = col_content[:insert_idx] + "\n" + "\n".join(new_lines) + col_content[insert_idx:]
 
-    await interaction.followup.send("\n".join(lines) or "Nothing to do.", ephemeral=True)
+        # Add new IDs to ZAPPY_ASSET_IDS set
+        new_id_str = ", ".join(str(a) for a, _, _ in added)
+        col_content = col_content.replace(
+            "ZAPPY_ASSET_IDS: set = {\n    ",
+            "ZAPPY_ASSET_IDS: set = {\n    " + new_id_str + ",\n    "
+        )
 
+        with open(filepath, "w") as f:
+            f.write(col_content)
 
-
-@tree.command(name="exprank", description="View the Expedition leaderboard")
-async def cmd_exprank(interaction: discord.Interaction):
-    """Show top expedition players."""
-    top = get_expedition_leaderboard(10)
-
-    if not check_expedition_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands." if EXPEDITION_CHANNEL else "❌ Expedition commands are restricted.",
+    except Exception as e:
+        await interaction.followup.send(
+            "Added to live cache but could not persist to file — "
+            "run /addzappies again after next bot restart.",
             ephemeral=True
         )
-        return
 
-    if not top:
-        await interaction.response.send_message(
-            "No expeditions completed yet — be the first!", ephemeral=False
-        )
-        return
+lines = []
+if added:
+    lines.append(f"Added {len(added)} Zappy/Zappies:")
+    for asset_id, name, _ in added:
+        lines.append(f"  {name} ({asset_id})")
+if skipped:
+    lines.append(f"Already in collection: {', '.join(str(x) for x in skipped)}")
+if failed:
+    lines.append(f"Failed:")
+    for asset_id, reason in failed:
+        lines.append(f"  {asset_id} — {reason}")
 
-    medals = ["🥇", "🥈", "🥉"] + ["  " for _ in range(10)]
-    lines  = ["**⚡ Expedition Leaderboard**", ""]
+await interaction.followup.send("\n".join(lines) or "Nothing to do.", ephemeral=True)
+```
 
-    for i, player in enumerate(top):
-        uid = player["discord_user_id"]
-        cp  = player["exp_cp_total"]
-        runs = player["runs_completed"]
-        try:
-            member = interaction.guild.get_member(int(uid))
-            name   = member.display_name if member else f"Explorer {uid[:6]}"
-        except Exception:
-            name = f"Explorer {uid[:6]}"
-        lines.append(f"{medals[i]} **{name}** — {cp:,} Exp CP · {runs} runs")
+@tree.command(name=“exprank”, description=“View the Expedition leaderboard”)
+async def cmd_exprank(interaction: discord.Interaction):
+“”“Show top expedition players.”””
+top = get_expedition_leaderboard(10)
 
-    await interaction.response.send_message("\n".join(lines), ephemeral=False)
+```
+if not check_expedition_channel(interaction):
+    await interaction.response.send_message(
+        f"❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands." if EXPEDITION_CHANNEL else "❌ Expedition commands are restricted.",
+        ephemeral=True
+    )
+    return
 
+if not top:
+    await interaction.response.send_message(
+        "No expeditions completed yet — be the first!", ephemeral=False
+    )
+    return
 
+medals = ["🥇", "🥈", "🥉"] + ["  " for _ in range(10)]
+lines  = ["**⚡ Expedition Leaderboard**", ""]
+
+for i, player in enumerate(top):
+    uid = player["discord_user_id"]
+    cp  = player["exp_cp_total"]
+    runs = player["runs_completed"]
+    try:
+        member = interaction.guild.get_member(int(uid))
+        name   = member.display_name if member else f"Explorer {uid[:6]}"
+    except Exception:
+        name = f"Explorer {uid[:6]}"
+    lines.append(f"{medals[i]} **{name}** — {cp:,} Exp CP · {runs} runs")
+
+await interaction.response.send_message("\n".join(lines), ephemeral=False)
+```
 
 @tasks.loop(minutes=1)
 async def session_scheduler():
-    """Checks every minute and triggers session events at the right time."""
-    global active_bracket_id, registration_open
+“”“Checks every minute and triggers session events at the right time.”””
+global active_bracket_id, registration_open
 
-    now = datetime.now(timezone.utc)
-    current_time = now.time().replace(second=0, microsecond=0)
+```
+now          = datetime.now(timezone.utc)
+current_hour = now.hour
+current_min  = now.minute
+today        = now.date().isoformat()
 
-    channel = bot.get_channel(CLASH_CHANNEL)
-    if not channel:
-        return
+channel = bot.get_channel(CLASH_CHANNEL)
+if not channel:
+    return
 
-    # Morning open
-    if current_time == MORNING_OPEN.replace(second=0):
-        await open_registration("morning", channel)
+# Use a set to track which events have fired today so they don't double-trigger
+if not hasattr(session_scheduler, "_fired"):
+    session_scheduler._fired = set()
 
-    # Morning close + resolve
-    elif current_time == MORNING_CLOSE.replace(second=0):
-        await close_and_resolve(channel)
+# Reset fired set each new day
+fire_key_prefix = today
 
-    # Evening open
-    elif current_time == EVENING_OPEN.replace(second=0):
-        await open_registration("evening", channel)
+def already_fired(key):
+    return f"{fire_key_prefix}:{key}" in session_scheduler._fired
 
-    # Evening close + resolve
-    elif current_time == EVENING_CLOSE.replace(second=0):
-        await close_and_resolve(channel)
+def mark_fired(key):
+    session_scheduler._fired.add(f"{fire_key_prefix}:{key}")
+    # Clean up old keys
+    session_scheduler._fired = {k for k in session_scheduler._fired if k.startswith(today)}
 
+# Morning open — 3:00 AM UTC
+if current_hour == 3 and current_min == 0 and not already_fired("morning_open"):
+    mark_fired("morning_open")
+    await open_registration("morning", channel)
+
+# Morning close — 3:30 AM UTC
+elif current_hour == 3 and current_min == 30 and not already_fired("morning_close"):
+    mark_fired("morning_close")
+    await close_and_resolve(channel)
+
+# Evening open — 3:00 PM UTC (15:00)
+elif current_hour == 15 and current_min == 0 and not already_fired("evening_open"):
+    mark_fired("evening_open")
+    await open_registration("evening", channel)
+
+# Evening close — 3:30 PM UTC (15:30)
+elif current_hour == 15 and current_min == 30 and not already_fired("evening_close"):
+    mark_fired("evening_close")
+    await close_and_resolve(channel)
+```
 
 async def open_registration(session: str, channel: discord.TextChannel):
-    """Open bracket registration for a session."""
-    global active_bracket_id, registration_open
+“”“Open bracket registration for a session.”””
+global active_bracket_id, registration_open
 
-    bracket_id = get_bracket_id(session)
-    active_bracket_id = bracket_id
-    registration_open = True
+```
+bracket_id = get_bracket_id(session)
+active_bracket_id = bracket_id
+registration_open = True
 
-    session_name = "☀️ Morning" if session == "morning" else "🌙 Evening"
-    emoji_time = "3:00 AM UTC" if session == "morning" else "3:00 PM UTC"
+session_name = "☀️ Morning" if session == "morning" else "🌙 Evening"
+emoji_time = "3:00 AM UTC" if session == "morning" else "3:00 PM UTC"
 
-    await channel.send(
-        f"⚡ **ZAPPY CLASH — {session_name} Bracket is OPEN!**\n"
-        f"\n"
-        f"Registration is open for **30 minutes** ({emoji_time}).\n"
-        f"Use `/clash` to enter your Zappy!\n"
-        f"\n"
-        f"Tonight's session has a **1.25× CP multiplier** on all wins. 🔥"
-        if session == "evening" else
-        f"⚡ **ZAPPY CLASH — {session_name} Bracket is OPEN!**\n"
-        f"\n"
-        f"Registration is open for **30 minutes** ({emoji_time}).\n"
-        f"Use `/clash` to enter your Zappy!"
-    )
-
+await channel.send(
+    f"⚡ **ZAPPY CLASH — {session_name} Bracket is OPEN!**\n"
+    f"\n"
+    f"Registration is open for **30 minutes** ({emoji_time}).\n"
+    f"Use `/clash` to enter your Zappy!\n"
+    f"\n"
+    f"Tonight's session has a **1.25× CP multiplier** on all wins. 🔥"
+    if session == "evening" else
+    f"⚡ **ZAPPY CLASH — {session_name} Bracket is OPEN!**\n"
+    f"\n"
+    f"Registration is open for **30 minutes** ({emoji_time}).\n"
+    f"Use `/clash` to enter your Zappy!"
+)
+```
 
 async def close_and_resolve(channel: discord.TextChannel):
-    """Close registration and run the full bracket."""
-    global active_bracket_id, registration_open
+“”“Close registration and run the full bracket.”””
+global active_bracket_id, registration_open
 
-    registration_open = False
-    bracket_id = active_bracket_id
+```
+registration_open = False
+bracket_id = active_bracket_id
 
-    entries = get_bracket_entries(bracket_id)
-    n = len(entries)
+entries = get_bracket_entries(bracket_id)
+n = len(entries)
 
-    if n < 2:
-        await channel.send(
-            f"⚠️ Not enough players registered ({n}/2 minimum). Bracket cancelled. "
-            f"Come back next session!"
-        )
-        active_bracket_id = None
-        return
-
+if n < 2:
     await channel.send(
-        f"🔒 **Registration closed!** {n} Zappies entered the bracket.\n"
-        f"⚡ Fights starting in 30 seconds..."
+        f"⚠️ Not enough players registered ({n}/2 minimum). Bracket cancelled. "
+        f"Come back next session!"
     )
+    active_bracket_id = None
+    return
 
-    await asyncio.sleep(30)
+await channel.send(
+    f"🔒 **Registration closed!** {n} Zappies entered the bracket.\n"
+    f"⚡ Fights starting in 30 seconds..."
+)
 
-    # Seed bracket
-    matchups = seed_bracket(entries)
+await asyncio.sleep(30)
 
-    await channel.send(f"⚡ **BRACKET START** — {n} fighters, {len(matchups)} first-round matchups!\n")
+# Seed bracket
+matchups = seed_bracket(entries)
 
-    # Run all rounds
-    current_round = matchups
-    round_num = 1
-    cp_multiplier = 1.25 if "evening" in bracket_id else 1.0
+await channel.send(f"⚡ **BRACKET START** — {n} fighters, {len(matchups)} first-round matchups!\n")
 
-    while len(current_round) > 0:
-        next_round = []
-        round_label = {1: "Round of 16", 2: "Quarterfinals", 3: "Semifinals", 4: "FINAL"}.get(round_num, f"Round {round_num}")
-        await channel.send(f"\n🔔 **{round_label}**\n")
+# Run all rounds
+current_round = matchups
+round_num = 1
+cp_multiplier = 1.25 if "evening" in bracket_id else 1.0
+
+while len(current_round) > 0:
+    next_round = []
+    round_label = {1: "Round of 16", 2: "Quarterfinals", 3: "Semifinals", 4: "FINAL"}.get(round_num, f"Round {round_num}")
+    await channel.send(f"\n🔔 **{round_label}**\n")
+    await asyncio.sleep(3)
+
+    for matchup in current_round:
+        player_a, player_b = matchup
+
+        # Handle byes
+        if player_b is None:
+            await channel.send(f"🎯 **{player_a['discord_user_id']}** advances with a bye.")
+            next_round.append(player_a)
+            continue
+
+        # Fetch Zappy data
+        zappy_a = await fetch_zappy_traits(player_a["asset_id"])
+        zappy_b = await fetch_zappy_traits(player_b["asset_id"])
+
+        if not zappy_a or not zappy_b:
+            await channel.send("⚠️ Couldn't load one fighter's stats — skipping this matchup.")
+            continue
+
+        fighter_a = build_fighter(zappy_a)
+        fighter_b = build_fighter(zappy_b)
+
+        # Run the battle
+        result = resolve_battle(fighter_a, fighter_b)
+
+        # ── Pre-fight embed: both Zappies side by side ──
+        pre_embed = discord.Embed(
+            title="⚡ BRACKET MATCH",
+            color=0xF5E642,
+        )
+        pre_embed.add_field(
+            name=fighter_a.display_name,
+            value=f"⚡ VLT {fighter_a.VLT} · 🛡️ INS {fighter_a.INS} · 🎲 SPK {fighter_a.SPK}"
+                  + (f"\n✨ {fighter_a.combo}" if fighter_a.combo else ""),
+            inline=True,
+        )
+        pre_embed.add_field(name="vs.", value="⚡", inline=True)
+        pre_embed.add_field(
+            name=fighter_b.display_name,
+            value=f"⚡ VLT {fighter_b.VLT} · 🛡️ INS {fighter_b.INS} · 🎲 SPK {fighter_b.SPK}"
+                  + (f"\n✨ {fighter_b.combo}" if fighter_b.combo else ""),
+            inline=True,
+        )
+        # Show both images — A as thumbnail, B as image
+        if fighter_a.image_url:
+            pre_embed.set_thumbnail(url=fighter_a.image_url)
+        if fighter_b.image_url:
+            pre_embed.set_image(url=fighter_b.image_url)
+        await channel.send(embed=pre_embed)
+        await asyncio.sleep(2)
+
+        # ── Play-by-play text (skip the header lines, already in embed) ──
+        log_lines = result["log"]
+        # Skip first 6 lines (the stat header we already showed in embed)
+        play_by_play = "\n".join(log_lines[6:])
+        chunks = [play_by_play[i:i+1800] for i in range(0, len(play_by_play), 1800)]
+        for chunk in chunks:
+            if chunk.strip():
+                await channel.send(chunk)
+                await asyncio.sleep(1)
+
+        # Award CP
+        winner_id = player_a["discord_user_id"] if result["winner"].asset_id == player_a["asset_id"] else player_b["discord_user_id"]
+        loser_id  = player_b["discord_user_id"] if winner_id == player_a["discord_user_id"] else player_a["discord_user_id"]
+
+        win_cp   = int(CP_WIN * cp_multiplier)
+        lose_cp  = int(CP_LOSS * cp_multiplier)
+        upset_cp = int(CP_UPSET_BONUS * cp_multiplier) if result["is_upset"] else 0
+
+        award_cp(winner_id, win_cp + upset_cp, f"bracket_win_{bracket_id}")
+        award_cp(loser_id,  lose_cp,            f"bracket_loss_{bracket_id}")
+
+        # Update streaks
+        winner_streak = update_streak(winner_id, won=True)
+        update_streak(loser_id, won=False)
+
+        # Streak milestone token rewards
+        if winner_wallet and winner_streak.get("rewards"):
+            for reward in winner_streak["rewards"]:
+                days = reward.get("days")
+                if days in (7, 30):
+                    streak_token = await award_streak_tokens(winner_wallet, days)
+                    if streak_token.get("success"):
+                        await channel.send(
+                            f"🔥 <@{winner_id}> hit a **{days}-day streak!** "
+                            f"{streak_token['message']}"
+                        )
+
+        # Save result
+        save_battle_result(
+            bracket_id=bracket_id,
+            winner_discord_id=winner_id,
+            loser_discord_id=loser_id,
+            winner_asset_id=result["winner"].asset_id,
+            loser_asset_id=result["loser"].asset_id,
+            is_upset=result["is_upset"],
+            round_num=round_num,
+        )
+
+        # ── Token rewards ──
+        winner_wallet = get_wallet(winner_id)
+        loser_wallet  = get_wallet(loser_id)
+        is_evening    = "evening" in bracket_id
+        token_msg     = ""
+
+        if winner_wallet:
+            token_result = await award_win_tokens(
+                discord_user_id = winner_id,
+                wallet_address  = winner_wallet,
+                is_upset        = result["is_upset"],
+                is_champion     = False,
+                is_evening      = is_evening,
+            )
+            if token_result["success"]:
+                token_msg = f"\n{token_result['message']}"
+            elif token_result.get("reason") == "not_opted_in":
+                token_msg = f"\n⚠️ <@{winner_id}>: {token_result['message']}"
+
+        # ── Winner embed with image ──
+        winner   = result["winner"]
+        win_desc = f"💰 **+{win_cp + upset_cp} CP** → <@{winner_id}>"
+        if result["is_upset"]:
+            win_desc += f" *(+{upset_cp} upset bonus!)*"
+        win_desc += f"\n💰 **+{lose_cp} CP** → <@{loser_id}>"
+        if token_msg:
+            win_desc += token_msg
+
+        win_embed = discord.Embed(
+            title=f"🏆 {winner.display_name} wins!",
+            description=win_desc,
+            color=0xF5E642,
+        )
+        if winner.image_url:
+            win_embed.set_image(url=winner.image_url)
+        win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
+        await channel.send(embed=win_embed)
+
+        # Determine who advances
+        if result["winner"].asset_id == player_a["asset_id"]:
+            next_round.append(player_a)
+        else:
+            next_round.append(player_b)
+
         await asyncio.sleep(3)
 
-        for matchup in current_round:
-            player_a, player_b = matchup
+    current_round_pairs = []
+    for i in range(0, len(next_round) - 1, 2):
+        current_round_pairs.append((next_round[i], next_round[i+1]))
+    if len(next_round) % 2 == 1:
+        current_round_pairs.append((next_round[-1], None))
 
-            # Handle byes
-            if player_b is None:
-                await channel.send(f"🎯 **{player_a['discord_user_id']}** advances with a bye.")
-                next_round.append(player_a)
-                continue
+    current_round = current_round_pairs
+    round_num += 1
 
-            # Fetch Zappy data
-            zappy_a = await fetch_zappy_traits(player_a["asset_id"])
-            zappy_b = await fetch_zappy_traits(player_b["asset_id"])
+    if len(next_round) == 1:
+        # We have a bracket champion
+        champion_id = next_round[0]["discord_user_id"]
+        champ_asset = await fetch_zappy_traits(next_round[0]["asset_id"])
+        champ_name = champ_asset["name"] if champ_asset else f"ASA {next_round[0]['asset_id']}"
 
-            if not zappy_a or not zappy_b:
-                await channel.send("⚠️ Couldn't load one fighter's stats — skipping this matchup.")
-                continue
+        bonus_cp = int(CP_BRACKET_WIN * cp_multiplier)
+        award_cp(champion_id, bonus_cp, f"bracket_champion_{bracket_id}")
 
-            fighter_a = build_fighter(zappy_a)
-            fighter_b = build_fighter(zappy_b)
-
-            # Run the battle
-            result = resolve_battle(fighter_a, fighter_b)
-
-            # ── Pre-fight embed: both Zappies side by side ──
-            pre_embed = discord.Embed(
-                title="⚡ BRACKET MATCH",
-                color=0xF5E642,
+        # Champion token reward
+        champ_wallet = get_wallet(champion_id)
+        champ_token_msg = ""
+        if champ_wallet:
+            champ_token = await award_win_tokens(
+                discord_user_id = champion_id,
+                wallet_address  = champ_wallet,
+                is_upset        = False,
+                is_champion     = True,
+                is_evening      = is_evening,
             )
-            pre_embed.add_field(
-                name=fighter_a.display_name,
-                value=f"⚡ VLT {fighter_a.VLT} · 🛡️ INS {fighter_a.INS} · 🎲 SPK {fighter_a.SPK}"
-                      + (f"\n✨ {fighter_a.combo}" if fighter_a.combo else ""),
-                inline=True,
-            )
-            pre_embed.add_field(name="vs.", value="⚡", inline=True)
-            pre_embed.add_field(
-                name=fighter_b.display_name,
-                value=f"⚡ VLT {fighter_b.VLT} · 🛡️ INS {fighter_b.INS} · 🎲 SPK {fighter_b.SPK}"
-                      + (f"\n✨ {fighter_b.combo}" if fighter_b.combo else ""),
-                inline=True,
-            )
-            # Show both images — A as thumbnail, B as image
-            if fighter_a.image_url:
-                pre_embed.set_thumbnail(url=fighter_a.image_url)
-            if fighter_b.image_url:
-                pre_embed.set_image(url=fighter_b.image_url)
-            await channel.send(embed=pre_embed)
-            await asyncio.sleep(2)
+            if champ_token["success"]:
+                champ_token_msg = f"\n{champ_token['message']}"
+            elif champ_token.get("reason") == "not_opted_in":
+                champ_token_msg = f"\n⚠️ Opt in to ASA {os.environ.get('REWARD_TOKEN_ID', '2572874483')} to receive token rewards!"
 
-            # ── Play-by-play text (skip the header lines, already in embed) ──
-            log_lines = result["log"]
-            # Skip first 6 lines (the stat header we already showed in embed)
-            play_by_play = "\n".join(log_lines[6:])
-            chunks = [play_by_play[i:i+1800] for i in range(0, len(play_by_play), 1800)]
-            for chunk in chunks:
-                if chunk.strip():
-                    await channel.send(chunk)
-                    await asyncio.sleep(1)
+        await channel.send(
+            f"\n🏆 **BRACKET CHAMPION!**\n"
+            f"<@{champion_id}> wins it all with **{champ_name}**!\n"
+            f"💰 **+{bonus_cp} CP** bracket champion bonus!"
+            f"{champ_token_msg}\n"
+            f"\n"
+            f"⚡ Use `/top` to see the updated leaderboard."
+        )
+        break
 
-            # Award CP
-            winner_id = player_a["discord_user_id"] if result["winner"].asset_id == player_a["asset_id"] else player_b["discord_user_id"]
-            loser_id  = player_b["discord_user_id"] if winner_id == player_a["discord_user_id"] else player_a["discord_user_id"]
-
-            win_cp   = int(CP_WIN * cp_multiplier)
-            lose_cp  = int(CP_LOSS * cp_multiplier)
-            upset_cp = int(CP_UPSET_BONUS * cp_multiplier) if result["is_upset"] else 0
-
-            award_cp(winner_id, win_cp + upset_cp, f"bracket_win_{bracket_id}")
-            award_cp(loser_id,  lose_cp,            f"bracket_loss_{bracket_id}")
-
-            # Update streaks
-            winner_streak = update_streak(winner_id, won=True)
-            update_streak(loser_id, won=False)
-
-            # Streak milestone token rewards
-            if winner_wallet and winner_streak.get("rewards"):
-                for reward in winner_streak["rewards"]:
-                    days = reward.get("days")
-                    if days in (7, 30):
-                        streak_token = await award_streak_tokens(winner_wallet, days)
-                        if streak_token.get("success"):
-                            await channel.send(
-                                f"🔥 <@{winner_id}> hit a **{days}-day streak!** "
-                                f"{streak_token['message']}"
-                            )
-
-            # Save result
-            save_battle_result(
-                bracket_id=bracket_id,
-                winner_discord_id=winner_id,
-                loser_discord_id=loser_id,
-                winner_asset_id=result["winner"].asset_id,
-                loser_asset_id=result["loser"].asset_id,
-                is_upset=result["is_upset"],
-                round_num=round_num,
-            )
-
-            # ── Token rewards ──
-            winner_wallet = get_wallet(winner_id)
-            loser_wallet  = get_wallet(loser_id)
-            is_evening    = "evening" in bracket_id
-            token_msg     = ""
-
-            if winner_wallet:
-                token_result = await award_win_tokens(
-                    discord_user_id = winner_id,
-                    wallet_address  = winner_wallet,
-                    is_upset        = result["is_upset"],
-                    is_champion     = False,
-                    is_evening      = is_evening,
-                )
-                if token_result["success"]:
-                    token_msg = f"\n{token_result['message']}"
-                elif token_result.get("reason") == "not_opted_in":
-                    token_msg = f"\n⚠️ <@{winner_id}>: {token_result['message']}"
-
-            # ── Winner embed with image ──
-            winner   = result["winner"]
-            win_desc = f"💰 **+{win_cp + upset_cp} CP** → <@{winner_id}>"
-            if result["is_upset"]:
-                win_desc += f" *(+{upset_cp} upset bonus!)*"
-            win_desc += f"\n💰 **+{lose_cp} CP** → <@{loser_id}>"
-            if token_msg:
-                win_desc += token_msg
-
-            win_embed = discord.Embed(
-                title=f"🏆 {winner.display_name} wins!",
-                description=win_desc,
-                color=0xF5E642,
-            )
-            if winner.image_url:
-                win_embed.set_image(url=winner.image_url)
-            win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
-            await channel.send(embed=win_embed)
-
-            # Determine who advances
-            if result["winner"].asset_id == player_a["asset_id"]:
-                next_round.append(player_a)
-            else:
-                next_round.append(player_b)
-
-            await asyncio.sleep(3)
-
-        current_round_pairs = []
-        for i in range(0, len(next_round) - 1, 2):
-            current_round_pairs.append((next_round[i], next_round[i+1]))
-        if len(next_round) % 2 == 1:
-            current_round_pairs.append((next_round[-1], None))
-
-        current_round = current_round_pairs
-        round_num += 1
-
-        if len(next_round) == 1:
-            # We have a bracket champion
-            champion_id = next_round[0]["discord_user_id"]
-            champ_asset = await fetch_zappy_traits(next_round[0]["asset_id"])
-            champ_name = champ_asset["name"] if champ_asset else f"ASA {next_round[0]['asset_id']}"
-
-            bonus_cp = int(CP_BRACKET_WIN * cp_multiplier)
-            award_cp(champion_id, bonus_cp, f"bracket_champion_{bracket_id}")
-
-            # Champion token reward
-            champ_wallet = get_wallet(champion_id)
-            champ_token_msg = ""
-            if champ_wallet:
-                champ_token = await award_win_tokens(
-                    discord_user_id = champion_id,
-                    wallet_address  = champ_wallet,
-                    is_upset        = False,
-                    is_champion     = True,
-                    is_evening      = is_evening,
-                )
-                if champ_token["success"]:
-                    champ_token_msg = f"\n{champ_token['message']}"
-                elif champ_token.get("reason") == "not_opted_in":
-                    champ_token_msg = f"\n⚠️ Opt in to ASA {os.environ.get('REWARD_TOKEN_ID', '2572874483')} to receive token rewards!"
-
-            await channel.send(
-                f"\n🏆 **BRACKET CHAMPION!**\n"
-                f"<@{champion_id}> wins it all with **{champ_name}**!\n"
-                f"💰 **+{bonus_cp} CP** bracket champion bonus!"
-                f"{champ_token_msg}\n"
-                f"\n"
-                f"⚡ Use `/top` to see the updated leaderboard."
-            )
-            break
-
-    active_bracket_id = None
-
+active_bracket_id = None
+```
 
 # ─────────────────────────────────────────────
+
 # Bot events
+
 # ─────────────────────────────────────────────
 
 @bot.event
 async def on_ready():
-    print(f"⚡ Zappy Clash bot online as {bot.user}")
-    await tree.sync(guild=discord.Object(id=GUILD_ID))
-    print(f"✅ Slash commands synced to guild {GUILD_ID}")
-    await tree.sync()
-    print(f"✅ Slash commands synced globally")
-    session_scheduler.start()
-    print("⏰ Session scheduler running")
-
+print(f”⚡ Zappy Clash bot online as {bot.user}”)
+await tree.sync(guild=discord.Object(id=GUILD_ID))
+print(f”✅ Slash commands synced to guild {GUILD_ID}”)
+await tree.sync()
+print(f”✅ Slash commands synced globally”)
+session_scheduler.start()
+print(“⏰ Session scheduler running”)
 
 # ─────────────────────────────────────────────
+
 # Run the bot
+
 # ─────────────────────────────────────────────
-if __name__ == "__main__":
-    bot.run(BOT_TOKEN)
+
+if **name** == “**main**”:
+bot.run(BOT_TOKEN)
