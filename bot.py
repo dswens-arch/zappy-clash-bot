@@ -1,19 +1,19 @@
 ## “””
 bot.py
 
-Zappy Clash Discord bot — main entry point.
+Zappy Clash Discord bot - main entry point.
 
 Commands:
-/link     — Connect your Algorand wallet
-/clash    — Register for the current bracket
-/stats    — View your Zappy’s stats
-/rank     — View your CP and rank
-/top      — Leaderboard
-/streak   — View your daily streak
+/link     - Connect your Algorand wallet
+/clash    - Register for the current bracket
+/stats    - View your Zappy’s stats
+/rank     - View your CP and rank
+/top      - Leaderboard
+/streak   - View your daily streak
 
 Scheduled sessions:
-3:00 AM UTC — Morning Bracket
-3:00 PM UTC — Evening Bracket
+3:00 AM UTC - Morning Bracket
+3:00 PM UTC - Evening Bracket
 
 Setup:
 
@@ -67,7 +67,7 @@ BOT_TOKEN       = os.environ[“DISCORD_BOT_TOKEN”]
 GUILD_ID        = int(os.environ[“DISCORD_GUILD_ID”])
 CLASH_CHANNEL      = int(os.environ[“CLASH_CHANNEL_ID”])    # #zappy-clash channel ID
 ANNOUNCE_CHANNEL   = int(os.environ.get(“ANNOUNCE_CHANNEL_ID”, CLASH_CHANNEL))
-EXPEDITION_CHANNEL = int(os.environ[“EXPEDITION_CHANNEL_ID”]) if os.environ.get(“EXPEDITION_CHANNEL_ID”) else None   # Optional — if not set, works anywhere
+EXPEDITION_CHANNEL = int(os.environ[“EXPEDITION_CHANNEL_ID”]) if os.environ.get(“EXPEDITION_CHANNEL_ID”) else None   # Optional - if not set, works anywhere
 
 # Session timing (UTC)
 
@@ -232,7 +232,7 @@ if is_registered(user_id, active_bracket_id):
     )
     return
 
-# Verify ownership using cache — avoids slow indexer call
+# Verify ownership using cache - avoids slow indexer call
 from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
 import time as _t
 _now = _t.monotonic()
@@ -270,12 +270,12 @@ if asset_id:
 elif len(all_assets) == 1:
     chosen_asset_id = all_assets[0]["asset_id"]
 else:
-    # Multiple — ask them to specify
+    # Multiple - ask them to specify
     # Fetch names for all assets so we show friendly names not just IDs
     lines = []
     for a in all_assets:
         display = a.get('name') or a.get('unit_name') or f"ASA {a['asset_id']}"
-        lines.append(f"  • **{display}** — `/clash asset_id:{a['asset_id']}`")
+        lines.append(f"  • **{display}** - `/clash asset_id:{a['asset_id']}`")
     names = "\n".join(lines)
     await interaction.followup.send(
         f"You have **{len(all_assets)} Zappies**! Reply with the one you want to enter:\n\n{names}",
@@ -320,7 +320,7 @@ clash_ch = bot.get_channel(CLASH_CHANNEL)
 if clash_ch:
     await clash_ch.send(
         f"⚡ **{interaction.user.display_name}** enters the bracket with "
-        f"**{name}** — VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
+        f"**{name}** - VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
     )
 ```
 
@@ -343,7 +343,7 @@ if not wallet:
     await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
     return
 
-# Use local collection table — no indexer call needed
+# Use local collection table - no indexer call needed
 from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
 from algorand_lookup import HERO_ASSET_IDS
 
@@ -372,9 +372,9 @@ embed = discord.Embed(title=name, color=0xF5E642)
 
 embed.add_field(
     name="Battle Stats",
-    value=f"⚡ **VLT** {stats.get('VLT','?')} — Attack\n"
-          f"🛡️ **INS** {stats.get('INS','?')} — Defense\n"
-          f"🎲 **SPK** {stats.get('SPK','?')} — Crit chance",
+    value=f"⚡ **VLT** {stats.get('VLT','?')} - Attack\n"
+          f"🛡️ **INS** {stats.get('INS','?')} - Defense\n"
+          f"🎲 **SPK** {stats.get('SPK','?')} - Crit chance",
     inline=True,
 )
 embed.add_field(
@@ -442,7 +442,7 @@ return
 top = get_leaderboard(10)
 
 if not top:
-    await interaction.response.send_message("No players on the board yet — be the first!", ephemeral=False)
+    await interaction.response.send_message("No players on the board yet - be the first!", ephemeral=False)
     return
 
 lines = ["**⚡ Zappy Clash Leaderboard**", ""]
@@ -456,7 +456,7 @@ for i, player in enumerate(top):
         name = member.display_name if member else f"Player {user_id[:6]}"
     except Exception:
         name = f"Player {user_id[:6]}"
-    lines.append(f"{medals[i]} **{name}** — {cp:,} CP")
+    lines.append(f"{medals[i]} **{name}** - {cp:,} CP")
 
 await interaction.response.send_message("\n".join(lines), ephemeral=False)
 ```
@@ -500,7 +500,7 @@ embed = discord.Embed(
     color=0xF5E642,
 )
 
-# Main collection — paginate into chunks of 20 per field (Discord limit)
+# Main collection - paginate into chunks of 20 per field (Discord limit)
 if zappies:
     chunk_size = 20
     for i in range(0, len(zappies), chunk_size):
@@ -513,7 +513,7 @@ if zappies:
         embed.add_field(name=field_name, value="\n".join(lines), inline=False)
 
 if heroes:
-    hero_lines = [f"🦸 **Zappy Hero — {h['hero_type']}** `{h['asset_id']}`" for h in heroes]
+    hero_lines = [f"🦸 **Zappy Hero - {h['hero_type']}** `{h['asset_id']}`" for h in heroes]
     embed.add_field(name="Heroes", value="\n".join(hero_lines), inline=False)
 
 if collabs:
@@ -524,7 +524,7 @@ embed.set_footer(text="Use /stats asset_id:XXXXX to see a Zappy's battle stats")
 await interaction.followup.send(embed=embed, ephemeral=True)
 ```
 
-@tree.command(name=“debug”, description=“ADMIN ONLY — debug a Zappy’s image URL”)
+@tree.command(name=“debug”, description=“ADMIN ONLY - debug a Zappy’s image URL”)
 @app_commands.describe(asset_id=“The Zappy ASA ID to debug”)
 async def cmd_debug(interaction: discord.Interaction, asset_id: int):
 “”“Show raw image URL for debugging. Owner only.”””
@@ -559,7 +559,7 @@ if image_url and image_url != "NONE":
 await interaction.followup.send("\n".join(lines), embed=embed, ephemeral=True)
 ```
 
-@tree.command(name=“testbracket”, description=“ADMIN ONLY — trigger a test bracket right now”)
+@tree.command(name=“testbracket”, description=“ADMIN ONLY - trigger a test bracket right now”)
 async def cmd_testbracket(interaction: discord.Interaction):
 “”“Manually trigger a bracket for testing. Only works for the server owner.”””
 global active_bracket_id, registration_open
@@ -570,7 +570,7 @@ if interaction.user.id != interaction.guild.owner_id:
     await interaction.response.send_message("❌ Admin only.", ephemeral=True)
     return
 
-await interaction.response.send_message("⚡ Starting test bracket — registration open for 2 minutes!", ephemeral=True)
+await interaction.response.send_message("⚡ Starting test bracket - registration open for 2 minutes!", ephemeral=True)
 
 bracket_id = f"test_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 active_bracket_id = bracket_id
@@ -579,7 +579,7 @@ registration_open = True
 channel = bot.get_channel(CLASH_CHANNEL)
 
 await channel.send(
-    "⚡ **ZAPPY CLASH — TEST BRACKET**\n"
+    "⚡ **ZAPPY CLASH - TEST BRACKET**\n"
     "\n"
     "Registration is open for **2 minutes**.\n"
     "Use `/clash` to enter your Zappy!"
@@ -735,14 +735,14 @@ if not wallet:
     await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
     return
 
-# Use cached wallet verification — fast, no indexer call
+# Use cached wallet verification - fast, no indexer call
 from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
 import time as _t
 now = _t.monotonic()
 if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
     ownership = _wallet_cache[wallet]
 else:
-    # Cache miss — do the indexer call
+    # Cache miss - do the indexer call
     ownership = await verify_wallet(user_id, wallet)
 
 if not ownership["owns"]:
@@ -766,7 +766,7 @@ all_zappies = ownership["zappies"] + [
     for h in ownership["heroes"]
 ]
 
-# Go straight to zone selection — Zappy pick happens after zone choice
+# Go straight to zone selection - Zappy pick happens after zone choice
 await _start_expedition_zone_select(interaction, user_id, all_zappies, eligible, cp_total, zappy_count, bonus, wallet)
 ```
 
@@ -780,7 +780,7 @@ zappy_count: int,
 bonus: dict,
 wallet: str,
 ):
-“”“Show zone selection — Zappy pick happens after zone choice.”””
+“”“Show zone selection - Zappy pick happens after zone choice.”””
 
 ```
 async def on_zone_selected(inter: discord.Interaction, zone_num: int):
@@ -823,11 +823,11 @@ locked_lines = []
 for z in range(1, 6):
     if z not in eligible:
         zone = ZONES[z]
-        locked_lines.append(f"🔒 {zone['name']} — need {zone['cp_required']:,} CP (you have {cp_total:,})")
+        locked_lines.append(f"🔒 {zone['name']} - need {zone['cp_required']:,} CP (you have {cp_total:,})")
 
 embed = discord.Embed(
     title       = "🗺️ Choose a Zone",
-    description = f"You have **{zappy_count} Zappy/Zappies**. Pick a zone — the bot will show your best Zappies for it.",
+    description = f"You have **{zappy_count} Zappy/Zappies**. Pick a zone - the bot will show your best Zappies for it.",
     color       = 0xF5E642,
 )
 if zone_lines:
@@ -847,11 +847,11 @@ await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 # ─────────────────────────────────────────────
 
 ZONE_STAT_PRIORITY = {
-1: (“SPK”, “VLT”, “INS”),   # Mixed — SPK edges out for hidden paths
-2: (“SPK”, “VLT”, “INS”),   # Voltage Bay — luck and crits rule coastal events
-3: (“VLT”, “INS”, “SPK”),   # Molten Circuit — raw power breaks through
-4: (“SPK”, “INS”, “VLT”),   # Null Space — luck navigates the strange
-5: (“INS”, “VLT”, “SPK”),   # Apex Summit — survival first
+1: (“SPK”, “VLT”, “INS”),   # Mixed - SPK edges out for hidden paths
+2: (“SPK”, “VLT”, “INS”),   # Voltage Bay - luck and crits rule coastal events
+3: (“VLT”, “INS”, “SPK”),   # Molten Circuit - raw power breaks through
+4: (“SPK”, “INS”, “VLT”),   # Null Space - luck navigates the strange
+5: (“INS”, “VLT”, “SPK”),   # Apex Summit - survival first
 }
 
 ZONE_STAT_REASON = {
@@ -866,7 +866,7 @@ ZONE_STAT_REASON = {
 “INS”: “Good INS weathers the storm cells.”,
 },
 3: {
-“VLT”: “High VLT is essential — Molten Circuit rewards raw power above all.”,
+“VLT”: “High VLT is essential - Molten Circuit rewards raw power above all.”,
 “INS”: “Strong INS survives the heat and the rogue automaton.”,
 “SPK”: “Good SPK helps with timing the thermal vents.”,
 },
@@ -876,7 +876,7 @@ ZONE_STAT_REASON = {
 “VLT”: “Good VLT handles the gravity zones.”,
 },
 5: {
-“INS”: “High INS is critical — the Apex Storm Crown hits hard.”,
+“INS”: “High INS is critical - the Apex Storm Crown hits hard.”,
 “VLT”: “Strong VLT powers through the Infinite Generator.”,
 “SPK”: “Good SPK finds hidden paths at the summit.”,
 },
@@ -1002,7 +1002,7 @@ if not ranked:
     return
 
 embed = discord.Embed(
-    title       = f"{zone['emoji']} {zone['name']} — Pick your Zappy",
+    title       = f"{zone['emoji']} {zone['name']} - Pick your Zappy",
     description = (
         f"**Key stat for this zone: {stat_labels.get(primary, primary)}**\n"
         f"Here are your top 5 Zappies ranked for this zone. "
@@ -1103,7 +1103,7 @@ async def on_choice(inter: discord.Interaction, choice_index: int):
                     send_token_reward, wallet, net_tokens, note
                 )
         elif wallet and entry_fee > 0 and updated_run["total_tokens"] == 0:
-            # Bad run — no tokens earned, fee already notified, nothing to send
+            # Bad run - no tokens earned, fee already notified, nothing to send
             pass
 
         # Post to expedition channel
@@ -1202,7 +1202,7 @@ if result.get("success"):
         )
 ```
 
-@tree.command(name=“addzappies”, description=“ADMIN — add newly minted Zappies to the collection”)
+@tree.command(name=“addzappies”, description=“ADMIN - add newly minted Zappies to the collection”)
 @app_commands.describe(ids=“Comma-separated ASA IDs e.g. 12345678,87654321”)
 async def cmd_addzappies(interaction: discord.Interaction, ids: str):
 “”“Fetch and register new Zappy ASA IDs into the live collection.”””
@@ -1217,7 +1217,7 @@ raw = [s.strip() for s in ids.replace(" ", "").split(",") if s.strip()]
 try:
     asset_ids = [int(x) for x in raw]
 except ValueError:
-    await interaction.followup.send("Invalid format — use comma-separated ASA IDs.", ephemeral=True)
+    await interaction.followup.send("Invalid format - use comma-separated ASA IDs.", ephemeral=True)
     return
 
 if len(asset_ids) > 50:
@@ -1395,7 +1395,7 @@ if added:
 
     except Exception as e:
         await interaction.followup.send(
-            "Added to live cache but could not persist to file — "
+            "Added to live cache but could not persist to file - "
             "run /addzappies again after next bot restart.",
             ephemeral=True
         )
@@ -1410,7 +1410,7 @@ if skipped:
 if failed:
     lines.append(f"Failed:")
     for asset_id, reason in failed:
-        lines.append(f"  {asset_id} — {reason}")
+        lines.append(f"  {asset_id} - {reason}")
 
 await interaction.followup.send("\n".join(lines) or "Nothing to do.", ephemeral=True)
 ```
@@ -1430,7 +1430,7 @@ if not check_expedition_channel(interaction):
 
 if not top:
     await interaction.response.send_message(
-        "No expeditions completed yet — be the first!", ephemeral=False
+        "No expeditions completed yet - be the first!", ephemeral=False
     )
     return
 
@@ -1446,7 +1446,7 @@ for i, player in enumerate(top):
         name   = member.display_name if member else f"Explorer {uid[:6]}"
     except Exception:
         name = f"Explorer {uid[:6]}"
-    lines.append(f"{medals[i]} **{name}** — {cp:,} Exp CP · {runs} runs")
+    lines.append(f"{medals[i]} **{name}** - {cp:,} Exp CP · {runs} runs")
 
 await interaction.response.send_message("\n".join(lines), ephemeral=False)
 ```
@@ -1481,22 +1481,22 @@ def mark_fired(key):
     # Clean up old keys
     session_scheduler._fired = {k for k in session_scheduler._fired if k.startswith(today)}
 
-# Morning open — 3:00 AM UTC
+# Morning open - 3:00 AM UTC
 if current_hour == 3 and current_min == 0 and not already_fired("morning_open"):
     mark_fired("morning_open")
     await open_registration("morning", channel)
 
-# Morning close — 3:30 AM UTC
+# Morning close - 3:30 AM UTC
 elif current_hour == 3 and current_min == 30 and not already_fired("morning_close"):
     mark_fired("morning_close")
     await close_and_resolve(channel)
 
-# Evening open — 3:00 PM UTC (15:00)
+# Evening open - 3:00 PM UTC (15:00)
 elif current_hour == 15 and current_min == 0 and not already_fired("evening_open"):
     mark_fired("evening_open")
     await open_registration("evening", channel)
 
-# Evening close — 3:30 PM UTC (15:30)
+# Evening close - 3:30 PM UTC (15:30)
 elif current_hour == 15 and current_min == 30 and not already_fired("evening_close"):
     mark_fired("evening_close")
     await close_and_resolve(channel)
@@ -1515,14 +1515,14 @@ session_name = "☀️ Morning" if session == "morning" else "🌙 Evening"
 emoji_time = "3:00 AM UTC" if session == "morning" else "3:00 PM UTC"
 
 await channel.send(
-    f"⚡ **ZAPPY CLASH — {session_name} Bracket is OPEN!**\n"
+    f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
     f"\n"
     f"Registration is open for **30 minutes** ({emoji_time}).\n"
     f"Use `/clash` to enter your Zappy!\n"
     f"\n"
     f"Tonight's session has a **1.25× CP multiplier** on all wins. 🔥"
     if session == "evening" else
-    f"⚡ **ZAPPY CLASH — {session_name} Bracket is OPEN!**\n"
+    f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
     f"\n"
     f"Registration is open for **30 minutes** ({emoji_time}).\n"
     f"Use `/clash` to enter your Zappy!"
@@ -1558,7 +1558,7 @@ await asyncio.sleep(30)
 # Seed bracket
 matchups = seed_bracket(entries)
 
-await channel.send(f"⚡ **BRACKET START** — {n} fighters, {len(matchups)} first-round matchups!\n")
+await channel.send(f"⚡ **BRACKET START** - {n} fighters, {len(matchups)} first-round matchups!\n")
 
 # Run all rounds
 current_round = matchups
@@ -1585,7 +1585,7 @@ while len(current_round) > 0:
         zappy_b = await fetch_zappy_traits(player_b["asset_id"])
 
         if not zappy_a or not zappy_b:
-            await channel.send("⚠️ Couldn't load one fighter's stats — skipping this matchup.")
+            await channel.send("⚠️ Couldn't load one fighter's stats - skipping this matchup.")
             continue
 
         fighter_a = build_fighter(zappy_a)
@@ -1612,7 +1612,7 @@ while len(current_round) > 0:
                   + (f"\n✨ {fighter_b.combo}" if fighter_b.combo else ""),
             inline=True,
         )
-        # Show both images — A as thumbnail, B as image
+        # Show both images - A as thumbnail, B as image
         if fighter_a.image_url:
             pre_embed.set_thumbnail(url=fighter_a.image_url)
         if fighter_b.image_url:
