@@ -13,8 +13,8 @@ Commands:
   /streak   - View your daily streak
 
 Scheduled sessions:
-  3:00 AM UTC - Morning Bracket
-  3:00 PM UTC - Evening Bracket
+  2:00 PM UTC - Morning Bracket
+  2:00 AM UTC - Night Bracket
 
 Setup:
   1. Copy .env.example to .env and fill in your keys
@@ -66,13 +66,13 @@ ANNOUNCE_CHANNEL   = int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
 EXPEDITION_CHANNEL = int(os.environ["EXPEDITION_CHANNEL_ID"]) if os.environ.get("EXPEDITION_CHANNEL_ID") else None   # Optional - if not set, works anywhere
 
 # Session timing (UTC)
-MORNING_OPEN    = dtime(3,  0,  tzinfo=timezone.utc)
-MORNING_CLOSE   = dtime(3, 30,  tzinfo=timezone.utc)   # 30 min registration window
-MORNING_RESOLVE = dtime(3, 35,  tzinfo=timezone.utc)
+MORNING_OPEN    = dtime(14,  0, tzinfo=timezone.utc)
+MORNING_CLOSE   = dtime(14, 30, tzinfo=timezone.utc)   # 30 min registration window
+MORNING_RESOLVE = dtime(14, 35, tzinfo=timezone.utc)
 
-EVENING_OPEN    = dtime(15,  0, tzinfo=timezone.utc)
-EVENING_CLOSE   = dtime(15, 30, tzinfo=timezone.utc)
-EVENING_RESOLVE = dtime(15, 35, tzinfo=timezone.utc)
+EVENING_OPEN    = dtime(2,   0, tzinfo=timezone.utc)
+EVENING_CLOSE   = dtime(2,  30, tzinfo=timezone.utc)
+EVENING_RESOLVE = dtime(2,  35, tzinfo=timezone.utc)
 
 # ---------------------------------------------
 # Bot setup
@@ -1463,22 +1463,22 @@ async def session_scheduler():
         session_scheduler._fired = {k for k in session_scheduler._fired if k.startswith(today)}
 
     # Morning open - 3:00 AM UTC
-    if current_hour == 3 and current_min == 0 and not already_fired("morning_open"):
+    if current_hour == 14 and current_min == 0 and not already_fired("morning_open"):
         mark_fired("morning_open")
         await open_registration("morning", channel)
 
     # Morning close - 3:30 AM UTC
-    elif current_hour == 3 and current_min == 30 and not already_fired("morning_close"):
+    elif current_hour == 14 and current_min == 30 and not already_fired("morning_close"):
         mark_fired("morning_close")
         await close_and_resolve(channel)
 
     # Evening open - 3:00 PM UTC (15:00)
-    elif current_hour == 15 and current_min == 0 and not already_fired("evening_open"):
+    elif current_hour == 2 and current_min == 0 and not already_fired("evening_open"):
         mark_fired("evening_open")
         await open_registration("evening", channel)
 
     # Evening close - 3:30 PM UTC (15:30)
-    elif current_hour == 15 and current_min == 30 and not already_fired("evening_close"):
+    elif current_hour == 2 and current_min == 30 and not already_fired("evening_close"):
         mark_fired("evening_close")
         await close_and_resolve(channel)
 
@@ -1491,8 +1491,8 @@ async def open_registration(session: str, channel: discord.TextChannel):
     active_bracket_id = bracket_id
     registration_open = True
 
-    session_name = "☀️ Morning" if session == "morning" else "🌙 Evening"
-    emoji_time = "3:00 AM UTC" if session == "morning" else "3:00 PM UTC"
+    session_name = "☀️ Morning" if session == "morning" else "🌙 Night"
+    emoji_time = "2:00 PM UTC" if session == "morning" else "2:00 AM UTC"
 
     await channel.send(
         f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
@@ -1546,7 +1546,16 @@ async def close_and_resolve(channel: discord.TextChannel):
 
     while len(current_round) > 0:
         next_round = []
-        round_label = {1: "Round of 16", 2: "Quarterfinals", 3: "Semifinals", 4: "FINAL"}.get(round_num, f"Round {round_num}")
+        # Count actual players remaining (byes count as 1 each)
+        players_left = sum(2 if m[1] is not None else 1 for m in current_round)
+        if players_left > 8:
+            round_label = f"Round of {players_left}"
+        elif players_left > 4:
+            round_label = "Quarterfinals"
+        elif players_left > 2:
+            round_label = "Semifinals"
+        else:
+            round_label = "FINAL"
         await channel.send(f"\n🔔 **{round_label}**\n")
         await asyncio.sleep(3)
 
@@ -1555,13 +1564,51 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             # Handle byes
             if player_b is None:
-                await channel.send(f"🎯 **{player_a['discord_user_id']}** advances with a bye.")
+                try:
+                    bye_member = interaction.guild.get_member(int(player_a['discord_user_id'])) if hasattr(interaction, 'guild') else None
+                    bye_name = bye_member.display_name if bye_member else f"<@{player_a['discord_user_id']}>"
+                except Exception:
+                    bye_name = f"<@{player_a['discord_user_id']}>"
+                await channel.send(f"🎯 **{bye_name}** advances with a bye.")
                 next_round.append(player_a)
                 continue
 
-            # Fetch Zappy data
-            zappy_a = await fetch_zappy_traits(player_a["asset_id"])
-            zappy_b = await fetch_zappy_traits(player_b["asset_id"])
+            # Fetch Zappy data — use collection table for consistent stats
+            from zappy_collection import ZAPPY_COLLECTION
+            from stats_engine import calculate_stats
+
+            def _get_fighter_data(asset_id):
+                entry = ZAPPY_COLLECTION.get(asset_id)
+                if not entry:
+                    return None
+                traits = {
+                    "background": entry.get("background",""),
+                    "body":       entry.get("body",""),
+                    "earring":    entry.get("earring","None"),
+                    "eyes":       entry.get("eyes",""),
+                    "eyewear":    entry.get("eyewear","None"),
+                    "head":       entry.get("head",""),
+                    "mouth":      entry.get("mouth",""),
+                    "skin":       entry.get("skin",""),
+                }
+                stats = calculate_stats(traits)
+                return {
+                    "asset_id":  asset_id,
+                    "name":      entry.get("name", f"Zappy #{asset_id}"),
+                    "unit_name": entry.get("unit_name",""),
+                    "image_url": entry.get("image_url",""),
+                    "stats":     stats,
+                    "traits":    traits,
+                }
+
+            zappy_a = _get_fighter_data(player_a["asset_id"])
+            zappy_b = _get_fighter_data(player_b["asset_id"])
+
+            # Fallback to live fetch if not in collection
+            if not zappy_a:
+                zappy_a = await fetch_zappy_traits(player_a["asset_id"])
+            if not zappy_b:
+                zappy_b = await fetch_zappy_traits(player_b["asset_id"])
 
             if not zappy_a or not zappy_b:
                 await channel.send("⚠️ Couldn't load one fighter's stats - skipping this matchup.")
@@ -1694,6 +1741,16 @@ async def close_and_resolve(channel: discord.TextChannel):
                 next_round.append(player_b)
 
             await asyncio.sleep(3)
+
+        # Deduplicate — remove any player that appears more than once
+        seen_ids = set()
+        deduped = []
+        for p in next_round:
+            pid = p["discord_user_id"]
+            if pid not in seen_ids:
+                seen_ids.add(pid)
+                deduped.append(p)
+        next_round = deduped
 
         current_round_pairs = []
         for i in range(0, len(next_round) - 1, 2):
