@@ -263,10 +263,16 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
         lines = []
         for a in all_assets:
             display = a.get('name') or a.get('unit_name') or f"ASA {a['asset_id']}"
-            lines.append(f"  • **{display}** - `/clash asset_id:{a['asset_id']}`")
-        names = "\n".join(lines)
+            lines.append(f"  • **{display}** - `{a['asset_id']}`")
+        # Keep under 1800 chars to be safe
+        names = ""
+        for line in lines:
+            if len(names) + len(line) + 1 > 1500:
+                names += f"\n  ...and {len(lines) - lines.index(line)} more. Use `/clash asset_id:XXXXX` to enter a specific one."
+                break
+            names += line + "\n"
         await interaction.followup.send(
-            f"You have **{len(all_assets)} Zappies**! Reply with the one you want to enter:\n\n{names}",
+            f"You have **{len(all_assets)} Zappies**! Use `/clash asset_id:XXXXX` to enter one:\n\n{names}",
             ephemeral=True
         )
         return
@@ -295,9 +301,9 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
     )
     if stats.get("combo"):
         embed.add_field(name="Combo", value=stats["combo"], inline=False)
-    if stats.get("ability"):
+    if stats.get("ability") and isinstance(stats["ability"], dict):
         ab = stats["ability"]
-        embed.add_field(name=f"⚡ {ab['name']}", value=ab["desc"], inline=False)
+        embed.add_field(name=f"⚡ {ab.get('name', 'Ability')}", value=ab.get("desc", ""), inline=False)
     if image_url:
         embed.set_thumbnail(url=image_url)
     embed.set_footer(text=f"Fights start when registration closes · Watch #{CLASH_CHANNEL}")
@@ -1618,6 +1624,9 @@ async def close_and_resolve(channel: discord.TextChannel):
             winner_streak = update_streak(winner_id, won=True)
             update_streak(loser_id, won=False)
 
+            # Get winner wallet early — needed for streak and token rewards
+            winner_wallet = get_wallet(winner_id)
+
             # Streak milestone token rewards
             if winner_wallet and winner_streak.get("rewards"):
                 for reward in winner_streak["rewards"]:
@@ -1642,7 +1651,6 @@ async def close_and_resolve(channel: discord.TextChannel):
             )
 
             # -- Token rewards --
-            winner_wallet = get_wallet(winner_id)
             loser_wallet  = get_wallet(loser_id)
             is_evening    = "evening" in bracket_id
             token_msg     = ""
