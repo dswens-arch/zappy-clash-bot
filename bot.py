@@ -1329,55 +1329,30 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
             except Exception as e:
                 failed.append((asset_id, str(e)[:80]))
 
-    # Persist new entries to zappy_collection.py
+    # Persist new entries to Supabase so they survive bot restarts
     if added:
         try:
-            import os
-            filepath = "/app/zappy_collection.py"
-            if not os.path.exists(filepath):
-                filepath = "./zappy_collection.py"
-
-            with open(filepath) as f:
-                col_content = f.read()
-
-            new_lines = []
+            from database import get_supabase
+            db = get_supabase()
             for asset_id, name, entry in added:
-                def esc(s):
-                    return str(s).replace('"', '\\"')
-                line = (
-                    "    " + str(asset_id) + ": {"
-                    + '"name": "' + esc(entry["name"]) + '", '
-                    + '"unit_name": "' + esc(entry["unit_name"]) + '", '
-                    + '"image_url": "' + esc(entry["image_url"]) + '", '
-                    + '"background": "' + esc(entry["background"]) + '", '
-                    + '"body": "' + esc(entry["body"]) + '", '
-                    + '"earring": "' + esc(entry["earring"]) + '", '
-                    + '"eyes": "' + esc(entry["eyes"]) + '", '
-                    + '"eyewear": "' + esc(entry["eyewear"]) + '", '
-                    + '"head": "' + esc(entry["head"]) + '", '
-                    + '"mouth": "' + esc(entry["mouth"]) + '", '
-                    + '"skin": "' + esc(entry["skin"]) + '"},'
-                )
-                new_lines.append(line)
-
-            # Insert before closing } of ZAPPY_COLLECTION
-            insert_idx = col_content.rfind("\n}")
-            col_content = col_content[:insert_idx] + "\n" + "\n".join(new_lines) + col_content[insert_idx:]
-
-            # Add new IDs to ZAPPY_ASSET_IDS set
-            new_id_str = ", ".join(str(a) for a, _, _ in added)
-            col_content = col_content.replace(
-                "ZAPPY_ASSET_IDS: set = {\n    ",
-                "ZAPPY_ASSET_IDS: set = {\n    " + new_id_str + ",\n    "
-            )
-
-            with open(filepath, "w") as f:
-                f.write(col_content)
-
+                db.table("extra_zappies").upsert({
+                    "asset_id":   asset_id,
+                    "name":       entry["name"],
+                    "unit_name":  entry["unit_name"],
+                    "image_url":  entry["image_url"],
+                    "background": entry["background"],
+                    "body":       entry["body"],
+                    "earring":    entry["earring"],
+                    "eyes":       entry["eyes"],
+                    "eyewear":    entry["eyewear"],
+                    "head":       entry["head"],
+                    "mouth":      entry["mouth"],
+                    "skin":       entry["skin"],
+                }).execute()
         except Exception as e:
             await interaction.followup.send(
-                "Added to live cache but could not persist to file - "
-                "run /addzappies again after next bot restart.",
+                f"Added to live cache but Supabase persist failed: {e}\n"
+                "Run /addzappies again if the bot restarts.",
                 ephemeral=True
             )
 
@@ -1810,8 +1785,41 @@ async def on_ready():
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
     await tree.sync()
     print(f"✅ Slash commands synced globally")
+    _load_extra_zappies()
     session_scheduler.start()
     print("⏰ Session scheduler running")
+
+
+def _load_extra_zappies():
+    """Load Zappies added via /addzappies from Supabase into the live collection."""
+    try:
+        from database import get_supabase
+        from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
+        db     = get_supabase()
+        result = db.table("extra_zappies").select("*").execute()
+        loaded = 0
+        for row in result.data or []:
+            asset_id = int(row["asset_id"])
+            if asset_id not in ZAPPY_ASSET_IDS:
+                ZAPPY_COLLECTION[asset_id] = {
+                    "name":       row["name"],
+                    "unit_name":  row["unit_name"],
+                    "image_url":  row["image_url"],
+                    "background": row["background"],
+                    "body":       row["body"],
+                    "earring":    row["earring"],
+                    "eyes":       row["eyes"],
+                    "eyewear":    row["eyewear"],
+                    "head":       row["head"],
+                    "mouth":      row["mouth"],
+                    "skin":       row["skin"],
+                }
+                ZAPPY_ASSET_IDS.add(asset_id)
+                loaded += 1
+        if loaded:
+            print(f"✅ Loaded {loaded} extra Zappies from Supabase")
+    except Exception as e:
+        print(f"⚠️ Could not load extra Zappies from Supabase: {e}")
 
 
 # ---------------------------------------------
