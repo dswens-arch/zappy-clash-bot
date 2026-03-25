@@ -1469,19 +1469,24 @@ async def open_registration(session: str, channel: discord.TextChannel):
     session_name = "☀️ Morning" if session == "morning" else "🌙 Night"
     emoji_time = "2:00 PM UTC" if session == "morning" else "2:00 AM UTC"
 
-    await channel.send(
-        f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
-        f"\n"
-        f"Registration is open for **30 minutes** ({emoji_time}).\n"
-        f"Use `/clash` to enter your Zappy!\n"
-        f"\n"
-        f"Tonight's session has a **1.25× CP multiplier** on all wins. 🔥"
-        if session == "evening" else
-        f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
-        f"\n"
-        f"Registration is open for **30 minutes** ({emoji_time}).\n"
-        f"Use `/clash` to enter your Zappy!"
-    )
+    if session == "evening":
+        await channel.send(
+            f"@everyone\n"
+            f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
+            f"\n"
+            f"Registration is open for **30 minutes** ({emoji_time}).\n"
+            f"Use `/clash` to enter your Zappy!\n"
+            f"\n"
+            f"Tonight's Night session has a **1.25x CP multiplier** on all wins. 🔥"
+        )
+    else:
+        await channel.send(
+            f"@everyone\n"
+            f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
+            f"\n"
+            f"Registration is open for **30 minutes** ({emoji_time}).\n"
+            f"Use `/clash` to enter your Zappy!"
+        )
 
 
 async def close_and_resolve(channel: discord.TextChannel):
@@ -1509,10 +1514,25 @@ async def close_and_resolve(channel: discord.TextChannel):
 
     await asyncio.sleep(30)
 
+    # Build display name lookup
+    guild = bot.get_guild(GUILD_ID)
+    def get_display_name(discord_user_id):
+        try:
+            member = guild.get_member(int(discord_user_id))
+            return member.display_name if member else f"Player {str(discord_user_id)[:4]}"
+        except Exception:
+            return f"Player {str(discord_user_id)[:4]}"
+
     # Seed bracket
     matchups = seed_bracket(entries)
 
-    await channel.send(f"⚡ **BRACKET START** - {n} fighters, {len(matchups)} first-round matchups!\n")
+    # Show bracket with usernames
+    bracket_lines = [f"⚡ **BRACKET START** - {n} fighters, {len(matchups)} first-round matchups!\n"]
+    for i, entry in enumerate(entries):
+        zappy_name  = entry.get("unit_name") or entry.get("name") or f"ASA {entry['asset_id']}"
+        player_name = get_display_name(entry["discord_user_id"])
+        bracket_lines.append(f"#{i+1} **{zappy_name}** · {player_name}")
+    await channel.send("\n".join(bracket_lines))
 
     # Run all rounds
     current_round = matchups
@@ -1595,20 +1615,24 @@ async def close_and_resolve(channel: discord.TextChannel):
             # Run the battle
             result = resolve_battle(fighter_a, fighter_b)
 
+            # Get player display names for this matchup
+            name_a = get_display_name(player_a["discord_user_id"])
+            name_b = get_display_name(player_b["discord_user_id"])
+
             # -- Pre-fight embed: both Zappies side by side --
             pre_embed = discord.Embed(
                 title="⚡ BRACKET MATCH",
                 color=0xF5E642,
             )
             pre_embed.add_field(
-                name=fighter_a.display_name,
+                name=f"{fighter_a.display_name} · {name_a}",
                 value=f"⚡ VLT {fighter_a.VLT} · 🛡️ INS {fighter_a.INS} · 🎲 SPK {fighter_a.SPK}"
                       + (f"\n✨ {fighter_a.combo}" if fighter_a.combo else ""),
                 inline=True,
             )
             pre_embed.add_field(name="vs.", value="⚡", inline=True)
             pre_embed.add_field(
-                name=fighter_b.display_name,
+                name=f"{fighter_b.display_name} · {name_b}",
                 value=f"⚡ VLT {fighter_b.VLT} · 🛡️ INS {fighter_b.INS} · 🎲 SPK {fighter_b.SPK}"
                       + (f"\n✨ {fighter_b.combo}" if fighter_b.combo else ""),
                 inline=True,
@@ -1699,8 +1723,9 @@ async def close_and_resolve(channel: discord.TextChannel):
             if token_msg:
                 win_desc += token_msg
 
+            winner_name = name_a if result["winner"].asset_id == player_a["asset_id"] else name_b
             win_embed = discord.Embed(
-                title=f"🏆 {winner.display_name} wins!",
+                title=f"🏆 {winner.display_name} wins! ({winner_name})",
                 description=win_desc,
                 color=0xF5E642,
             )
