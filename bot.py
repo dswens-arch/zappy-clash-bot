@@ -1201,7 +1201,13 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
     await interaction.followup.send(f"Fetching {len(asset_ids)} Zappy/Zappies...", ephemeral=True)
 
     import aiohttp
-    from algorand_lookup import INDEXER_URL, IPFS_GATEWAYS, decode_arc19_reserve
+    from algorand_lookup import INDEXER_URL, decode_arc19_reserve
+    IPFS_GATEWAYS = [
+        "https://nftstorage.link/ipfs/",
+        "https://dweb.link/ipfs/",
+        "https://cloudflare-ipfs.com/ipfs/",
+        "https://ipfs.io/ipfs/",
+    ]
     from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
 
     added   = []
