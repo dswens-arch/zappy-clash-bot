@@ -1269,6 +1269,7 @@ def _decode_arc19(asset_url, reserve_address):
         return 'b' + base64.b32encode(cid_bytes).decode().lower().rstrip('=')
     except Exception:
         return None
+
 from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
 
 added   = []
