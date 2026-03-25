@@ -1201,13 +1201,48 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
     await interaction.followup.send(f"Fetching {len(asset_ids)} Zappy/Zappies...", ephemeral=True)
 
     import aiohttp
-    from algorand_lookup import INDEXER_URL, decode_arc19_reserve
+    from algorand_lookup import INDEXER_URL
+    import base64, re
+
     IPFS_GATEWAYS = [
         "https://nftstorage.link/ipfs/",
         "https://dweb.link/ipfs/",
         "https://cloudflare-ipfs.com/ipfs/",
         "https://ipfs.io/ipfs/",
     ]
+
+    def _encode_varint(n):
+        buf = []
+        while True:
+            towrite = n & 0x7f
+            n >>= 7
+            if n:
+                buf.append(towrite | 0x80)
+            else:
+                buf.append(towrite)
+                break
+        return bytes(buf)
+
+    def _decode_arc19(asset_url, reserve_address):
+        try:
+            from algosdk import encoding as algo_encoding
+            match = re.search(r'\{ipfscid:(\d+):([^:]+):([^:]+):([^}]+)\}', asset_url)
+            if not match:
+                return None
+            version   = int(match.group(1))
+            codec_str = match.group(2)
+            hash_type = match.group(4)
+            digest    = algo_encoding.decode_address(reserve_address)
+            if version == 0:
+                import base58
+                return base58.b58encode(bytes([0x12, 0x20]) + digest).decode()
+            codec_map = {"raw": 0x55, "dag-pb": 0x70}
+            hash_map  = {"sha2-256": 0x12}
+            multihash = _encode_varint(hash_map.get(hash_type, 0x12)) + _encode_varint(len(digest)) + digest
+            cid_bytes = _encode_varint(1) + _encode_varint(codec_map.get(codec_str, 0x55)) + multihash
+            return 'b' + base64.b32encode(cid_bytes).decode().lower().rstrip('=')
+        except Exception:
+            return None
     from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
 
     added   = []
@@ -1237,7 +1272,7 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                 image_url = ""
 
                 if asset_url.startswith("template-ipfs://") and reserve:
-                    metadata_cid = decode_arc19_reserve(asset_url, reserve)
+                    metadata_cid = _decode_arc19(asset_url, reserve)
                     if metadata_cid:
                         for gateway in IPFS_GATEWAYS:
                             try:
