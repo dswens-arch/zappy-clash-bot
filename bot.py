@@ -1096,7 +1096,7 @@ async def _run_expedition_beat(
                     color = ZONES[zone_num]["color"],
                 )
                 if zappy.get("image_url"):
-                    public_embed.set_thumbnail(url=zappy["image_url"])
+                    public_embed.set_image(url=zappy["image_url"])
                 await exp_channel.send(embed=public_embed)
 
             # Final summary with fee breakdown
@@ -1171,6 +1171,181 @@ async def cmd_claimnft(interaction: discord.Interaction):
                 f"🎉 <@{user_id}> just claimed their Zone 5 NFT prize: "
                 f"**{result['name']}**! 🏔️⚡"
             )
+
+
+
+
+
+
+@tree.command(name="addzappies", description="ADMIN — add newly minted Zappies to the collection")
+@app_commands.describe(ids="Comma-separated ASA IDs e.g. 12345678,87654321")
+async def cmd_addzappies(interaction: discord.Interaction, ids: str):
+    """Fetch and register new Zappy ASA IDs into the live collection."""
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("Admin only.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    raw = [s.strip() for s in ids.replace(" ", "").split(",") if s.strip()]
+    try:
+        asset_ids = [int(x) for x in raw]
+    except ValueError:
+        await interaction.followup.send("Invalid format — use comma-separated ASA IDs.", ephemeral=True)
+        return
+
+    if len(asset_ids) > 50:
+        await interaction.followup.send("Max 50 ASA IDs at once.", ephemeral=True)
+        return
+
+    await interaction.followup.send(f"Fetching {len(asset_ids)} Zappy/Zappies...", ephemeral=True)
+
+    import aiohttp
+    from algorand_lookup import INDEXER_URL, IPFS_GATEWAYS, decode_arc19_reserve
+    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
+
+    added   = []
+    skipped = []
+    failed  = []
+
+    async with aiohttp.ClientSession() as session:
+        for asset_id in asset_ids:
+            if asset_id in ZAPPY_ASSET_IDS:
+                skipped.append(asset_id)
+                continue
+            try:
+                url = f"{INDEXER_URL}/v2/assets/{asset_id}"
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                    if resp.status != 200:
+                        failed.append((asset_id, f"indexer {resp.status}"))
+                        continue
+                    data   = await resp.json()
+                    params = data.get("asset", {}).get("params", {})
+
+                name      = params.get("name", f"Zappy #{asset_id}")
+                unit_name = params.get("unit-name", "")
+                asset_url = params.get("url", "")
+                reserve   = params.get("reserve", "")
+
+                traits    = {}
+                image_url = ""
+
+                if asset_url.startswith("template-ipfs://") and reserve:
+                    metadata_cid = decode_arc19_reserve(asset_url, reserve)
+                    if metadata_cid:
+                        for gateway in IPFS_GATEWAYS:
+                            try:
+                                async with session.get(
+                                    f"{gateway}{metadata_cid}",
+                                    timeout=aiohttp.ClientTimeout(total=15)
+                                ) as resp:
+                                    if resp.status == 200:
+                                        metadata = await resp.json(content_type=None)
+                                        props = metadata.get("properties", {})
+                                        if isinstance(props, list):
+                                            props = {item["trait_type"]: item["value"] for item in props if "trait_type" in item}
+                                        traits = {
+                                            "background": props.get("Background", ""),
+                                            "body":       props.get("Body", ""),
+                                            "earring":    props.get("Earring", "None"),
+                                            "eyes":       props.get("Eyes", ""),
+                                            "eyewear":    props.get("Eyewear", "None"),
+                                            "head":       props.get("Head", ""),
+                                            "mouth":      props.get("Mouth", ""),
+                                            "skin":       props.get("Skin", ""),
+                                        }
+                                        raw_img = metadata.get("image", "")
+                                        if raw_img.startswith("ipfs://"):
+                                            cid = raw_img.replace("ipfs://", "").split("/")[0]
+                                            image_url = "https://ipfs.io/ipfs/" + cid
+                                        break
+                            except Exception:
+                                continue
+
+                entry = {
+                    "name": name, "unit_name": unit_name, "image_url": image_url,
+                    "background": traits.get("background", ""),
+                    "body":       traits.get("body", ""),
+                    "earring":    traits.get("earring", "None"),
+                    "eyes":       traits.get("eyes", ""),
+                    "eyewear":    traits.get("eyewear", "None"),
+                    "head":       traits.get("head", ""),
+                    "mouth":      traits.get("mouth", ""),
+                    "skin":       traits.get("skin", ""),
+                }
+                ZAPPY_COLLECTION[asset_id] = entry
+                ZAPPY_ASSET_IDS.add(asset_id)
+                added.append((asset_id, name, entry))
+
+            except Exception as e:
+                failed.append((asset_id, str(e)[:80]))
+
+    # Persist new entries to zappy_collection.py
+    if added:
+        try:
+            import os
+            filepath = "/app/zappy_collection.py"
+            if not os.path.exists(filepath):
+                filepath = "./zappy_collection.py"
+
+            with open(filepath) as f:
+                col_content = f.read()
+
+            new_lines = []
+            for asset_id, name, entry in added:
+                def esc(s):
+                    return str(s).replace('"', '\\"')
+                line = (
+                    "    " + str(asset_id) + ": {"
+                    + '"name": "' + esc(entry["name"]) + '", '
+                    + '"unit_name": "' + esc(entry["unit_name"]) + '", '
+                    + '"image_url": "' + esc(entry["image_url"]) + '", '
+                    + '"background": "' + esc(entry["background"]) + '", '
+                    + '"body": "' + esc(entry["body"]) + '", '
+                    + '"earring": "' + esc(entry["earring"]) + '", '
+                    + '"eyes": "' + esc(entry["eyes"]) + '", '
+                    + '"eyewear": "' + esc(entry["eyewear"]) + '", '
+                    + '"head": "' + esc(entry["head"]) + '", '
+                    + '"mouth": "' + esc(entry["mouth"]) + '", '
+                    + '"skin": "' + esc(entry["skin"]) + '"},'
+                )
+                new_lines.append(line)
+
+            # Insert before closing } of ZAPPY_COLLECTION
+            insert_idx = col_content.rfind("\n}")
+            col_content = col_content[:insert_idx] + "\n" + "\n".join(new_lines) + col_content[insert_idx:]
+
+            # Add new IDs to ZAPPY_ASSET_IDS set
+            new_id_str = ", ".join(str(a) for a, _, _ in added)
+            col_content = col_content.replace(
+                "ZAPPY_ASSET_IDS: set = {\n    ",
+                "ZAPPY_ASSET_IDS: set = {\n    " + new_id_str + ",\n    "
+            )
+
+            with open(filepath, "w") as f:
+                f.write(col_content)
+
+        except Exception as e:
+            await interaction.followup.send(
+                "Added to live cache but could not persist to file — "
+                "run /addzappies again after next bot restart.",
+                ephemeral=True
+            )
+
+    lines = []
+    if added:
+        lines.append(f"Added {len(added)} Zappy/Zappies:")
+        for asset_id, name, _ in added:
+            lines.append(f"  {name} ({asset_id})")
+    if skipped:
+        lines.append(f"Already in collection: {', '.join(str(x) for x in skipped)}")
+    if failed:
+        lines.append(f"Failed:")
+        for asset_id, reason in failed:
+            lines.append(f"  {asset_id} — {reason}")
+
+    await interaction.followup.send("\n".join(lines) or "Nothing to do.", ephemeral=True)
+
 
 
 @tree.command(name="exprank", description="View the Expedition leaderboard")
