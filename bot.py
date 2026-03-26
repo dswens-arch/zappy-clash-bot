@@ -41,6 +41,7 @@ from expedition_engine import (
 )
 from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from nft_rewards       import award_nft_prize, claim_nft_prize
+from buddy_rewards     import check_buddy_drop, award_buddy, claim_buddy
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -1054,11 +1055,19 @@ async def _run_expedition_beat(
 
         if updated_run["complete"]:
             # Run is done
-            nft_drop = check_nft_drop(updated_run)
-            nft_prize_result = None
+            nft_drop   = check_nft_drop(updated_run)
+            buddy_drop = check_buddy_drop(zone_num)
+
+            nft_prize_result   = None
+            buddy_prize_result = None
+
+            if buddy_drop:
+                buddy_prize_result = await award_buddy(user_id, wallet, zone_num)
             if nft_drop:
                 nft_prize_result = await award_nft_prize(user_id, wallet)
-            final_embed = build_run_complete_embed(updated_run, nft_drop)
+
+            has_any_drop = nft_drop or buddy_drop
+            final_embed = build_run_complete_embed(updated_run, has_any_drop)
 
             # Save to DB
             save_expedition_run(
@@ -1098,6 +1107,7 @@ async def _run_expedition_beat(
                         f"with **{zappy.get('name', 'their Zappy')}**!\n"
                         f"⚡ +{updated_run['total_cp']} Exp CP · "
                         + token_line
+                        + (" · 🐾 **ZAPPY BUDDY FOUND!**" if buddy_drop else "")
                         + (" · 🎉 **NFT DROP!**" if nft_drop else "")
                     ),
                     color = ZONES[zone_num]["color"],
@@ -1115,10 +1125,10 @@ async def _run_expedition_beat(
             )
 
             await inter.followup.send(embed=final_embed, ephemeral=True)
+            if buddy_prize_result and buddy_prize_result.get("success"):
+                await inter.followup.send(buddy_prize_result["message"], ephemeral=True)
             if nft_prize_result and nft_prize_result.get("success"):
-                await inter.followup.send(
-                    nft_prize_result["message"], ephemeral=True
-                )
+                await inter.followup.send(nft_prize_result["message"], ephemeral=True)
             end_run(user_id)
         else:
             # Next beat
@@ -1167,17 +1177,27 @@ async def cmd_claimnft(interaction: discord.Interaction):
         await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
         return
 
-    result = await claim_nft_prize(user_id, wallet)
+    # Check buddy pool first, then NFT prizes
+    result = await claim_buddy(user_id, wallet)
+    if result is None:
+        result = await claim_nft_prize(user_id, wallet)
+
     await interaction.followup.send(result["message"], ephemeral=True)
 
-    # Announce in clash channel if successful
+    # Announce publicly if successful
     if result.get("success"):
-        channel = bot.get_channel(CLASH_CHANNEL)
+        channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
         if channel:
-            await channel.send(
-                f"🎉 <@{user_id}> just claimed their Zone 5 NFT prize: "
-                f"**{result['name']}**! 🏔️⚡"
-            )
+            if result.get("is_buddy"):
+                await channel.send(
+                    f"🐾 <@{user_id}> just claimed their Zappy Buddy: "
+                    f"**{result['name']}**! They found a friend on their expedition. ⚡"
+                )
+            else:
+                await channel.send(
+                    f"🎉 <@{user_id}> just claimed their Zone 5 NFT prize: "
+                    f"**{result['name']}**! 🏔️⚡"
+                )
 
 
 
