@@ -14,7 +14,7 @@ Commands:
 
 Scheduled sessions:
   2:00 PM UTC - Morning Bracket
-  2:00 AM UTC - Night Bracket
+  12:00 AM UTC - Night Bracket
 
 Setup:
   1. Copy .env.example to .env and fill in your keys
@@ -71,9 +71,9 @@ MORNING_OPEN    = dtime(14,  0, tzinfo=timezone.utc)
 MORNING_CLOSE   = dtime(14, 30, tzinfo=timezone.utc)   # 30 min registration window
 MORNING_RESOLVE = dtime(14, 35, tzinfo=timezone.utc)
 
-EVENING_OPEN    = dtime(2,   0, tzinfo=timezone.utc)
-EVENING_CLOSE   = dtime(2,  30, tzinfo=timezone.utc)
-EVENING_RESOLVE = dtime(2,  35, tzinfo=timezone.utc)
+EVENING_OPEN    = dtime(0,   0, tzinfo=timezone.utc)
+EVENING_CLOSE   = dtime(0,  30, tzinfo=timezone.utc)
+EVENING_RESOLVE = dtime(0,  35, tzinfo=timezone.utc)
 
 # ---------------------------------------------
 # Bot setup
@@ -1468,12 +1468,12 @@ async def session_scheduler():
         await close_and_resolve(channel)
 
     # Evening open - 3:00 PM UTC (15:00)
-    elif current_hour == 2 and current_min == 0 and not already_fired("evening_open"):
+    elif current_hour == 0 and current_min == 0 and not already_fired("evening_open"):
         mark_fired("evening_open")
         await open_registration("evening", channel)
 
     # Evening close - 3:30 PM UTC (15:30)
-    elif current_hour == 2 and current_min == 30 and not already_fired("evening_close"):
+    elif current_hour == 0 and current_min == 30 and not already_fired("evening_close"):
         mark_fired("evening_close")
         await close_and_resolve(channel)
 
@@ -1487,7 +1487,7 @@ async def open_registration(session: str, channel: discord.TextChannel):
     registration_open = True
 
     session_name = "☀️ Morning" if session == "morning" else "🌙 Night"
-    emoji_time = "2:00 PM UTC" if session == "morning" else "2:00 AM UTC"
+    emoji_time = "2:00 PM UTC" if session == "morning" else "12:00 AM UTC"
 
     if session == "evening":
         await channel.send(
