@@ -1665,10 +1665,12 @@ async def close_and_resolve(channel: discord.TextChannel):
             await channel.send(embed=pre_embed)
             await asyncio.sleep(2)
 
-            # -- Play-by-play text (skip the header lines, already in embed) --
+            # -- Play-by-play text (skip header lines and final win line) --
             log_lines = result["log"]
-            # Skip first 6 lines (the stat header we already showed in embed)
-            play_by_play = "\n".join(log_lines[6:])
+            # Skip first 6 lines (stat header shown in embed)
+            # Skip last line (win announcement shown in embed)
+            play_lines = log_lines[6:-1]
+            play_by_play = "\n".join(play_lines)
             chunks = [play_by_play[i:i+1800] for i in range(0, len(play_by_play), 1800)]
             for chunk in chunks:
                 if chunk.strip():
@@ -1772,11 +1774,16 @@ async def close_and_resolve(channel: discord.TextChannel):
                 deduped.append(p)
         next_round = deduped
 
+        # Pair next round: highest seed vs lowest seed
         current_round_pairs = []
-        for i in range(0, len(next_round) - 1, 2):
-            current_round_pairs.append((next_round[i], next_round[i+1]))
+        lo, hi = 0, len(next_round) - 1
+        while lo < hi:
+            current_round_pairs.append((next_round[lo], next_round[hi]))
+            lo += 1
+            hi -= 1
+        # If odd number, last player gets a bye
         if len(next_round) % 2 == 1:
-            current_round_pairs.append((next_round[-1], None))
+            current_round_pairs.append((next_round[len(next_round) // 2], None))
 
         current_round = current_round_pairs
         round_num += 1
