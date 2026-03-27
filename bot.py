@@ -278,6 +278,20 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
         )
         return
 
+    # Check 48-hour champion cooldown
+    cooldown = check_champion_cooldown(chosen_asset_id)
+    if cooldown["on_cooldown"]:
+        from zappy_collection import ZAPPY_COLLECTION
+        entry = ZAPPY_COLLECTION.get(chosen_asset_id, {})
+        zappy_name = entry.get("name", f"ASA {chosen_asset_id}")
+        await interaction.followup.send(
+            f"⏳ **{zappy_name}** is on a 48-hour cooldown after winning the last bracket.\n"
+            f"Eligible again: <t:{cooldown['eligible_ts']}:R>\n"
+            f"Enter a different Zappy with `/clash asset_id:XXXXX`.",
+            ephemeral=True
+        )
+        return
+
     # Fetch stats for the chosen Zappy
     zappy = await fetch_zappy_traits(chosen_asset_id)
     if not zappy:
@@ -692,6 +706,63 @@ def get_expedition_leaderboard(limit: int = 10) -> list:
 # ---------------------------------------------
 # /expedition command
 # ---------------------------------------------
+
+
+
+# ─────────────────────────────────────────────
+# Champion cooldown — 48 hours after winning
+# ─────────────────────────────────────────────
+
+def set_champion_cooldown(asset_id: int):
+    """Record a Zappy as champion with a 48-hour cooldown."""
+    try:
+        from database import get_supabase
+        from datetime import datetime, timezone
+        db = get_supabase()
+        db.table("champion_cooldowns").upsert({
+            "asset_id":   asset_id,
+            "won_at":     datetime.now(timezone.utc).isoformat(),
+        }).execute()
+    except Exception as e:
+        print(f"Error setting champion cooldown: {e}")
+
+
+def check_champion_cooldown(asset_id: int) -> dict:
+    """
+    Check if a Zappy is on cooldown.
+    Returns {"on_cooldown": bool, "eligible_at": str or None}
+    """
+    try:
+        from database import get_supabase
+        from datetime import datetime, timezone, timedelta
+        db = get_supabase()
+        result = (
+            db.table("champion_cooldowns")
+            .select("won_at")
+            .eq("asset_id", asset_id)
+            .order("won_at", desc=True)
+            .limit(1)
+            .execute()
+        )
+        if not result.data:
+            return {"on_cooldown": False, "eligible_at": None}
+
+        won_at      = datetime.fromisoformat(result.data[0]["won_at"])
+        eligible_at = won_at + timedelta(hours=48)
+        now         = datetime.now(timezone.utc)
+
+        if now < eligible_at:
+            return {
+                "on_cooldown":  True,
+                "eligible_at":  eligible_at.strftime("%B %d at %I:%M %p UTC"),
+                "eligible_ts":  int(eligible_at.timestamp()),
+            }
+        return {"on_cooldown": False, "eligible_at": None}
+    except Exception as e:
+        print(f"Error checking champion cooldown: {e}")
+        return {"on_cooldown": False, "eligible_at": None}
+
+
 
 @tree.command(name="expedition", description="Send your Zappy on a solo expedition")
 async def cmd_expedition(interaction: discord.Interaction):
@@ -1796,6 +1867,9 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             bonus_cp = int(CP_BRACKET_WIN * cp_multiplier)
             award_cp(champion_id, bonus_cp, f"bracket_champion_{bracket_id}")
+
+            # Set 48-hour cooldown on champion Zappy
+            set_champion_cooldown(next_round[0]["asset_id"])
 
             # Champion token reward
             champ_wallet = get_wallet(champion_id)
