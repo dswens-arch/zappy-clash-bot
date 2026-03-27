@@ -302,6 +302,10 @@ def seed_bracket(entries: list) -> list:
     """
     Seed the bracket by CP ranking (higher CP gets better seed).
     Returns list of matchups: [(player_a, player_b), ...]
+    
+    With n players, byes_needed = next_power_of_2(n) - n.
+    Top seeds get the byes. Remaining players all fight in round 1.
+    This ensures only the minimum byes are given and they don't cascade.
     """
     import random
 
@@ -317,22 +321,31 @@ def seed_bracket(entries: list) -> list:
 
     ranked.sort(key=lambda x: x["cp"], reverse=True)
 
-    # Pad to power of 2 with byes if needed
     n = len(ranked)
     if n < 2:
         return []
 
-    # Standard bracket seeding: 1 vs last, 2 vs second-last, etc.
+    # Find next power of 2
+    next_pow2 = 1
+    while next_pow2 < n:
+        next_pow2 *= 2
+
+    byes_needed = next_pow2 - n
+
+    # Top seeds get byes (they advance automatically)
+    bye_players   = ranked[:byes_needed]
+    fight_players = ranked[byes_needed:]
+
+    # Pair up the fighting players: highest vs lowest seed
     matchups = []
-    top = ranked[:n//2]
-    bottom = ranked[n//2:]
-    bottom.reverse()   # Seed 1 vs lowest seed
+    lo, hi = 0, len(fight_players) - 1
+    while lo < hi:
+        matchups.append((fight_players[lo], fight_players[hi]))
+        lo += 1
+        hi -= 1
 
-    for a, b in zip(top, bottom):
-        matchups.append((a, b))
-
-    # If odd number, give the top seed a bye (they auto-advance)
-    if n % 2 == 1:
-        matchups.append((ranked[0], None))   # None = bye
+    # Add bye matchups at end (they'll be processed as byes in the scheduler)
+    for player in bye_players:
+        matchups.append((player, None))
 
     return matchups
