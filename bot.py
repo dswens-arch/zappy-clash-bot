@@ -1404,37 +1404,75 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                 traits    = {}
                 image_url = ""
 
+                # Determine metadata URL based on standard
+                metadata_url = None
+
                 if asset_url.startswith("template-ipfs://") and reserve:
+                    # ARC-19 — decode CID from reserve address
                     metadata_cid = _decode_arc19(asset_url, reserve)
                     if metadata_cid:
-                        for gateway in IPFS_GATEWAYS:
-                            try:
-                                async with session.get(
-                                    f"{gateway}{metadata_cid}",
-                                    timeout=aiohttp.ClientTimeout(total=15)
-                                ) as resp:
-                                    if resp.status == 200:
-                                        metadata = await resp.json(content_type=None)
-                                        props = metadata.get("properties", {})
-                                        if isinstance(props, list):
-                                            props = {item["trait_type"]: item["value"] for item in props if "trait_type" in item}
-                                        traits = {
-                                            "background": props.get("Background", ""),
-                                            "body":       props.get("Body", ""),
-                                            "earring":    props.get("Earring", "None"),
-                                            "eyes":       props.get("Eyes", ""),
-                                            "eyewear":    props.get("Eyewear", "None"),
-                                            "head":       props.get("Head", ""),
-                                            "mouth":      props.get("Mouth", ""),
-                                            "skin":       props.get("Skin", ""),
-                                        }
-                                        raw_img = metadata.get("image", "")
-                                        if raw_img.startswith("ipfs://"):
-                                            cid = raw_img.replace("ipfs://", "").split("/")[0]
-                                            image_url = "https://ipfs.io/ipfs/" + cid
-                                        break
-                            except Exception:
-                                continue
+                        metadata_url = IPFS_GATEWAYS[0] + metadata_cid
+
+                elif asset_url.startswith("ipfs://"):
+                    # ARC-3 direct IPFS URL
+                    cid = asset_url.replace("ipfs://", "").split("#")[0]
+                    metadata_url = "https://ipfs.io/ipfs/" + cid
+
+                elif asset_url.startswith("https://") or asset_url.startswith("http://"):
+                    # ARC-3 direct HTTP URL — strip fragment (#arc3 etc)
+                    metadata_url = asset_url.split("#")[0]
+
+                if metadata_url:
+                    # Try fetching metadata, fall back through gateways if needed
+                    fetch_urls = [metadata_url]
+                    # Also try other gateways for IPFS URLs
+                    if "ipfs" in metadata_url:
+                        for gw in IPFS_GATEWAYS[1:]:
+                            cid_part = metadata_url.split("/ipfs/")[-1] if "/ipfs/" in metadata_url else ""
+                            if cid_part:
+                                fetch_urls.append(gw + cid_part)
+
+                    for fetch_url in fetch_urls:
+                        try:
+                            async with session.get(
+                                fetch_url,
+                                timeout=aiohttp.ClientTimeout(total=15)
+                            ) as resp:
+                                if resp.status == 200:
+                                    metadata = await resp.json(content_type=None)
+                                    props = metadata.get("properties", {})
+                                    if isinstance(props, list):
+                                        props = {item["trait_type"]: item["value"] for item in props if "trait_type" in item}
+                                    traits = {
+                                        "background": props.get("Background", ""),
+                                        "body":       props.get("Body", ""),
+                                        "earring":    props.get("Earring", "None"),
+                                        "eyes":       props.get("Eyes", ""),
+                                        "eyewear":    props.get("Eyewear", "None"),
+                                        "head":       props.get("Head", ""),
+                                        "mouth":      props.get("Mouth", ""),
+                                        "skin":       props.get("Skin", ""),
+                                    }
+                                    raw_img = metadata.get("image", "")
+                                    if raw_img.startswith("ipfs://"):
+                                        cid = raw_img.replace("ipfs://", "").split("/")[0]
+                                        image_url = "https://ipfs.io/ipfs/" + cid
+                                    elif raw_img.startswith("https://"):
+                                        image_url = raw_img
+                                    # Also check image directly from asset URL for ARC-3
+                                    if not image_url and "ipfs" in asset_url:
+                                        image_url = asset_url.split("#")[0]
+                                    break
+                        except Exception:
+                            continue
+
+                # ARC-3 fallback: if metadata URL is the image itself
+                if not image_url and asset_url and not asset_url.startswith("template-ipfs://"):
+                    clean_url = asset_url.split("#")[0]
+                    if any(ext in clean_url.lower() for ext in [".png", ".jpg", ".jpeg", ".gif", ".webp"]):
+                        image_url = clean_url
+                    elif "ipfs" in clean_url:
+                        image_url = clean_url
 
                 entry = {
                     "name": name, "unit_name": unit_name, "image_url": image_url,
