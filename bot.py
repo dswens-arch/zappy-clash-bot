@@ -1385,8 +1385,12 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
     async with aiohttp.ClientSession() as session:
         for asset_id in asset_ids:
             if asset_id in ZAPPY_ASSET_IDS:
-                skipped.append(asset_id)
-                continue
+                # Check if traits are empty — if so, re-fetch
+                existing = ZAPPY_COLLECTION.get(asset_id, {})
+                if any([existing.get("background"), existing.get("body"), existing.get("skin")]):
+                    skipped.append(asset_id)
+                    continue
+                # Empty traits — fall through to re-fetch
             try:
                 url = f"{INDEXER_URL}/v2/assets/{asset_id}"
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
