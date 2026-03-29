@@ -1470,18 +1470,19 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                     print(f"DEBUG {asset_id}: fetching metadata from {metadata_url[:80]}")
                     fetch_urls = [metadata_url]
                     if "ipfs" in metadata_url:
-                        for gw in IPFS_GATEWAYS[1:]:
-                            cid_part = metadata_url.split("/ipfs/")[-1] if "/ipfs/" in metadata_url else ""
-                            if cid_part:
+                        cid_part = metadata_url.split("/ipfs/")[-1] if "/ipfs/" in metadata_url else ""
+                        if cid_part:
+                            for gw in IPFS_GATEWAYS[1:]:
                                 fetch_urls.append(gw + cid_part)
 
                     for fetch_url in fetch_urls:
                         try:
                             async with session.get(
                                 fetch_url,
-                                timeout=aiohttp.ClientTimeout(total=20)
+                                timeout=aiohttp.ClientTimeout(total=30),
+                                headers={"User-Agent": "Mozilla/5.0"}
                             ) as resp:
-                                print(f"DEBUG {asset_id}: {fetch_url[:60]} status={resp.status}")
+                                print(f"DEBUG {asset_id}: {fetch_url[:70]} status={resp.status}")
                                 if resp.status == 200:
                                     metadata = await resp.json(content_type=None)
                                     print(f"DEBUG {asset_id}: metadata keys={list(metadata.keys())}")
@@ -1508,7 +1509,7 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                                         image_url = asset_url.split("#")[0]
                                     break
                         except Exception as ex:
-                            print(f"DEBUG {asset_id}: {fetch_url[:60]} EXCEPTION={ex}")
+                            print(f"DEBUG {asset_id}: {fetch_url[:70]} EXCEPTION={type(ex).__name__}: {str(ex)[:80]}")
                             continue
 
                 # ARC-3 fallback: if metadata URL is the image itself
