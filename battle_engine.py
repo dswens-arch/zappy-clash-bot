@@ -104,6 +104,10 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
     if not ability or fighter.ability_used:
         return False, ""
 
+    # Guard against legacy string format
+    if isinstance(ability, str):
+        return False, ""
+
     trigger = ability.get("trigger_round")
 
     # Determine if this round triggers the ability
