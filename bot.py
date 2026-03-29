@@ -427,9 +427,9 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
     )
     if stats.get("combo"):
         embed.add_field(name="Combo", value=stats["combo"], inline=False)
-    if stats.get("ability"):
+    if stats.get("ability") and isinstance(stats["ability"], dict):
         ab = stats["ability"]
-        embed.add_field(name=f"⚡ Ability: {ab['name']}", value=ab["desc"], inline=False)
+        embed.add_field(name=f"⚡ Ability: {ab.get('name', 'Ability')}", value=ab.get("desc", ""), inline=False)
 
     image_url = zappy.get("image_url", "")
     if image_url:
@@ -970,31 +970,61 @@ def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
     """
     Rank a list of Zappies by their suitability for a specific zone.
     Returns top 5 with scores and explanations.
-    Each zappy dict must have: asset_id, name, unit_name
-    Traits/stats loaded via fetch_zappy_traits.
+    Handles regular Zappies, Heroes, and Collabs.
     """
     priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
     primary, secondary, tertiary = priority
 
+    from zappy_collection import ZAPPY_COLLECTION
+    from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+    from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
+
     ranked = []
     for z in zappies:
-        from zappy_collection import ZAPPY_COLLECTION
-        entry = ZAPPY_COLLECTION.get(z["asset_id"])
-        if not entry:
+        asset_id = z["asset_id"]
+        stats    = None
+        traits   = {}
+        image_url = ""
+
+        # Hero
+        if asset_id in HERO_ASSET_IDS:
+            hero_type = HERO_ASSET_IDS[asset_id]
+            hero_data = get_hero_stats(hero_type)
+            if hero_data:
+                stats     = {k: hero_data[k] for k in ("VLT", "INS", "SPK")}
+                traits    = {"hero_type": hero_type}
+                image_url = ""
+
+        # Collab
+        elif asset_id in COLLAB_ASSET_IDS:
+            collab_type = COLLAB_ASSET_IDS[asset_id]
+            collab_data = get_collab_stats(collab_type)
+            if collab_data:
+                stats     = {k: collab_data[k] for k in ("VLT", "INS", "SPK")}
+                traits    = {"collab_type": collab_type}
+                image_url = ""
+
+        # Regular Zappy
+        else:
+            entry = ZAPPY_COLLECTION.get(asset_id)
+            if not entry:
+                continue
+            traits = {
+                "background": entry["background"],
+                "body":       entry["body"],
+                "earring":    entry["earring"],
+                "eyes":       entry["eyes"],
+                "eyewear":    entry["eyewear"],
+                "head":       entry["head"],
+                "mouth":      entry["mouth"],
+                "skin":       entry["skin"],
+            }
+            stats     = calculate_stats(traits)
+            image_url = entry.get("image_url", "")
+
+        if not stats:
             continue
-        from stats_engine import calculate_stats
-        traits = {
-            "background": entry["background"],
-            "body":       entry["body"],
-            "earring":    entry["earring"],
-            "eyes":       entry["eyes"],
-            "eyewear":    entry["eyewear"],
-            "head":       entry["head"],
-            "mouth":      entry["mouth"],
-            "skin":       entry["skin"],
-        }
-        stats = calculate_stats(traits)
-        # Weighted score: primary=3x, secondary=2x, tertiary=1x
+
         score = (
             stats[primary]   * 3 +
             stats[secondary] * 2 +
@@ -1002,10 +1032,10 @@ def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
         )
         ranked.append({
             **z,
-            "stats":  stats,
-            "score":  score,
-            "traits": traits,
-            "image_url": entry.get("image_url", ""),
+            "stats":     stats,
+            "score":     score,
+            "traits":    traits,
+            "image_url": image_url,
         })
 
     ranked.sort(key=lambda x: x["score"], reverse=True)
@@ -1405,6 +1435,8 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                 asset_url = params.get("url", "")
                 reserve   = params.get("reserve", "")
 
+                print(f"DEBUG {asset_id}: url={asset_url[:80]} reserve={reserve[:20] if reserve else 'none'}")
+
                 traits    = {}
                 image_url = ""
 
@@ -1426,8 +1458,10 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                     # ARC-3 direct HTTP URL — strip fragment (#arc3 etc)
                     metadata_url = asset_url.split("#")[0]
 
+                print(f"DEBUG {asset_id}: metadata_url={metadata_url[:80] if metadata_url else 'NONE'}")
+
                 if metadata_url:
-                    # Try fetching metadata, fall back through gateways if needed
+                    print(f"DEBUG {asset_id}: fetching metadata from {metadata_url[:80]}")
                     fetch_urls = [metadata_url]
                     # Also try other gateways for IPFS URLs
                     if "ipfs" in metadata_url:
@@ -1442,6 +1476,7 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                                 fetch_url,
                                 timeout=aiohttp.ClientTimeout(total=15)
                             ) as resp:
+                                print(f"DEBUG {asset_id}: fetch {fetch_url[:60]} status={resp.status}")
                                 if resp.status == 200:
                                     metadata = await resp.json(content_type=None)
                                     props = metadata.get("properties", {})
