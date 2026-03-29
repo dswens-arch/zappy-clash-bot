@@ -1367,10 +1367,11 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
     import base64, re
 
     IPFS_GATEWAYS = [
-        "https://nftstorage.link/ipfs/",
+        "https://ipfs.algonode.dev/ipfs/",
+        "https://ipfs.io/ipfs/",
         "https://dweb.link/ipfs/",
         "https://cloudflare-ipfs.com/ipfs/",
-        "https://ipfs.io/ipfs/",
+        "https://nftstorage.link/ipfs/",
     ]
 
     def _encode_varint(n):
@@ -1463,7 +1464,6 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                 if metadata_url:
                     print(f"DEBUG {asset_id}: fetching metadata from {metadata_url[:80]}")
                     fetch_urls = [metadata_url]
-                    # Also try other gateways for IPFS URLs
                     if "ipfs" in metadata_url:
                         for gw in IPFS_GATEWAYS[1:]:
                             cid_part = metadata_url.split("/ipfs/")[-1] if "/ipfs/" in metadata_url else ""
@@ -1474,11 +1474,12 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                         try:
                             async with session.get(
                                 fetch_url,
-                                timeout=aiohttp.ClientTimeout(total=15)
+                                timeout=aiohttp.ClientTimeout(total=20)
                             ) as resp:
-                                print(f"DEBUG {asset_id}: fetch {fetch_url[:60]} status={resp.status}")
+                                print(f"DEBUG {asset_id}: {fetch_url[:60]} status={resp.status}")
                                 if resp.status == 200:
                                     metadata = await resp.json(content_type=None)
+                                    print(f"DEBUG {asset_id}: metadata keys={list(metadata.keys())}")
                                     props = metadata.get("properties", {})
                                     if isinstance(props, list):
                                         props = {item["trait_type"]: item["value"] for item in props if "trait_type" in item}
@@ -1498,11 +1499,11 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
                                         image_url = "https://ipfs.io/ipfs/" + cid
                                     elif raw_img.startswith("https://"):
                                         image_url = raw_img
-                                    # Also check image directly from asset URL for ARC-3
                                     if not image_url and "ipfs" in asset_url:
                                         image_url = asset_url.split("#")[0]
                                     break
-                        except Exception:
+                        except Exception as ex:
+                            print(f"DEBUG {asset_id}: {fetch_url[:60]} EXCEPTION={ex}")
                             continue
 
                 # ARC-3 fallback: if metadata URL is the image itself
