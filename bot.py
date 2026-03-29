@@ -1606,7 +1606,6 @@ async def _addzappies_dummy():
             b32 = base64.b32encode(cid_bytes).decode().lower()
             return 'b' + b32.rstrip('=')
         except Exception as e:
-            print(f"DEBUG _decode_arc19 error: {e}")
             return None
 
 
