@@ -1571,13 +1571,14 @@ async def _addzappies_dummy():
     import base64, re
 
     IPFS_GATEWAYS = [
-        "https://gateway.pinata.cloud/ipfs/",
+        "https://crustipfs.xyz/ipfs/",
         "https://ipfs.io/ipfs/",
-        "https://ipfs.algonode.dev/ipfs/",
         "https://dweb.link/ipfs/",
         "https://cloudflare-ipfs.com/ipfs/",
         "https://nftstorage.link/ipfs/",
         "https://w3s.link/ipfs/",
+        "https://gateway.pinata.cloud/ipfs/",
+        "https://ipfs.algonode.dev/ipfs/",
     ]
 
     def _encode_varint(n):
