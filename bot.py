@@ -1367,11 +1367,13 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
     import base64, re
 
     IPFS_GATEWAYS = [
-        "https://ipfs.algonode.dev/ipfs/",
+        "https://gateway.pinata.cloud/ipfs/",
         "https://ipfs.io/ipfs/",
+        "https://ipfs.algonode.dev/ipfs/",
         "https://dweb.link/ipfs/",
         "https://cloudflare-ipfs.com/ipfs/",
         "https://nftstorage.link/ipfs/",
+        "https://w3s.link/ipfs/",
     ]
 
     def _encode_varint(n):
@@ -1403,8 +1405,11 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
             hash_map  = {"sha2-256": 0x12}
             multihash = _encode_varint(hash_map.get(hash_type, 0x12)) + _encode_varint(len(digest)) + digest
             cid_bytes = _encode_varint(1) + _encode_varint(codec_map.get(codec_str, 0x55)) + multihash
-            return 'b' + base64.b32encode(cid_bytes).decode().lower().rstrip('=')
-        except Exception:
+            # CIDv1 base32 lower — must pad to multiple of 8 before decoding
+            b32 = base64.b32encode(cid_bytes).decode().lower()
+            return 'b' + b32.rstrip('=')
+        except Exception as e:
+            print(f"DEBUG _decode_arc19 error: {e}")
             return None
 
     from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
