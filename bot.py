@@ -1360,7 +1360,204 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
         await interaction.followup.send("Max 50 ASA IDs at once.", ephemeral=True)
         return
 
-    await interaction.followup.send(f"Fetching {len(asset_ids)} Zappy/Zappies...", ephemeral=True)
+    await interaction.followup.send(
+        f"Processing {len(asset_ids)} Zappy/Zappies in the background. "
+        f"Results will be posted here when done.", ephemeral=True
+    )
+
+    # Run the slow IPFS work as a background task
+    asyncio.create_task(_addzappies_background(interaction.channel, asset_ids))
+
+
+async def _addzappies_background(channel, asset_ids: list):
+    """Background task for /addzappies — runs IPFS fetches without blocking Discord."""
+    import aiohttp, base64, re
+    from algorand_lookup import INDEXER_URL
+    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
+
+    IPFS_GATEWAYS = [
+        "https://ipfs.io/ipfs/",
+        "https://dweb.link/ipfs/",
+        "https://cloudflare-ipfs.com/ipfs/",
+        "https://nftstorage.link/ipfs/",
+        "https://w3s.link/ipfs/",
+        "https://gateway.pinata.cloud/ipfs/",
+    ]
+
+    def _encode_varint(n):
+        buf = []
+        while True:
+            towrite = n & 0x7f
+            n >>= 7
+            if n:
+                buf.append(towrite | 0x80)
+            else:
+                buf.append(towrite)
+                break
+        return bytes(buf)
+
+    def _decode_arc19(asset_url, reserve_address):
+        try:
+            from algosdk import encoding as algo_encoding
+            match = re.search(r'\{ipfscid:(\d+):([^:]+):([^:]+):([^}]+)\}', asset_url)
+            if not match:
+                return None
+            version   = int(match.group(1))
+            codec_str = match.group(2)
+            hash_type = match.group(4)
+            digest    = algo_encoding.decode_address(reserve_address)
+            if version == 0:
+                import base58
+                return base58.b58encode(bytes([0x12, 0x20]) + digest).decode()
+            codec_map = {"raw": 0x55, "dag-pb": 0x70}
+            hash_map  = {"sha2-256": 0x12}
+            multihash = _encode_varint(hash_map.get(hash_type, 0x12)) + _encode_varint(len(digest)) + digest
+            cid_bytes = _encode_varint(1) + _encode_varint(codec_map.get(codec_str, 0x55)) + multihash
+            b32 = base64.b32encode(cid_bytes).decode().lower()
+            return 'b' + b32.rstrip('=')
+        except Exception as e:
+            print(f"ARC19 decode error: {e}")
+            return None
+
+    added   = []
+    skipped = []
+    failed  = []
+
+    async with aiohttp.ClientSession() as session:
+        for asset_id in asset_ids:
+            # Skip if already has traits
+            if asset_id in ZAPPY_ASSET_IDS:
+                existing = ZAPPY_COLLECTION.get(asset_id, {})
+                if any([existing.get("background"), existing.get("body"), existing.get("skin")]):
+                    skipped.append(asset_id)
+                    continue
+
+            try:
+                url = f"{INDEXER_URL}/v2/assets/{asset_id}"
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                    if resp.status != 200:
+                        failed.append((asset_id, f"indexer {resp.status}"))
+                        continue
+                    data   = await resp.json()
+                    params = data.get("asset", {}).get("params", {})
+
+                name      = params.get("name", f"Zappy #{asset_id}")
+                unit_name = params.get("unit-name", "")
+                asset_url = params.get("url", "")
+                reserve   = params.get("reserve", "")
+
+                traits    = {}
+                image_url = ""
+                metadata_url = None
+
+                if asset_url.startswith("template-ipfs://") and reserve:
+                    cid = _decode_arc19(asset_url, reserve)
+                    if cid:
+                        metadata_url = f"https://ipfs.io/ipfs/{cid}"
+                elif asset_url.startswith("ipfs://"):
+                    cid = asset_url.replace("ipfs://", "").split("#")[0]
+                    metadata_url = f"https://ipfs.io/ipfs/{cid}"
+                elif asset_url.startswith("https://") or asset_url.startswith("http://"):
+                    metadata_url = asset_url.split("#")[0]
+
+                if metadata_url:
+                    cid_part = metadata_url.split("/ipfs/")[-1] if "/ipfs/" in metadata_url else ""
+                    fetch_urls = [metadata_url] + [gw + cid_part for gw in IPFS_GATEWAYS if cid_part and gw not in metadata_url]
+
+                    for fetch_url in fetch_urls:
+                        try:
+                            async with session.get(
+                                fetch_url,
+                                timeout=aiohttp.ClientTimeout(total=30),
+                                headers={"User-Agent": "Mozilla/5.0"}
+                            ) as resp:
+                                if resp.status == 200:
+                                    metadata = await resp.json(content_type=None)
+                                    props = metadata.get("properties", {})
+                                    if isinstance(props, list):
+                                        props = {p["trait_type"]: p["value"] for p in props if "trait_type" in p}
+                                    traits = {
+                                        "background": props.get("Background", ""),
+                                        "body":       props.get("Body", ""),
+                                        "earring":    props.get("Earring", "None"),
+                                        "eyes":       props.get("Eyes", ""),
+                                        "eyewear":    props.get("Eyewear", "None"),
+                                        "head":       props.get("Head", ""),
+                                        "mouth":      props.get("Mouth", ""),
+                                        "skin":       props.get("Skin", ""),
+                                    }
+                                    raw_img = metadata.get("image", "")
+                                    if raw_img.startswith("ipfs://"):
+                                        image_url = "https://ipfs.io/ipfs/" + raw_img.replace("ipfs://", "").split("/")[0]
+                                    elif raw_img.startswith("https://"):
+                                        image_url = raw_img
+                                    if not image_url and "ipfs" in asset_url:
+                                        image_url = asset_url.split("#")[0]
+                                    break
+                        except Exception:
+                            continue
+
+                entry = {
+                    "name": name, "unit_name": unit_name, "image_url": image_url,
+                    "background": traits.get("background", ""),
+                    "body":       traits.get("body", ""),
+                    "earring":    traits.get("earring", "None"),
+                    "eyes":       traits.get("eyes", ""),
+                    "eyewear":    traits.get("eyewear", "None"),
+                    "head":       traits.get("head", ""),
+                    "mouth":      traits.get("mouth", ""),
+                    "skin":       traits.get("skin", ""),
+                }
+                ZAPPY_COLLECTION[asset_id] = entry
+                ZAPPY_ASSET_IDS.add(asset_id)
+                added.append((asset_id, name, entry))
+
+            except Exception as e:
+                failed.append((asset_id, str(e)[:80]))
+
+    # Persist to Supabase
+    if added:
+        try:
+            from database import get_supabase
+            db = get_supabase()
+            for asset_id, name, entry in added:
+                db.table("extra_zappies").upsert({
+                    "asset_id":   asset_id,
+                    "name":       entry["name"],
+                    "unit_name":  entry["unit_name"],
+                    "image_url":  entry["image_url"],
+                    "background": entry["background"],
+                    "body":       entry["body"],
+                    "earring":    entry["earring"],
+                    "eyes":       entry["eyes"],
+                    "eyewear":    entry["eyewear"],
+                    "head":       entry["head"],
+                    "mouth":      entry["mouth"],
+                    "skin":       entry["skin"],
+                }).execute()
+        except Exception as e:
+            await channel.send(f"⚠️ Supabase persist failed: {e}")
+
+    # Post results
+    lines = ["**Zappy Import Complete**"]
+    if added:
+        lines.append(f"Added {len(added)}:")
+        for asset_id, name, _ in added:
+            has_traits = bool(ZAPPY_COLLECTION.get(asset_id, {}).get("background"))
+            lines.append(f"  {name} ({asset_id}) {'✅' if has_traits else '⚠️ no traits'}")
+    if skipped:
+        lines.append(f"Already in collection: {len(skipped)}")
+    if failed:
+        lines.append(f"Failed: {len(failed)}")
+        for asset_id, reason in failed:
+            lines.append(f"  {asset_id} - {reason}")
+
+    await channel.send("\n".join(lines))
+
+
+# ─── dummy placeholder so the old addzappies body below gets replaced ───
+async def _addzappies_dummy():
+    pass
 
     import aiohttp
     from algorand_lookup import INDEXER_URL
@@ -1411,173 +1608,6 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
         except Exception as e:
             print(f"DEBUG _decode_arc19 error: {e}")
             return None
-
-    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
-
-    added   = []
-    skipped = []
-    failed  = []
-
-    async with aiohttp.ClientSession() as session:
-        for asset_id in asset_ids:
-            if asset_id in ZAPPY_ASSET_IDS:
-                # Check if traits are empty — if so, re-fetch
-                existing = ZAPPY_COLLECTION.get(asset_id, {})
-                if any([existing.get("background"), existing.get("body"), existing.get("skin")]):
-                    skipped.append(asset_id)
-                    continue
-                # Empty traits — fall through to re-fetch
-            try:
-                url = f"{INDEXER_URL}/v2/assets/{asset_id}"
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                    if resp.status != 200:
-                        failed.append((asset_id, f"indexer {resp.status}"))
-                        continue
-                    data   = await resp.json()
-                    params = data.get("asset", {}).get("params", {})
-
-                name      = params.get("name", f"Zappy #{asset_id}")
-                unit_name = params.get("unit-name", "")
-                asset_url = params.get("url", "")
-                reserve   = params.get("reserve", "")
-
-                print(f"DEBUG {asset_id}: url={asset_url[:80]} reserve={reserve[:20] if reserve else 'none'}")
-
-                traits    = {}
-                image_url = ""
-
-                # Determine metadata URL based on standard
-                metadata_url = None
-
-                if asset_url.startswith("template-ipfs://") and reserve:
-                    # ARC-19 — decode CID from reserve address
-                    metadata_cid = _decode_arc19(asset_url, reserve)
-                    if metadata_cid:
-                        metadata_url = IPFS_GATEWAYS[0] + metadata_cid
-
-                elif asset_url.startswith("ipfs://"):
-                    # ARC-3 direct IPFS URL
-                    cid = asset_url.replace("ipfs://", "").split("#")[0]
-                    metadata_url = "https://ipfs.io/ipfs/" + cid
-
-                elif asset_url.startswith("https://") or asset_url.startswith("http://"):
-                    # ARC-3 direct HTTP URL — strip fragment (#arc3 etc)
-                    metadata_url = asset_url.split("#")[0]
-
-                print(f"DEBUG {asset_id}: metadata_url={metadata_url[:80] if metadata_url else 'NONE'}")
-
-                if metadata_url:
-                    print(f"DEBUG {asset_id}: fetching metadata from {metadata_url[:80]}")
-                    fetch_urls = [metadata_url]
-                    if "ipfs" in metadata_url:
-                        cid_part = metadata_url.split("/ipfs/")[-1] if "/ipfs/" in metadata_url else ""
-                        if cid_part:
-                            for gw in IPFS_GATEWAYS[1:]:
-                                fetch_urls.append(gw + cid_part)
-
-                    for fetch_url in fetch_urls:
-                        try:
-                            async with session.get(
-                                fetch_url,
-                                timeout=aiohttp.ClientTimeout(total=30),
-                                headers={"User-Agent": "Mozilla/5.0"}
-                            ) as resp:
-                                print(f"DEBUG {asset_id}: {fetch_url[:70]} status={resp.status}")
-                                if resp.status == 200:
-                                    metadata = await resp.json(content_type=None)
-                                    print(f"DEBUG {asset_id}: metadata keys={list(metadata.keys())}")
-                                    props = metadata.get("properties", {})
-                                    if isinstance(props, list):
-                                        props = {item["trait_type"]: item["value"] for item in props if "trait_type" in item}
-                                    traits = {
-                                        "background": props.get("Background", ""),
-                                        "body":       props.get("Body", ""),
-                                        "earring":    props.get("Earring", "None"),
-                                        "eyes":       props.get("Eyes", ""),
-                                        "eyewear":    props.get("Eyewear", "None"),
-                                        "head":       props.get("Head", ""),
-                                        "mouth":      props.get("Mouth", ""),
-                                        "skin":       props.get("Skin", ""),
-                                    }
-                                    raw_img = metadata.get("image", "")
-                                    if raw_img.startswith("ipfs://"):
-                                        cid = raw_img.replace("ipfs://", "").split("/")[0]
-                                        image_url = "https://ipfs.io/ipfs/" + cid
-                                    elif raw_img.startswith("https://"):
-                                        image_url = raw_img
-                                    if not image_url and "ipfs" in asset_url:
-                                        image_url = asset_url.split("#")[0]
-                                    break
-                        except Exception as ex:
-                            print(f"DEBUG {asset_id}: {fetch_url[:70]} EXCEPTION={type(ex).__name__}: {str(ex)[:80]}")
-                            continue
-
-                # ARC-3 fallback: if metadata URL is the image itself
-                if not image_url and asset_url and not asset_url.startswith("template-ipfs://"):
-                    clean_url = asset_url.split("#")[0]
-                    if any(ext in clean_url.lower() for ext in [".png", ".jpg", ".jpeg", ".gif", ".webp"]):
-                        image_url = clean_url
-                    elif "ipfs" in clean_url:
-                        image_url = clean_url
-
-                entry = {
-                    "name": name, "unit_name": unit_name, "image_url": image_url,
-                    "background": traits.get("background", ""),
-                    "body":       traits.get("body", ""),
-                    "earring":    traits.get("earring", "None"),
-                    "eyes":       traits.get("eyes", ""),
-                    "eyewear":    traits.get("eyewear", "None"),
-                    "head":       traits.get("head", ""),
-                    "mouth":      traits.get("mouth", ""),
-                    "skin":       traits.get("skin", ""),
-                }
-                ZAPPY_COLLECTION[asset_id] = entry
-                ZAPPY_ASSET_IDS.add(asset_id)
-                added.append((asset_id, name, entry))
-
-            except Exception as e:
-                failed.append((asset_id, str(e)[:80]))
-
-    # Persist new entries to Supabase so they survive bot restarts
-    if added:
-        try:
-            from database import get_supabase
-            db = get_supabase()
-            for asset_id, name, entry in added:
-                db.table("extra_zappies").upsert({
-                    "asset_id":   asset_id,
-                    "name":       entry["name"],
-                    "unit_name":  entry["unit_name"],
-                    "image_url":  entry["image_url"],
-                    "background": entry["background"],
-                    "body":       entry["body"],
-                    "earring":    entry["earring"],
-                    "eyes":       entry["eyes"],
-                    "eyewear":    entry["eyewear"],
-                    "head":       entry["head"],
-                    "mouth":      entry["mouth"],
-                    "skin":       entry["skin"],
-                }).execute()
-        except Exception as e:
-            await interaction.followup.send(
-                f"Added to live cache but Supabase persist failed: {e}\n"
-                "Run /addzappies again if the bot restarts.",
-                ephemeral=True
-            )
-
-    lines = []
-    if added:
-        lines.append(f"Added {len(added)} Zappy/Zappies:")
-        for asset_id, name, _ in added:
-            lines.append(f"  {name} ({asset_id})")
-    if skipped:
-        lines.append(f"Already in collection: {', '.join(str(x) for x in skipped)}")
-    if failed:
-        lines.append(f"Failed:")
-        for asset_id, reason in failed:
-            lines.append(f"  {asset_id} - {reason}")
-
-    await interaction.followup.send("\n".join(lines) or "Nothing to do.", ephemeral=True)
 
 
 
