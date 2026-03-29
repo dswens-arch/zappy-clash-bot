@@ -1458,11 +1458,18 @@ async def _addzappies_background(channel, asset_ids: list):
                     cid = asset_url.replace("ipfs://", "").split("#")[0]
                     metadata_url = f"https://ipfs.io/ipfs/{cid}"
                 elif asset_url.startswith("https://") or asset_url.startswith("http://"):
-                    metadata_url = asset_url.split("#")[0]
+                    # Strip fragment AND query params — just want the base metadata URL
+                    base_url = asset_url.split("#")[0].split("?")[0]
+                    metadata_url = base_url
 
                 if metadata_url:
                     cid_part = metadata_url.split("/ipfs/")[-1] if "/ipfs/" in metadata_url else ""
-                    fetch_urls = [metadata_url] + [gw + cid_part for gw in IPFS_GATEWAYS if cid_part and gw not in metadata_url]
+                    # For direct HTTPS URLs, try original first then gateways
+                    # For template-ipfs, try all gateways
+                    if asset_url.startswith("https://") or asset_url.startswith("http://"):
+                        fetch_urls = [metadata_url] + ([gw + cid_part for gw in IPFS_GATEWAYS if cid_part] if cid_part else [])
+                    else:
+                        fetch_urls = [gw + cid_part for gw in IPFS_GATEWAYS if cid_part] if cid_part else [metadata_url]
 
                     for fetch_url in fetch_urls:
                         try:
