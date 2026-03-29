@@ -1340,8 +1340,11 @@ async def cmd_claimnft(interaction: discord.Interaction):
 
 
 @tree.command(name="addzappies", description="ADMIN - add newly minted Zappies to the collection")
-@app_commands.describe(ids="Comma-separated ASA IDs e.g. 12345678,87654321")
-async def cmd_addzappies(interaction: discord.Interaction, ids: str):
+@app_commands.describe(
+    ids="Comma-separated ASA IDs e.g. 12345678,87654321",
+    metadata_url="Optional: paste the IPFS metadata URL directly (for single ASA only)"
+)
+async def cmd_addzappies(interaction: discord.Interaction, ids: str, metadata_url: str | None = None):
     """Fetch and register new Zappy ASA IDs into the live collection."""
     if interaction.user.id != interaction.guild.owner_id:
         await interaction.response.send_message("Admin only.", ephemeral=True)
@@ -1360,16 +1363,19 @@ async def cmd_addzappies(interaction: discord.Interaction, ids: str):
         await interaction.followup.send("Max 50 ASA IDs at once.", ephemeral=True)
         return
 
+    if metadata_url and len(asset_ids) > 1:
+        await interaction.followup.send("metadata_url can only be used with a single ASA ID.", ephemeral=True)
+        return
+
     await interaction.followup.send(
         f"Processing {len(asset_ids)} Zappy/Zappies in the background. "
         f"Results will be posted here when done.", ephemeral=True
     )
 
-    # Run the slow IPFS work as a background task
-    asyncio.create_task(_addzappies_background(interaction.channel, asset_ids))
+    asyncio.create_task(_addzappies_background(interaction.channel, asset_ids, metadata_url))
 
 
-async def _addzappies_background(channel, asset_ids: list):
+async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: str | None = None):
     """Background task for /addzappies — runs IPFS fetches without blocking Discord."""
     import aiohttp, base64, re
     from algorand_lookup import INDEXER_URL
@@ -1450,7 +1456,10 @@ async def _addzappies_background(channel, asset_ids: list):
                 image_url = ""
                 metadata_url = None
 
-                if asset_url.startswith("template-ipfs://") and reserve:
+                # Use directly provided URL if given (bypasses gateway issues)
+                if direct_metadata_url and len(asset_ids) == 1:
+                    metadata_url = direct_metadata_url.split("#")[0].split("?")[0]
+                elif asset_url.startswith("template-ipfs://") and reserve:
                     cid = _decode_arc19(asset_url, reserve)
                     if cid:
                         metadata_url = f"https://ipfs.io/ipfs/{cid}"
@@ -1615,6 +1624,85 @@ async def _addzappies_dummy():
             return 'b' + b32.rstrip('=')
         except Exception as e:
             return None
+
+
+
+
+
+@tree.command(name="settraits", description="ADMIN - manually set traits for a Zappy")
+@app_commands.describe(
+    asset_id   = "The ASA ID",
+    background = "Background trait",
+    body       = "Body trait",
+    earring    = "Earring trait (or None)",
+    eyes       = "Eyes trait",
+    eyewear    = "Eyewear trait (or None)",
+    head       = "Head trait",
+    mouth      = "Mouth trait",
+    skin       = "Skin trait",
+    image_url  = "Full IPFS image URL (optional)"
+)
+async def cmd_settraits(
+    interaction: discord.Interaction,
+    asset_id:    int,
+    background:  str,
+    body:        str,
+    eyes:        str,
+    head:        str,
+    mouth:       str,
+    skin:        str,
+    earring:     str = "None",
+    eyewear:     str = "None",
+    image_url:   str = "",
+):
+    """Manually set traits for a Zappy — bypasses IPFS."""
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("Admin only.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
+    from database import get_supabase
+
+    # Get name from indexer if not already known
+    name = ZAPPY_COLLECTION.get(asset_id, {}).get("name", f"Zappy #{asset_id}")
+    unit_name = ZAPPY_COLLECTION.get(asset_id, {}).get("unit_name", "")
+
+    entry = {
+        "name":       name,
+        "unit_name":  unit_name,
+        "image_url":  image_url,
+        "background": background,
+        "body":       body,
+        "earring":    earring,
+        "eyes":       eyes,
+        "eyewear":    eyewear,
+        "head":       head,
+        "mouth":      mouth,
+        "skin":       skin,
+    }
+
+    # Update live collection
+    ZAPPY_COLLECTION[asset_id] = entry
+    ZAPPY_ASSET_IDS.add(asset_id)
+
+    # Persist to Supabase
+    try:
+        db = get_supabase()
+        db.table("extra_zappies").upsert({
+            "asset_id": asset_id,
+            **entry,
+        }).execute()
+        await interaction.followup.send(
+            f"✅ Traits set for **{name}** (`{asset_id}`)\n"
+            f"Background: {background} | Body: {body} | Skin: {skin}\n"
+            f"Eyes: {eyes} | Head: {head} | Mouth: {mouth}\n"
+            f"Earring: {earring} | Eyewear: {eyewear}",
+            ephemeral=True
+        )
+    except Exception as e:
+        await interaction.followup.send(f"Live cache updated but Supabase failed: {e}", ephemeral=True)
 
 
 
