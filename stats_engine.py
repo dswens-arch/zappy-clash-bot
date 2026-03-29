@@ -334,14 +334,14 @@ SKIN_VLT_BONUS = {
 # SPECIAL ASSETS — Heroes and Collab
 # ─────────────────────────────────────────────
 HERO_STATS = {
-    "Bear":       {"VLT": 95, "INS": 90, "SPK": 75, "ability": "Beardown", "ability_desc": "Doubles INS for one round. Absorbs all damage that round."},
-    "Crocodile":  {"VLT": 90, "INS": 75, "SPK": 80, "ability": "Death Roll", "ability_desc": "Locks opponent — they cannot benefit from SPK crits this round."},
-    "Cat":        {"VLT": 75, "INS": 80, "SPK": 95, "ability": "Nine Lives", "ability_desc": "If HP hits 0, survives at 1 HP once. Only fires once per battle."},
-    "Rabbit":     {"VLT": 80, "INS": 70, "SPK": 90, "ability": "Lucky Foot", "ability_desc": "Crit multiplier becomes 3x instead of 2x this battle."},
+    "Bear":       {"VLT": 95, "INS": 90, "SPK": 75, "ability": {"name": "Beardown",   "desc": "Doubles INS for one round. Absorbs all damage that round."}},
+    "Crocodile":  {"VLT": 90, "INS": 75, "SPK": 80, "ability": {"name": "Death Roll", "desc": "Locks opponent -- they cannot benefit from SPK crits this round."}},
+    "Cat":        {"VLT": 75, "INS": 80, "SPK": 95, "ability": {"name": "Nine Lives", "desc": "If HP hits 0, survives at 1 HP once. Only fires once per battle."}},
+    "Rabbit":     {"VLT": 80, "INS": 70, "SPK": 90, "ability": {"name": "Lucky Foot", "desc": "Crit multiplier becomes 3x instead of 2x this battle."}},
 }
 
 COLLAB_STATS = {
-    "ShittyKitties": {"VLT": 70, "INS": 70, "SPK": 100, "ability": "Chaos Mode", "ability_desc": "Random stat gets tripled for one random round. Even the bot doesn't know which."},
+    "ShittyKitties": {"VLT": 70, "INS": 70, "SPK": 100, "ability": {"name": "Chaos Mode", "desc": "Random stat gets tripled for one random round. Even the bot doesn't know which."}},
 }
 
 
