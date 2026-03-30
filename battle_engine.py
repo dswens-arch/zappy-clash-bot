@@ -42,6 +42,7 @@ class Fighter:
     crit_multiplier: float = field(default=CRIT_MULTIPLIER, init=False)
     ability_used:    bool  = field(default=False, init=False)
     survived_zero:   bool  = field(default=False, init=False)   # Nine Lives tracker
+    iron_shell_used: bool  = field(default=False, init=False)   # Iron Shell one-time shield tracker
 
     @property
     def display_name(self) -> str:
@@ -294,12 +295,15 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             if ability_triggered and ability_msg:
                 round_msg.append(ability_msg)
 
-        # Fighter A attacks Fighter B
+        # ── Fighter A attacks Fighter B ──
         dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
-        # Special: Divine Shield blocks all damage
-        if fighter_b.INS > 90 and fighter_b.ability_used:
+
+        # Iron Shell: one-time full absorb, only if fighter_b has the combo
+        if fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
             dmg_a = 0
-            round_msg.append(f"  🛡️ {fighter_b.display_name}'s shield absorbs everything!")
+            fighter_b.iron_shell_used = True
+            round_msg.append(f"  🛡️ {fighter_b.display_name}'s Iron Shell absorbs everything — survives on 1 HP!")
+            fighter_b.hp = 1
         else:
             if crit_a:
                 round_msg.append(f"  {random.choice(CRIT_LINES)}! **{fighter_a.display_name}** — {dmg_a} damage!")
@@ -309,11 +313,15 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(f"  **{fighter_a.display_name}** {random.choice(WEAK_HIT)} — {dmg_a} damage.")
             fighter_b.hp -= dmg_a
 
-        # Fighter B attacks Fighter A
+        # ── Fighter B attacks Fighter A ──
         dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
-        if fighter_a.INS > 90 and fighter_a.ability_used:
+
+        # Iron Shell: one-time full absorb, only if fighter_a has the combo
+        if fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
             dmg_b = 0
-            round_msg.append(f"  🛡️ {fighter_a.display_name}'s shield absorbs everything!")
+            fighter_a.iron_shell_used = True
+            round_msg.append(f"  🛡️ {fighter_a.display_name}'s Iron Shell absorbs everything — survives on 1 HP!")
+            fighter_a.hp = 1
         else:
             if crit_b:
                 round_msg.append(f"  {random.choice(CRIT_LINES)}! **{fighter_b.display_name}** — {dmg_b} damage!")
