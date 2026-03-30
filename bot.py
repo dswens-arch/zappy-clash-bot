@@ -2015,9 +2015,39 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             # Fetch Zappy data — use collection table for consistent stats
             from zappy_collection import ZAPPY_COLLECTION
-            from stats_engine import calculate_stats
+            from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+            from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
 
             def _get_fighter_data(asset_id):
+                # ── Heroes — fixed hardcoded stats, not in ZAPPY_COLLECTION ──
+                if asset_id in HERO_ASSET_IDS:
+                    hero_type = HERO_ASSET_IDS[asset_id]
+                    hero_data = get_hero_stats(hero_type)
+                    if hero_data:
+                        return {
+                            "asset_id":  asset_id,
+                            "name":      f"Zappy Hero — {hero_type}",
+                            "unit_name": hero_type,
+                            "image_url": "",
+                            "stats":     hero_data,
+                            "traits":    {"hero_type": hero_type},
+                        }
+
+                # ── Collabs — fixed hardcoded stats, not in ZAPPY_COLLECTION ──
+                if asset_id in COLLAB_ASSET_IDS:
+                    collab_type = COLLAB_ASSET_IDS[asset_id]
+                    collab_data = get_collab_stats(collab_type)
+                    if collab_data:
+                        return {
+                            "asset_id":  asset_id,
+                            "name":      f"{collab_type}",
+                            "unit_name": collab_type,
+                            "image_url": "",
+                            "stats":     collab_data,
+                            "traits":    {"collab_type": collab_type},
+                        }
+
+                # ── Regular Zappies — look up in collection ──
                 entry = ZAPPY_COLLECTION.get(asset_id)
                 if not entry:
                     return None
