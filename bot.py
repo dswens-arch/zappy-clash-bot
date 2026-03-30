@@ -1233,7 +1233,7 @@ async def _run_expedition_beat(
             if exp_channel:
                 token_line = f"🪙 +{net_tokens} tokens"
                 if entry_fee > 0:
-                    token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_tokens']} earned − {entry_fee} entry fee)"
+                    token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_cp']} earned − {entry_fee} entry fee)"
                 public_embed = discord.Embed(
                     title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
                     description = (
@@ -1253,8 +1253,8 @@ async def _run_expedition_beat(
             # Final summary with fee breakdown
             fee_breakdown = f" ({updated_run['total_tokens']} earned − {entry_fee} entry fee)" if entry_fee > 0 else ""
             final_embed.description = (
-                f"🪙 **{net_tokens} tokens** sent to your wallet{fee_breakdown}\n"
                 f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
+                f"🪙 **{net_tokens} tokens** sent to your wallet{fee_breakdown}\n"
                 f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
             )
 
@@ -1807,7 +1807,7 @@ async def assign_cp_role(discord_user_id: str, cp_total: int):
 
 
 async def assign_champion_role(discord_user_id: str):
-    """Assign Clash Champion role."""
+    """Assign Clash Champion role, stripping it from any current holder first."""
     try:
         guild  = bot.get_guild(GUILD_ID)
         member = guild.get_member(int(discord_user_id))
@@ -1815,6 +1815,10 @@ async def assign_champion_role(discord_user_id: str):
             return
         role = guild.get_role(ROLE_CLASH_CHAMPION)
         if role:
+            # Strip from anyone who currently holds it
+            for existing in list(role.members):
+                if existing.id != member.id:
+                    await existing.remove_roles(role, reason="New Clash Champion crowned")
             await member.add_roles(role, reason="Bracket champion")
     except Exception as e:
         print(f"Error assigning champion role: {e}")
