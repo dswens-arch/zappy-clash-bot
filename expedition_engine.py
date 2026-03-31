@@ -202,10 +202,12 @@ class ExpeditionView(discord.ui.View):
                 )
                 return
 
+            # Acknowledge immediately — must happen within 3 seconds
+            await interaction.response.defer(ephemeral=True)
+
             self.chosen = True
             for item in self.children:
                 item.disabled = True
-            await interaction.response.defer(ephemeral=True)
 
             # Process the choice
             await self.callback(interaction, choice_index)
@@ -243,10 +245,10 @@ class ZoneSelectView(discord.ui.View):
                     "Already selected.", ephemeral=True
                 )
                 return
+            await interaction.response.defer(ephemeral=True)
             self.chosen = True
             for item in self.children:
                 item.disabled = True
-            await interaction.response.defer(ephemeral=True)
             await self.callback(interaction, zone_num)
 
         return button_callback
@@ -275,10 +277,10 @@ class ZappySelectView(discord.ui.View):
         async def button_callback(interaction: discord.Interaction):
             if self.chosen:
                 return
+            await interaction.response.defer(ephemeral=True)
             self.chosen = True
             for item in self.children:
                 item.disabled = True
-            await interaction.response.defer(ephemeral=True)
             await self.callback(interaction, asset_id)
 
         return button_callback
@@ -359,6 +361,16 @@ def build_run_complete_embed(run: dict, nft_drop: bool = False) -> discord.Embed
     embed = discord.Embed(
         title = f"🏁 Expedition Complete — {zone['name']}",
         color = zone["color"],
+    )
+
+    embed.add_field(
+        name  = "Run Summary",
+        value = (
+            f"⚡ **{run['total_cp']} Expedition CP** earned\n"
+            f"🪙 **{run['total_tokens']} tokens** collected\n"
+            f"📦 Collection bonus: {run['collection_bonus']['label']}"
+        ),
+        inline=False,
     )
 
     if nft_drop:
