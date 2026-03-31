@@ -361,16 +361,6 @@ def build_run_complete_embed(run: dict, nft_drop: bool = False) -> discord.Embed
         color = zone["color"],
     )
 
-    embed.add_field(
-        name  = "Run Summary",
-        value = (
-            f"⚡ **{run['total_cp']} Expedition CP** earned\n"
-            f"🪙 **{run['total_tokens']} tokens** collected\n"
-            f"📦 Collection bonus: {run['collection_bonus']['label']}"
-        ),
-        inline=False,
-    )
-
     if nft_drop:
         embed.add_field(
             name  = "🎉 RARE DROP!",
