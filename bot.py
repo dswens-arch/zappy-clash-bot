@@ -210,9 +210,8 @@ async def cmd_link(interaction: discord.Interaction, wallet: str):
 
 
 @tree.command(name="clash", description="Enter your Zappy into the current bracket")
-@app_commands.describe(asset_id="Your Zappy's ASA ID (optional if you only have one)")
-async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = None):
-    """Register for the active bracket."""
+async def cmd_clash(interaction: discord.Interaction):
+    """Register for the active bracket — shows top 5 Zappies as buttons."""
     if not check_clash_channel(interaction):
         await interaction.response.send_message(
             f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
@@ -249,14 +248,16 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
         )
         return
 
-    # Verify ownership using cache - avoids slow indexer call
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+    # Verify ownership
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL, HERO_ASSET_IDS, COLLAB_ASSET_IDS
+    from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
+    from zappy_collection import ZAPPY_COLLECTION
     import time as _t
     _now = _t.monotonic()
     if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
         ownership = _wallet_cache[wallet]
     else:
-        await interaction.followup.send("⚡ Verifying your Zappy...", ephemeral=True)
+        await interaction.followup.send("⚡ Verifying your Zappies...", ephemeral=True)
         ownership = await verify_wallet(user_id, wallet)
 
     if not ownership["owns"]:
@@ -267,98 +268,148 @@ async def cmd_clash(interaction: discord.Interaction, asset_id: int | None = Non
         )
         return
 
-    # Determine which asset to use
     all_assets = (
         ownership["zappies"] +
         [{"asset_id": h["asset_id"], "unit_name": h["hero_type"]} for h in ownership["heroes"]] +
         [{"asset_id": c["asset_id"], "unit_name": "ShittyKitties"} for c in ownership["collabs"]]
     )
 
-    if asset_id:
-        # Validate the specified asset belongs to them
-        found = next((a for a in all_assets if a["asset_id"] == asset_id), None)
-        if not found:
-            await interaction.followup.send(
-                f"❌ ASA {asset_id} not found in your wallet.",
-                ephemeral=True
-            )
-            return
-        chosen_asset_id = asset_id
-    elif len(all_assets) == 1:
-        chosen_asset_id = all_assets[0]["asset_id"]
-    else:
-        # Multiple - ask them to specify
-        # Fetch names for all assets so we show friendly names not just IDs
-        lines = []
-        for a in all_assets:
-            display = a.get('name') or a.get('unit_name') or f"ASA {a['asset_id']}"
-            lines.append(f"  • **{display}** - `{a['asset_id']}`")
-        # Keep under 1800 chars to be safe
-        names = ""
-        for line in lines:
-            if len(names) + len(line) + 1 > 1500:
-                names += f"\n  ...and {len(lines) - lines.index(line)} more. Use `/clash asset_id:XXXXX` to enter a specific one."
-                break
-            names += line + "\n"
+    # Score each Zappy by total stats (VLT+INS+SPK) to rank them
+    scored = []
+    for z in all_assets:
+        asset_id = z["asset_id"]
+
+        # Skip if on champion cooldown
+        cooldown = check_champion_cooldown(asset_id)
+        if cooldown["on_cooldown"]:
+            continue
+
+        if asset_id in HERO_ASSET_IDS:
+            hero_type = HERO_ASSET_IDS[asset_id]
+            data = get_hero_stats(hero_type)
+            if data:
+                scored.append({
+                    "asset_id":  asset_id,
+                    "name":      f"Hero — {hero_type}",
+                    "stats":     data,
+                    "score":     data["VLT"] + data["INS"] + data["SPK"],
+                    "image_url": "",
+                })
+        elif asset_id in COLLAB_ASSET_IDS:
+            collab_type = COLLAB_ASSET_IDS[asset_id]
+            data = get_collab_stats(collab_type)
+            if data:
+                scored.append({
+                    "asset_id":  asset_id,
+                    "name":      collab_type,
+                    "stats":     data,
+                    "score":     data["VLT"] + data["INS"] + data["SPK"],
+                    "image_url": "",
+                })
+        else:
+            entry = ZAPPY_COLLECTION.get(asset_id)
+            if entry:
+                traits = {
+                    "background": entry.get("background",""),
+                    "body":       entry.get("body",""),
+                    "earring":    entry.get("earring","None"),
+                    "eyes":       entry.get("eyes",""),
+                    "eyewear":    entry.get("eyewear","None"),
+                    "head":       entry.get("head",""),
+                    "mouth":      entry.get("mouth",""),
+                    "skin":       entry.get("skin",""),
+                }
+                stats = calculate_stats(traits)
+                scored.append({
+                    "asset_id":  asset_id,
+                    "name":      entry.get("name", f"Zappy #{asset_id}"),
+                    "stats":     stats,
+                    "score":     stats["VLT"] + stats["INS"] + stats["SPK"],
+                    "image_url": entry.get("image_url",""),
+                })
+
+    if not scored:
         await interaction.followup.send(
-            f"You have **{len(all_assets)} Zappies**! Use `/clash asset_id:XXXXX` to enter one:\n\n{names}",
+            "❌ No eligible Zappies found (they may all be on cooldown or not in collection).",
             ephemeral=True
         )
         return
 
-    # Check 48-hour champion cooldown
-    cooldown = check_champion_cooldown(chosen_asset_id)
-    if cooldown["on_cooldown"]:
-        from zappy_collection import ZAPPY_COLLECTION
-        entry = ZAPPY_COLLECTION.get(chosen_asset_id, {})
-        zappy_name = entry.get("name", f"ASA {chosen_asset_id}")
-        await interaction.followup.send(
-            f"⏳ **{zappy_name}** is on a 48-hour cooldown after winning the last bracket.\n"
-            f"Eligible again: <t:{cooldown['eligible_ts']}:R>\n"
-            f"Enter a different Zappy with `/clash asset_id:XXXXX`.",
-            ephemeral=True
-        )
-        return
+    # Sort by score, take top 5
+    top5 = sorted(scored, key=lambda x: x["score"], reverse=True)[:5]
 
-    # Fetch stats for the chosen Zappy
-    zappy = await fetch_zappy_traits(chosen_asset_id)
-    if not zappy:
-        await interaction.followup.send(
-            "❌ Couldn't load your Zappy's traits from IPFS. Try again in a moment.",
-            ephemeral=True
-        )
-        return
-
-    # Register
-    register_for_bracket(user_id, chosen_asset_id, active_bracket_id)
-
-    # Show their stats as an embed with image
-    stats     = zappy.get("stats", {})
-    name      = zappy.get("name", f"ASA {chosen_asset_id}")
-    image_url = zappy.get("image_url", "")
-
+    # Build selection embed
     embed = discord.Embed(
-        title=f"✅ {name} is in the bracket!",
-        description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
+        title="⚡ Choose your Zappy for the Clash!",
+        description="Your top Zappies ranked by combined stats. Pick one to enter the bracket.",
         color=0xF5E642,
     )
-    if stats.get("combo"):
-        embed.add_field(name="Combo", value=stats["combo"], inline=False)
-    if stats.get("ability") and isinstance(stats["ability"], dict):
-        ab = stats["ability"]
-        embed.add_field(name=f"⚡ {ab.get('name', 'Ability')}", value=ab.get("desc", ""), inline=False)
-    if image_url:
-        embed.set_thumbnail(url=image_url)
-    embed.set_footer(text=f"Fights start when registration closes · Watch #{CLASH_CHANNEL}")
-    await interaction.followup.send(embed=embed, ephemeral=True)
-
-    # Announce in clash channel
-    clash_ch = bot.get_channel(CLASH_CHANNEL)
-    if clash_ch:
-        await clash_ch.send(
-            f"⚡ **{interaction.user.display_name}** enters the bracket with "
-            f"**{name}** - VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
+    for i, z in enumerate(top5, 1):
+        s = z["stats"]
+        embed.add_field(
+            name=f"{i}. {z['name']}",
+            value=f"⚡ VLT {s.get('VLT','?')} · 🛡️ INS {s.get('INS','?')} · 🎲 SPK {s.get('SPK','?')}",
+            inline=False,
         )
+
+    # Build button view
+    class ClashPickView(discord.ui.View):
+        def __init__(self):
+            super().__init__(timeout=60)
+            self.chosen = False
+            for z in top5:
+                s = z["stats"]
+                btn = discord.ui.Button(
+                    label=z["name"][:60],
+                    style=discord.ButtonStyle.primary,
+                    custom_id=f"clash_pick_{z['asset_id']}",
+                )
+                btn.callback = self._make_callback(z)
+                self.add_item(btn)
+
+        def _make_callback(self, zappy: dict):
+            async def callback(inter: discord.Interaction):
+                if self.chosen:
+                    await inter.response.send_message("Already picked!", ephemeral=True)
+                    return
+                await inter.response.defer(ephemeral=True)
+                self.chosen = True
+                for item in self.children:
+                    item.disabled = True
+
+                asset_id = zappy["asset_id"]
+                stats    = zappy["stats"]
+                name     = zappy["name"]
+
+                # Register
+                register_for_bracket(user_id, asset_id, active_bracket_id)
+
+                # Confirmation embed
+                confirm = discord.Embed(
+                    title=f"✅ {name} is in the bracket!",
+                    description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
+                    color=0xF5E642,
+                )
+                if stats.get("combo"):
+                    confirm.add_field(name="Combo", value=stats["combo"], inline=False)
+                if stats.get("ability") and isinstance(stats["ability"], dict):
+                    ab = stats["ability"]
+                    confirm.add_field(name=f"⚡ {ab.get('name','Ability')}", value=ab.get("desc",""), inline=False)
+                if zappy.get("image_url"):
+                    confirm.set_thumbnail(url=zappy["image_url"])
+                confirm.set_footer(text=f"Fights start when registration closes · Watch #{CLASH_CHANNEL}")
+                await inter.followup.send(embed=confirm, ephemeral=True)
+
+                # Public announcement
+                clash_ch = bot.get_channel(CLASH_CHANNEL)
+                if clash_ch:
+                    await clash_ch.send(
+                        f"⚡ **{inter.user.display_name}** enters the bracket with "
+                        f"**{name}** — VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
+                    )
+            return callback
+
+    await interaction.followup.send(embed=embed, view=ClashPickView(), ephemeral=True)
 
 
 @tree.command(name="stats", description="Preview your Zappy's battle stats")
@@ -1190,8 +1241,6 @@ async def _run_expedition_beat(
             nft_prize_result   = None
             buddy_prize_result = None
 
-            wallet = get_wallet(user_id)
-
             if buddy_drop:
                 buddy_prize_result = await award_buddy(user_id, wallet, zone_num)
             if nft_drop:
@@ -1215,6 +1264,7 @@ async def _run_expedition_beat(
             await assign_cp_role(user_id, exp_cp_total)
 
             # Send token rewards minus entry fee
+            wallet = get_wallet(user_id)
             entry_fee = updated_run.get("entry_fee", 0)
             net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
             if wallet and net_tokens > 0:
@@ -1234,7 +1284,7 @@ async def _run_expedition_beat(
             if exp_channel:
                 token_line = f"🪙 +{net_tokens} tokens"
                 if entry_fee > 0:
-                    token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_tokens']} earned − {entry_fee} entry fee)"
+                    token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_cp']} earned − {entry_fee} entry fee)"
                 public_embed = discord.Embed(
                     title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
                     description = (
@@ -1254,8 +1304,8 @@ async def _run_expedition_beat(
             # Final summary with fee breakdown
             fee_breakdown = f" ({updated_run['total_tokens']} earned − {entry_fee} entry fee)" if entry_fee > 0 else ""
             final_embed.description = (
-                f"🪙 **{net_tokens} tokens** sent to your wallet{fee_breakdown}\n"
                 f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
+                f"🪙 **{net_tokens} tokens** sent to your wallet{fee_breakdown}\n"
                 f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
             )
 
@@ -2016,9 +2066,39 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             # Fetch Zappy data — use collection table for consistent stats
             from zappy_collection import ZAPPY_COLLECTION
-            from stats_engine import calculate_stats
+            from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+            from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
 
             def _get_fighter_data(asset_id):
+                # ── Heroes — hardcoded stats, not in ZAPPY_COLLECTION ──
+                if asset_id in HERO_ASSET_IDS:
+                    hero_type = HERO_ASSET_IDS[asset_id]
+                    hero_data = get_hero_stats(hero_type)
+                    if hero_data:
+                        return {
+                            "asset_id":  asset_id,
+                            "name":      f"Zappy Hero — {hero_type}",
+                            "unit_name": hero_type,
+                            "image_url": "",
+                            "stats":     hero_data,
+                            "traits":    {"hero_type": hero_type},
+                        }
+
+                # ── Collabs — hardcoded stats, not in ZAPPY_COLLECTION ──
+                if asset_id in COLLAB_ASSET_IDS:
+                    collab_type = COLLAB_ASSET_IDS[asset_id]
+                    collab_data = get_collab_stats(collab_type)
+                    if collab_data:
+                        return {
+                            "asset_id":  asset_id,
+                            "name":      f"{collab_type}",
+                            "unit_name": collab_type,
+                            "image_url": "",
+                            "stats":     collab_data,
+                            "traits":    {"collab_type": collab_type},
+                        }
+
+                # ── Regular Zappies — look up in collection ──
                 entry = ZAPPY_COLLECTION.get(asset_id)
                 if not entry:
                     return None
