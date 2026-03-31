@@ -1233,7 +1233,7 @@ async def _run_expedition_beat(
             if exp_channel:
                 token_line = f"🪙 +{net_tokens} tokens"
                 if entry_fee > 0:
-                    token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_cp']} earned − {entry_fee} entry fee)"
+                    token_line = f"🪙 +{net_tokens} tokens ({updated_run['total_tokens']} earned − {entry_fee} entry fee)"
                 public_embed = discord.Embed(
                     title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
                     description = (
@@ -1253,8 +1253,8 @@ async def _run_expedition_beat(
             # Final summary with fee breakdown
             fee_breakdown = f" ({updated_run['total_tokens']} earned − {entry_fee} entry fee)" if entry_fee > 0 else ""
             final_embed.description = (
-                f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
                 f"🪙 **{net_tokens} tokens** sent to your wallet{fee_breakdown}\n"
+                f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
                 f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
             )
 
@@ -2015,39 +2015,9 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             # Fetch Zappy data — use collection table for consistent stats
             from zappy_collection import ZAPPY_COLLECTION
-            from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
-            from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
+            from stats_engine import calculate_stats
 
             def _get_fighter_data(asset_id):
-                # ── Heroes — fixed hardcoded stats, not in ZAPPY_COLLECTION ──
-                if asset_id in HERO_ASSET_IDS:
-                    hero_type = HERO_ASSET_IDS[asset_id]
-                    hero_data = get_hero_stats(hero_type)
-                    if hero_data:
-                        return {
-                            "asset_id":  asset_id,
-                            "name":      f"Zappy Hero — {hero_type}",
-                            "unit_name": hero_type,
-                            "image_url": "",
-                            "stats":     hero_data,
-                            "traits":    {"hero_type": hero_type},
-                        }
-
-                # ── Collabs — fixed hardcoded stats, not in ZAPPY_COLLECTION ──
-                if asset_id in COLLAB_ASSET_IDS:
-                    collab_type = COLLAB_ASSET_IDS[asset_id]
-                    collab_data = get_collab_stats(collab_type)
-                    if collab_data:
-                        return {
-                            "asset_id":  asset_id,
-                            "name":      f"{collab_type}",
-                            "unit_name": collab_type,
-                            "image_url": "",
-                            "stats":     collab_data,
-                            "traits":    {"collab_type": collab_type},
-                        }
-
-                # ── Regular Zappies — look up in collection ──
                 entry = ZAPPY_COLLECTION.get(asset_id)
                 if not entry:
                     return None
