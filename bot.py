@@ -1248,6 +1248,9 @@ async def _run_expedition_beat(
             nft_prize_result   = None
             buddy_prize_result = None
 
+            # Fetch wallet early — needed for drop rewards and token payout
+            wallet = get_wallet(user_id)
+
             if buddy_drop:
                 buddy_prize_result = await award_buddy(user_id, wallet, zone_num)
             if nft_drop:
@@ -1271,7 +1274,6 @@ async def _run_expedition_beat(
             await assign_cp_role(user_id, exp_cp_total)
 
             # Send token rewards minus entry fee
-            wallet = get_wallet(user_id)
             entry_fee = updated_run.get("entry_fee", 0)
             net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
             if wallet and net_tokens > 0:
