@@ -235,7 +235,7 @@ async def cmd_clash(interaction: discord.Interaction):
         return
 
     # Check wallet is linked
-    wallet = get_wallet(user_id)
+    wallet = await asyncio.to_thread(get_wallet, user_id)
     if not wallet:
         await interaction.followup.send(
             "❌ You haven't linked your wallet yet. Use `/link` first!",
@@ -244,7 +244,7 @@ async def cmd_clash(interaction: discord.Interaction):
         return
 
     # Check if already registered
-    if is_registered(user_id, active_bracket_id):
+    if await asyncio.to_thread(is_registered, user_id, active_bracket_id):
         await interaction.followup.send(
             "✅ You're already registered for this bracket! Check "
             f"<#{CLASH_CHANNEL}> when fights start.",
@@ -284,7 +284,7 @@ async def cmd_clash(interaction: discord.Interaction):
         asset_id = z["asset_id"]
 
         # Skip if on champion cooldown
-        cooldown = check_champion_cooldown(asset_id)
+        cooldown = await asyncio.to_thread(check_champion_cooldown, asset_id)
         if cooldown["on_cooldown"]:
             continue
 
@@ -389,7 +389,7 @@ async def cmd_clash(interaction: discord.Interaction):
                 name     = zappy["name"]
 
                 # Register
-                register_for_bracket(user_id, asset_id, active_bracket_id)
+                await asyncio.to_thread(register_for_bracket, user_id, asset_id, active_bracket_id)
 
                 # Confirmation embed
                 confirm = discord.Embed(
@@ -1996,7 +1996,7 @@ async def close_and_resolve(channel: discord.TextChannel):
     registration_open = False
     bracket_id = active_bracket_id
 
-    entries = get_bracket_entries(bracket_id)
+    entries = await asyncio.to_thread(get_bracket_entries, bracket_id)
     n = len(entries)
 
     if n < 2:
@@ -2261,22 +2261,22 @@ async def close_and_resolve(channel: discord.TextChannel):
             lose_cp  = int(CP_LOSS * cp_multiplier)
             upset_cp = int(CP_UPSET_BONUS * cp_multiplier) if result["is_upset"] else 0
 
-            award_cp(winner_id, win_cp + upset_cp, f"bracket_win_{bracket_id}")
-            award_cp(loser_id,  lose_cp,            f"bracket_loss_{bracket_id}")
+            await asyncio.to_thread(award_cp, winner_id, win_cp + upset_cp, f"bracket_win_{bracket_id}")
+            await asyncio.to_thread(award_cp, loser_id,  lose_cp,            f"bracket_loss_{bracket_id}")
 
             # Check CP milestones for both players
             from database import get_player_rank
-            winner_cp = get_player_rank(winner_id).get("cp_total", 0)
-            loser_cp  = get_player_rank(loser_id).get("cp_total", 0)
+            winner_cp = (await asyncio.to_thread(get_player_rank, winner_id)).get("cp_total", 0)
+            loser_cp  = (await asyncio.to_thread(get_player_rank, loser_id)).get("cp_total", 0)
             await assign_cp_role(winner_id, winner_cp)
             await assign_cp_role(loser_id, loser_cp)
 
             # Update streaks
-            winner_streak = update_streak(winner_id, won=True)
-            update_streak(loser_id, won=False)
+            winner_streak = await asyncio.to_thread(update_streak, winner_id, True)
+            await asyncio.to_thread(update_streak, loser_id, False)
 
             # Get winner wallet early — needed for streak and token rewards
-            winner_wallet = get_wallet(winner_id)
+            winner_wallet = await asyncio.to_thread(get_wallet, winner_id)
 
             # Assign streak role if milestone hit
             current_streak = winner_streak.get("current_streak", 0)
@@ -2296,7 +2296,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                             )
 
             # Save result
-            save_battle_result(
+            await asyncio.to_thread(save_battle_result,
                 bracket_id=bracket_id,
                 winner_discord_id=winner_id,
                 loser_discord_id=loser_id,
@@ -2307,7 +2307,7 @@ async def close_and_resolve(channel: discord.TextChannel):
             )
 
             # -- Token rewards --
-            loser_wallet  = get_wallet(loser_id)
+            loser_wallet  = await asyncio.to_thread(get_wallet, loser_id)
             is_evening    = "evening" in bracket_id
             token_msg     = ""
 
@@ -2383,10 +2383,10 @@ async def close_and_resolve(channel: discord.TextChannel):
             champ_name = champ_asset["name"] if champ_asset else f"ASA {next_round[0]['asset_id']}"
 
             bonus_cp = int(CP_BRACKET_WIN * cp_multiplier)
-            award_cp(champion_id, bonus_cp, f"bracket_champion_{bracket_id}")
+            await asyncio.to_thread(award_cp, champion_id, bonus_cp, f"bracket_champion_{bracket_id}")
 
             # Set 48-hour cooldown on champion Zappy
-            set_champion_cooldown(next_round[0]["asset_id"])
+            await asyncio.to_thread(set_champion_cooldown, next_round[0]["asset_id"])
 
             # Assign Clash Champion role
             await assign_champion_role(champion_id)
@@ -2398,7 +2398,7 @@ async def close_and_resolve(channel: discord.TextChannel):
             asyncio.create_task(remove_champ_role_later(champion_id))
 
             # Champion token reward
-            champ_wallet = get_wallet(champion_id)
+            champ_wallet = await asyncio.to_thread(get_wallet, champion_id)
             champ_token_msg = ""
             if champ_wallet:
                 champ_token = await award_win_tokens(
