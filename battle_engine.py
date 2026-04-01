@@ -43,6 +43,7 @@ class Fighter:
     ability_used:    bool  = field(default=False, init=False)
     survived_zero:   bool  = field(default=False, init=False)   # Nine Lives tracker
     iron_shell_used: bool  = field(default=False, init=False)   # Iron Shell one-time shield tracker
+    divine_shield_active: bool = field(default=False, init=False)  # Blocks all incoming damage this round
 
     @property
     def display_name(self) -> str:
@@ -133,8 +134,8 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         return True, f"🔥 **INFERNO SURGE!** {fighter.display_name}'s VLT doubles this round!"
 
     elif name == "Divine Shield":
-        opponent.INS = min(100, opponent.INS - 30)
-        return True, f"😇 **DIVINE SHIELD!** {fighter.display_name} blocks all incoming damage this round!"
+        fighter.divine_shield_active = True
+        return True, f"😇 **DIVINE SHIELD!** {fighter.display_name} is protected — all incoming damage blocked this round!"
 
     elif name == "Soul Deal":
         steal = 10
@@ -298,8 +299,12 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # ── Fighter A attacks Fighter B ──
         dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
 
+        # Divine Shield: fighter_b takes no damage this round
+        if fighter_b.divine_shield_active:
+            round_msg.append(f"  😇 {fighter_b.display_name}'s Divine Shield holds — 0 damage!")
+            fighter_b.divine_shield_active = False
         # Iron Shell: one-time full absorb, only if fighter_b has the combo
-        if fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
+        elif fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
             dmg_a = 0
             fighter_b.iron_shell_used = True
             round_msg.append(f"  🛡️ {fighter_b.display_name}'s Iron Shell absorbs everything — survives on 1 HP!")
@@ -316,8 +321,12 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # ── Fighter B attacks Fighter A ──
         dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
 
+        # Divine Shield: fighter_a takes no damage this round
+        if fighter_a.divine_shield_active:
+            round_msg.append(f"  😇 {fighter_a.display_name}'s Divine Shield holds — 0 damage!")
+            fighter_a.divine_shield_active = False
         # Iron Shell: one-time full absorb, only if fighter_a has the combo
-        if fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
+        elif fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
             dmg_b = 0
             fighter_a.iron_shell_used = True
             round_msg.append(f"  🛡️ {fighter_a.display_name}'s Iron Shell absorbs everything — survives on 1 HP!")
