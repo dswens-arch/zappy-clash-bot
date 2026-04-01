@@ -42,6 +42,7 @@ from expedition_engine import (
 from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from nft_rewards       import award_nft_prize, claim_nft_prize
 from buddy_rewards     import check_buddy_drop, award_buddy, claim_buddy
+from clash_chaos_modifiers import apply_all_modifiers, freaky_friday_reveal
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -2010,6 +2011,54 @@ async def close_and_resolve(channel: discord.TextChannel):
 
     await asyncio.sleep(30)
 
+    # ── Chaos Modifiers ───────────────────────────────────────────────────────
+    from database import get_supabase, get_player_rank as _get_rank
+    db = get_supabase()
+
+    participant_list = []
+    for e in entries:
+        cp = _get_rank(e["discord_user_id"]).get("cp_total", 0)
+        participant_list.append({
+            "user_id":    e["discord_user_id"],
+            "asset_id":   e["asset_id"],
+            "zappy_name": e.get("unit_name") or e.get("name") or f"ASA {e['asset_id']}",
+            "cp":         cp,
+        })
+
+    chaos = await apply_all_modifiers(db, participant_list)
+    active_modifiers  = chaos["active_modifiers"]
+    oracle_embed_data = chaos["oracle_embed"]
+    freaky_swap       = chaos["freaky_friday_swap"]
+    modified_parts    = chaos["participants"]
+
+    # Post oracle embed BEFORE bracket seedings drop
+    if oracle_embed_data:
+        oracle_embed = discord.Embed(
+            title       = oracle_embed_data["title"],
+            description = oracle_embed_data["description"],
+            color       = oracle_embed_data["color"],
+        )
+        oracle_embed.set_footer(text=oracle_embed_data["footer"]["text"])
+        await channel.send(embed=oracle_embed)
+        await asyncio.sleep(4)
+
+    # Post modifier announcements (Gravity Flip, Equalizer)
+    for announcement in chaos["announcements"]:
+        await channel.send(announcement)
+        await asyncio.sleep(2)
+
+    # Freaky Friday reveal — posted NOW so people can react before fights start
+    if freaky_swap and freaky_swap[0]:
+        await channel.send(freaky_friday_reveal(freaky_swap[0], freaky_swap[1]))
+        await asyncio.sleep(2)
+
+    # Remap entries to use chaos-modified CP for seeding
+    cp_override = {p["asset_id"]: p["cp"] for p in modified_parts}
+    for e in entries:
+        e["_chaos_cp"] = cp_override.get(e["asset_id"], 0)
+    entries_for_seeding = sorted(entries, key=lambda x: x["_chaos_cp"], reverse=True)
+    # ─────────────────────────────────────────────────────────────────────────
+
     # Build display name lookup
     guild = bot.get_guild(GUILD_ID)
     def get_display_name(discord_user_id):
@@ -2019,12 +2068,20 @@ async def close_and_resolve(channel: discord.TextChannel):
         except Exception:
             return f"Player {str(discord_user_id)[:4]}"
 
-    # Seed bracket
-    matchups = seed_bracket(entries)
+    # Seed bracket using (possibly chaos-modified) ordering
+    matchups = seed_bracket(entries_for_seeding)
 
-    # Show bracket with usernames
-    bracket_lines = [f"⚡ **BRACKET START** - {n} fighters, {len(matchups)} first-round matchups!\n"]
-    for i, entry in enumerate(entries):
+    # Show bracket with modifier tags
+    modifier_tag = ""
+    if "gravity_flip" in active_modifiers:
+        modifier_tag = " · 🌀 GRAVITY FLIP"
+    elif "equalizer" in active_modifiers:
+        modifier_tag = " · ⚖️ EQUALIZER"
+    if "freaky_friday" in active_modifiers:
+        modifier_tag += " · 🔀 FREAKY FRIDAY"
+
+    bracket_lines = [f"⚡ **BRACKET START** - {n} fighters, {len(matchups)} first-round matchups!{modifier_tag}\n"]
+    for i, entry in enumerate(entries_for_seeding):
         zappy_name  = entry.get("unit_name") or entry.get("name") or f"ASA {entry['asset_id']}"
         player_name = get_display_name(entry["discord_user_id"])
         bracket_lines.append(f"#{i+1} **{zappy_name}** · {player_name}")
