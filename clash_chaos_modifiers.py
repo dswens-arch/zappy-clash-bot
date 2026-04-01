@@ -32,9 +32,9 @@ WEEKLY_RANDOM = ["gravity_flip", "equalizer"]
 
 def get_weekly_modifier_state(db, week_start: date) -> dict:
     """Fetch or create this week's modifier usage record."""
-    row = db.table("clash_weekly_modifiers").select("*").eq("week_start", str(week_start)).maybe_single().execute()
+    row = db.table("clash_weekly_modifiers").select("*").eq("week_start", str(week_start)).execute()
     if row.data:
-        return row.data
+        return row.data[0]
     # First bracket of the week — initialize
     new_row = {"week_start": str(week_start), "gravity_flip_used": False, "equalizer_used": False}
     db.table("clash_weekly_modifiers").insert(new_row).execute()
