@@ -2015,51 +2015,61 @@ async def close_and_resolve(channel: discord.TextChannel):
     await asyncio.sleep(30)
 
     # ── Chaos Modifiers ───────────────────────────────────────────────────────
-    from database import get_supabase, get_player_rank as _get_rank
-    db = get_supabase()
+    active_modifiers  = []
+    oracle_embed_data = None
+    freaky_swap       = None
+    entries_for_seeding = entries  # fallback: use original order if chaos fails
 
-    participant_list = []
-    for e in entries:
-        cp = _get_rank(e["discord_user_id"]).get("cp_total", 0)
-        participant_list.append({
-            "user_id":    e["discord_user_id"],
-            "asset_id":   e["asset_id"],
-            "zappy_name": e.get("unit_name") or e.get("name") or f"ASA {e['asset_id']}",
-            "cp":         cp,
-        })
+    try:
+        from database import get_supabase, get_player_rank as _get_rank
+        db = get_supabase()
 
-    chaos = apply_all_modifiers(db, participant_list)
-    active_modifiers  = chaos["active_modifiers"]
-    oracle_embed_data = chaos["oracle_embed"]
-    freaky_swap       = chaos["freaky_friday_swap"]
-    modified_parts    = chaos["participants"]
+        participant_list = []
+        for e in entries:
+            cp = _get_rank(e["discord_user_id"]).get("cp_total", 0)
+            participant_list.append({
+                "user_id":    e["discord_user_id"],
+                "asset_id":   e["asset_id"],
+                "zappy_name": e.get("unit_name") or e.get("name") or f"ASA {e['asset_id']}",
+                "cp":         cp,
+            })
 
-    # Post oracle embed BEFORE bracket seedings drop
-    if oracle_embed_data:
-        oracle_embed = discord.Embed(
-            title       = oracle_embed_data["title"],
-            description = oracle_embed_data["description"],
-            color       = oracle_embed_data["color"],
-        )
-        oracle_embed.set_footer(text=oracle_embed_data["footer"]["text"])
-        await channel.send(embed=oracle_embed)
-        await asyncio.sleep(4)
+        chaos = apply_all_modifiers(db, participant_list)
+        active_modifiers  = chaos["active_modifiers"]
+        oracle_embed_data = chaos["oracle_embed"]
+        freaky_swap       = chaos["freaky_friday_swap"]
+        modified_parts    = chaos["participants"]
 
-    # Post modifier announcements (Gravity Flip, Equalizer)
-    for announcement in chaos["announcements"]:
-        await channel.send(announcement)
-        await asyncio.sleep(2)
+        # Post oracle embed BEFORE bracket seedings drop
+        if oracle_embed_data:
+            oracle_embed = discord.Embed(
+                title       = oracle_embed_data["title"],
+                description = oracle_embed_data["description"],
+                color       = oracle_embed_data["color"],
+            )
+            oracle_embed.set_footer(text=oracle_embed_data["footer"]["text"])
+            await channel.send(embed=oracle_embed)
+            await asyncio.sleep(4)
 
-    # Freaky Friday reveal — posted NOW so people can react before fights start
-    if freaky_swap and freaky_swap[0]:
-        await channel.send(freaky_friday_reveal(freaky_swap[0], freaky_swap[1]))
-        await asyncio.sleep(2)
+        # Post modifier announcements (Gravity Flip, Equalizer)
+        for announcement in chaos["announcements"]:
+            await channel.send(announcement)
+            await asyncio.sleep(2)
 
-    # Remap entries to use chaos-modified CP for seeding
-    cp_override = {p["asset_id"]: p["cp"] for p in modified_parts}
-    for e in entries:
-        e["_chaos_cp"] = cp_override.get(e["asset_id"], 0)
-    entries_for_seeding = sorted(entries, key=lambda x: x["_chaos_cp"], reverse=True)
+        # Freaky Friday reveal — posted NOW so people can react before fights start
+        if freaky_swap and freaky_swap[0]:
+            await channel.send(freaky_friday_reveal(freaky_swap[0], freaky_swap[1]))
+            await asyncio.sleep(2)
+
+        # Remap entries to use chaos-modified CP for seeding
+        cp_override = {p["asset_id"]: p["cp"] for p in modified_parts}
+        for e in entries:
+            e["_chaos_cp"] = cp_override.get(e["asset_id"], 0)
+        entries_for_seeding = sorted(entries, key=lambda x: x["_chaos_cp"], reverse=True)
+
+    except Exception as chaos_err:
+        print(f"⚠️ Chaos modifiers skipped due to error: {chaos_err}")
+        entries_for_seeding = entries  # bracket runs normally, no modifiers
     # ─────────────────────────────────────────────────────────────────────────
 
     # Build display name lookup
