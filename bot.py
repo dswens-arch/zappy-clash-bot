@@ -218,7 +218,10 @@ async def cmd_clash(interaction: discord.Interaction):
             f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
         )
         return
-    await interaction.response.defer(ephemeral=True)
+    try:
+        await interaction.response.defer(ephemeral=True)
+    except discord.errors.NotFound:
+        return  # Interaction expired — user can try again
 
     user_id = str(interaction.user.id)
 
@@ -373,7 +376,10 @@ async def cmd_clash(interaction: discord.Interaction):
                 if self.chosen:
                     await inter.response.send_message("Already picked!", ephemeral=True)
                     return
-                await inter.response.defer(ephemeral=True)
+                try:
+                    await inter.response.defer(ephemeral=True)
+                except discord.errors.NotFound:
+                    return  # Interaction expired — user can try again
                 self.chosen = True
                 for item in self.children:
                     item.disabled = True
