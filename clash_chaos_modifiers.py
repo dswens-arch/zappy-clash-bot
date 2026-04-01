@@ -30,19 +30,19 @@ WEEKLY_RANDOM = ["gravity_flip", "equalizer"]
 #
 # You can also track this in a simple dict if you persist it — swap in your DB calls below.
 
-async def get_weekly_modifier_state(db, week_start: date) -> dict:
+def get_weekly_modifier_state(db, week_start: date) -> dict:
     """Fetch or create this week's modifier usage record."""
-    row = await db.table("clash_weekly_modifiers").select("*").eq("week_start", str(week_start)).maybe_single().execute()
+    row = db.table("clash_weekly_modifiers").select("*").eq("week_start", str(week_start)).maybe_single().execute()
     if row.data:
         return row.data
     # First bracket of the week — initialize
     new_row = {"week_start": str(week_start), "gravity_flip_used": False, "equalizer_used": False}
-    await db.table("clash_weekly_modifiers").insert(new_row).execute()
+    db.table("clash_weekly_modifiers").insert(new_row).execute()
     return new_row
 
 
-async def mark_modifier_used(db, week_start: date, modifier: str):
-    await db.table("clash_weekly_modifiers").update({f"{modifier}_used": True}).eq("week_start", str(week_start)).execute()
+def mark_modifier_used(db, week_start: date, modifier: str):
+    db.table("clash_weekly_modifiers").update({f"{modifier}_used": True}).eq("week_start", str(week_start)).execute()
 
 
 def get_week_start() -> date:
@@ -59,25 +59,25 @@ EQUALIZER_CHANCE      = 0.15   # 15% per bracket, max once/week
 FREAKY_FRIDAY_CHANCE  = 0.40   # 40% — fires independently, any bracket
 
 
-async def roll_modifiers(db) -> list[str]:
+def roll_modifiers(db) -> list[str]:
     """
     Roll which modifiers are active for this bracket.
     Returns a list of active modifier keys.
     Call once per bracket, before seeding.
     """
     week_start = get_week_start()
-    state = await get_weekly_modifier_state(db, week_start)
+    state = get_weekly_modifier_state(db, week_start)
     active = []
 
     # Gravity Flip
     if not state["gravity_flip_used"] and random.random() < GRAVITY_FLIP_CHANCE:
         active.append("gravity_flip")
-        await mark_modifier_used(db, week_start, "gravity_flip")
+        mark_modifier_used(db, week_start, "gravity_flip")
 
     # Equalizer — can't stack with Gravity Flip (both alter CP math)
     if "gravity_flip" not in active and not state["equalizer_used"] and random.random() < EQUALIZER_CHANCE:
         active.append("equalizer")
-        await mark_modifier_used(db, week_start, "equalizer")
+        mark_modifier_used(db, week_start, "equalizer")
 
     # Freaky Friday — independent roll, can stack with Oracle
     if random.random() < FREAKY_FRIDAY_CHANCE:
@@ -222,7 +222,7 @@ def build_oracle_embed(prophecy: str) -> dict:
 # MASTER APPLY FUNCTION
 # ─────────────────────────────────────────────
 
-async def apply_all_modifiers(db, participants: list[dict]) -> dict:
+def apply_all_modifiers(db, participants: list[dict]) -> dict:
     """
     Roll and apply all active modifiers for this bracket.
     Returns:
@@ -234,7 +234,7 @@ async def apply_all_modifiers(db, participants: list[dict]) -> dict:
             "freaky_friday_swap": (str, str) | None,  # reveal after results
         }
     """
-    active = await roll_modifiers(db)
+    active = roll_modifiers(db)
     announcements = []
     oracle_embed = None
     freaky_friday_swap = None
