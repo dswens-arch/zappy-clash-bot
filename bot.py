@@ -2022,7 +2022,7 @@ async def close_and_resolve(channel: discord.TextChannel):
             "cp":         cp,
         })
 
-    chaos = await apply_all_modifiers(db, participant_list)
+    chaos = apply_all_modifiers(db, participant_list)
     active_modifiers  = chaos["active_modifiers"]
     oracle_embed_data = chaos["oracle_embed"]
     freaky_swap       = chaos["freaky_friday_swap"]
