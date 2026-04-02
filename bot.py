@@ -2436,6 +2436,7 @@ async def close_and_resolve(channel: discord.TextChannel):
 @bot.event
 async def on_ready():
     print(f"⚡ Zappy Clash bot online as {bot.user}")
+    setup_auction_commands(bot, tree, GUILD_ID)
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
     await tree.sync()
@@ -2443,7 +2444,6 @@ async def on_ready():
     _load_extra_zappies()
     session_scheduler.start()
     print("⏰ Session scheduler running")
-    setup_auction_commands(bot, tree, GUILD_ID)
     auction_checker.start()
 
 def _load_extra_zappies():
