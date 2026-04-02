@@ -29,6 +29,7 @@ from discord.ext import commands, tasks
 from discord import app_commands
 from datetime import datetime, timezone, time as dtime
 from dotenv import load_dotenv
+from clash_auction import setup_auction_commands, auction_checker
 
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
@@ -2442,7 +2443,8 @@ async def on_ready():
     _load_extra_zappies()
     session_scheduler.start()
     print("⏰ Session scheduler running")
-
+    setup_auction_commands(bot, tree, GUILD_ID)
+    auction_checker.start()
 
 def _load_extra_zappies():
     """Load Zappies added via /addzappies from Supabase into the live collection."""
