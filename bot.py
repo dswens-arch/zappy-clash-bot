@@ -1386,6 +1386,11 @@ async def cmd_claimnft(interaction: discord.Interaction):
                     f"🐾 <@{user_id}> just claimed their Zappy Buddy: "
                     f"**{result['name']}**! They found a friend on their expedition. ⚡"
                 )
+            elif result.get("source") == "clash":
+                await channel.send(
+                    f"🎁 <@{user_id}> just claimed their Clash champion NFT prize: "
+                    f"**{result['name']}**! ⚡🏆"
+                )
             else:
                 await channel.send(
                     f"🎉 <@{user_id}> just claimed their Zone 5 NFT prize: "
@@ -2416,11 +2421,23 @@ async def close_and_resolve(channel: discord.TextChannel):
                 elif champ_token.get("reason") == "not_opted_in":
                     champ_token_msg = f"\n⚠️ Opt in to ASA {os.environ.get('REWARD_TOKEN_ID', '2572874483')} to receive token rewards!"
 
+            # -- NFT Drop (5% chance, rolled in final battle) --
+            nft_drop_msg = ""
+            if result.get("nft_drop") and champ_wallet:
+                nft_drop_result = await award_nft_prize(champion_id, champ_wallet)
+                if nft_drop_result and nft_drop_result.get("success"):
+                    nft_drop_msg = (
+                        f"\n\n🎁 **NFT DROP!** The prize wallet is feeling generous — "
+                        f"<@{champion_id}> won a Zappies NFT!\n"
+                        f"Use `/claimnft` to collect your prize. ⚡"
+                    )
+
             await channel.send(
                 f"\n🏆 **BRACKET CHAMPION!**\n"
                 f"<@{champion_id}> wins it all with **{champ_name}**!\n"
                 f"💰 **+{bonus_cp} CP** bracket champion bonus!"
-                f"{champ_token_msg}\n"
+                f"{champ_token_msg}"
+                f"{nft_drop_msg}\n"
                 f"\n"
                 f"⚡ Use `/top` to see the updated leaderboard."
             )
