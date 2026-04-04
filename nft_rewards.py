@@ -156,6 +156,7 @@ def send_nft(recipient_address: str, asset_id: int, note: str = "") -> str | Non
 async def award_nft_prize(
     discord_user_id: str,
     wallet_address:  str,
+    source:          str = "expedition",
 ) -> dict:
     """
     Full NFT prize flow:
@@ -187,6 +188,7 @@ async def award_nft_prize(
             "asset_id":        asset_id,
             "asset_name":      name,
             "status":          "pending",
+            "source":          source,
             "awarded_at":      datetime.now(timezone.utc).isoformat(),
         }).execute()
     except Exception as e:
@@ -268,6 +270,7 @@ async def claim_nft_prize(discord_user_id: str, wallet_address: str) -> dict:
                 "asset_id": asset_id,
                 "name":     name,
                 "txid":     txid,
+                "source":   prize.get("source", "expedition"),
                 "message":  f"✅ **{name}** has been sent to your wallet! Check Pera to confirm.",
             }
         else:
