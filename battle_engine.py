@@ -376,18 +376,10 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
     is_upset = (winner == fighter_a and a_is_underdog) or (winner == fighter_b and not a_is_underdog)
     log.append(f"🏆 **{winner.display_name} wins!** {random.choice(UPSET_LINES if is_upset else WIN_LINES)}")
 
-    # ── NFT Drop Roll (5% chance) ──
-    nft_drop = random.random() < 0.05
-    if nft_drop:
-        log.append("")
-        log.append("🎁 **NFT DROP!** The prize wallet is feeling generous — **{winner.display_name}'s** trainer just won a Zappies NFT!".format(winner=winner))
-        log.append("Use `/claim` to collect your prize before it's gone. ⚡")
-
     return {
         "winner": winner,
         "loser":  loser,
         "is_upset": is_upset,
-        "nft_drop": nft_drop,
         "log": log,
         "log_text": "\n".join(log),
         "fighter_a_final_hp": fighter_a.hp,
