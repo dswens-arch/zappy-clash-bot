@@ -23,6 +23,7 @@ Setup:
 """
 
 import os
+import random
 import asyncio
 import discord
 from discord.ext import commands, tasks
@@ -2421,10 +2422,10 @@ async def close_and_resolve(channel: discord.TextChannel):
                 elif champ_token.get("reason") == "not_opted_in":
                     champ_token_msg = f"\n⚠️ Opt in to ASA {os.environ.get('REWARD_TOKEN_ID', '2572874483')} to receive token rewards!"
 
-            # -- NFT Drop (5% chance, rolled in final battle) --
+            # -- NFT Drop (5% chance, champion only) --
             nft_drop_msg = ""
-            if result.get("nft_drop") and champ_wallet:
-                nft_drop_result = await award_nft_prize(champion_id, champ_wallet)
+            if random.random() < 0.05 and champ_wallet:
+                nft_drop_result = await award_nft_prize(champion_id, champ_wallet, source="clash")
                 if nft_drop_result and nft_drop_result.get("success"):
                     nft_drop_msg = (
                         f"\n\n🎁 **NFT DROP!** The prize wallet is feeling generous — "
