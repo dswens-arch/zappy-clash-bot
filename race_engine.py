@@ -517,13 +517,56 @@ def generate_narration(
 # ---------------------------------------------------------------------------
 
 async def get_racer(db: Client, discord_user_id: str) -> Optional[dict]:
+    """Get first registered Zappy for a player. Use get_all_racers for multi-Zappy."""
     res = db.table("zappy_racers").select("*").eq("discord_user_id", discord_user_id).execute()
     return res.data[0] if res.data else None
+
+
+async def get_all_racers(db: Client, discord_user_id: str) -> list[dict]:
+    """Get all Zappies registered to a player."""
+    res = db.table("zappy_racers").select("*").eq("discord_user_id", discord_user_id).execute()
+    return res.data or []
 
 
 async def get_stats(db: Client, zappy_id: str) -> Optional[dict]:
     res = db.table("zappy_stats").select("*").eq("zappy_id", zappy_id).execute()
     return res.data[0] if res.data else None
+
+
+async def get_available_racers(db: Client, discord_user_id: str) -> tuple[list[dict], list[dict]]:
+    """
+    Returns (available, on_cooldown) lists of (racer, stats) dicts.
+    A Zappy is on cooldown for 1hr after its last race.
+    """
+    from datetime import datetime, timezone, timedelta
+    racers = await get_all_racers(db, discord_user_id)
+    available = []
+    on_cooldown = []
+
+    for racer in racers:
+        stats = await get_stats(db, racer["zappy_id"])
+        if not stats:
+            continue
+        last_raced = stats.get("last_raced_at")
+        if last_raced:
+            # Parse timestamp
+            if isinstance(last_raced, str):
+                last_raced = datetime.fromisoformat(last_raced.replace("Z", "+00:00"))
+            cooldown_ends = last_raced + timedelta(hours=1)
+            if datetime.now(timezone.utc) < cooldown_ends:
+                on_cooldown.append({"racer": racer, "stats": stats, "cooldown_ends": cooldown_ends})
+                continue
+        available.append({"racer": racer, "stats": stats})
+
+    return available, on_cooldown
+
+
+async def set_zappy_cooldown(db: Client, zappy_id: str) -> None:
+    """Mark a Zappy as just raced — starts the 1hr cooldown."""
+    from datetime import datetime, timezone
+    db.table("zappy_stats").update({
+        "last_raced_at": datetime.now(timezone.utc).isoformat()
+    }).eq("zappy_id", zappy_id).execute()
 
 
 async def create_duel(db: Client, challenger_id: str, opponent_id: str) -> dict:
@@ -615,14 +658,27 @@ async def apply_upgrade(
     discord_user_id: str,
     stat_name: str,
     points: int,
+    zappy_id: str = None,
 ) -> dict:
     """
-    Spend ZAP to upgrade a stat. Returns a result dict with
-    success bool, cost, new stat value, and remaining ZAP balance.
+    Spend ZAPP to upgrade a stat on a specific Zappy.
+    If zappy_id is None, uses the first registered Zappy.
+    ZAP balance is shared across all a player's Zappies (taken from first row).
     """
-    racer = await get_racer(db, discord_user_id)
-    if not racer:
-        return {"success": False, "error": "Not registered. Use /register first."}
+    all_racers = await get_all_racers(db, discord_user_id)
+    if not all_racers:
+        return {"success": False, "error": "Not registered. Use /gpregister first."}
+
+    # Find the specific Zappy or default to first
+    if zappy_id:
+        racer = next((r for r in all_racers if r["zappy_id"] == zappy_id), None)
+        if not racer:
+            return {"success": False, "error": f"{zappy_id} not found in your garage."}
+    else:
+        racer = all_racers[0]
+
+    # ZAP balance lives on the first registered Zappy row
+    balance_racer = all_racers[0]
 
     stats = await get_stats(db, racer["zappy_id"])
     if not stats:
@@ -645,18 +701,18 @@ async def apply_upgrade(
         }
 
     cost = upgrade_cost(current, target)
-    if racer["zap_balance"] < cost:
+    if balance_racer["zap_balance"] < cost:
         return {
             "success": False,
             "error": (
-                f"Need {cost:,} ZAP but only have {racer['zap_balance']:,}. "
+                f"Need {cost:,} ZAPP but only have {balance_racer['zap_balance']:,}. "
                 f"Keep racing to earn more."
             ),
         }
 
-    # Deduct ZAP and update stat
-    new_balance = racer["zap_balance"] - cost
-    db.table("zappy_racers").update({"zap_balance": new_balance}).eq("discord_user_id", discord_user_id).execute()
+    # Deduct ZAPP from the balance row (first Zappy)
+    new_balance = balance_racer["zap_balance"] - cost
+    db.table("zappy_racers").update({"zap_balance": new_balance}).eq("discord_user_id", discord_user_id).eq("zappy_id", balance_racer["zappy_id"]).execute()
     db.table("zappy_stats").update({
         stat_name:           target,
         "total_zap_spent":   stats["total_zap_spent"] + cost,
