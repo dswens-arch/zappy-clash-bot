@@ -550,6 +550,7 @@ class GrandPrixCog(commands.Cog):
             message=race_msg, result=result,
             name_a=f"<@{id_a}>", name_b=f"<@{id_b}>",
             zappy_a=racer_a["zappy_id"], zappy_b=racer_b["zappy_id"],
+            mode=q.mode,
         )
 
         winner_racer = racer_a if result["winner"] == "a" else racer_b
@@ -791,6 +792,7 @@ class GrandPrixCog(commands.Cog):
             message=race_msg, result=result,
             name_a=f"<@{user_id}>", name_b="🤖 CPU",
             zappy_a=racer["zappy_id"], zappy_b=CPU_ZAPPY_ID,
+            mode=mode.value,
         )
 
         winner_racer = racer      if result["winner"] == "a" else cpu_racer
