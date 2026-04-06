@@ -380,13 +380,13 @@ def generate_narration(
 # ---------------------------------------------------------------------------
 
 async def get_racer(db: Client, discord_user_id: str) -> Optional[dict]:
-    res = db.table("zappy_racers").select("*").eq("discord_user_id", discord_user_id).single().execute()
-    return res.data if res.data else None
+    res = db.table("zappy_racers").select("*").eq("discord_user_id", discord_user_id).execute()
+    return res.data[0] if res.data else None
 
 
 async def get_stats(db: Client, zappy_id: str) -> Optional[dict]:
-    res = db.table("zappy_stats").select("*").eq("zappy_id", zappy_id).single().execute()
-    return res.data if res.data else None
+    res = db.table("zappy_stats").select("*").eq("zappy_id", zappy_id).execute()
+    return res.data[0] if res.data else None
 
 
 async def create_duel(db: Client, challenger_id: str, opponent_id: str) -> dict:
