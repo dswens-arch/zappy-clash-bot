@@ -38,14 +38,15 @@ from race_engine import (
     run_race_narration,
     apply_upgrade,
     get_racer,
+    get_all_racers,
+    get_available_racers,
+    set_zappy_cooldown,
     get_stats,
     create_duel,
     confirm_payment,
     write_race_result,
     max_upgrade_cost,
     STAT_CAP_MAX,
-    STAT_BASE_MIN, STAT_BASE_MAX,
-    STAT_CAP_MIN,  STAT_CAP_MAX,
 )
 from algo_layer import (
     build_payment_ui,
@@ -244,10 +245,12 @@ class RaceQueue:
 
     def reset(self):
         self.player_a_id:    str | None  = None
-        self.player_a_racer: dict | None = None
+        self.player_a_racer: dict | None = None  # full racer row
+        self.player_a_stats: dict | None = None  # selected zappy stats
         self.player_a_paid:  bool        = False
         self.player_b_id:    str | None  = None
         self.player_b_racer: dict | None = None
+        self.player_b_stats: dict | None = None
         self.player_b_paid:  bool        = False
         self.duel_id:        str | None  = None
         self.after_round:    int         = 0
@@ -376,14 +379,6 @@ class GrandPrixCog(commands.Cog):
         user_id = str(interaction.user.id)
         channel = interaction.channel
 
-        racer = await get_racer(self.db, user_id)
-        if not racer:
-            await interaction.followup.send(
-                "You need to `/gpregister` first to join the Grand Prix.",
-                ephemeral=True,
-            )
-            return
-
         if user_id in active_players:
             await interaction.followup.send(
                 "You're already in a race or queue. Finish that one first.",
@@ -398,6 +393,29 @@ class GrandPrixCog(commands.Cog):
             )
             return
 
+        # Check registration
+        available, on_cooldown = await get_available_racers(self.db, user_id)
+
+        if not available and not on_cooldown:
+            await interaction.followup.send(
+                "You need to `/gpregister` first to join the Grand Prix.",
+                ephemeral=True,
+            )
+            return
+
+        if not available:
+            # All Zappies on cooldown — tell them when earliest is ready
+            earliest = min(on_cooldown, key=lambda x: x["cooldown_ends"])
+            ends = earliest["cooldown_ends"]
+            import discord as _discord
+            ts = int(ends.timestamp())
+            await interaction.followup.send(
+                f"All your Zappies are cooling down! ❄️\n"
+                f"**{earliest['racer']['zappy_id']}** is ready <t:{ts}:R>.",
+                ephemeral=True,
+            )
+            return
+
         if q.mode == "zap":
             if not await can_afford_entry(self.db, user_id):
                 bal = await get_zap_balance(self.db, user_id)
@@ -408,32 +426,113 @@ class GrandPrixCog(commands.Cog):
                 )
                 return
 
-        # Slot A
+        # If only one Zappy available, skip picker and go straight in
+        if len(available) == 1:
+            selected = available[0]
+            await self._slot_player(interaction, q, channel, user_id, selected["racer"], selected["stats"])
+            return
+
+        # Multiple Zappies — show picker
+        await self._show_zappy_picker(interaction, q, channel, user_id, available)
+
+    async def _show_zappy_picker(
+        self,
+        interaction: discord.Interaction,
+        q: RaceQueue,
+        channel,
+        user_id: str,
+        available: list[dict],
+    ):
+        """Show ephemeral buttons to pick which Zappy to race with."""
+
+        class ZappyPickView(discord.ui.View):
+            def __init__(self_inner):
+                super().__init__(timeout=60)
+                self_inner.chosen = False
+
+                for entry in available[:5]:  # max 5 buttons
+                    racer = entry["racer"]
+                    stats = entry["stats"]
+                    label = (
+                        f"{racer['zappy_id']}  "
+                        f"SPD {stats['speed']}  "
+                        f"END {stats['endurance']}  "
+                        f"CLT {stats['clutch']}"
+                    )[:80]
+                    btn = discord.ui.Button(
+                        label=label,
+                        style=discord.ButtonStyle.primary,
+                        custom_id=f"gp_pick_{racer['zappy_id']}",
+                    )
+                    btn.callback = self_inner._make_cb(racer, stats)
+                    self_inner.add_item(btn)
+
+            def _make_cb(self_inner, racer, stats):
+                async def cb(btn_interaction: discord.Interaction):
+                    if self_inner.chosen:
+                        await btn_interaction.response.send_message("Already picked!", ephemeral=True)
+                        return
+                    self_inner.chosen = True
+                    for item in self_inner.children:
+                        item.disabled = True
+                    await btn_interaction.response.defer(ephemeral=True)
+                    await self._slot_player(btn_interaction, q, channel, user_id, racer, stats)
+                return cb
+
+        embed = discord.Embed(
+            title="⚡ Pick your Zappy",
+            description="Choose which Zappy to race with. Stats shown — pick your best lineup.",
+            color=discord.Color.from_rgb(30, 180, 255),
+        )
+        for entry in available[:5]:
+            racer = entry["racer"]
+            stats = entry["stats"]
+            embed.add_field(
+                name=racer["zappy_id"],
+                value=(
+                    f"Speed `{stat_bar(stats['speed'], stats['speed_max'])}` {stats['speed']}/{stats['speed_max']}\n"
+                    f"Endurance `{stat_bar(stats['endurance'], stats['endurance_max'])}` {stats['endurance']}/{stats['endurance_max']}\n"
+                    f"Clutch `{stat_bar(stats['clutch'], stats['clutch_max'])}` {stats['clutch']}/{stats['clutch_max']}"
+                ),
+                inline=False,
+            )
+
+        await interaction.followup.send(embed=embed, view=ZappyPickView(), ephemeral=True)
+
+    async def _slot_player(
+        self,
+        interaction: discord.Interaction,
+        q: RaceQueue,
+        channel,
+        user_id: str,
+        racer: dict,
+        stats: dict,
+    ):
+        """Place a player into slot A or B with their chosen Zappy."""
         if q.player_a_id is None:
             q.player_a_id    = user_id
             q.player_a_racer = racer
+            q.player_a_stats = stats
             active_players.add(user_id)
             if q.mode == "zap":
                 await self._zap_join_a(interaction, q, channel)
             else:
                 await self._algo_join_a(interaction, q, channel)
-            return
 
-        # Slot B
-        if q.player_b_id is None and q.player_a_id != user_id:
+        elif q.player_b_id is None and q.player_a_id != user_id:
             q.player_b_id    = user_id
             q.player_b_racer = racer
+            q.player_b_stats = stats
             active_players.add(user_id)
             if q.mode == "zap":
                 await self._zap_join_b(interaction, q, channel)
             else:
                 await self._algo_join_b(interaction, q, channel)
-            return
-
-        await interaction.followup.send(
-            "Queue is full — two players are lining up. Check back soon.",
-            ephemeral=True,
-        )
+        else:
+            await interaction.followup.send(
+                "Queue is full — two players are lining up. Check back soon.",
+                ephemeral=True,
+            )
 
     # -----------------------------------------------------------------------
     # ALGO join flows
@@ -544,8 +643,9 @@ class GrandPrixCog(commands.Cog):
 
         self.db.table("race_duels").update({"status": "racing"}).eq("id", q.duel_id).execute()
 
-        stats_a = await get_stats(self.db, racer_a["zappy_id"])
-        stats_b = await get_stats(self.db, racer_b["zappy_id"])
+        # Use pre-selected stats from queue (set during Zappy picker)
+        stats_a = q.player_a_stats or await get_stats(self.db, racer_a["zappy_id"])
+        stats_b = q.player_b_stats or await get_stats(self.db, racer_b["zappy_id"])
         result  = resolve_race(stats_a, stats_b)
 
         race_msg = await channel.send("🏁 **Race starting...**")
@@ -621,9 +721,14 @@ class GrandPrixCog(commands.Cog):
 
         # Win/loss records (always, even in test)
         if winner_id != "cpu":
-            self.db.table("zappy_racers").update({"wins":   winner_racer.get("wins", 0) + 1}).eq("discord_user_id", winner_id).execute()
+            self.db.table("zappy_racers").update({"wins": winner_racer.get("wins", 0) + 1}).eq("discord_user_id", winner_id).eq("zappy_id", winner_racer["zappy_id"]).execute()
         if loser_id != "cpu":
-            self.db.table("zappy_racers").update({"losses": loser_racer.get("losses", 0) + 1}).eq("discord_user_id", loser_id).execute()
+            self.db.table("zappy_racers").update({"losses": loser_racer.get("losses", 0) + 1}).eq("discord_user_id", loser_id).eq("zappy_id", loser_racer["zappy_id"]).execute()
+
+        # Apply 1hr cooldown to both Zappies that raced
+        if not test_mode:
+            await set_zappy_cooldown(self.db, winner_racer["zappy_id"])
+            await set_zappy_cooldown(self.db, loser_racer["zappy_id"])
 
         # Board → result card
         await self._update_board(channel, q, "result",
@@ -841,25 +946,54 @@ class GrandPrixCog(commands.Cog):
             )
             return
 
+        # Check if this specific Zappy ID is already registered (by anyone)
+        existing_zappy = self.db.table("zappy_stats").select("zappy_id").eq("zappy_id", zappy_id).execute()
+        if existing_zappy.data:
+            await interaction.followup.send(
+                f"**{zappy_id}** is already registered. Each Zappy can only be registered once.",
+                ephemeral=True,
+            )
+            return
+
+        # Check how many Zappies this player already has
+        all_racers = await get_all_racers(self.db, user_id)
+        zappy_count = len(all_racers)
+
         stats = seed_stats(zappy_id)
-        self.db.table("zappy_racers").insert({
-            "discord_user_id": user_id,
-            "wallet_address":  wallet_address,
-            "zappy_id":        zappy_id,
-            "zap_balance":     0,
-            "wins": 0, "losses": 0,
-        }).execute()
+
+        # First Zappy — also sets the wallet and ZAP balance row
+        # Additional Zappies — use same wallet, share ZAP balance
+        if zappy_count == 0:
+            self.db.table("zappy_racers").insert({
+                "discord_user_id": user_id,
+                "wallet_address":  wallet_address,
+                "zappy_id":        zappy_id,
+                "zap_balance":     0,
+                "wins": 0, "losses": 0,
+            }).execute()
+        else:
+            # Additional Zappy — inherit wallet from first registration
+            existing_wallet = all_racers[0]["wallet_address"]
+            self.db.table("zappy_racers").insert({
+                "discord_user_id": user_id,
+                "wallet_address":  existing_wallet,
+                "zappy_id":        zappy_id,
+                "zap_balance":     0,
+                "wins": 0, "losses": 0,
+            }).execute()
+
         self.db.table("zappy_stats").insert({"zappy_id": zappy_id, **stats}).execute()
+
+        garage_note = f"Zappy #{zappy_count + 1} in your garage." if zappy_count > 0 else "Use `/gpupgrade` to level up. Tap a race board to compete."
 
         embed = format_stats_embed(
             {"zappy_id": zappy_id, "wallet_address": wallet_address,
              "wins": 0, "losses": 0, "zap_balance": 0},
             stats,
-            title=f"⚡ {zappy_id} — Registered for Grand Prix!",
+            title=f"⚡ {zappy_id} — Added to Garage!",
         )
         embed.description = (
-            "Stats seeded from your Zappy ID. Max potential locked in.\n"
-            "Use `/gpupgrade` to level up. Tap a race board to compete."
+            f"Stats seeded from your Zappy ID. Max potential locked in.\n{garage_note}"
         )
         await interaction.followup.send(embed=embed, ephemeral=True)
 
@@ -903,15 +1037,30 @@ class GrandPrixCog(commands.Cog):
     # /gpstats
     # -----------------------------------------------------------------------
 
-    @app_commands.command(name="gpstats", description="View your Grand Prix stat sheet.")
+    @app_commands.command(name="gpstats", description="View your Grand Prix garage and stats.")
     async def gpstats(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        racer = await get_racer(self.db, str(interaction.user.id))
-        if not racer:
+        from datetime import datetime, timezone
+        available, on_cooldown = await get_available_racers(self.db, str(interaction.user.id))
+        all_entries = available + on_cooldown
+
+        if not all_entries:
             await interaction.followup.send("Not registered. Use `/gpregister` first.", ephemeral=True)
             return
-        stats = await get_stats(self.db, racer["zappy_id"])
-        await interaction.followup.send(embed=format_stats_embed(racer, stats))
+
+        for entry in all_entries:
+            racer = entry["racer"]
+            stats = entry["stats"]
+            cooldown_ends = entry.get("cooldown_ends")
+
+            if cooldown_ends:
+                ts = int(cooldown_ends.timestamp())
+                title = f"⚡ {racer['zappy_id']} — ❄️ Ready <t:{ts}:R>"
+            else:
+                title = f"⚡ {racer['zappy_id']} — Ready to Race"
+
+            embed = format_stats_embed(racer, stats, title=title)
+            await interaction.followup.send(embed=embed)
 
     # -----------------------------------------------------------------------
     # /gpgarage
@@ -935,24 +1084,39 @@ class GrandPrixCog(commands.Cog):
     # /gpupgrade
     # -----------------------------------------------------------------------
 
-    @app_commands.command(name="gpupgrade", description="Spend ZAP to upgrade a stat on your Grand Prix Zappy.")
-    @app_commands.describe(stat="Which stat to upgrade", points="Points to add (1–5)")
+    @app_commands.command(name="gpupgrade", description="Spend ZAPP to upgrade a stat on one of your Zappies.")
+    @app_commands.describe(
+        zappy_id="Which Zappy to upgrade (e.g. Zappy #83)",
+        stat="Which stat to upgrade",
+        points="Points to add (1–5)",
+    )
     @app_commands.choices(stat=[
         app_commands.Choice(name="Speed",     value="speed"),
         app_commands.Choice(name="Endurance", value="endurance"),
         app_commands.Choice(name="Clutch",    value="clutch"),
     ])
-    async def gpupgrade(self, interaction: discord.Interaction, stat: app_commands.Choice[str], points: int = 1):
+    async def gpupgrade(self, interaction: discord.Interaction, zappy_id: str, stat: app_commands.Choice[str], points: int = 1):
         await interaction.response.defer(ephemeral=True)
         if not 1 <= points <= 5:
             await interaction.followup.send("Enter between 1 and 5 points.", ephemeral=True)
             return
-        result = await apply_upgrade(self.db, str(interaction.user.id), stat.value, points)
+
+        # Verify this Zappy belongs to the player
+        all_racers = await get_all_racers(self.db, str(interaction.user.id))
+        owned_ids = [r["zappy_id"] for r in all_racers]
+        if zappy_id not in owned_ids:
+            await interaction.followup.send(
+                f"**{zappy_id}** isn't in your garage. Your Zappies: {', '.join(owned_ids) or 'none'}",
+                ephemeral=True,
+            )
+            return
+
+        result = await apply_upgrade(self.db, str(interaction.user.id), stat.value, points, zappy_id=zappy_id)
         if not result["success"]:
             await interaction.followup.send(f"❌ {result['error']}", ephemeral=True)
             return
         await interaction.followup.send(
-            f"✅ **{stat.name}** upgraded: {result['old_value']} → **{result['new_value']}** / {result['cap']}\n"
+            f"✅ **{zappy_id}** — {stat.name} upgraded: {result['old_value']} → **{result['new_value']}** / {result['cap']}\n"
             f"`{stat_bar(result['new_value'], result['cap'])}`\n\n"
             f"Cost: **{result['cost']:,} ZAPP** · Balance: **{result['new_balance']:,} ZAPP**",
             ephemeral=True,
