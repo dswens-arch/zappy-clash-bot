@@ -113,7 +113,7 @@ ACCENTS = {
 }
 LABELS = {
     "algo": ("ALGO GRAND PRIX",  "5 ALGO entry  |  Winner takes 9 ALGO"),
-    "zap":  ("ZAP GRAND PRIX",   "500 ZAP entry  |  Winner takes 1,000 ZAP"),
+    "zap":  ("ZAPP GRAND PRIX",   "500 ZAPP entry  |  Winner takes 1,000 ZAPP"),
 }
 
 
@@ -178,9 +178,16 @@ def board_result(mode, zappy_a, zappy_b, winner, score_a, score_b, surge=False):
     draw.text((W//2, 82),  "RACE RESULT",               font=FONT_MED,  fill=accent, anchor="mm")
     draw.rounded_rectangle([W//2-230, 98, W//2+230, 158],    radius=10, fill=(16,36,16), outline=GREEN, width=2)
     draw.text((W//2, 128), f"{winner}  WINS!",               font=FONT_BOLD, fill=GREEN,  anchor="mm")
-    payout    = "9 ALGO paid out" if mode == "algo" else "1,000 ZAP paid out"
-    surge_tag = "  ·  ⚡ SURGE!" if surge else ""
-    draw.text((W//2, 178), f"{payout}  ·  {score_a}-{score_b} laps{surge_tag}", font=FONT_SM, fill=MUTED, anchor="mm")
+    payout    = "9 ALGO paid out" if mode == "algo" else "1,000 ZAPP paid out"
+    surge_tag = "  SURGE!" if surge else ""
+    diff = abs(score_a - score_b)
+    if diff == 3:
+        margin = "Dominant"
+    elif diff == 2:
+        margin = "Won by 2 laps"
+    else:
+        margin = "Won by 1 lap"
+    draw.text((W//2, 178), f"{payout}  ·  {margin}{surge_tag}", font=FONT_SM, fill=MUTED, anchor="mm")
     draw.text((W//2, 210), f"{zappy_a}  vs  {zappy_b}",     font=FONT_SM,   fill=MUTED,  anchor="mm")
     draw.text((W//2, 250), "New race open below  ↓",         font=FONT_SM,   fill=accent, anchor="mm")
     return _buf(img)
@@ -217,7 +224,7 @@ class JoinZapView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(
-        label="Join Race  ·  500 ZAP",
+        label="Join Race  ·  500 ZAPP",
         style=discord.ButtonStyle.success,
         emoji="⚡",
         custom_id="gp:join_zap",
@@ -311,8 +318,8 @@ def format_stats_embed(racer: dict, stats: dict, title: str = None) -> discord.E
     embed.add_field(name="Wins",        value=str(wins),    inline=True)
     embed.add_field(name="Losses",      value=str(losses),  inline=True)
     embed.add_field(name="Win Rate",    value=win_rate,     inline=True)
-    embed.add_field(name="ZAP Balance", value=f"{racer.get('zap_balance', 0):,}", inline=True)
-    embed.add_field(name="ZAP to max",
+    embed.add_field(name="ZAPP Balance", value=f"{racer.get('zap_balance', 0):,}", inline=True)
+    embed.add_field(name="ZAPP to max",
         value=f"{max_upgrade_cost(stats):,}" if max_upgrade_cost(stats) > 0 else "✅ Maxed", inline=True)
     embed.set_footer(text=f"Wallet: {racer['wallet_address'][:10]}...{racer['wallet_address'][-4:]}")
     return embed
@@ -395,8 +402,8 @@ class GrandPrixCog(commands.Cog):
             if not await can_afford_entry(self.db, user_id):
                 bal = await get_zap_balance(self.db, user_id)
                 await interaction.followup.send(
-                    f"Not enough ZAP. Need **{ZAP_ENTRY:,}** — you have **{bal:,}**.\n"
-                    f"Race on the ALGO board to earn more ZAP.",
+                    f"Not enough ZAPP. Need **{ZAP_ENTRY:,}** — you have **{bal:,}**.\n"
+                    f"Race on the ALGO board to earn more ZAPP.",
                     ephemeral=True,
                 )
                 return
@@ -500,8 +507,8 @@ class GrandPrixCog(commands.Cog):
 
         await self._update_board(channel, q, "waiting", zappy_id=q.player_a_racer["zappy_id"])
         await interaction.followup.send(
-            f"✅ **{ZAP_ENTRY:,} ZAP** deducted — you're in the queue!\n"
-            f"Remaining balance: **{result['new_balance']:,} ZAP**\n"
+            f"✅ **{ZAP_ENTRY:,} ZAPP** deducted — you're in the queue!\n"
+            f"Remaining balance: **{result['new_balance']:,} ZAPP**\n"
             f"Waiting for an opponent...",
             ephemeral=True,
         )
@@ -518,8 +525,8 @@ class GrandPrixCog(commands.Cog):
         q.player_b_paid = True
 
         await interaction.followup.send(
-            f"✅ **{ZAP_ENTRY:,} ZAP** deducted — race starting!\n"
-            f"Remaining balance: **{result['new_balance']:,} ZAP**",
+            f"✅ **{ZAP_ENTRY:,} ZAPP** deducted — race starting!\n"
+            f"Remaining balance: **{result['new_balance']:,} ZAPP**",
             ephemeral=True,
         )
         await self._launch_race(q, channel)
@@ -591,22 +598,22 @@ class GrandPrixCog(commands.Cog):
             # ZAP participation bonuses
             self._add_zap(winner_id, winner_racer.get("zap_balance", 0), 500)
             self._add_zap(loser_id,  loser_racer.get("zap_balance", 0),  100)
-            await channel.send(f"⚡ Winner +500 ZAP  ·  Runner-up +100 ZAP{txid_display}")
+            await channel.send(f"⚡ Winner +500 ZAPP  ·  Runner-up +100 ZAPP{txid_display}")
 
         elif q.mode == "algo" and test_mode:
             # Test mode — skip real payout, just log
             await write_race_result(self.db, q.duel_id, result, winner_id, "test")
             self._add_zap(winner_id, winner_racer.get("zap_balance", 0), 500)
             self._add_zap(loser_id,  loser_racer.get("zap_balance", 0),  100)
-            await channel.send(f"⚡ Winner +500 ZAP  ·  Runner-up +100 ZAP")
+            await channel.send(f"⚡ Winner +500 ZAPP  ·  Runner-up +100 ZAPP")
 
         else:  # zap mode
             if not test_mode:
                 await pay_winner(self.db, winner_id, loser_id)
                 await write_race_result(self.db, q.duel_id, result, winner_id, "zap")
                 await channel.send(
-                    f"🪙 **{ZAP_PAYOUT:,} ZAP** paid to **{winner_racer['zappy_id']}**\n"
-                    f"⚡ Winner +{ZAP_WIN_BONUS} ZAP bonus  ·  Runner-up +{ZAP_LOSE_BONUS} ZAP"
+                    f"🪙 **{ZAP_PAYOUT:,} ZAPP** paid to **{winner_racer['zappy_id']}**\n"
+                    f"⚡ Winner +{ZAP_WIN_BONUS} ZAPP bonus  ·  Runner-up +{ZAP_LOSE_BONUS} ZAPP"
                 )
             else:
                 await write_race_result(self.db, q.duel_id, result, winner_id, "test")
@@ -692,7 +699,7 @@ class GrandPrixCog(commands.Cog):
         await interaction.followup.send(
             f"✅ Both boards posted.\n"
             f"ALGO board: `{algo_msg.id}`\n"
-            f"ZAP board:  `{zap_msg.id}`\n\n"
+            f"ZAPP board:  `{zap_msg.id}`\n\n"
             f"Pin both messages to keep them visible at the top of the channel.",
             ephemeral=True,
         )
@@ -784,7 +791,7 @@ class GrandPrixCog(commands.Cog):
         stats_a = await get_stats(self.db, racer["zappy_id"])
         result  = resolve_race(stats_a, cpu_stats)
 
-        mode_label = "ALGO" if mode.value == "algo" else "ZAP"
+        mode_label = "ALGO" if mode.value == "algo" else "ZAPP"
         race_msg = await channel.send(f"🧪 **TEST RACE ({mode_label} mode) — no real funds move**")
 
         await run_race_narration(
@@ -947,7 +954,7 @@ class GrandPrixCog(commands.Cog):
         await interaction.followup.send(
             f"✅ **{stat.name}** upgraded: {result['old_value']} → **{result['new_value']}** / {result['cap']}\n"
             f"`{stat_bar(result['new_value'], result['cap'])}`\n\n"
-            f"Cost: **{result['cost']:,} ZAP** · Balance: **{result['new_balance']:,} ZAP**",
+            f"Cost: **{result['cost']:,} ZAPP** · Balance: **{result['new_balance']:,} ZAPP**",
             ephemeral=True,
         )
 
@@ -955,13 +962,13 @@ class GrandPrixCog(commands.Cog):
     # /gpzap
     # -----------------------------------------------------------------------
 
-    @app_commands.command(name="gpzap", description="Check your ZAP balance.")
+    @app_commands.command(name="gpzap", description="Check your ZAPP balance.")
     async def gpzap(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         bal = await get_zap_balance(self.db, str(interaction.user.id))
         await interaction.followup.send(
-            f"⚡ Your ZAP balance: **{bal:,} ZAP**\n"
-            f"ZAP race entry: {ZAP_ENTRY:,}  ·  Win payout: {ZAP_PAYOUT:,}",
+            f"⚡ Your ZAPP balance: **{bal:,} ZAP**\n"
+            f"ZAPP race entry: {ZAP_ENTRY:,}  ·  Win payout: {ZAP_PAYOUT:,}",
             ephemeral=True,
         )
 
