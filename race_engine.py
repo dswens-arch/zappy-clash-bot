@@ -256,12 +256,12 @@ def generate_narration(
     name_b: str,
     zappy_a: str,
     zappy_b: str,
+    mode: str = "algo",
 ) -> list[dict]:
     """
     Convert a race result into a list of timed narration beats.
-
-    Returns a list of dicts: [{"delay": int, "text": str}, ...]
-    Each beat is sent/edited as a Discord message after `delay` seconds.
+    mode: 'algo' or 'zap' — controls wager text in the final beat.
+    zappy_a / zappy_b should be the Zappy ID (e.g. ZAP-447), not ASA ID.
     """
     beats = []
 
@@ -272,20 +272,28 @@ def generate_narration(
             **kwargs,
         )
 
+    def bars(sa, sb):
+        return build_progress_bar(sa), build_progress_bar(sb)
+
     # --- Beat 0: Race start ---
     l1w = result["lap1"]["winner"]
+    score_a = 1 if l1w == "a" else 0
+    score_b = 1 - score_a
+
     if l1w == "a":
         lap1_line = pick(LAP1_LEAD_A)
-        bar_a, bar_b = build_progress_bar(1), build_progress_bar(0)
     else:
         lap1_line = pick(LAP1_LEAD_B)
-        bar_a, bar_b = build_progress_bar(0), build_progress_bar(1)
+
+    bar_a, bar_b = bars(score_a, score_b)
+
+    wager_line = "5 ALGO on the line" if mode == "algo" else "500 ZAP on the line"
 
     beats.append({
         "delay": 0,
         "text": (
             f"🏁 **RACE START — ZAPPY GRAND PRIX**\n"
-            f"*5 ALGO on the line. 30 seconds. Let's go.*\n\n"
+            f"*{wager_line}. 30 seconds. Let's go.*\n\n"
             f"{lap1_line}\n\n"
             f"> {zappy_a} ({name_a})  {bar_a}\n"
             f"> {zappy_b} ({name_b})  {bar_b}"
@@ -293,19 +301,15 @@ def generate_narration(
     })
 
     # --- Beat 1: Mid race ---
-    score_a_mid = 1 if l1w == "a" else 0
-    score_b_mid = 1 - score_a_mid
     l2w = result["lap2"]["winner"]
-
     if l2w == "a":
-        score_a_mid += 1
+        score_a += 1
         lap2_line = pick(LAP2_LEAD_A)
     else:
-        score_b_mid += 1
+        score_b += 1
         lap2_line = pick(LAP2_LEAD_B)
 
-    bar_a = build_progress_bar(score_a_mid)
-    bar_b = build_progress_bar(score_b_mid)
+    bar_a, bar_b = bars(score_a, score_b)
 
     beats.append({
         "delay": BEAT_DELAYS[0],
@@ -317,7 +321,7 @@ def generate_narration(
         ),
     })
 
-    # --- Beat 2: Surge or tension ---
+    # --- Beat 2: Surge or tension (keep bars visible) ---
     surge_text = ""
     if result["surge_triggered"]:
         surge_name = (
@@ -332,16 +336,20 @@ def generate_narration(
         "delay": BEAT_DELAYS[1],
         "text": (
             f"😤 **FINAL LAP**{surge_text}\n\n"
-            f"{tension_line}"
+            f"{tension_line}\n\n"
+            f"> {zappy_a} ({name_a})  {bar_a}\n"
+            f"> {zappy_b} ({name_b})  {bar_b}"
         ),
     })
 
-    # --- Beat 3: Dramatic pause ---
+    # --- Beat 3: Dramatic pause (keep bars visible) ---
     beats.append({
         "delay": BEAT_DELAYS[2],
         "text": (
             f"😤 **FINAL LAP**{surge_text}\n\n"
             f"{tension_line}\n\n"
+            f"> {zappy_a} ({name_a})  {bar_a}\n"
+            f"> {zappy_b} ({name_b})  {bar_b}\n\n"
             f"*It's going to be close...*"
         ),
     })
@@ -358,8 +366,12 @@ def generate_narration(
         win_line = pick(WIN_LINES_B)
         winner_display = f"{zappy_b} ({name_b})"
 
-    bar_a = build_progress_bar(final_score_a)
-    bar_b = build_progress_bar(final_score_b)
+    bar_a, bar_b = bars(final_score_a, final_score_b)
+
+    if mode == "algo":
+        payout_line = f"🏦 **{winner_display}** receives **9 ALGO**\n💰 Bot collects **1 ALGO** rake"
+    else:
+        payout_line = f"🪙 **{winner_display}** receives **1,000 ZAP**"
 
     beats.append({
         "delay": BEAT_DELAYS[3],
@@ -367,8 +379,7 @@ def generate_narration(
             f"{win_line}\n\n"
             f"> {zappy_a} ({name_a})  {bar_a}  {final_score_a} laps\n"
             f"> {zappy_b} ({name_b})  {bar_b}  {final_score_b} laps\n\n"
-            f"🏦 **{winner_display}** receives **9 ALGO**\n"
-            f"💰 Bot collects **1 ALGO** rake"
+            f"{payout_line}"
         ),
     })
 
@@ -446,8 +457,6 @@ async def write_race_result(
         "winner_id": winner_id,
     }).eq("id", duel_id).execute()
 
-    # Update bot wallet rake
-    db.rpc("increment_rake", {"amount": RAKE_ALGO}).execute()
 
 
 async def expire_stale_duels(db: Client) -> list[str]:
@@ -542,18 +551,15 @@ async def apply_upgrade(
 # ---------------------------------------------------------------------------
 
 async def run_race_narration(
-    message,           # discord.Message to edit in place
+    message,
     result: dict,
     name_a: str,
     name_b: str,
     zappy_a: str,
     zappy_b: str,
+    mode: str = "algo",
 ) -> None:
-    """
-    Edit a Discord message through each narration beat with delays.
-    Call this after status flips to 'racing'.
-    """
-    beats = generate_narration(result, name_a, name_b, zappy_a, zappy_b)
+    beats = generate_narration(result, name_a, name_b, zappy_a, zappy_b, mode=mode)
 
     for i, beat in enumerate(beats):
         if i > 0:
