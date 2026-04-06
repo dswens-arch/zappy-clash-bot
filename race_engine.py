@@ -269,9 +269,34 @@ WIN_LINES = [
 ]
 
 
-def build_progress_bar(laps_won: int, total_laps: int = 3, width: int = 10) -> str:
-    filled = round((laps_won / total_laps) * width)
-    return "🟩" * filled + "⬜" * (width - filled)
+def build_track(position: int, total: int = 14, marker: str = "🟢") -> str:
+    """
+    Show a racer's position on a 14-segment track ending with 🏁.
+    position: 0 = start, total-1 = finish line
+    marker: 🟢 for leader, 🔴 for trailer, 🟡 for tied
+    """
+    track = ["⬜"] * total
+    pos = min(position, total - 1)
+    track[pos] = marker
+    return "".join(track) + "🏁"
+
+
+def get_markers(score_a: int, score_b: int) -> tuple[str, str]:
+    """Return (marker_a, marker_b) based on current race positions."""
+    if score_a > score_b:
+        return "🟢", "🔴"
+    elif score_b > score_a:
+        return "🔴", "🟢"
+    else:
+        return "🟡", "🟡"
+
+
+def score_to_position(score: int, total_laps: int = 3, track_len: int = 14) -> int:
+    """Convert laps won to a track position (0-indexed, 0=start, 13=near finish)."""
+    # Each lap win moves racer forward. Max position = track_len - 1
+    # Winner at 3 laps = position 13, loser at 0 wins = position 3
+    base = 3  # everyone starts a little off the line
+    return base + round((score / total_laps) * (track_len - base - 1))
 
 
 def _margin_text(score_a: int, score_b: int, winner: str) -> str:
@@ -295,12 +320,17 @@ def generate_narration(
 ) -> list[dict]:
     beats = []
 
-    def bars(sa, sb):
-        return build_progress_bar(sa), build_progress_bar(sb)
+    def track_lines(sa, sb):
+        ma, mb = get_markers(sa, sb)
+        pa = score_to_position(sa)
+        pb = score_to_position(sb)
+        ta = build_track(pa, marker=ma)
+        tb = build_track(pb, marker=mb)
+        return ta, tb
 
     label_a = f"**{zappy_a}** ({name_a})"
     label_b = f"**{zappy_b}** ({name_b})"
-    wager   = "5 ALGO" if mode == "algo" else "500 ZAP"
+    wager   = "5 ALGO" if mode == "algo" else "500 ZAPP"
 
     l1w = result["lap1"]["winner"]
     l2w = result["lap2"]["winner"]
@@ -309,12 +339,15 @@ def generate_narration(
     s_a, s_b = 0, 0
 
     # Beat 0 — LIGHTS OUT
+    # Both start at position 0, both yellow (tied)
+    t0 = build_track(score_to_position(0), marker="🟡")
     beats.append({
         "delay": 0,
         "text": (
             "🎮 **ZAPPY GRAND PRIX**\n"
             f"*{wager} on the line — 3 laps — winner takes all*\n\n"
-            f"**{zappy_a}** ({name_a})  vs  **{zappy_b}** ({name_b})\n\n"
+            f"{zappy_a} ({name_a})  {t0}\n"
+            f"{zappy_b} ({name_b})  {t0}\n\n"
             "*Engines revving... lights on...*\n"
             "🔴 🔴 🔴 🔴 🔴"
         ),
@@ -328,15 +361,15 @@ def generate_narration(
         s_b += 1
         line = random.choice(LAP1_WIN_B).format(a=label_a, b=label_b)
 
-    bar_a, bar_b = bars(s_a, s_b)
+    ta, tb = track_lines(s_a, s_b)
     leader_label = label_a if l1w == "a" else label_b
 
     beats.append({
         "delay": BEAT_DELAYS[0],
         "text": (
             f"{line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}\n"
-            f"> {zappy_b} ({name_b})  {bar_b}\n\n"
+            f"{zappy_a} ({name_a})  {ta}\n"
+            f"{zappy_b} ({name_b})  {tb}\n\n"
             f"*Lap 1 done — {leader_label} leads*"
         ),
     })
@@ -348,7 +381,7 @@ def generate_narration(
     else:
         s_b += 1
 
-    bar_a, bar_b = bars(s_a, s_b)
+    ta, tb = track_lines(s_a, s_b)
 
     if s_a == s_b:
         evener = label_a if l2w == "a" else label_b
@@ -369,8 +402,8 @@ def generate_narration(
         "delay": BEAT_DELAYS[1],
         "text": (
             f"{line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}\n"
-            f"> {zappy_b} ({name_b})  {bar_b}\n\n"
+            f"{zappy_a} ({name_a})  {ta}\n"
+            f"{zappy_b} ({name_b})  {tb}\n\n"
             f"*Lap 2 done — {status}*"
         ),
     })
@@ -383,8 +416,8 @@ def generate_narration(
             "delay": BEAT_DELAYS[2],
             "text": (
                 f"{surge_line}\n\n"
-                f"> {zappy_a} ({name_a})  {bar_a}\n"
-                f"> {zappy_b} ({name_b})  {bar_b}\n\n"
+                f"{zappy_a} ({name_a})  {ta}\n"
+                f"{zappy_b} ({name_b})  {tb}\n\n"
                 "*Final lap incoming...*"
             ),
         })
@@ -394,8 +427,8 @@ def generate_narration(
             "delay": BEAT_DELAYS[2],
             "text": (
                 f"{tension}\n\n"
-                f"> {zappy_a} ({name_a})  {bar_a}\n"
-                f"> {zappy_b} ({name_b})  {bar_b}"
+                f"{zappy_a} ({name_a})  {ta}\n"
+                f"{zappy_b} ({name_b})  {tb}"
             ),
         })
 
@@ -405,7 +438,7 @@ def generate_narration(
     else:
         s_b += 1
 
-    bar_a, bar_b = bars(s_a, s_b)
+    ta, tb = track_lines(s_a, s_b)
 
     is_comeback_a = (l3w == "a" and s_a > s_b and l2w != "a" and l1w != "a")
     is_comeback_b = (l3w == "b" and s_b > s_a and l2w != "b" and l1w != "b")
@@ -422,8 +455,8 @@ def generate_narration(
         "delay": BEAT_DELAYS[3],
         "text": (
             f"{line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}\n"
-            f"> {zappy_b} ({name_b})  {bar_b}"
+            f"{zappy_a} ({name_a})  {ta}\n"
+            f"{zappy_b} ({name_b})  {tb}"
         ),
     })
 
@@ -432,28 +465,31 @@ def generate_narration(
         "delay": BEAT_DELAYS[4],
         "text": (
             f"{line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}\n"
-            f"> {zappy_b} ({name_b})  {bar_b}\n\n"
+            f"{zappy_a} ({name_a})  {ta}\n"
+            f"{zappy_b} ({name_b})  {tb}\n\n"
             "*Checking the replay...*"
         ),
     })
 
     # Beat 6 — WINNER
+    # Winner track goes to finish line (pos 13 = full green)
+    # Loser track shows their actual position (how far back)
     final_score_a = result["score_a"]
     final_score_b = result["score_b"]
 
     if final_winner == "a":
         winner_zappy, winner_name = zappy_a, name_a
         winner_display = label_a
-        top_bar = build_progress_bar(final_score_a)
-        bot_bar = build_progress_bar(final_score_b)
         bot_label = f"{zappy_b} ({name_b})"
+        # Winner at finish line, loser at their earned position
+        t_winner = build_track(13, marker="🟢")
+        t_loser  = build_track(score_to_position(final_score_b), marker="🔴")
     else:
         winner_zappy, winner_name = zappy_b, name_b
         winner_display = label_b
-        top_bar = build_progress_bar(final_score_b)
-        bot_bar = build_progress_bar(final_score_a)
         bot_label = f"{zappy_a} ({name_a})"
+        t_winner = build_track(13, marker="🟢")
+        t_loser  = build_track(score_to_position(final_score_a), marker="🔴")
 
     win_line = random.choice(WIN_LINES).format(winner=winner_display)
     margin   = _margin_text(final_score_a, final_score_b, final_winner)
@@ -468,8 +504,8 @@ def generate_narration(
         "text": (
             f"{win_line}\n"
             f"*{margin}*\n\n"
-            f"> 🥇 {winner_zappy} ({winner_name})  {top_bar}\n"
-            f"> {bot_label}  {bot_bar}\n\n"
+            f"🥇 {winner_zappy} ({winner_name})  {t_winner}\n"
+            f"   {bot_label}  {t_loser}\n\n"
             f"{payout_line}"
         ),
     })
