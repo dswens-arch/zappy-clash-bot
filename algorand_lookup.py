@@ -23,6 +23,8 @@ HERO_ASSET_IDS = {
     2742451787: "Crocodile",
     2779491623: "Cat",
     3091046425: "Rabbit",
+    3509675278: "Wolf",
+    3509678849: "Frog",
 }
 
 COLLAB_ASSET_IDS = {
@@ -35,6 +37,8 @@ HERO_IMAGES = {
     "Crocodile":  "",
     "Cat":        "",
     "Rabbit":     "",
+    "Wolf":       "",
+    "Frog":       "",
 }
 
 # In-memory cache (traits are already local, but cache computed stats)
