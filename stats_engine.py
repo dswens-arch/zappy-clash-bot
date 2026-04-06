@@ -338,6 +338,8 @@ HERO_STATS = {
     "Crocodile":  {"VLT": 90, "INS": 75, "SPK": 80, "ability": {"name": "Death Roll", "desc": "Locks opponent -- they cannot benefit from SPK crits this round."}},
     "Cat":        {"VLT": 75, "INS": 80, "SPK": 95, "ability": {"name": "Nine Lives", "desc": "If HP hits 0, survives at 1 HP once. Only fires once per battle."}},
     "Rabbit":     {"VLT": 80, "INS": 70, "SPK": 90, "ability": {"name": "Lucky Foot", "desc": "Crit multiplier becomes 3x instead of 2x this battle."}},
+    "Wolf":       {"VLT": 92, "INS": 85, "SPK": 70, "ability": {"name": "Pack Hunt",  "desc": "VLT increases by 10 each round. The longer the fight, the worse it gets for you.",  "trigger_round": "random"}},
+    "Frog":       {"VLT": 75, "INS": 68, "SPK": 94, "ability": {"name": "Patience",   "desc": "Sits out round 1 entirely, then crits are guaranteed in round 2.", "trigger_round": 1}},
 }
 
 COLLAB_STATS = {
