@@ -300,40 +300,27 @@ def generate_narration(
 
     label_a = f"**{zappy_a}** ({name_a})"
     label_b = f"**{zappy_b}** ({name_b})"
-
-    wager = "5 ALGO" if mode == "algo" else "500 ZAP"
+    wager   = "5 ALGO" if mode == "algo" else "500 ZAP"
 
     l1w = result["lap1"]["winner"]
     l2w = result["lap2"]["winner"]
     l3w = result["lap3"]["winner"]
     final_winner = result["winner"]
-
-    # Running scores
     s_a, s_b = 0, 0
 
-    # ---------------------------------------------------------------
     # Beat 0 — LIGHTS OUT
-    # ---------------------------------------------------------------
     beats.append({
         "delay": 0,
         "text": (
-            f"🎮 **ZAPPY GRAND PRIX**
-"
-            f"*{wager} on the line — 3 laps — winner takes all*
-
-"
-            f"**{zappy_a}** ({name_a})  vs  **{zappy_b}** ({name_b})
-
-"
-            f"*Engines revving... lights on...*
-"
-            f"🔴 🔴 🔴 🔴 🔴"
+            "🎮 **ZAPPY GRAND PRIX**\n"
+            f"*{wager} on the line — 3 laps — winner takes all*\n\n"
+            f"**{zappy_a}** ({name_a})  vs  **{zappy_b}** ({name_b})\n\n"
+            "*Engines revving... lights on...*\n"
+            "🔴 🔴 🔴 🔴 🔴"
         ),
     })
 
-    # ---------------------------------------------------------------
     # Beat 1 — LAP 1 (Speed)
-    # ---------------------------------------------------------------
     if l1w == "a":
         s_a += 1
         line = random.choice(LAP1_WIN_A).format(a=label_a, b=label_b)
@@ -347,21 +334,14 @@ def generate_narration(
     beats.append({
         "delay": BEAT_DELAYS[0],
         "text": (
-            f"{line}
-
-"
-            f"> {zappy_a} ({name_a})  {bar_a}
-"
-            f"> {zappy_b} ({name_b})  {bar_b}
-
-"
+            f"{line}\n\n"
+            f"> {zappy_a} ({name_a})  {bar_a}\n"
+            f"> {zappy_b} ({name_b})  {bar_b}\n\n"
             f"*Lap 1 done — {leader_label} leads*"
         ),
     })
 
-    # ---------------------------------------------------------------
     # Beat 2 — LAP 2 (Endurance)
-    # ---------------------------------------------------------------
     prev_leader = l1w
     if l2w == "a":
         s_a += 1
@@ -371,60 +351,41 @@ def generate_narration(
     bar_a, bar_b = bars(s_a, s_b)
 
     if s_a == s_b:
-        # Tied — whoever won lap 2 just evened it
         evener = label_a if l2w == "a" else label_b
-        line = random.choice(LAP2_TIED).format(leader=evener)
+        line   = random.choice(LAP2_TIED).format(leader=evener)
         status = "ALL SQUARE — final lap decides!"
     elif l2w != prev_leader:
-        # Lead flip
         new_leader = label_a if l2w == "a" else label_b
         trailer    = label_b if l2w == "a" else label_a
-        line = random.choice(LAP2_FLIP).format(leader=new_leader, trailer=trailer)
+        line   = random.choice(LAP2_FLIP).format(leader=new_leader, trailer=trailer)
         status = f"{zappy_a if l2w == 'a' else zappy_b} now leads"
     else:
-        # Held the lead
-        leader = label_a if l2w == "a" else label_b
+        leader  = label_a if l2w == "a" else label_b
         trailer = label_b if l2w == "a" else label_a
-        line = random.choice(LAP2_HOLD_LEAD).format(leader=leader, trailer=trailer)
+        line   = random.choice(LAP2_HOLD_LEAD).format(leader=leader, trailer=trailer)
         status = f"{zappy_a if l2w == 'a' else zappy_b} still leads"
 
     beats.append({
         "delay": BEAT_DELAYS[1],
         "text": (
-            f"{line}
-
-"
-            f"> {zappy_a} ({name_a})  {bar_a}
-"
-            f"> {zappy_b} ({name_b})  {bar_b}
-
-"
+            f"{line}\n\n"
+            f"> {zappy_a} ({name_a})  {bar_a}\n"
+            f"> {zappy_b} ({name_b})  {bar_b}\n\n"
             f"*Lap 2 done — {status}*"
         ),
     })
 
-    # ---------------------------------------------------------------
     # Beat 3 — Surge or Tension
-    # ---------------------------------------------------------------
     if result["surge_triggered"]:
         ben = result["surge_beneficiary"]
-        if ben == "a":
-            surge_line = random.choice(SURGE_A).format(a=label_a, b=label_b)
-        else:
-            surge_line = random.choice(SURGE_B).format(a=label_a, b=label_b)
-
+        surge_line = random.choice(SURGE_A if ben == "a" else SURGE_B).format(a=label_a, b=label_b)
         beats.append({
             "delay": BEAT_DELAYS[2],
             "text": (
-                f"{surge_line}
-
-"
-                f"> {zappy_a} ({name_a})  {bar_a}
-"
-                f"> {zappy_b} ({name_b})  {bar_b}
-
-"
-                f"*Final lap incoming...*"
+                f"{surge_line}\n\n"
+                f"> {zappy_a} ({name_a})  {bar_a}\n"
+                f"> {zappy_b} ({name_b})  {bar_b}\n\n"
+                "*Final lap incoming...*"
             ),
         })
     else:
@@ -432,18 +393,13 @@ def generate_narration(
         beats.append({
             "delay": BEAT_DELAYS[2],
             "text": (
-                f"{tension}
-
-"
-                f"> {zappy_a} ({name_a})  {bar_a}
-"
+                f"{tension}\n\n"
+                f"> {zappy_a} ({name_a})  {bar_a}\n"
                 f"> {zappy_b} ({name_b})  {bar_b}"
             ),
         })
 
-    # ---------------------------------------------------------------
     # Beat 4 — LAP 3 (Clutch)
-    # ---------------------------------------------------------------
     if l3w == "a":
         s_a += 1
     else:
@@ -451,18 +407,13 @@ def generate_narration(
 
     bar_a, bar_b = bars(s_a, s_b)
 
-    # Was this a comeback, a hold, or a tiebreaker clincher?
-    if s_a == s_b:
-        # Can't happen with 3 laps but safety net
-        clincher = label_a if l3w == "a" else label_b
-        line = random.choice(LAP3_WIN_TIEBREAK).format(leader=clincher)
-    elif (l3w == "a" and s_a > s_b and l2w != "a" and l1w != "a"):
-        # Full comeback
-        clincher = label_a
-        line = random.choice(LAP3_WIN_COMEBACK).format(leader=clincher)
-    elif (l3w == "b" and s_b > s_a and l2w != "b" and l1w != "b"):
-        clincher = label_b
-        line = random.choice(LAP3_WIN_COMEBACK).format(leader=clincher)
+    is_comeback_a = (l3w == "a" and s_a > s_b and l2w != "a" and l1w != "a")
+    is_comeback_b = (l3w == "b" and s_b > s_a and l2w != "b" and l1w != "b")
+
+    if is_comeback_a:
+        line = random.choice(LAP3_WIN_COMEBACK).format(leader=label_a)
+    elif is_comeback_b:
+        line = random.choice(LAP3_WIN_COMEBACK).format(leader=label_b)
     else:
         clincher = label_a if final_winner == "a" else label_b
         line = random.choice(LAP3_WIN_LEADER).format(leader=clincher)
@@ -470,84 +421,61 @@ def generate_narration(
     beats.append({
         "delay": BEAT_DELAYS[3],
         "text": (
-            f"{line}
-
-"
-            f"> {zappy_a} ({name_a})  {bar_a}
-"
+            f"{line}\n\n"
+            f"> {zappy_a} ({name_a})  {bar_a}\n"
             f"> {zappy_b} ({name_b})  {bar_b}"
         ),
     })
 
-    # ---------------------------------------------------------------
     # Beat 5 — Dramatic pause
-    # ---------------------------------------------------------------
     beats.append({
         "delay": BEAT_DELAYS[4],
         "text": (
-            f"{line}
-
-"
-            f"> {zappy_a} ({name_a})  {bar_a}
-"
-            f"> {zappy_b} ({name_b})  {bar_b}
-
-"
-            f"*Checking the replay...*"
+            f"{line}\n\n"
+            f"> {zappy_a} ({name_a})  {bar_a}\n"
+            f"> {zappy_b} ({name_b})  {bar_b}\n\n"
+            "*Checking the replay...*"
         ),
     })
 
-    # ---------------------------------------------------------------
     # Beat 6 — WINNER
-    # ---------------------------------------------------------------
     final_score_a = result["score_a"]
     final_score_b = result["score_b"]
 
     if final_winner == "a":
-        winner_zappy   = zappy_a
-        winner_name    = name_a
+        winner_zappy, winner_name = zappy_a, name_a
         winner_display = label_a
-        top_bar        = build_progress_bar(final_score_a)
-        bot_bar        = build_progress_bar(final_score_b)
-        top_score      = final_score_a
-        bot_score      = final_score_b
-        bot_label      = f"{zappy_b} ({name_b})"
+        top_bar = build_progress_bar(final_score_a)
+        bot_bar = build_progress_bar(final_score_b)
+        bot_label = f"{zappy_b} ({name_b})"
     else:
-        winner_zappy   = zappy_b
-        winner_name    = name_b
+        winner_zappy, winner_name = zappy_b, name_b
         winner_display = label_b
-        top_bar        = build_progress_bar(final_score_b)
-        bot_bar        = build_progress_bar(final_score_a)
-        top_score      = final_score_b
-        bot_score      = final_score_a
-        bot_label      = f"{zappy_a} ({name_a})"
+        top_bar = build_progress_bar(final_score_b)
+        bot_bar = build_progress_bar(final_score_a)
+        bot_label = f"{zappy_a} ({name_a})"
 
-    win_line  = random.choice(WIN_LINES).format(winner=winner_display)
-    margin    = _margin_text(final_score_a, final_score_b, final_winner)
+    win_line = random.choice(WIN_LINES).format(winner=winner_display)
+    margin   = _margin_text(final_score_a, final_score_b, final_winner)
 
     if mode == "algo":
-        payout_line = f"🏦 **{winner_display}** receives **9 ALGO** · Bot rakes **1 ALGO**"
+        payout_line = f"\U0001f3e6 **{winner_display}** receives **9 ALGO** · Bot rakes **1 ALGO**"
     else:
-        payout_line = f"🪙 **{winner_display}** receives **1,000 ZAP**"
+        payout_line = f"\U0001fa99 **{winner_display}** receives **1,000 ZAP**"
 
     beats.append({
         "delay": BEAT_DELAYS[5],
         "text": (
-            f"{win_line}
-"
-            f"*{margin}*
-
-"
-            f"> 🥇 {winner_zappy} ({winner_name})  {top_bar}
-"
-            f"> {bot_label}  {bot_bar}
-
-"
+            f"{win_line}\n"
+            f"*{margin}*\n\n"
+            f"> 🥇 {winner_zappy} ({winner_name})  {top_bar}\n"
+            f"> {bot_label}  {bot_bar}\n\n"
             f"{payout_line}"
         ),
     })
 
     return beats
+
 # ---------------------------------------------------------------------------
 # Supabase helpers
 # ---------------------------------------------------------------------------
