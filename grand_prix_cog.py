@@ -112,8 +112,8 @@ ACCENTS = {
     "zap":  (255, 200,  50),
 }
 LABELS = {
-    "algo": ("⚡ ALGO GRAND PRIX",  "5 ALGO entry  ·  Winner takes 9 ALGO"),
-    "zap":  ("⚡ ZAP GRAND PRIX",   "500 ZAP entry  ·  Winner takes 1,000 ZAP"),
+    "algo": ("ALGO GRAND PRIX",  "5 ALGO entry  |  Winner takes 9 ALGO"),
+    "zap":  ("ZAP GRAND PRIX",   "500 ZAP entry  |  Winner takes 1,000 ZAP"),
 }
 
 
@@ -163,7 +163,7 @@ def board_racing(mode, zappy_a, zappy_b):
     img  = Image.new("RGB", (W,H), BG)
     draw = ImageDraw.Draw(img)
     _base(draw, mode)
-    draw.text((W//2, 88),  "🏎  RACE IN PROGRESS",         font=FONT_BOLD, fill=GREEN, anchor="mm")
+    draw.text((W//2, 88),  "RACE IN PROGRESS",         font=FONT_BOLD, fill=GREEN, anchor="mm")
     draw.text((60, 125),   f"⚡  {zappy_a}",               font=FONT_MED,  fill=WHITE)
     draw.text((60, 165),   f"⚡  {zappy_b}",               font=FONT_MED,  fill=WHITE)
     draw.text((W//2, 215), "Race underway — result soon",   font=FONT_SM,   fill=MUTED, anchor="mm")
@@ -175,7 +175,7 @@ def board_result(mode, zappy_a, zappy_b, winner, score_a, score_b, surge=False):
     draw = ImageDraw.Draw(img)
     accent = ACCENTS[mode]
     _base(draw, mode)
-    draw.text((W//2, 82),  "🏆  RACE RESULT",               font=FONT_MED,  fill=accent, anchor="mm")
+    draw.text((W//2, 82),  "RACE RESULT",               font=FONT_MED,  fill=accent, anchor="mm")
     draw.rounded_rectangle([W//2-230, 98, W//2+230, 158],    radius=10, fill=(16,36,16), outline=GREEN, width=2)
     draw.text((W//2, 128), f"{winner}  WINS!",               font=FONT_BOLD, fill=GREEN,  anchor="mm")
     payout    = "9 ALGO paid out" if mode == "algo" else "1,000 ZAP paid out"
@@ -598,7 +598,7 @@ class GrandPrixCog(commands.Cog):
             await write_race_result(self.db, q.duel_id, result, winner_id, "test")
             self._add_zap(winner_id, winner_racer.get("zap_balance", 0), 500)
             self._add_zap(loser_id,  loser_racer.get("zap_balance", 0),  100)
-            await channel.send(f"🧪 **TEST MODE** — No real ALGO moved.\n⚡ Winner +500 ZAP  ·  Runner-up +100 ZAP")
+            await channel.send(f"⚡ Winner +500 ZAP  ·  Runner-up +100 ZAP")
 
         else:  # zap mode
             if not test_mode:
@@ -610,10 +610,7 @@ class GrandPrixCog(commands.Cog):
                 )
             else:
                 await write_race_result(self.db, q.duel_id, result, winner_id, "test")
-                await channel.send(
-                    f"🧪 **TEST MODE** — No real ZAP moved.\n"
-                    f"Would have paid **{ZAP_PAYOUT:,} ZAP** to **{winner_racer['zappy_id']}**"
-                )
+                # No separate message — test label already shown in opening message
 
         # Win/loss records (always, even in test)
         if winner_id != "cpu":
