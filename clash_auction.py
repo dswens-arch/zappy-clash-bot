@@ -132,19 +132,19 @@ def build_auction_embed(auction: dict, db, closed: bool = False) -> discord.Embe
     if top_bid:
         embed.add_field(
             name="💰 Highest Bid",
-            value=f"**{top_bid['bid_amount']:,} ZAPP**\nby **{top_bid['discord_username']}**",
+            value=f"**{top_bid['bid_amount']:,} ALGO**\nby **{top_bid['discord_username']}**",
             inline=True,
         )
     else:
         embed.add_field(
             name="💰 Highest Bid",
-            value=f"No bids yet · Opening at **{auction['starting_bid']:,} ZAPP**",
+            value=f"No bids yet · Opening at **{auction['starting_bid']:,} ALGO**",
             inline=True,
         )
 
     embed.add_field(
         name="⬆️ Min Increment",
-        value=f"{auction['min_increment']:,} ZAPP",
+        value=f"{auction['min_increment']:,} ALGO",
         inline=True,
     )
 
@@ -217,7 +217,7 @@ async def close_auction(auction: dict, db, bot: discord.Client, channel_id: int 
         )
         embed.add_field(
             name="💰 Winning Bid",
-            value=f"**{top_bid['bid_amount']:,} ZAPP**",
+            value=f"**{top_bid['bid_amount']:,} ALGO**",
             inline=True,
         )
         embed.add_field(
@@ -288,7 +288,7 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
     @app_commands.describe(
         nft_name    = "Name of the NFT being auctioned",
         duration_hours = "How long the auction runs (in hours)",
-        starting_bid   = "Minimum opening bid in ZAPP",
+        starting_bid   = "Minimum opening bid in ALGO",
         min_increment  = "Minimum raise over current high bid",
         asset_id       = "Algorand ASA ID (optional, for your records)",
         image_url      = "Image URL for the embed thumbnail (optional)",
@@ -358,7 +358,7 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
 
     # ── /auction bid ─────────────────────────────────────────────────────────
     @auction_group.command(name="bid", description="Place a bid on the active auction")
-    @app_commands.describe(amount="Your bid in ZAPP tokens")
+    @app_commands.describe(amount="Your bid in ALGO tokens")
     async def auction_bid(interaction: discord.Interaction, amount: int):
         await interaction.response.defer(ephemeral=True)
 
@@ -382,8 +382,8 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
             min_bid = top_bid["bid_amount"] + auction["min_increment"]
             if amount < min_bid:
                 await interaction.followup.send(
-                    f"❌ Bid too low. Current high is **{top_bid['bid_amount']:,} ZAPP** "
-                    f"— minimum next bid is **{min_bid:,} ZAPP**.",
+                    f"❌ Bid too low. Current high is **{top_bid['bid_amount']:,} ALGO** "
+                    f"— minimum next bid is **{min_bid:,} ALGO**.",
                     ephemeral=True,
                 )
                 return
@@ -396,7 +396,7 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
         else:
             if amount < auction["starting_bid"]:
                 await interaction.followup.send(
-                    f"❌ Opening bid must be at least **{auction['starting_bid']:,} ZAPP**.",
+                    f"❌ Opening bid must be at least **{auction['starting_bid']:,} ALGO**.",
                     ephemeral=True,
                 )
                 return
@@ -416,7 +416,7 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
                 if prev_user:
                     await prev_user.send(
                         f"⚡ You've been outbid on **{auction['nft_name']}**!\n"
-                        f"New high bid: **{amount:,} ZAPP** by **{interaction.user.display_name}**\n"
+                        f"New high bid: **{amount:,} ALGO** by **{interaction.user.display_name}**\n"
                         f"Head back to place a new bid before the auction closes."
                     )
             except Exception:
@@ -433,7 +433,7 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
             title=f"💰 New High Bid — {auction['nft_name']}",
             description=(
                 f"**{interaction.user.display_name}** has taken the lead!\n"
-                f"Current high bid: **{amount:,} ZAPP**\n"
+                f"Current high bid: **{amount:,} ALGO**\n"
                 f"⏱️ {format_time_remaining(auction['ends_at'])} remaining"
             ),
             color=discord.Color.gold(),
@@ -443,7 +443,7 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
 
         await target.send(embed=public_embed)
         await interaction.followup.send(
-            f"✅ Bid of **{amount:,} ZAPP** placed. You're the high bidder!", ephemeral=True
+            f"✅ Bid of **{amount:,} ALGO** placed. You're the high bidder!", ephemeral=True
         )
 
     # ── /auction info ─────────────────────────────────────────────────────────
