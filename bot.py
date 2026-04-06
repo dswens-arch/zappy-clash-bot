@@ -31,6 +31,8 @@ from discord import app_commands
 from datetime import datetime, timezone, time as dtime
 from dotenv import load_dotenv
 from clash_auction import setup_auction_commands, auction_checker
+import grand_prix_cog
+from grand_prix_cog import GrandPrixCog
 
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
@@ -2455,6 +2457,13 @@ async def close_and_resolve(channel: discord.TextChannel):
 async def on_ready():
     print(f"⚡ Zappy Clash bot online as {bot.user}")
     setup_auction_commands(bot, tree, GUILD_ID)
+
+    # Grand Prix
+    await bot.add_cog(GrandPrixCog(bot))
+    bot.add_view(grand_prix_cog.JoinAlgoView())
+    bot.add_view(grand_prix_cog.JoinZapView())
+    print("⚡ Grand Prix cog loaded")
+
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
     await tree.sync()
