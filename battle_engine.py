@@ -86,8 +86,10 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     ins_reduction = defender.INS * 0.3   # INS reduces ~30% of damage
     damage = max(1, raw_damage - ins_reduction)
 
-    # Crit check
-    is_crit = random.random() < attacker.crit_chance
+    # Crit check — guaranteed_crit set by Patience ability
+    is_crit = getattr(attacker, 'guaranteed_crit', False) or random.random() < attacker.crit_chance
+    if getattr(attacker, 'guaranteed_crit', False):
+        attacker.guaranteed_crit = False   # consume it
     flavor_note = ""
 
     if is_crit:
@@ -169,6 +171,23 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         else:
             fighter.SPK = min(100, fighter.SPK * 3)
         return True, f"🐱 **CHAOS MODE!** The Shitty Kitty goes feral — {stat} tripled! Nobody expected that."
+
+    elif name == "Pack Hunt":
+        # VLT escalates each round — tracked via round_num passed from caller
+        bonus = (round_num - 1) * 10
+        fighter.VLT = min(100, fighter.VLT + bonus)
+        fighter.ability_used = False   # re-triggers every round
+        return True, f"🐺 **PACK HUNT!** {fighter.display_name} closes in — VLT +{bonus} this round!"
+
+    elif name == "Patience":
+        if round_num == 1:
+            # Skip round 1, set up guaranteed crit for round 2
+            fighter.ability_used = False   # don't lock it out
+            return True, f"🐸 **PATIENCE...** {fighter.display_name} goes still. Something is coming."
+        elif round_num == 2:
+            fighter.crit_multiplier = getattr(fighter, 'crit_multiplier', 2.0) * 2
+            fighter.guaranteed_crit = True
+            return True, f"🐸 **PATIENCE PAYS OFF!** {fighter.display_name} strikes — guaranteed crit, double multiplier!"
 
     elif name == "Chroma Shift":
         stats = {"VLT": fighter.VLT, "INS": fighter.INS, "SPK": fighter.SPK}
