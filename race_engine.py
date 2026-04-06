@@ -373,12 +373,20 @@ def generate_narration(
     else:
         payout_line = f"🪙 **{winner_display}** receives **1,000 ZAP**"
 
+    # Always show winner on top for clarity
+    if winner == "a":
+        top_zappy, top_name, top_bar, top_score = zappy_a, name_a, bar_a, final_score_a
+        bot_zappy, bot_name, bot_bar, bot_score = zappy_b, name_b, bar_b, final_score_b
+    else:
+        top_zappy, top_name, top_bar, top_score = zappy_b, name_b, bar_b, final_score_b
+        bot_zappy, bot_name, bot_bar, bot_score = zappy_a, name_a, bar_a, final_score_a
+
     beats.append({
         "delay": BEAT_DELAYS[3],
         "text": (
             f"{win_line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}  {final_score_a} laps\n"
-            f"> {zappy_b} ({name_b})  {bar_b}  {final_score_b} laps\n\n"
+            f"> 🥇 {top_zappy} ({top_name})  {top_bar}  {top_score} laps\n"
+            f"> {bot_zappy} ({bot_name})  {bot_bar}  {bot_score} laps\n\n"
             f"{payout_line}"
         ),
     })
