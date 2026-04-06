@@ -33,12 +33,16 @@ COLLAB_ASSET_IDS = {
 
 # Hero image URLs — hardcoded since they're not in the CSV
 HERO_IMAGES = {
-    "Bear":       "",
-    "Crocodile":  "",
-    "Cat":        "",
-    "Rabbit":     "",
-    "Wolf":       "",
-    "Frog":       "",
+    "Bear":       "https://ipfs-pera.algonode.dev/ipfs/bafkreidtl5ha7is6ze5lfgs6fpfagzvtpkjsx3327urgvge463c2kmimem?optimizer=image&width=1152&quality=70",
+    "Crocodile":  "https://ipfs-pera.algonode.dev/ipfs/bafkreibelcalckqcxpabntsja6ejdsdbs7aqg6wtjjx7nr5swdaabkxcpe?optimizer=image&width=1152&quality=70",
+    "Cat":        "https://ipfs-pera.algonode.dev/ipfs/bafkreiendbzef6gm3idxel5xl5bcbzf6xofns3qfvlqx7jmg6eqdnjfjvu?optimizer=image&width=1152&quality=70",
+    "Rabbit":     "https://ipfs-pera.algonode.dev/ipfs/bafkreictcu7ipijiknqaofjhbubjjylxg26zrvjrgdheycubp44kgx2g4a?optimizer=image&width=1152&quality=70",
+    "Wolf":       "https://ipfs-pera.algonode.dev/ipfs/bafybeiez2pgydvo5bza6egakwxciqww6q62c4jeatd7agrwxsyut2lhqbm?optimizer=image&width=1152&quality=70",
+    "Frog":       "https://ipfs-pera.algonode.dev/ipfs/bafybeiap4ffb5ywlaifxz5lmj3wkqwsej6xwqdhwo3nll2nmww27rpashi?optimizer=image&width=1152&quality=70",
+}
+
+COLLAB_IMAGES = {
+    "ShittyKitties": "https://ipfs-pera.algonode.dev/ipfs/bafkreian2vjr2pzyzuvc4gz4pfyk7ddu2tfqvk7uzbwly3eospixvlawzq?optimizer=image&width=1152&quality=70",
 }
 
 # In-memory cache (traits are already local, but cache computed stats)
@@ -93,7 +97,7 @@ async def fetch_zappy_traits(asset_id: int) -> dict | None:
             "collab_type": collab_type,
             "stats":       stats,
             "traits":      {"collab_type": collab_type},
-            "image_url":   "",
+            "image_url":   COLLAB_IMAGES.get(collab_type, ""),
         }
         _zappy_cache[asset_id] = result
         return result
