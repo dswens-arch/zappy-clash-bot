@@ -56,8 +56,8 @@ async def deduct_entry(db, discord_user_id: str) -> dict:
         return {
             "success": False,
             "error": (
-                f"Not enough ZAP. Need **{ZAP_ENTRY:,}** but only have **{balance:,}**.\n"
-                f"Race in the ALGO queue to earn more ZAP."
+                f"Not enough ZAPP. Need **{ZAP_ENTRY:,}** but only have **{balance:,}**.\n"
+                f"Race in the ALGO queue to earn more ZAPP."
             ),
         }
 
