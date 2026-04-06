@@ -461,7 +461,7 @@ def generate_narration(
     if mode == "algo":
         payout_line = f"\U0001f3e6 **{winner_display}** receives **9 ALGO** · Bot rakes **1 ALGO**"
     else:
-        payout_line = f"\U0001fa99 **{winner_display}** receives **1,000 ZAP**"
+        payout_line = f"\U0001fa99 **{winner_display}** receives **1,000 ZAPP**"
 
     beats.append({
         "delay": BEAT_DELAYS[5],
