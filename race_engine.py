@@ -34,7 +34,7 @@ STAT_CAP_MIN  = 8
 STAT_CAP_MAX  = 11
 
 # Race beat timing (seconds between Discord message edits)
-BEAT_DELAYS = [8, 8, 6, 6]  # start → lap1 → lap2 → final → result
+BEAT_DELAYS = [7, 8, 6, 8, 5, 4]  # lights_out → lap1 → lap2 → surge/tension → lap3 → pause → winner
 
 
 # ---------------------------------------------------------------------------
@@ -190,64 +190,99 @@ def resolve_race(stats_a: dict, stats_b: dict) -> dict:
 # Narration generator
 # ---------------------------------------------------------------------------
 
-LAP1_LEAD_A = [
-    "🏎️ **{a} rockets off the line!** Speed advantage early.",
-    "⚡ **{a} grabs the early lead!** {b} plays it conservative.",
-    "🔥 **{a} out front!** Low, clean, and fast off the start.",
+# --- Lap 1 (Speed) ---
+LAP1_WIN_A = [
+    "🚦 LIGHTS OUT — AND {a} LAUNCHES FIRST! Speed advantage off the line!",
+    "🚦 GO GO GO — {a} FIRES OUT THE GATE! {b} eating dust already!",
+    "🚦 AND THEY'RE OFF — {a} TAKES THE EARLY LEAD! Pure speed on display!",
+    "🚦 BOOM! {a} EXPLODES OFF THE LINE! That Speed stat is doing work!",
 ]
-LAP1_LEAD_B = [
-    "🏎️ **{b} nails the launch!** {a} scrambles to respond.",
-    "⚡ **{b} takes the early lead!** Smooth off the line.",
-    "🔥 **{b} out front!** {a} already in catch-up mode.",
-]
-LAP1_EVEN = [
-    "🏎️ Dead even off the start. Both Zappies holding their line.",
-    "⚡ Side by side out of the gate. Speed stats too close to call.",
-]
-
-LAP2_LEAD_A = [
-    "💨 **{a} holding strong through the mid-section.** Endurance doing work.",
-    "🌀 **{a} extends the gap!** {b} fading in the middle laps.",
-    "💪 **{a} digging in.** Endurance stat paying off.",
-]
-LAP2_LEAD_B = [
-    "💨 **{b} surges in the mid-race!** Closing fast on {a}.",
-    "🌀 **{b} takes over!** Endurance kicking in late.",
-    "💪 **{b} finds another gear.** {a} looks rattled.",
-]
-LAP2_EVEN = [
-    "💨 Still dead even. This one's going to the wire.",
-    "🌀 Neither Zappy giving an inch. Mid-race tension is real.",
+LAP1_WIN_B = [
+    "🚦 LIGHTS OUT — {b} JUMPS AHEAD! Caught {a} sleeping at the start!",
+    "🚦 AND THEY'RE OFF — {b} OUT FRONT! Clean launch, perfect timing!",
+    "🚦 GO GO GO — {b} TAKES IT EARLY! {a} already chasing!",
+    "🚦 BOOM! {b} GRABS THE HOLE SHOT! {a} in catch-up mode from lap one!",
 ]
 
-SURGE_LINES = [
-    "⚡ **SURGE!** {surge} finds a burst of electric energy — closing the gap dramatically!",
-    "🌩️ **SURGE EVENT!** {surge} catches a slip-stream and explodes forward!",
-    "💥 **SURGE!** The crowd erupts — {surge} wasn't done yet!",
+# --- Lap 2 (Endurance) ---
+LAP2_HOLD_LEAD = [
+    "💨 LAP 2 — {leader} HOLDS THE LINE! Endurance stat locking in the gap!",
+    "💨 LAP 2 — {leader} WON'T CRACK! {trailer} pushing hard but getting nowhere!",
+    "💨 LAP 2 — {leader} PULLING AWAY! This race might be over early!",
+    "💨 LAP 2 — {leader} IN COMPLETE CONTROL! Endurance built different!",
+]
+LAP2_FLIP = [
+    "💨 LAP 2 — LEAD CHANGE! {leader} TAKES OVER! {trailer} fading fast!",
+    "💨 LAP 2 — COMEBACK ALERT! {leader} storms through! This race is ALIVE!",
+    "💨 LAP 2 — {leader} SNATCHES THE LEAD! {trailer} ran out of road!",
+    "💨 LAP 2 — UNBELIEVABLE! {leader} FLIPS IT! Nobody saw that coming!",
+]
+LAP2_TIED = [
+    "💨 LAP 2 — ONE EACH! IT'S ALL SQUARE! Final lap decides everything!",
+    "💨 LAP 2 — KNOTTED UP! {leader} evens it out! This goes to the wire!",
+    "💨 LAP 2 — DEAD EVEN! Neither Zappy giving an inch! One lap left!",
 ]
 
+# --- Surge ---
+SURGE_A = [
+    "⚡ SURGE! {a} FINDS ANOTHER GEAR! Electric boost on the final lap!",
+    "⚡ SURGE EVENT! {a} LIGHTS UP! The crowd goes absolutely wild!",
+    "⚡ SURGE! {a} NOT DONE YET! Closing speed out of nowhere!",
+]
+SURGE_B = [
+    "⚡ SURGE! {b} FINDS ANOTHER GEAR! Electric boost on the final lap!",
+    "⚡ SURGE EVENT! {b} LIGHTS UP! The crowd goes absolutely wild!",
+    "⚡ SURGE! {b} NOT DONE YET! Closing speed out of nowhere!",
+]
+
+# --- Lap 3 tension (no surge) ---
 LAP3_TENSION = [
-    "😤 **FINAL LAP.** Clutch stat decides it all...",
-    "🏁 **ONE LAP LEFT.** Everything on the line...",
-    "🎯 **IT COMES DOWN TO THIS.** Who wants it more...",
+    "🏁 FINAL LAP — IT ALL COMES DOWN TO THIS! CLUTCH STAT DECIDES!",
+    "🏁 LAST LAP! NO MORE EXCUSES! WHO WANTS IT MORE?!",
+    "🏁 FINAL LAP — THE CROWD IS ON ITS FEET! HERE WE GO!",
+    "🏁 ONE LAP LEFT! THE PRESSURE IS INSANE! LET'S GO!",
 ]
 
-WIN_LINES_A = [
-    "🏆 **{a} WINS!** Holds the line under pressure!",
-    "🥇 **{a} TAKES IT!** Photo finish — but it's clear!",
-    "⚡ **{a} CROSSES FIRST!** The clutch stat delivered!",
+# --- Lap 3 result ---
+LAP3_WIN_LEADER = [
+    "🔥 LAP 3 — {leader} SEALS IT! Clutch when it counted most!",
+    "🔥 LAP 3 — {leader} CROSSES FIRST! Couldn't be caught!",
+    "🔥 LAP 3 — {leader} HOLDS ON! Pure guts on the final lap!",
 ]
-WIN_LINES_B = [
-    "🏆 **{b} WINS!** Came from behind and took it!",
-    "🥇 **{b} TAKES IT!** What a comeback!",
-    "⚡ **{b} CROSSES FIRST!** Clutch when it counted!",
+LAP3_WIN_COMEBACK = [
+    "🔥 LAP 3 — {leader} STEALS IT! COMEBACK FOR THE AGES!",
+    "🔥 LAP 3 — {leader} FROM BEHIND! NOBODY EXPECTED THAT!",
+    "🔥 LAP 3 — UNREAL! {leader} TAKES THE FINAL LAP! WHAT A RACE!",
+]
+LAP3_WIN_TIEBREAK = [
+    "🔥 LAP 3 — {leader} EDGES IT! Closest finish you'll ever see!",
+    "🔥 LAP 3 — {leader} BY A NOSE! Photo finish goes their way!",
+    "🔥 LAP 3 — {leader} NABS IT! They were inseparable all race!",
+]
+
+# --- Winner ---
+WIN_LINES = [
+    "🏆 {winner} WINS! {winner} WINS! {winner} WINS!",
+    "🏆 THAT'S IT! {winner} TAKES THE GRAND PRIX!",
+    "🏆 GAME OVER! {winner} IS YOUR WINNER!",
+    "🏆 UNBELIEVABLE SCENES! {winner} CROSSES THE LINE!",
 ]
 
 
 def build_progress_bar(laps_won: int, total_laps: int = 3, width: int = 10) -> str:
-    """Build a simple emoji progress bar showing lap wins."""
     filled = round((laps_won / total_laps) * width)
     return "🟩" * filled + "⬜" * (width - filled)
+
+
+def _margin_text(score_a: int, score_b: int, winner: str) -> str:
+    """Return 'Won by X lap(s)' or 'Won by a whisker' for a sweep."""
+    diff = abs(score_a - score_b)
+    if diff == 3:
+        return "Dominant — won every lap"
+    elif diff == 2:
+        return "Won by 2 laps"
+    else:
+        return "Won by 1 lap"
 
 
 def generate_narration(
@@ -258,142 +293,261 @@ def generate_narration(
     zappy_b: str,
     mode: str = "algo",
 ) -> list[dict]:
-    """
-    Convert a race result into a list of timed narration beats.
-    mode: 'algo' or 'zap' — controls wager text in the final beat.
-    zappy_a / zappy_b should be the Zappy ID (e.g. ZAP-447), not ASA ID.
-    """
     beats = []
-
-    def pick(lines: list, **kwargs) -> str:
-        return random.choice(lines).format(
-            a=f"**{zappy_a}** ({name_a})",
-            b=f"**{zappy_b}** ({name_b})",
-            **kwargs,
-        )
 
     def bars(sa, sb):
         return build_progress_bar(sa), build_progress_bar(sb)
 
-    # --- Beat 0: Race start ---
+    label_a = f"**{zappy_a}** ({name_a})"
+    label_b = f"**{zappy_b}** ({name_b})"
+
+    wager = "5 ALGO" if mode == "algo" else "500 ZAP"
+
     l1w = result["lap1"]["winner"]
-    score_a = 1 if l1w == "a" else 0
-    score_b = 1 - score_a
+    l2w = result["lap2"]["winner"]
+    l3w = result["lap3"]["winner"]
+    final_winner = result["winner"]
 
-    if l1w == "a":
-        lap1_line = pick(LAP1_LEAD_A)
-    else:
-        lap1_line = pick(LAP1_LEAD_B)
+    # Running scores
+    s_a, s_b = 0, 0
 
-    bar_a, bar_b = bars(score_a, score_b)
-
-    wager_line = "5 ALGO on the line" if mode == "algo" else "500 ZAP on the line"
-
+    # ---------------------------------------------------------------
+    # Beat 0 — LIGHTS OUT
+    # ---------------------------------------------------------------
     beats.append({
         "delay": 0,
         "text": (
-            f"🏁 **RACE START — ZAPPY GRAND PRIX**\n"
-            f"*{wager_line}. 30 seconds. Let's go.*\n\n"
-            f"{lap1_line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}\n"
-            f"> {zappy_b} ({name_b})  {bar_b}"
+            f"🎮 **ZAPPY GRAND PRIX**
+"
+            f"*{wager} on the line — 3 laps — winner takes all*
+
+"
+            f"**{zappy_a}** ({name_a})  vs  **{zappy_b}** ({name_b})
+
+"
+            f"*Engines revving... lights on...*
+"
+            f"🔴 🔴 🔴 🔴 🔴"
         ),
     })
 
-    # --- Beat 1: Mid race ---
-    l2w = result["lap2"]["winner"]
-    if l2w == "a":
-        score_a += 1
-        lap2_line = pick(LAP2_LEAD_A)
+    # ---------------------------------------------------------------
+    # Beat 1 — LAP 1 (Speed)
+    # ---------------------------------------------------------------
+    if l1w == "a":
+        s_a += 1
+        line = random.choice(LAP1_WIN_A).format(a=label_a, b=label_b)
     else:
-        score_b += 1
-        lap2_line = pick(LAP2_LEAD_B)
+        s_b += 1
+        line = random.choice(LAP1_WIN_B).format(a=label_a, b=label_b)
 
-    bar_a, bar_b = bars(score_a, score_b)
+    bar_a, bar_b = bars(s_a, s_b)
+    leader_label = label_a if l1w == "a" else label_b
 
     beats.append({
         "delay": BEAT_DELAYS[0],
         "text": (
-            f"🌀 **LAP 2 — MID RACE**\n\n"
-            f"{lap2_line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}\n"
-            f"> {zappy_b} ({name_b})  {bar_b}"
+            f"{line}
+
+"
+            f"> {zappy_a} ({name_a})  {bar_a}
+"
+            f"> {zappy_b} ({name_b})  {bar_b}
+
+"
+            f"*Lap 1 done — {leader_label} leads*"
         ),
     })
 
-    # --- Beat 2: Surge or tension (keep bars visible) ---
-    surge_text = ""
-    if result["surge_triggered"]:
-        surge_name = (
-            f"{zappy_a} ({name_a})" if result["surge_beneficiary"] == "a"
-            else f"{zappy_b} ({name_b})"
-        )
-        surge_text = "\n\n" + random.choice(SURGE_LINES).format(surge=f"**{surge_name}**")
+    # ---------------------------------------------------------------
+    # Beat 2 — LAP 2 (Endurance)
+    # ---------------------------------------------------------------
+    prev_leader = l1w
+    if l2w == "a":
+        s_a += 1
+    else:
+        s_b += 1
 
-    tension_line = random.choice(LAP3_TENSION)
+    bar_a, bar_b = bars(s_a, s_b)
+
+    if s_a == s_b:
+        # Tied — whoever won lap 2 just evened it
+        evener = label_a if l2w == "a" else label_b
+        line = random.choice(LAP2_TIED).format(leader=evener)
+        status = "ALL SQUARE — final lap decides!"
+    elif l2w != prev_leader:
+        # Lead flip
+        new_leader = label_a if l2w == "a" else label_b
+        trailer    = label_b if l2w == "a" else label_a
+        line = random.choice(LAP2_FLIP).format(leader=new_leader, trailer=trailer)
+        status = f"{zappy_a if l2w == 'a' else zappy_b} now leads"
+    else:
+        # Held the lead
+        leader = label_a if l2w == "a" else label_b
+        trailer = label_b if l2w == "a" else label_a
+        line = random.choice(LAP2_HOLD_LEAD).format(leader=leader, trailer=trailer)
+        status = f"{zappy_a if l2w == 'a' else zappy_b} still leads"
 
     beats.append({
         "delay": BEAT_DELAYS[1],
         "text": (
-            f"😤 **FINAL LAP**{surge_text}\n\n"
-            f"{tension_line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}\n"
-            f"> {zappy_b} ({name_b})  {bar_b}"
+            f"{line}
+
+"
+            f"> {zappy_a} ({name_a})  {bar_a}
+"
+            f"> {zappy_b} ({name_b})  {bar_b}
+
+"
+            f"*Lap 2 done — {status}*"
         ),
     })
 
-    # --- Beat 3: Dramatic pause (keep bars visible) ---
-    beats.append({
-        "delay": BEAT_DELAYS[2],
-        "text": (
-            f"😤 **FINAL LAP**{surge_text}\n\n"
-            f"{tension_line}\n\n"
-            f"> {zappy_a} ({name_a})  {bar_a}\n"
-            f"> {zappy_b} ({name_b})  {bar_b}\n\n"
-            f"*It's going to be close...*"
-        ),
-    })
+    # ---------------------------------------------------------------
+    # Beat 3 — Surge or Tension
+    # ---------------------------------------------------------------
+    if result["surge_triggered"]:
+        ben = result["surge_beneficiary"]
+        if ben == "a":
+            surge_line = random.choice(SURGE_A).format(a=label_a, b=label_b)
+        else:
+            surge_line = random.choice(SURGE_B).format(a=label_a, b=label_b)
 
-    # --- Beat 4: Winner ---
-    winner = result["winner"]
-    final_score_a = result["score_a"]
-    final_score_b = result["score_b"]
+        beats.append({
+            "delay": BEAT_DELAYS[2],
+            "text": (
+                f"{surge_line}
 
-    if winner == "a":
-        win_line = pick(WIN_LINES_A)
-        winner_display = f"{zappy_a} ({name_a})"
+"
+                f"> {zappy_a} ({name_a})  {bar_a}
+"
+                f"> {zappy_b} ({name_b})  {bar_b}
+
+"
+                f"*Final lap incoming...*"
+            ),
+        })
     else:
-        win_line = pick(WIN_LINES_B)
-        winner_display = f"{zappy_b} ({name_b})"
+        tension = random.choice(LAP3_TENSION)
+        beats.append({
+            "delay": BEAT_DELAYS[2],
+            "text": (
+                f"{tension}
 
-    bar_a, bar_b = bars(final_score_a, final_score_b)
+"
+                f"> {zappy_a} ({name_a})  {bar_a}
+"
+                f"> {zappy_b} ({name_b})  {bar_b}"
+            ),
+        })
 
-    if mode == "algo":
-        payout_line = f"🏦 **{winner_display}** receives **9 ALGO**\n💰 Bot collects **1 ALGO** rake"
+    # ---------------------------------------------------------------
+    # Beat 4 — LAP 3 (Clutch)
+    # ---------------------------------------------------------------
+    if l3w == "a":
+        s_a += 1
     else:
-        payout_line = f"🪙 **{winner_display}** receives **1,000 ZAP**"
+        s_b += 1
 
-    # Always show winner on top for clarity
-    if winner == "a":
-        top_zappy, top_name, top_bar, top_score = zappy_a, name_a, bar_a, final_score_a
-        bot_zappy, bot_name, bot_bar, bot_score = zappy_b, name_b, bar_b, final_score_b
+    bar_a, bar_b = bars(s_a, s_b)
+
+    # Was this a comeback, a hold, or a tiebreaker clincher?
+    if s_a == s_b:
+        # Can't happen with 3 laps but safety net
+        clincher = label_a if l3w == "a" else label_b
+        line = random.choice(LAP3_WIN_TIEBREAK).format(leader=clincher)
+    elif (l3w == "a" and s_a > s_b and l2w != "a" and l1w != "a"):
+        # Full comeback
+        clincher = label_a
+        line = random.choice(LAP3_WIN_COMEBACK).format(leader=clincher)
+    elif (l3w == "b" and s_b > s_a and l2w != "b" and l1w != "b"):
+        clincher = label_b
+        line = random.choice(LAP3_WIN_COMEBACK).format(leader=clincher)
     else:
-        top_zappy, top_name, top_bar, top_score = zappy_b, name_b, bar_b, final_score_b
-        bot_zappy, bot_name, bot_bar, bot_score = zappy_a, name_a, bar_a, final_score_a
+        clincher = label_a if final_winner == "a" else label_b
+        line = random.choice(LAP3_WIN_LEADER).format(leader=clincher)
 
     beats.append({
         "delay": BEAT_DELAYS[3],
         "text": (
-            f"{win_line}\n\n"
-            f"> 🥇 {top_zappy} ({top_name})  {top_bar}  {top_score} laps\n"
-            f"> {bot_zappy} ({bot_name})  {bot_bar}  {bot_score} laps\n\n"
+            f"{line}
+
+"
+            f"> {zappy_a} ({name_a})  {bar_a}
+"
+            f"> {zappy_b} ({name_b})  {bar_b}"
+        ),
+    })
+
+    # ---------------------------------------------------------------
+    # Beat 5 — Dramatic pause
+    # ---------------------------------------------------------------
+    beats.append({
+        "delay": BEAT_DELAYS[4],
+        "text": (
+            f"{line}
+
+"
+            f"> {zappy_a} ({name_a})  {bar_a}
+"
+            f"> {zappy_b} ({name_b})  {bar_b}
+
+"
+            f"*Checking the replay...*"
+        ),
+    })
+
+    # ---------------------------------------------------------------
+    # Beat 6 — WINNER
+    # ---------------------------------------------------------------
+    final_score_a = result["score_a"]
+    final_score_b = result["score_b"]
+
+    if final_winner == "a":
+        winner_zappy   = zappy_a
+        winner_name    = name_a
+        winner_display = label_a
+        top_bar        = build_progress_bar(final_score_a)
+        bot_bar        = build_progress_bar(final_score_b)
+        top_score      = final_score_a
+        bot_score      = final_score_b
+        bot_label      = f"{zappy_b} ({name_b})"
+    else:
+        winner_zappy   = zappy_b
+        winner_name    = name_b
+        winner_display = label_b
+        top_bar        = build_progress_bar(final_score_b)
+        bot_bar        = build_progress_bar(final_score_a)
+        top_score      = final_score_b
+        bot_score      = final_score_a
+        bot_label      = f"{zappy_a} ({name_a})"
+
+    win_line  = random.choice(WIN_LINES).format(winner=winner_display)
+    margin    = _margin_text(final_score_a, final_score_b, final_winner)
+
+    if mode == "algo":
+        payout_line = f"🏦 **{winner_display}** receives **9 ALGO** · Bot rakes **1 ALGO**"
+    else:
+        payout_line = f"🪙 **{winner_display}** receives **1,000 ZAP**"
+
+    beats.append({
+        "delay": BEAT_DELAYS[5],
+        "text": (
+            f"{win_line}
+"
+            f"*{margin}*
+
+"
+            f"> 🥇 {winner_zappy} ({winner_name})  {top_bar}
+"
+            f"> {bot_label}  {bot_bar}
+
+"
             f"{payout_line}"
         ),
     })
 
     return beats
-
-
 # ---------------------------------------------------------------------------
 # Supabase helpers
 # ---------------------------------------------------------------------------
@@ -427,7 +581,8 @@ async def confirm_payment(db: Client, duel_id: str, player_role: str, txid: str)
     field = "challenger_txid" if player_role == "challenger" else "opponent_txid"
     db.table("race_duels").update({field: txid}).eq("id", duel_id).execute()
 
-    duel = db.table("race_duels").select("*").eq("id", duel_id).single().execute().data
+    duel_res = db.table("race_duels").select("*").eq("id", duel_id).execute()
+    duel = duel_res.data[0] if duel_res.data else {}
     if duel["challenger_txid"] and duel["opponent_txid"]:
         db.table("race_duels").update({"status": "paid"}).eq("id", duel_id).execute()
         duel["status"] = "paid"
