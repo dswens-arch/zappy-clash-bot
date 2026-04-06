@@ -259,7 +259,7 @@ active_players: set[str] = set()
 # CPU opponent for test races
 # ---------------------------------------------------------------------------
 
-CPU_ZAPPY_ID = "CPU-001"
+CPU_ZAPPY_ID = "Sparky"   # CPU test opponent display name
 
 def make_cpu_racer() -> dict:
     """Generate a fake CPU racer with mid-range stats for testing."""
@@ -271,13 +271,13 @@ def make_cpu_racer() -> dict:
     }
 
 def make_cpu_stats() -> dict:
-    """Mid-range stats so the CPU is beatable but not a pushover."""
+    """CPU stats match a fresh unupgraded Zappy — fair test opponent."""
     return {
-        "speed":          random.randint(4, 8),
+        "speed":          random.randint(3, 6),
         "speed_max":      10,
-        "endurance":      random.randint(4, 8),
+        "endurance":      random.randint(3, 6),
         "endurance_max":  10,
-        "clutch":         random.randint(4, 8),
+        "clutch":         random.randint(3, 6),
         "clutch_max":     10,
         "total_zap_spent": 0,
     }
@@ -543,8 +543,8 @@ class GrandPrixCog(commands.Cog):
 
         race_msg = await channel.send("🏁 **Race starting...**")
 
-        id_a = self.db.table("zappy_racers").select("discord_user_id").eq("zappy_id", racer_a["zappy_id"]).single().execute().data["discord_user_id"]
-        id_b = self.db.table("zappy_racers").select("discord_user_id").eq("zappy_id", racer_b["zappy_id"]).single().execute().data["discord_user_id"]
+        id_a = racer_a.get("discord_user_id") or (self.db.table("zappy_racers").select("discord_user_id").eq("zappy_id", racer_a["zappy_id"]).execute().data or [{}])[0].get("discord_user_id", "unknown")
+        id_b = racer_b.get("discord_user_id") or (self.db.table("zappy_racers").select("discord_user_id").eq("zappy_id", racer_b["zappy_id"]).execute().data or [{}])[0].get("discord_user_id", "unknown")
 
         await run_race_narration(
             message=race_msg, result=result,
@@ -579,7 +579,8 @@ class GrandPrixCog(commands.Cog):
 
             # Bot rake
             try:
-                bw = self.db.table("bot_wallet").select("algo_balance,total_rake_collected").eq("id",1).single().execute().data
+                bw_res = self.db.table("bot_wallet").select("algo_balance,total_rake_collected").eq("id",1).execute()
+                bw = bw_res.data[0] if bw_res.data else {"algo_balance": 0, "total_rake_collected": 0}
                 self.db.table("bot_wallet").update({
                     "algo_balance":         bw["algo_balance"] + 1,
                     "total_rake_collected": bw["total_rake_collected"] + 1,
@@ -786,7 +787,8 @@ class GrandPrixCog(commands.Cog):
         stats_a = await get_stats(self.db, racer["zappy_id"])
         result  = resolve_race(stats_a, cpu_stats)
 
-        race_msg = await channel.send("🏁 **Test race starting...**")
+        mode_label = "ALGO" if mode.value == "algo" else "ZAP"
+        race_msg = await channel.send(f"🧪 **TEST RACE ({mode_label} mode) — no real funds move**")
 
         await run_race_narration(
             message=race_msg, result=result,
