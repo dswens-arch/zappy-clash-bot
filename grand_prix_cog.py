@@ -857,6 +857,42 @@ class GrandPrixCog(commands.Cog):
         await interaction.followup.send(embed=embed, ephemeral=True)
 
     # -----------------------------------------------------------------------
+    # /gpunregister
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpunregister", description="(Admin) Remove a player's Grand Prix registration so they can re-register.")
+    @app_commands.describe(player="The player to unregister (leave blank to unregister yourself)")
+    @app_commands.default_permissions(administrator=True)
+    async def gpunregister(self, interaction: discord.Interaction, player: discord.Member = None):
+        await interaction.response.defer(ephemeral=True)
+
+        target    = player or interaction.user
+        target_id = str(target.id)
+
+        racer = await get_racer(self.db, target_id)
+        if not racer:
+            await interaction.followup.send(
+                f"{target.display_name} isn't registered in the Grand Prix.",
+                ephemeral=True,
+            )
+            return
+
+        zappy_id = racer["zappy_id"]
+
+        # Delete stats first (foreign key child), then racer
+        self.db.table("zappy_stats").delete().eq("zappy_id", zappy_id).execute()
+        self.db.table("zappy_racers").delete().eq("discord_user_id", target_id).execute()
+
+        # Also remove from active players if somehow stuck
+        active_players.discard(target_id)
+
+        await interaction.followup.send(
+            f"✅ **{target.display_name}** unregistered — `{zappy_id}` removed.\n"
+            f"They can now use `/gpregister` with a new Zappy ID.",
+            ephemeral=True,
+        )
+
+    # -----------------------------------------------------------------------
     # /gpstats
     # -----------------------------------------------------------------------
 
