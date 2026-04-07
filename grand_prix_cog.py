@@ -139,11 +139,13 @@ def _load_bg(mode, state) -> Image.Image:
     filename = BOARD_IMAGES[mode][state]
     path = os.path.join(_BOARDS_DIR, filename)
     if os.path.exists(path):
-        # Paste with padding so Discord mobile corner radius doesn't clip the art
-        PAD = 8
-        raw    = Image.open(path).convert("RGBA").resize((W - PAD * 2, H - PAD * 2))
+        # Asymmetric padding — Discord mobile clips bottom corners more aggressively
+        PAD_L, PAD_R, PAD_T, PAD_B = 6, 6, 6, 14
+        new_w = W - PAD_L - PAD_R
+        new_h = H - PAD_T - PAD_B
+        raw    = Image.open(path).convert("RGBA").resize((new_w, new_h))
         canvas = Image.new("RGBA", (W, H), (8, 10, 20, 255))
-        canvas.paste(raw, (PAD, PAD), raw.split()[3])
+        canvas.paste(raw, (PAD_L, PAD_T), raw.split()[3])
         return canvas
     print(f"[grand_prix] MISSING image: {path}")
     return Image.new("RGBA", (W, H), (8, 10, 20, 255))
