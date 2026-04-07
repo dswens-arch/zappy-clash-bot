@@ -59,17 +59,19 @@ from algo_layer import (
 from zap_layer import (
     can_afford_entry,
     get_zapp_balance,
-    build_zapp_payment_uri,
-    find_zapp_payment_sync,
-    pay_winner,
-    refund_entry,
+    build_payment_ui as build_zapp_payment_ui,
+    build_pera_zapp_uri as build_zapp_payment_uri,
+    make_payment_view as make_zapp_payment_view,
+    wait_for_payment as wait_for_zapp_payment,
+    send_payout as send_zapp_payout,
+    send_refund as send_zapp_refund,
+    is_opted_in,
     ZAP_ENTRY,
     ZAP_PAYOUT,
     ZAP_WIN_BONUS,
     ZAP_LOSE_BONUS,
     ZAPP_ASA_ID,
 )
-from algo_layer import get_current_round as _get_round
 
 
 # ---------------------------------------------------------------------------
@@ -455,8 +457,8 @@ class GrandPrixCog(commands.Cog):
 
         if q.mode == "zap":
             wallet = available[0]["racer"]["wallet_address"] if available else None
-            if not wallet or not await can_afford_entry(wallet):
-                bal = await get_zapp_balance(wallet) if wallet else 0
+            bal = get_zapp_balance(wallet) if wallet else 0
+            if not wallet or bal < ZAP_ENTRY:
                 await interaction.followup.send(
                     f"Not enough ZAPP. Need **{ZAP_ENTRY:,}** — you have **{bal:,}** in your wallet.\n"
                     f"Earn ZAPP through Clash and Expedition.",
@@ -644,20 +646,15 @@ class GrandPrixCog(commands.Cog):
             if q.player_a_paid and q.player_b_paid:
                 await self._launch_race(q, channel)
 
-        # Poll every 5 seconds for up to 3 minutes
-        import time
-        deadline = time.monotonic() + 180
-        while time.monotonic() < deadline:
-            txid = await _asyncio.to_thread(
-                find_zapp_payment_sync,
-                racer["wallet_address"],
-                q.duel_id,
-                q.after_round,
-            )
-            if txid:
-                await on_found(txid)
-                return
-            await _asyncio.sleep(5)
+        # Poll every 5 seconds for up to 3 minutes using zap_layer
+        txid = await wait_for_zapp_payment(
+            sender_address=racer["wallet_address"],
+            duel_id=q.duel_id,
+            after_round=q.after_round,
+            on_found=on_found,
+        )
+        if txid:
+            return
 
         # Timeout — refund if they paid
         active_players.discard(q.player_a_id if slot == "a" else q.player_b_id)
