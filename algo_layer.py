@@ -1,1335 +1,471 @@
 """
-grand_prix_cog.py
-Zappy Grand Prix — self-contained cog for the existing Zappy Clash bot.
+algo_layer.py
+Zappy Grand Prix — Algorand transaction layer
 
-All Grand Prix commands are prefixed with /gp to avoid collisions
-with existing Clash commands (/stats, /link, /top etc).
+Handles:
+- Deep link URI generation (algorand://) for wallet apps
+- QR code generation for desktop fallback
+- Watching for incoming ALGO payments via indexer polling
+- Winner payouts and expired duel refunds from bot hot wallet
 
-Commands:
-  /gpregister     — link wallet + Zappy ID for Grand Prix
-  /gpstats        — your Grand Prix stat sheet
-  /gpgarage       — scout another player's stats
-  /gpupgrade      — spend ZAP to level up a stat
-  /gpzap          — check your ZAP balance
-  /gpleaderboard  — Grand Prix leaderboard by wins
-  /gpsetup        — (admin) post both race boards in this channel
-  /gptestrace     — (admin) run a test race vs the computer, no real money
+Requires env vars:
+    BOT_MNEMONIC       — 25-word mnemonic for the bot's hot wallet
+    ALGOD_TOKEN        — algod API token (use "" for public nodes)
+    ALGOD_URL          — algod node URL
+    INDEXER_TOKEN      — indexer API token
+    INDEXER_URL        — indexer node URL
 
-Add to bot.py on_ready:
-  from grand_prix_cog import GrandPrixCog
-  await bot.add_cog(GrandPrixCog(bot))
+Recommended free nodes: AlgoNode (algonode.cloud)
 """
 
-import asyncio
-import random
-import io
 import os
-from PIL import Image, ImageDraw, ImageFont
+import io
+import asyncio
+import time
+import base64
+from urllib.parse import urlencode
+from typing import Optional, Callable
 
-import discord
-from discord import app_commands
-from discord.ext import commands, tasks
+import qrcode
+from qrcode.image.pure import PyPNGImage
 
-from database import get_supabase   # reuse existing Supabase client
-
-from race_engine import (
-    seed_stats,
-    resolve_race,
-    run_race_narration,
-    apply_upgrade,
-    get_racer,
-    get_all_racers,
-    get_available_racers,
-    set_zappy_cooldown,
-    get_stats,
-    create_duel,
-    confirm_payment,
-    write_race_result,
-    max_upgrade_cost,
-    STAT_CAP_MAX,
-)
-from algo_layer import (
-    build_payment_ui,
-    make_payment_view,
-    wait_for_payment,
-    send_payout,
-    get_current_round,
-    process_expired_duels,
-)
-from zap_layer import (
-    can_afford_entry,
-    get_zapp_balance,
-    build_payment_ui as build_zapp_payment_ui,
-    build_pera_zapp_uri as build_zapp_payment_uri,
-    make_payment_view as make_zapp_payment_view,
-    wait_for_payment as wait_for_zapp_payment,
-    send_payout as send_zapp_payout,
-    send_refund as send_zapp_refund,
-    is_opted_in,
-    ZAP_ENTRY,
-    ZAP_PAYOUT,
-    ZAP_WIN_BONUS,
-    ZAP_LOSE_BONUS,
-    ZAPP_ASA_ID,
-)
+from algosdk import mnemonic, account, transaction
+from algosdk.v2client import algod, indexer
 
 
 # ---------------------------------------------------------------------------
-# Channel IDs — add these to your .env
-# ---------------------------------------------------------------------------
-# ALGO_RACE_CHANNEL_ID=<channel id>
-# ZAP_RACE_CHANNEL_ID=<channel id>
-
-
-# ---------------------------------------------------------------------------
-# Fonts
+# Client setup
 # ---------------------------------------------------------------------------
 
-def _font(name: str, size: int) -> ImageFont.FreeTypeFont:
-    for path in [
-        f"./fonts/{name}",
-        f"/usr/share/fonts/truetype/google-fonts/{name}",
-        f"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-    ]:
-        if os.path.exists(path):
-            return ImageFont.truetype(path, size)
-    return ImageFont.load_default()
-
-FONT_BOLD = _font("Poppins-Bold.ttf",    36)
-FONT_MED  = _font("Poppins-Medium.ttf",  22)
-FONT_REG  = _font("Poppins-Regular.ttf", 16)
-FONT_SM   = _font("Poppins-Regular.ttf", 14)
-
-
-# ---------------------------------------------------------------------------
-# Board image generator — composites text onto real background images
-# Images live in ./boards/ folder alongside this file in the repo
-# ---------------------------------------------------------------------------
-
-W, H   = 798, 278
-WHITE  = (240, 245, 255)
-MUTED  = (180, 190, 210)
-GREEN  = (50,  220, 120)
-SHADOW = (0, 0, 0)
-
-ACCENTS = {
-    "algo": (30,  180, 255),
-    "zap":  (255, 200,  50),
-}
-LABELS = {
-    "algo": ("ALGO GRAND PRIX",  "5 ALGO entry  |  Winner takes 9 ALGO"),
-    "zap":  ("ZAPP GRAND PRIX",  "500 ZAPP entry  |  Winner takes 1,000 ZAPP"),
-}
-
-# Resolve boards/ relative to this file so Railway always finds it
-_BOARDS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boards")
-
-BOARD_IMAGES = {
-    "algo": {
-        "empty":   "algoempty.png",
-        "waiting": "algowaiting.png",
-        "racing":  "algoracing.png",
-        "result":  "algoresult.png",
-    },
-    "zap": {
-        "empty":   "zappempty.png",
-        "waiting": "zappwaiting.png",
-        "racing":  "zappracing.png",
-        "result":  "zappresult.png",
-    },
-}
-
-
-def _load_bg(mode, state) -> Image.Image:
-    filename = BOARD_IMAGES[mode][state]
-    path = os.path.join(_BOARDS_DIR, filename)
-    if os.path.exists(path):
-        # Asymmetric padding — Discord mobile clips bottom corners more aggressively
-        PAD_L, PAD_R, PAD_T, PAD_B = 6, 6, 6, 14
-        new_w = W - PAD_L - PAD_R
-        new_h = H - PAD_T - PAD_B
-        raw    = Image.open(path).convert("RGBA").resize((new_w, new_h))
-        canvas = Image.new("RGBA", (W, H), (8, 10, 20, 255))
-        canvas.paste(raw, (PAD_L, PAD_T), raw.split()[3])
-        return canvas
-    print(f"[grand_prix] MISSING image: {path}")
-    return Image.new("RGBA", (W, H), (8, 10, 20, 255))
-
-
-def _t(draw, x, y, text, font, color):
-    """Draw text with drop shadow for readability over any background."""
-    draw.text((x+1, y+1), text, font=font, fill=(*SHADOW, 200), anchor="mm")
-    draw.text((x+2, y+2), text, font=font, fill=(*SHADOW, 120), anchor="mm")
-    draw.text((x, y), text, font=font, fill=color, anchor="mm")
-
-
-def _buf(img):
-    # Composite RGBA onto a dark background before converting
-    # so transparent areas don't turn white
-    bg = Image.new("RGBA", img.size, (8, 10, 20, 255))
-    bg.paste(img, mask=img.split()[3])  # use alpha channel as mask
-    b = io.BytesIO()
-    bg.convert("RGB").save(b, format="PNG")
-    b.seek(0)
-    return b
-
-
-def board_empty(mode):
-    img  = _load_bg(mode, "empty")
-    draw = ImageDraw.Draw(img)
-    accent = ACCENTS[mode]
-    title, subtitle = LABELS[mode]
-    _t(draw, W//2, 80,  title,                  FONT_BOLD, accent)
-    _t(draw, W//2, 118, subtitle,               FONT_SM,   MUTED)
-    _t(draw, W//2, 160, "NO RACE IN PROGRESS",  FONT_MED,  (160, 170, 190))
-    _t(draw, W//2, 190, "Be the first to join", FONT_SM,   (120, 130, 150))
-    return _buf(img)
-
-
-def board_waiting(mode, zappy_id):
-    img  = _load_bg(mode, "waiting")
-    draw = ImageDraw.Draw(img)
-    accent = ACCENTS[mode]
-    title, subtitle = LABELS[mode]
-    _t(draw, W//2, 45,  title,                                   FONT_BOLD, accent)
-    _t(draw, W//2, 82,  "WAITING FOR OPPONENT",                  FONT_MED,  accent)
-    _t(draw, W//2, 130, f"{zappy_id}  is ready",                 FONT_BOLD, WHITE)
-    _t(draw, 190,  245, zappy_id,                                FONT_SM,   WHITE)
-    _t(draw, 600,  245, "???",                                   FONT_SM,   MUTED)
-    _t(draw, W//2, 195, "Join to race · first to pay locks in",  FONT_SM,   MUTED)
-    _t(draw, W//2, 222, "Tap Join Race to enter",                FONT_SM,   accent)
-    return _buf(img)
-
-
-def board_racing(mode, zappy_a, zappy_b):
-    img  = _load_bg(mode, "racing")
-    draw = ImageDraw.Draw(img)
-    accent = ACCENTS[mode]
-    title, _ = LABELS[mode]
-    _t(draw, W//2, 50,  title,                         FONT_BOLD, accent)
-    _t(draw, W//2, 85,  "RACE IN PROGRESS",            FONT_MED,  GREEN)
-    _t(draw, W//2, 125, zappy_a,                       FONT_BOLD, WHITE)
-    _t(draw, W//2, 155, "vs",                          FONT_SM,   MUTED)
-    _t(draw, W//2, 185, zappy_b,                       FONT_BOLD, WHITE)
-    _t(draw, W//2, 225, "Race underway — result soon", FONT_SM,   MUTED)
-    return _buf(img)
-
-
-def board_result(mode, zappy_a, zappy_b, winner, score_a, score_b, surge=False):
-    img  = _load_bg(mode, "result")
-    draw = ImageDraw.Draw(img)
-    accent = ACCENTS[mode]
-    title, _ = LABELS[mode]
-    payout    = "9 ALGO paid out" if mode == "algo" else "1,000 ZAPP paid out"
-    surge_tag = "  SURGE!" if surge else ""
-    diff = abs(score_a - score_b)
-    margin = "Dominant run" if diff == 3 else "Clear victory" if diff == 2 else "Close race"
-    _t(draw, W//2, 45,  title,                               FONT_BOLD, accent)
-    _t(draw, W//2, 82,  "RACE RESULT",                       FONT_MED,  accent)
-    _t(draw, W//2, 125, f"{winner}  WINS!",                  FONT_BOLD, GREEN)
-    _t(draw, W//2, 168, f"{payout}  ·  {margin}{surge_tag}", FONT_SM,   MUTED)
-    _t(draw, W//2, 198, f"{zappy_a}  vs  {zappy_b}",         FONT_SM,   MUTED)
-    _t(draw, W//2, 235, "New race open below",               FONT_SM,   accent)
-    return _buf(img)
-
-
-def make_board_buf(mode, state, **kw):
-    if state == "empty":   return board_empty(mode)
-    if state == "waiting": return board_waiting(mode, **kw)
-    if state == "racing":  return board_racing(mode, **kw)
-    if state == "result":  return board_result(mode, **kw)
-    return board_empty(mode)
-
-
-# ---------------------------------------------------------------------------
-# Persistent join button views
-# ---------------------------------------------------------------------------
-
-class JoinAlgoView(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(
-        label="Join Race  ·  5 ALGO",
-        style=discord.ButtonStyle.primary,
-        emoji="🏁",
-        custom_id="gp:join_algo",
+def get_algod_client() -> algod.AlgodClient:
+    return algod.AlgodClient(
+        algod_token=os.getenv("ALGOD_TOKEN", ""),
+        algod_address=os.getenv("ALGOD_URL", "https://mainnet-api.algonode.cloud"),
     )
-    async def join(self, interaction: discord.Interaction, button: discord.ui.Button):
-        pass  # routed via on_interaction
 
 
-class JoinZapView(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(
-        label="Join Race  ·  500 ZAPP",
-        style=discord.ButtonStyle.success,
-        emoji="⚡",
-        custom_id="gp:join_zap",
+def get_indexer_client() -> indexer.IndexerClient:
+    return indexer.IndexerClient(
+        indexer_token=os.getenv("INDEXER_TOKEN", ""),
+        indexer_address=os.getenv("INDEXER_URL", "https://mainnet-idx.algonode.cloud"),
     )
-    async def join(self, interaction: discord.Interaction, button: discord.ui.Button):
-        pass  # routed via on_interaction
+
+
+def get_bot_account() -> tuple[str, str]:
+    """Return (private_key, address) for the bot's hot wallet."""
+    mn = os.getenv("BOT_WALLET_MNEMONIC") or os.getenv("BOT_MNEMONIC")
+    if not mn:
+        raise EnvironmentError("BOT_WALLET_MNEMONIC env var not set.")
+    private_key = mnemonic.to_private_key(mn)
+    address = account.address_from_private_key(private_key)
+    return private_key, address
+
+
+def get_bot_address() -> str:
+    _, address = get_bot_account()
+    return address
 
 
 # ---------------------------------------------------------------------------
-# Queue state
+# Constants
 # ---------------------------------------------------------------------------
 
-class RaceQueue:
-    def __init__(self, mode: str):
-        self.mode = mode
-        self.reset()
+WAGER_ALGO       = 5
+PAYOUT_ALGO      = 9
+RAKE_ALGO        = 1
 
-    def reset(self):
-        self.player_a_id:    str | None  = None
-        self.player_a_racer: dict | None = None  # full racer row
-        self.player_a_stats: dict | None = None  # selected zappy stats
-        self.player_a_paid:  bool        = False
-        self.player_b_id:    str | None  = None
-        self.player_b_racer: dict | None = None
-        self.player_b_stats: dict | None = None
-        self.player_b_paid:  bool        = False
-        self.duel_id:        str | None  = None
-        self.after_round:    int         = 0
-        self.board_msg_id:   int | None  = None
-        self.locked:         bool        = False
+WAGER_MICROALGO  = 5_000_000
+PAYOUT_MICROALGO = 9_000_000
+RAKE_MICROALGO   = 1_000_000
 
+PAYMENT_TIMEOUT  = 180   # seconds before duel expires
+POLL_INTERVAL    = 5     # indexer poll cadence in seconds
+BOT_MIN_BALANCE  = 10_000_000  # 10 ALGO minimum operating buffer
 
-algo_queue = RaceQueue("algo")
-zap_queue  = RaceQueue("zap")
-
-# Global set — discord_user_ids currently in any queue or race
-active_players: set[str] = set()
+QR_BOX_SIZE  = 8
+QR_BORDER    = 2
 
 
 # ---------------------------------------------------------------------------
-# CPU opponent for test races
+# Deep link + QR generation
 # ---------------------------------------------------------------------------
 
-CPU_ZAPPY_ID = "Sparky"   # CPU test opponent display name
+def build_payment_note(duel_id: str) -> str:
+    """
+    The note players include in their payment so the bot can
+    match it to the correct duel. Format: zgp:<duel_id>
+    """
+    return f"zgp:{duel_id}"
 
-def make_cpu_racer() -> dict:
-    """Generate a fake CPU racer with mid-range stats for testing."""
+
+def build_algorand_uri(
+    bot_address: str,
+    duel_id: str,
+    amount_microalgo: int = WAGER_MICROALGO,
+) -> str:
+    """
+    Build an algorand:// deep link URI that opens the player's wallet
+    with the transaction pre-filled (ARC-0026 spec).
+
+    Supported by: Pera, Defly, Exodus, Lute
+    On mobile this opens the wallet app directly.
+    On desktop it won't do much — use the QR fallback instead.
+
+    Note is base64-encoded per the ARC-0026 spec.
+    """
+    note_b64 = base64.b64encode(
+        build_payment_note(duel_id).encode()
+    ).decode()
+
+    params = urlencode({
+        "amount": amount_microalgo,
+        "note":   note_b64,
+    })
+
+    # algorand:// scheme not supported in Discord buttons — use HTTPS Pera web
+    return f"https://app.perawallet.app/payment-request/?receiver={bot_address}&{params}"
+
+
+def build_pera_uri(
+    bot_address: str,
+    duel_id: str,
+    amount_microalgo: int = WAGER_MICROALGO,
+) -> str:
+    """
+    Pera Wallet's own deep link scheme — opens directly into the
+    send screen with all fields pre-populated.
+
+    xnote=1 locks the note field so the player can't accidentally
+    change it and break the duel matching.
+    """
+    note_b64 = base64.b64encode(
+        build_payment_note(duel_id).encode()
+    ).decode()
+
+    params = urlencode({
+        "receiver": bot_address,
+        "amount":   amount_microalgo,
+        "note":     note_b64,
+        "xnote":    "1",
+    })
+
+    # perawallet:// scheme not supported in Discord buttons — use HTTPS Pera web
+    return f"https://app.perawallet.app/payment-request/?{params}"
+
+
+def generate_qr_png(uri: str) -> io.BytesIO:
+    """
+    Generate a QR code PNG of the algorand:// URI.
+    Returns a BytesIO buffer ready to attach to a Discord message.
+    Desktop players scan this with Pera on their phone.
+    Uses pure PNG (no Pillow needed) so it works on Railway out of the box.
+    """
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=QR_BOX_SIZE,
+        border=QR_BORDER,
+    )
+    qr.add_data(uri)
+    qr.make(fit=True)
+
+    img = qr.make_image(image_factory=PyPNGImage)
+    buf = io.BytesIO()
+    img.save(buf)
+    buf.seek(0)
+    return buf
+
+
+def build_payment_ui(duel_id: str) -> dict:
+    """
+    Build everything the Discord command needs for the payment step.
+
+    Returns:
+        bot_address  — bot's Algorand wallet address
+        algo_uri     — algorand:// URI (universal, most wallets)
+        pera_uri     — perawallet:// URI (Pera-specific, best UX)
+        qr_buf       — BytesIO PNG buffer for the QR code
+        note         — raw note string player must include
+        instructions — formatted Discord message string
+
+    Usage in your bot command:
+        ui = build_payment_ui(duel_id)
+        qr_file = discord.File(ui["qr_buf"], filename="pay.png")
+        view = PaymentView(ui["algo_uri"], ui["pera_uri"])
+        await interaction.followup.send(ui["instructions"], file=qr_file, view=view)
+    """
+    bot_address = get_bot_address()
+    algo_uri    = build_algorand_uri(bot_address, duel_id)
+    pera_uri    = build_pera_uri(bot_address, duel_id)
+    qr_buf      = generate_qr_png(algo_uri)
+    note        = build_payment_note(duel_id)
+
+    instructions = (
+        f"**Send 5 ALGO to enter the race**\n\n"
+        f"📱 **Mobile** — tap a button below to open your wallet. "
+        f"The address, amount, and note are pre-filled. Just approve.\n\n"
+        f"🖥️ **Desktop** — scan the QR code with Pera Wallet on your phone.\n\n"
+        f"*Note field:* `{note}` *(do not change this)*\n"
+        f"⏳ Challenge expires in **3 minutes**."
+    )
+
     return {
-        "discord_user_id": "cpu",
-        "wallet_address":  "CPU000000000000000000000000000000000000000000000000000000",
-        "zappy_id":        CPU_ZAPPY_ID,
-        "wins": 0, "losses": 0, "zap_balance": 0,
-    }
-
-def make_cpu_stats() -> dict:
-    """CPU stats match a fresh unupgraded Zappy — fair test opponent."""
-    return {
-        "speed":          random.randint(3, 6),
-        "speed_max":      10,
-        "endurance":      random.randint(3, 6),
-        "endurance_max":  10,
-        "clutch":         random.randint(3, 6),
-        "clutch_max":     10,
-        "total_zap_spent": 0,
+        "bot_address":  bot_address,
+        "algo_uri":     algo_uri,
+        "pera_uri":     pera_uri,
+        "qr_buf":       qr_buf,
+        "note":         note,
+        "instructions": instructions,
     }
 
 
 # ---------------------------------------------------------------------------
-# Stat display helpers
+# Discord UI view — payment buttons
 # ---------------------------------------------------------------------------
+# Import this into your bot commands file and pass it to the message send.
+# Requires: import discord
 
-def stat_bar(current: int, cap: int, width: int = 11) -> str:
-    filled = round((current / STAT_CAP_MAX) * width)
-    return "█" * filled + "░" * (width - filled)
+def make_payment_view(algo_uri: str, pera_uri: str):
+    """
+    Returns a discord.ui.View with two link buttons:
+      - Open in Pera   (perawallet:// deep link)
+      - Open in Wallet (algorand:// universal link)
 
+    These are link-style buttons — tapping them opens the URI directly.
+    On mobile this triggers the wallet app. On desktop it's a no-op
+    for most users, which is why we also send the QR code.
+    """
+    import discord
 
-def format_stats_embed(racer: dict, stats: dict, title: str = None) -> discord.Embed:
-    wins     = racer.get("wins", 0)
-    losses   = racer.get("losses", 0)
-    total    = wins + losses
-    win_rate = f"{round(wins/total*100)}%" if total else "—"
+    class PaymentView(discord.ui.View):
+        def __init__(self):
+            super().__init__(timeout=180)  # matches PAYMENT_TIMEOUT
 
-    embed = discord.Embed(
-        title=title or f"⚡ {racer['zappy_id']}",
-        color=discord.Color.from_rgb(30, 180, 255),
-    )
-    embed.add_field(name="Speed",
-        value=f"`{stat_bar(stats['speed'], stats['speed_max'])}` {stats['speed']}/{stats['speed_max']}", inline=False)
-    embed.add_field(name="Endurance",
-        value=f"`{stat_bar(stats['endurance'], stats['endurance_max'])}` {stats['endurance']}/{stats['endurance_max']}", inline=False)
-    embed.add_field(name="Clutch",
-        value=f"`{stat_bar(stats['clutch'], stats['clutch_max'])}` {stats['clutch']}/{stats['clutch_max']}", inline=False)
-    embed.add_field(name="Wins",        value=str(wins),    inline=True)
-    embed.add_field(name="Losses",      value=str(losses),  inline=True)
-    embed.add_field(name="Win Rate",    value=win_rate,     inline=True)
-    embed.add_field(name="ZAPP Balance", value=f"{racer.get('zap_balance', 0):,}", inline=True)
-    embed.add_field(name="ZAPP to max",
-        value=f"{max_upgrade_cost(stats):,}" if max_upgrade_cost(stats) > 0 else "✅ Maxed", inline=True)
-    embed.set_footer(text=f"Wallet: {racer['wallet_address'][:10]}...{racer['wallet_address'][-4:]}")
-    return embed
+            self.add_item(discord.ui.Button(
+                style=discord.ButtonStyle.link,
+                label="Pay 5 ALGO in Pera",
+                url=pera_uri,
+                emoji="⚡",
+                row=0,
+            ))
+
+    return PaymentView()
 
 
 # ---------------------------------------------------------------------------
-# Cog
+# Balance helpers
 # ---------------------------------------------------------------------------
 
-class GrandPrixCog(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-        self.db  = get_supabase()
-        self.expiry_task.start()
+def get_bot_balance() -> int:
+    """Return bot wallet balance in microALGO."""
+    client = get_algod_client()
+    _, address = get_bot_account()
+    return client.account_info(address)["amount"]
 
-    def cog_unload(self):
-        self.expiry_task.cancel()
 
-    # -----------------------------------------------------------------------
-    # Background: expire stale ALGO duels + refund
-    # -----------------------------------------------------------------------
+def check_bot_can_pay() -> bool:
+    return get_bot_balance() >= (PAYOUT_MICROALGO + BOT_MIN_BALANCE)
 
-    @tasks.loop(seconds=30)
-    async def expiry_task(self):
+
+def get_account_balance(address: str) -> int:
+    try:
+        return get_algod_client().account_info(address)["amount"]
+    except Exception:
+        return 0
+
+
+def get_current_round() -> int:
+    return get_algod_client().status()["last-round"]
+
+
+# ---------------------------------------------------------------------------
+# Payment verification via indexer polling
+# ---------------------------------------------------------------------------
+
+def find_payment_txn(
+    sender_address: str,
+    receiver_address: str,
+    amount_microalgo: int,
+    after_round: int,
+    expected_note: str,
+) -> Optional[str]:
+    """
+    Search the indexer for a confirmed ALGO payment matching all criteria.
+    Returns txid if found, None otherwise.
+    """
+    idx          = get_indexer_client()
+    expected_b64 = base64.b64encode(expected_note.encode()).decode()
+
+    try:
+        response = idx.search_transactions(
+            address=sender_address,
+            address_role="sender",
+            txn_type="pay",
+            min_amount=amount_microalgo,
+            min_round=after_round,
+        )
+    except Exception as e:
+        print(f"[algo_layer] Indexer search error: {e}")
+        return None
+
+    for txn in response.get("transactions", []):
+        pay = txn.get("payment-transaction", {})
+
+        # Must send to bot address
+        if pay.get("receiver") != receiver_address:
+            continue
+
+        # Must meet the wager amount
+        if pay.get("amount", 0) < amount_microalgo:
+            continue
+
+        # Note must match exactly — this is how we tie the payment to the duel
+        raw_note = txn.get("note", "")
         try:
-            await process_expired_duels(self.db, refund=True)
-        except Exception as e:
-            print(f"[grand_prix] Expiry task error: {e}")
+            if raw_note != expected_b64:
+                continue
+        except Exception:
+            continue
 
-    @expiry_task.before_loop
-    async def before_expiry(self):
-        await self.bot.wait_until_ready()
+        return txn["id"]
 
-    # -----------------------------------------------------------------------
-    # Button router
-    # -----------------------------------------------------------------------
+    return None
 
-    @commands.Cog.listener()
-    async def on_interaction(self, interaction: discord.Interaction):
-        if interaction.type != discord.InteractionType.component:
-            return
-        cid = interaction.data.get("custom_id", "")
-        if cid == "gp:join_algo":
-            await self._handle_join(interaction, algo_queue)
-        elif cid == "gp:join_zap":
-            await self._handle_join(interaction, zap_queue)
 
-    # -----------------------------------------------------------------------
-    # Shared join handler
-    # -----------------------------------------------------------------------
+async def wait_for_payment(
+    sender_address: str,
+    duel_id: str,
+    after_round: int,
+    on_found: Optional[Callable] = None,
+    on_timeout: Optional[Callable] = None,
+) -> Optional[str]:
+    """
+    Poll the indexer every 5 seconds until a matching payment is found
+    or the 3-minute window closes.
 
-    async def _handle_join(self, interaction: discord.Interaction, q: RaceQueue):
-        await interaction.response.defer(ephemeral=True)
-        user_id = str(interaction.user.id)
-        channel = interaction.channel
+    on_found(txid)  — async callback fired immediately when payment lands
+    on_timeout()    — async callback fired if 3 minutes elapse with nothing
 
-        if user_id in active_players:
-            await interaction.followup.send(
-                "You're already in a race or queue. Finish that one first.",
-                ephemeral=True,
-            )
-            return
+    Returns txid on success, None on timeout.
 
-        if q.locked:
-            await interaction.followup.send(
-                "A race is already running on this board. Hang tight.",
-                ephemeral=True,
-            )
-            return
-
-        # Check registration
-        available, on_cooldown = await get_available_racers(self.db, user_id)
-
-        if not available and not on_cooldown:
-            await interaction.followup.send(
-                "You need to `/gpregister` first to join the Grand Prix.",
-                ephemeral=True,
-            )
-            return
-
-        if not available:
-            # All Zappies on cooldown — tell them when earliest is ready
-            earliest = min(on_cooldown, key=lambda x: x["cooldown_ends"])
-            ends = earliest["cooldown_ends"]
-            import discord as _discord
-            ts = int(ends.timestamp())
-            await interaction.followup.send(
-                f"All your Zappies are cooling down! ❄️\n"
-                f"**{earliest['racer']['zappy_id']}** is ready <t:{ts}:R>.",
-                ephemeral=True,
-            )
-            return
-
-        if q.mode == "zap":
-            wallet = available[0]["racer"]["wallet_address"] if available else None
-            bal = get_zapp_balance(wallet) if wallet else 0
-            if not wallet or bal < ZAP_ENTRY:
-                await interaction.followup.send(
-                    f"Not enough ZAPP. Need **{ZAP_ENTRY:,}** — you have **{bal:,}** in your wallet.\n"
-                    f"Earn ZAPP through Clash and Expedition.",
-                    ephemeral=True,
-                )
-                return
-
-        # If only one Zappy available, skip picker and go straight in
-        if len(available) == 1:
-            selected = available[0]
-            await self._slot_player(interaction, q, channel, user_id, selected["racer"], selected["stats"])
-            return
-
-        # Multiple Zappies — show picker
-        await self._show_zappy_picker(interaction, q, channel, user_id, available)
-
-    async def _show_zappy_picker(
-        self,
-        interaction: discord.Interaction,
-        q: RaceQueue,
-        channel,
-        user_id: str,
-        available: list[dict],
-    ):
-        """Show ephemeral buttons to pick which Zappy to race with."""
-
-        class ZappyPickView(discord.ui.View):
-            def __init__(self_inner):
-                super().__init__(timeout=60)
-                self_inner.chosen = False
-
-                for entry in available[:5]:  # max 5 buttons
-                    racer = entry["racer"]
-                    stats = entry["stats"]
-                    label = (
-                        f"{racer['zappy_id']}  "
-                        f"SPD {stats['speed']}  "
-                        f"END {stats['endurance']}  "
-                        f"CLT {stats['clutch']}"
-                    )[:80]
-                    btn = discord.ui.Button(
-                        label=label,
-                        style=discord.ButtonStyle.primary,
-                        custom_id=f"gp_pick_{racer['zappy_id']}",
-                    )
-                    btn.callback = self_inner._make_cb(racer, stats)
-                    self_inner.add_item(btn)
-
-            def _make_cb(self_inner, racer, stats):
-                async def cb(btn_interaction: discord.Interaction):
-                    if self_inner.chosen:
-                        await btn_interaction.response.send_message("Already picked!", ephemeral=True)
-                        return
-                    self_inner.chosen = True
-                    for item in self_inner.children:
-                        item.disabled = True
-                    await btn_interaction.response.defer(ephemeral=True)
-                    await self._slot_player(btn_interaction, q, channel, user_id, racer, stats)
-                return cb
-
-        embed = discord.Embed(
-            title="⚡ Pick your Zappy",
-            description="Choose which Zappy to race with. Stats shown — pick your best lineup.",
-            color=discord.Color.from_rgb(30, 180, 255),
-        )
-        for entry in available[:5]:
-            racer = entry["racer"]
-            stats = entry["stats"]
-            embed.add_field(
-                name=racer["zappy_id"],
-                value=(
-                    f"Speed `{stat_bar(stats['speed'], stats['speed_max'])}` {stats['speed']}/{stats['speed_max']}\n"
-                    f"Endurance `{stat_bar(stats['endurance'], stats['endurance_max'])}` {stats['endurance']}/{stats['endurance_max']}\n"
-                    f"Clutch `{stat_bar(stats['clutch'], stats['clutch_max'])}` {stats['clutch']}/{stats['clutch_max']}"
-                ),
-                inline=False,
-            )
-
-        await interaction.followup.send(embed=embed, view=ZappyPickView(), ephemeral=True)
-
-    async def _slot_player(
-        self,
-        interaction: discord.Interaction,
-        q: RaceQueue,
-        channel,
-        user_id: str,
-        racer: dict,
-        stats: dict,
-    ):
-        """Place a player into slot A or B with their chosen Zappy."""
-        if q.player_a_id is None:
-            q.player_a_id    = user_id
-            q.player_a_racer = racer
-            q.player_a_stats = stats
-            active_players.add(user_id)
-            if q.mode == "zap":
-                await self._zap_join_a(interaction, q, channel)
-            else:
-                await self._algo_join_a(interaction, q, channel)
-
-        elif q.player_b_id is None and q.player_a_id != user_id:
-            q.player_b_id    = user_id
-            q.player_b_racer = racer
-            q.player_b_stats = stats
-            active_players.add(user_id)
-            if q.mode == "zap":
-                await self._zap_join_b(interaction, q, channel)
-            else:
-                await self._algo_join_b(interaction, q, channel)
-        else:
-            await interaction.followup.send(
-                "Queue is full — two players are lining up. Check back soon.",
-                ephemeral=True,
-            )
-
-    # -----------------------------------------------------------------------
-    # ALGO join flows
-    # -----------------------------------------------------------------------
-
-    async def _algo_join_a(self, interaction, q, channel):
-        q.after_round = get_current_round()
-        duel = await create_duel(self.db, q.player_a_id, q.player_a_id)
-        q.duel_id = duel["id"]
-
-        await self._update_board(channel, q, "waiting", zappy_id=q.player_a_racer["zappy_id"])
-
-        ui = build_payment_ui(q.duel_id)
-        await interaction.followup.send(
-            content=ui["instructions"],
-            file=discord.File(ui["qr_buf"], filename="pay.png"),
-            view=make_payment_view(ui["algo_uri"], ui["pera_uri"]),
-            ephemeral=True,
-        )
-        asyncio.create_task(self._poll_algo(q, "a", channel))
-
-    async def _algo_join_b(self, interaction, q, channel):
-        self.db.table("race_duels").update({"opponent_id": q.player_b_id}).eq("id", q.duel_id).execute()
-        ui = build_payment_ui(q.duel_id)
-        await interaction.followup.send(
-            content=ui["instructions"],
-            file=discord.File(ui["qr_buf"], filename="pay.png"),
-            view=make_payment_view(ui["algo_uri"], ui["pera_uri"]),
-            ephemeral=True,
-        )
-        asyncio.create_task(self._poll_algo(q, "b", channel))
-
-    async def _poll_algo(self, q, slot, channel):
-        racer = q.player_a_racer if slot == "a" else q.player_b_racer
-        role  = "challenger" if slot == "a" else "opponent"
-
-        async def on_found(txid):
-            await confirm_payment(self.db, q.duel_id, role, txid)
-            if slot == "a":
-                q.player_a_paid = True
-                await channel.send(f"✅ **{q.player_a_racer['zappy_id']}** payment confirmed — waiting for opponent...")
-            else:
-                q.player_b_paid = True
-                await channel.send(f"✅ **{q.player_b_racer['zappy_id']}** payment confirmed!")
-            if q.player_a_paid and q.player_b_paid:
-                await self._launch_race(q, channel)
-
-        await wait_for_payment(
+    Typical usage in a bot command:
+        after_round = get_current_round()
+        # ... send payment UI to Discord ...
+        txid = await wait_for_payment(
             sender_address=racer["wallet_address"],
-            duel_id=q.duel_id,
-            after_round=q.after_round,
-            on_found=on_found,
-            on_timeout=None,
+            duel_id=duel["id"],
+            after_round=after_round,
+            on_found=lambda txid: confirm_payment(db, duel["id"], role, txid),
+            on_timeout=lambda: interaction.followup.send("⏰ Challenge expired."),
         )
+    """
+    bot_address   = get_bot_address()
+    expected_note = build_payment_note(duel_id)
+    deadline      = time.monotonic() + PAYMENT_TIMEOUT
 
-    async def _poll_zapp_payment(self, q: RaceQueue, slot: str, channel):
-        """Poll indexer for ZAPP payment then trigger race when both paid."""
-        import asyncio as _asyncio
-
-        racer = q.player_a_racer if slot == "a" else q.player_b_racer
-        role  = "challenger" if slot == "a" else "opponent"
-
-        async def on_found(txid: str):
-            await confirm_payment(self.db, q.duel_id, role, txid)
-            if slot == "a":
-                q.player_a_paid = True
-                await channel.send(f"✅ **{q.player_a_racer['zappy_id']}** ZAPP payment confirmed — waiting for opponent...")
-            else:
-                q.player_b_paid = True
-                await channel.send(f"✅ **{q.player_b_racer['zappy_id']}** ZAPP payment confirmed!")
-            if q.player_a_paid and q.player_b_paid:
-                await self._launch_race(q, channel)
-
-        # Poll every 5 seconds for up to 3 minutes using zap_layer
-        txid = await wait_for_zapp_payment(
-            sender_address=racer["wallet_address"],
-            duel_id=q.duel_id,
-            after_round=q.after_round,
-            on_found=on_found,
+    while time.monotonic() < deadline:
+        txid = find_payment_txn(
+            sender_address=sender_address,
+            receiver_address=bot_address,
+            amount_microalgo=WAGER_MICROALGO,
+            after_round=after_round,
+            expected_note=expected_note,
         )
         if txid:
-            return
-
-        # Timeout — refund if they paid
-        active_players.discard(q.player_a_id if slot == "a" else q.player_b_id)
-        if slot == "a":
-            q.player_a_id = None; q.player_a_racer = None
-            await self._update_board(channel, q, "empty")
-        else:
-            q.player_b_id = None; q.player_b_racer = None
-
-    async def _poll_zapp(self, q: RaceQueue, slot: str, channel):
-        """Poll indexer for ZAPP ASA payment — mirrors _poll_algo."""
-        racer = q.player_a_racer if slot == "a" else q.player_b_racer
-        role  = "challenger" if slot == "a" else "opponent"
-
-        async def on_found(txid):
-            await confirm_payment(self.db, q.duel_id, role, txid)
-            if slot == "a":
-                q.player_a_paid = True
-                await channel.send(
-                    f"✅ **{q.player_a_racer['zappy_id']}** ZAPP payment confirmed — waiting for opponent..."
-                )
-            else:
-                q.player_b_paid = True
-                await channel.send(
-                    f"✅ **{q.player_b_racer['zappy_id']}** ZAPP payment confirmed!"
-                )
-            if q.player_a_paid and q.player_b_paid:
-                await self._launch_race(q, channel)
-
-        await wait_for_zapp_payment(
-            sender_address=racer["wallet_address"],
-            duel_id=q.duel_id,
-            after_round=q.after_round,
-            on_found=on_found,
-            on_timeout=None,
-        )
-
-    # -----------------------------------------------------------------------
-    # ZAP join flows
-    # -----------------------------------------------------------------------
-
-    async def _zap_join_a(self, interaction, q, channel):
-        import base64
-        from urllib.parse import urlencode
-        from algo_layer import get_current_round, get_bot_address as _bot_addr
-
-        duel = await create_duel(self.db, q.player_a_id, q.player_a_id)
-        q.duel_id     = duel["id"]
-        q.after_round = get_current_round()
-
-        bot_address = _bot_addr()
-        note        = f"zgp:{q.duel_id}"
-        note_b64    = base64.b64encode(note.encode()).decode()
-        # Build algorand:// URI for QR code (wallet apps scan this natively)
-        from algo_layer import generate_qr_png as _qr
-        algo_uri = (
-            f"algorand://{bot_address}?"
-            + urlencode({"amount": 0, "asset": ZAPP_ASA_ID,
-                         "amount_asset": ZAP_ENTRY, "note": note_b64})
-        )
-        qr_buf = _qr(algo_uri)
-
-        await self._update_board(channel, q, "waiting", zappy_id=q.player_a_racer["zappy_id"])
-        await interaction.followup.send(
-            f"**Send {ZAP_ENTRY:,} ZAPP to enter the race**\n\n"
-            f"📱 **Mobile** — scan the QR code with Pera Wallet.\n"
-            f"🖥️ **Desktop** — send manually using the details below.\n\n"
-            f"```\nAddress : {bot_address}\nAsset   : ZAPP ({ZAPP_ASA_ID})\n"
-            f"Amount  : {ZAP_ENTRY:,}\nNote    : {note}\n```\n"
-            f"*The note must match exactly or your entry won't register.*\n"
-            f"⏳ Waiting for your payment...",
-            file=discord.File(qr_buf, filename="pay_zapp.png"),
-            ephemeral=True,
-        )
-        asyncio.create_task(self._poll_zapp_payment(q, "a", channel))
-
-    async def _zap_join_b(self, interaction, q, channel):
-        import base64
-        from urllib.parse import urlencode
-        from algo_layer import get_bot_address as _bot_addr
-
-        self.db.table("race_duels").update({"opponent_id": q.player_b_id}).eq("id", q.duel_id).execute()
-
-        bot_address = _bot_addr()
-        note        = f"zgp:{q.duel_id}"
-        note_b64    = base64.b64encode(note.encode()).decode()
-        from algo_layer import generate_qr_png as _qr
-        algo_uri = (
-            f"algorand://{bot_address}?"
-            + urlencode({"amount": 0, "asset": ZAPP_ASA_ID,
-                         "amount_asset": ZAP_ENTRY, "note": note_b64})
-        )
-        qr_buf = _qr(algo_uri)
-
-        await interaction.followup.send(
-            f"**Send {ZAP_ENTRY:,} ZAPP to enter the race**\n\n"
-            f"📱 **Mobile** — scan the QR code with Pera Wallet.\n"
-            f"🖥️ **Desktop** — send manually using the details below.\n\n"
-            f"```\nAddress : {bot_address}\nAsset   : ZAPP ({ZAPP_ASA_ID})\n"
-            f"Amount  : {ZAP_ENTRY:,}\nNote    : {note}\n```\n"
-            f"*The note must match exactly or your entry won't register.*\n"
-            f"⏳ Waiting for your payment...",
-            file=discord.File(qr_buf, filename="pay_zapp.png"),
-            ephemeral=True,
-        )
-        asyncio.create_task(self._poll_zapp_payment(q, "b", channel))
-
-    # -----------------------------------------------------------------------
-    # Shared race launcher
-    # -----------------------------------------------------------------------
-
-    async def _launch_race(self, q: RaceQueue, channel):
-        q.locked = True
-        racer_a, racer_b = q.player_a_racer, q.player_b_racer
-
-        await self._update_board(channel, q, "racing",
-            zappy_a=racer_a["zappy_id"], zappy_b=racer_b["zappy_id"])
-
-        self.db.table("race_duels").update({"status": "racing"}).eq("id", q.duel_id).execute()
-
-        # Use pre-selected stats from queue (set during Zappy picker)
-        stats_a = q.player_a_stats or await get_stats(self.db, racer_a["zappy_id"])
-        stats_b = q.player_b_stats or await get_stats(self.db, racer_b["zappy_id"])
-        result  = resolve_race(stats_a, stats_b)
-
-        race_msg = await channel.send("🏁 **Race starting...**")
-
-        id_a = racer_a.get("discord_user_id") or (self.db.table("zappy_racers").select("discord_user_id").eq("zappy_id", racer_a["zappy_id"]).execute().data or [{}])[0].get("discord_user_id", "unknown")
-        id_b = racer_b.get("discord_user_id") or (self.db.table("zappy_racers").select("discord_user_id").eq("zappy_id", racer_b["zappy_id"]).execute().data or [{}])[0].get("discord_user_id", "unknown")
-
-        await run_race_narration(
-            message=race_msg, result=result,
-            name_a=f"<@{id_a}>", name_b=f"<@{id_b}>",
-            zappy_a=racer_a["zappy_id"], zappy_b=racer_b["zappy_id"],
-            mode=q.mode,
-        )
-
-        winner_racer = racer_a if result["winner"] == "a" else racer_b
-        loser_racer  = racer_b if result["winner"] == "a" else racer_a
-        winner_id    = id_a    if result["winner"] == "a" else id_b
-        loser_id     = id_b    if result["winner"] == "a" else id_a
-
-        await self._settle(q, channel, result, winner_racer, loser_racer, winner_id, loser_id)
-
-    # -----------------------------------------------------------------------
-    # Settle — payout, ZAP, records, board
-    # -----------------------------------------------------------------------
-
-    async def _settle(self, q, channel, result, winner_racer, loser_racer, winner_id, loser_id, test_mode=False):
-        if q.mode == "algo" and not test_mode:
-            payout_txid  = None
-            txid_display = ""
-            try:
-                payout_txid  = send_payout(winner_racer["wallet_address"], q.duel_id)
-                txid_display = f"\n🏦 TX: `{payout_txid[:14]}...`"
-            except Exception as e:
-                print(f"[grand_prix] ALGO payout error: {e}")
-                txid_display = "\n⚠️ Payout error — contact admin."
-
-            await write_race_result(self.db, q.duel_id, result, winner_id, payout_txid or "")
-
-            # Bot rake
-            try:
-                bw_res = self.db.table("bot_wallet").select("algo_balance,total_rake_collected").eq("id",1).execute()
-                bw = bw_res.data[0] if bw_res.data else {"algo_balance": 0, "total_rake_collected": 0}
-                self.db.table("bot_wallet").update({
-                    "algo_balance":         bw["algo_balance"] + 1,
-                    "total_rake_collected": bw["total_rake_collected"] + 1,
-                }).eq("id", 1).execute()
-            except Exception as e:
-                print(f"[grand_prix] Rake error: {e}")
-
-            await channel.send(f"🏦 Payout complete{txid_display}")
-
-        elif q.mode == "algo" and test_mode:
-            # Test mode — skip real payout, just log
-            await write_race_result(self.db, q.duel_id, result, winner_id, "test")
-            await channel.send(f"🏦 Test complete — no ALGO or ZAPP moved")
-
-        else:  # zap mode
-            if not test_mode:
-                await pay_winner(self.db, winner_id, loser_id)
-                await write_race_result(self.db, q.duel_id, result, winner_id, "zap")
-                await channel.send(
-                    f"🪙 **{ZAP_PAYOUT:,} ZAPP** paid to **{winner_racer['zappy_id']}**\n"
-                    f"⚡ Winner +{ZAP_WIN_BONUS} ZAPP bonus  ·  Runner-up +{ZAP_LOSE_BONUS} ZAPP"
-                )
-            else:
-                await write_race_result(self.db, q.duel_id, result, winner_id, "test")
-                # No separate message — test label already shown in opening message
-
-        # Win/loss records (always, even in test)
-        if winner_id != "cpu":
-            self.db.table("zappy_racers").update({"wins": winner_racer.get("wins", 0) + 1}).eq("discord_user_id", winner_id).eq("zappy_id", winner_racer["zappy_id"]).execute()
-        if loser_id != "cpu":
-            self.db.table("zappy_racers").update({"losses": loser_racer.get("losses", 0) + 1}).eq("discord_user_id", loser_id).eq("zappy_id", loser_racer["zappy_id"]).execute()
-
-        # Apply 1hr cooldown to both Zappies that raced
-        if not test_mode:
-            await set_zappy_cooldown(self.db, winner_racer["zappy_id"])
-            await set_zappy_cooldown(self.db, loser_racer["zappy_id"])
-
-        # Board → result card
-        await self._update_board(channel, q, "result",
-            zappy_a=q.player_a_racer["zappy_id"],
-            zappy_b=q.player_b_racer["zappy_id"],
-            winner=winner_racer["zappy_id"],
-            score_a=result["score_a"],
-            score_b=result["score_b"],
-            surge=result["surge_triggered"],
-            remove_button=True,
-        )
-
-        # Release locks
-        active_players.discard(q.player_a_id)
-        active_players.discard(q.player_b_id)
-        q.reset()
-
-        # Post fresh empty board
-        await self._post_new_board(channel, q)
-
-    def _add_zap(self, user_id, current_balance, amount):
-        if user_id == "cpu":
-            return
-        self.db.table("zappy_racers").update(
-            {"zap_balance": current_balance + amount}
-        ).eq("discord_user_id", user_id).execute()
-
-    # -----------------------------------------------------------------------
-    # Board helpers
-    # -----------------------------------------------------------------------
-
-    async def _update_board(self, channel, q, state, remove_button=False, **kw):
-        if q.board_msg_id is None:
-            return
-        try:
-            msg = await channel.fetch_message(q.board_msg_id)
-        except discord.NotFound:
-            return
-        buf  = make_board_buf(q.mode, state, **kw)
-        file = discord.File(buf, filename="board.png")
-        view = (JoinAlgoView() if q.mode == "algo" else JoinZapView()) if not remove_button else discord.utils.MISSING
-        await msg.edit(attachments=[file], view=view)
-
-    async def _post_new_board(self, channel, q):
-        buf  = board_empty(q.mode)
-        file = discord.File(buf, filename="board.png")
-        view = JoinAlgoView() if q.mode == "algo" else JoinZapView()
-        msg  = await channel.send(file=file, view=view)
-        q.board_msg_id = msg.id
-
-    # -----------------------------------------------------------------------
-    # /gpsetup — post both boards (admin)
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpsetup", description="(Admin) Post both Grand Prix race boards in this channel.")
-    @app_commands.default_permissions(administrator=True)
-    async def gpsetup(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-        channel = interaction.channel
-
-        algo_msg = await channel.send(
-            file=discord.File(board_empty("algo"), filename="board_algo.png"),
-            view=JoinAlgoView(),
-        )
-        algo_queue.board_msg_id = algo_msg.id
-
-        zap_msg = await channel.send(
-            file=discord.File(board_empty("zap"), filename="board_zap.png"),
-            view=JoinZapView(),
-        )
-        zap_queue.board_msg_id = zap_msg.id
-
-        await interaction.followup.send(
-            f"✅ Both boards posted.\n"
-            f"ALGO board: `{algo_msg.id}`\n"
-            f"ZAPP board:  `{zap_msg.id}`\n\n"
-            f"Pin both messages to keep them visible at the top of the channel.",
-            ephemeral=True,
-        )
-
-    # -----------------------------------------------------------------------
-    # /gptestrace — admin test vs CPU, no real money
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gptestrace", description="(Admin) Run a test race vs the CPU. No real ALGO or ZAP moves.")
-    @app_commands.describe(mode="Which board to test (algo or zap)")
-    @app_commands.choices(mode=[
-        app_commands.Choice(name="ALGO",  value="algo"),
-        app_commands.Choice(name="ZAP",   value="zap"),
-    ])
-    @app_commands.default_permissions(administrator=True)
-    async def gptestrace(self, interaction: discord.Interaction, mode: app_commands.Choice[str]):
-        await interaction.response.defer(ephemeral=True)
-
-        user_id = str(interaction.user.id)
-        channel = interaction.channel
-
-        # Must be registered
-        racer = await get_racer(self.db, user_id)
-        if not racer:
-            await interaction.followup.send(
-                "Register first with `/gpregister` before running a test race.",
-                ephemeral=True,
-            )
-            return
-
-        # Pick the right queue
-        q = algo_queue if mode.value == "algo" else zap_queue
-
-        if q.locked:
-            await interaction.followup.send(
-                "That board is currently locked mid-race. Wait for it to finish.",
-                ephemeral=True,
-            )
-            return
-
-        if user_id in active_players:
-            await interaction.followup.send(
-                "You're already in a queue or race.",
-                ephemeral=True,
-            )
-            return
-
-        await interaction.followup.send(
-            f"🧪 **Test race starting on the {mode.name} board...**\n"
-            f"No real {mode.name} will move. Full narration and board updates will run.",
-            ephemeral=True,
-        )
-
-        # Set up queue with human as A, CPU as B
-        cpu_racer = make_cpu_racer()
-        cpu_stats = make_cpu_stats()
-
-        q.player_a_id    = user_id
-        q.player_a_racer = racer
-        q.player_a_paid  = True
-        q.player_b_id    = "cpu"
-        q.player_b_racer = cpu_racer
-        q.player_b_paid  = True
-        q.locked         = True
-        active_players.add(user_id)
-
-        # Create a duel row (test flag)
-        duel = await create_duel(self.db, user_id, user_id)
-        q.duel_id = duel["id"]
-
-        # Make sure there's a board to update — post one if missing
-        if q.board_msg_id is None:
-            buf  = board_empty(q.mode)
-            file = discord.File(buf, filename="board.png")
-            view = JoinAlgoView() if q.mode == "algo" else JoinZapView()
-            msg  = await channel.send(file=file, view=view)
-            q.board_msg_id = msg.id
-            pass  # silently post temp board
-
-        await self._update_board(channel, q, "racing",
-            zappy_a=racer["zappy_id"], zappy_b=CPU_ZAPPY_ID)
-
-        self.db.table("race_duels").update({"status": "racing"}).eq("id", q.duel_id).execute()
-
-        stats_a = await get_stats(self.db, racer["zappy_id"])
-        result  = resolve_race(stats_a, cpu_stats)
-
-        mode_label = "ALGO" if mode.value == "algo" else "ZAPP"
-        race_msg = await channel.send(f"🧪 **TEST RACE ({mode_label} mode) — no real funds move**")
-
-        await run_race_narration(
-            message=race_msg, result=result,
-            name_a=f"<@{user_id}>", name_b="🤖 CPU",
-            zappy_a=racer["zappy_id"], zappy_b=CPU_ZAPPY_ID,
-            mode=mode.value,
-        )
-
-        winner_racer = racer      if result["winner"] == "a" else cpu_racer
-        loser_racer  = cpu_racer  if result["winner"] == "a" else racer
-        winner_id    = user_id    if result["winner"] == "a" else "cpu"
-        loser_id     = "cpu"      if result["winner"] == "a" else user_id
-
-        await self._settle(
-            q, channel, result,
-            winner_racer, loser_racer,
-            winner_id, loser_id,
-            test_mode=True,
-        )
-
-    # -----------------------------------------------------------------------
-    # /gpregister
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpregister", description="Register your Zappy for the Grand Prix.")
-    @app_commands.describe(
-        wallet_address="Your Algorand wallet address (58 characters)",
-        zappy_id="Your Zappy NFT ID (e.g. ZAP-447)",
+            if on_found:
+                await on_found(txid)
+            return txid
+
+        await asyncio.sleep(POLL_INTERVAL)
+
+    if on_timeout:
+        await on_timeout()
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Sending transactions from bot wallet
+# ---------------------------------------------------------------------------
+
+def _send_algo(receiver: str, amount_microalgo: int, note: str) -> str:
+    """Sign, broadcast, and confirm an ALGO payment from the bot wallet."""
+    private_key, bot_address = get_bot_account()
+    client = get_algod_client()
+    params = client.suggested_params()
+
+    txn = transaction.PaymentTxn(
+        sender=bot_address,
+        sp=params,
+        receiver=receiver,
+        amt=amount_microalgo,
+        note=note.encode("utf-8"),
     )
-    async def gpregister(self, interaction: discord.Interaction, wallet_address: str, zappy_id: str):
-        await interaction.response.defer(ephemeral=True)
-        user_id  = str(interaction.user.id)
-        existing = await get_racer(self.db, user_id)
 
-        if existing:
-            await interaction.followup.send(
-                f"Already registered with **{existing['zappy_id']}**. Use `/gpstats` to check in.",
-                ephemeral=True,
+    signed = txn.sign(private_key)
+    txid   = client.send_transaction(signed)
+    transaction.wait_for_confirmation(client, txid, 10)
+    return txid
+
+
+def send_payout(winner_address: str, duel_id: str) -> str:
+    """Send 9 ALGO to the race winner. Returns txid."""
+    if not check_bot_can_pay():
+        raise RuntimeError("Bot wallet balance too low to cover payout.")
+    return _send_algo(winner_address, PAYOUT_MICROALGO, f"zgp:payout:{duel_id}")
+
+
+def send_refund(player_address: str, duel_id: str) -> str:
+    """Return 5 ALGO to a player whose duel expired. Returns txid."""
+    return _send_algo(player_address, WAGER_MICROALGO, f"zgp:refund:{duel_id}")
+
+
+# ---------------------------------------------------------------------------
+# Background expiry task — wire into bot.py
+# ---------------------------------------------------------------------------
+
+async def process_expired_duels(db_client, refund: bool = True) -> list[str]:
+    """
+    Called by a background task in bot.py (e.g. every 30 seconds).
+    Finds stale pending duels, marks them expired in Supabase,
+    and refunds any player who already sent their ALGO.
+
+    Returns list of expired duel IDs so the bot can post
+    expiry notices to the relevant Discord channels.
+    """
+    from race_engine import expire_stale_duels
+
+    expired  = await expire_stale_duels(db_client)
+    duel_ids = []
+
+    for duel in expired:
+        duel_id = duel["id"]
+        duel_ids.append(duel_id)
+
+        if not refund:
+            continue
+
+        for role, user_field, txid_field in [
+            ("challenger", "challenger_id", "challenger_txid"),
+            ("opponent",   "opponent_id",   "opponent_txid"),
+        ]:
+            if not duel.get(txid_field):
+                continue  # player never paid, nothing to refund
+
+            row = (
+                db_client.table("zappy_racers")
+                .select("wallet_address")
+                .eq("discord_user_id", duel[user_field])
+                .single()
+                .execute()
+                .data
             )
-            return
+            if not row:
+                continue
 
-        if len(wallet_address) != 58:
-            await interaction.followup.send(
-                "Invalid Algorand address — should be 58 characters.",
-                ephemeral=True,
-            )
-            return
+            try:
+                send_refund(row["wallet_address"], duel_id)
+                print(f"[algo_layer] Refunded {role} on expired duel {duel_id}")
+            except Exception as e:
+                print(f"[algo_layer] Refund failed ({role}, {duel_id}): {e}")
 
-        # Check if this specific Zappy ID is already registered (by anyone)
-        existing_zappy = self.db.table("zappy_stats").select("zappy_id").eq("zappy_id", zappy_id).execute()
-        if existing_zappy.data:
-            await interaction.followup.send(
-                f"**{zappy_id}** is already registered. Each Zappy can only be registered once.",
-                ephemeral=True,
-            )
-            return
-
-        # Check how many Zappies this player already has
-        all_racers = await get_all_racers(self.db, user_id)
-        zappy_count = len(all_racers)
-
-        stats = seed_stats(zappy_id)
-
-        # First Zappy — also sets the wallet and ZAP balance row
-        # Additional Zappies — use same wallet, share ZAP balance
-        if zappy_count == 0:
-            self.db.table("zappy_racers").insert({
-                "discord_user_id": user_id,
-                "wallet_address":  wallet_address,
-                "zappy_id":        zappy_id,
-                "zap_balance":     0,
-                "wins": 0, "losses": 0,
-            }).execute()
-        else:
-            # Additional Zappy — inherit wallet from first registration
-            existing_wallet = all_racers[0]["wallet_address"]
-            self.db.table("zappy_racers").insert({
-                "discord_user_id": user_id,
-                "wallet_address":  existing_wallet,
-                "zappy_id":        zappy_id,
-                "zap_balance":     0,
-                "wins": 0, "losses": 0,
-            }).execute()
-
-        self.db.table("zappy_stats").insert({"zappy_id": zappy_id, **stats}).execute()
-
-        garage_note = f"Zappy #{zappy_count + 1} in your garage." if zappy_count > 0 else "Use `/gpupgrade` to level up. Tap a race board to compete."
-
-        embed = format_stats_embed(
-            {"zappy_id": zappy_id, "wallet_address": wallet_address,
-             "wins": 0, "losses": 0, "zap_balance": 0},
-            stats,
-            title=f"⚡ {zappy_id} — Added to Garage!",
-        )
-        embed.description = (
-            f"Stats seeded from your Zappy ID. Max potential locked in.\n{garage_note}"
-        )
-        await interaction.followup.send(embed=embed, ephemeral=True)
-
-    # -----------------------------------------------------------------------
-    # /gpclear — admin, unstick a player from the queue
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpclear", description="(Admin) Clear a stuck player from the race queue.")
-    @app_commands.describe(player="The player to clear (leave blank to clear yourself)")
-    @app_commands.default_permissions(administrator=True)
-    async def gpclear(self, interaction: discord.Interaction, player: discord.Member = None):
-        await interaction.response.defer(ephemeral=True)
-
-        target    = player or interaction.user
-        target_id = str(target.id)
-
-        was_active = target_id in active_players
-        active_players.discard(target_id)
-
-        # Also clear from either queue slot
-        cleared_queues = []
-        for q in [algo_queue, zap_queue]:
-            if q.player_a_id == target_id:
-                q.player_a_id    = None
-                q.player_a_racer = None
-                q.player_a_stats = None
-                q.player_a_paid  = False
-                cleared_queues.append(q.mode.upper())
-            if q.player_b_id == target_id:
-                q.player_b_id    = None
-                q.player_b_racer = None
-                q.player_b_stats = None
-                q.player_b_paid  = False
-                cleared_queues.append(q.mode.upper())
-
-        if was_active or cleared_queues:
-            detail = f" (removed from {', '.join(cleared_queues)} queue)" if cleared_queues else ""
-            await interaction.followup.send(
-                f"✅ **{target.display_name}** cleared{detail}. They can now join a race.",
-                ephemeral=True,
-            )
-        else:
-            await interaction.followup.send(
-                f"**{target.display_name}** wasn't in any queue or active state.",
-                ephemeral=True,
-            )
-
-    # -----------------------------------------------------------------------
-    # /gpunregister
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpunregister", description="(Admin) Remove a player's Grand Prix registration so they can re-register.")
-    @app_commands.describe(player="The player to unregister (leave blank to unregister yourself)")
-    @app_commands.default_permissions(administrator=True)
-    async def gpunregister(self, interaction: discord.Interaction, player: discord.Member = None):
-        await interaction.response.defer(ephemeral=True)
-
-        target    = player or interaction.user
-        target_id = str(target.id)
-
-        racer = await get_racer(self.db, target_id)
-        if not racer:
-            await interaction.followup.send(
-                f"{target.display_name} isn't registered in the Grand Prix.",
-                ephemeral=True,
-            )
-            return
-
-        zappy_id = racer["zappy_id"]
-
-        # Delete stats first (foreign key child), then racer
-        self.db.table("zappy_stats").delete().eq("zappy_id", zappy_id).execute()
-        self.db.table("zappy_racers").delete().eq("discord_user_id", target_id).execute()
-
-        # Also remove from active players if somehow stuck
-        active_players.discard(target_id)
-
-        await interaction.followup.send(
-            f"✅ **{target.display_name}** unregistered — `{zappy_id}` removed.\n"
-            f"They can now use `/gpregister` with a new Zappy ID.",
-            ephemeral=True,
-        )
-
-    # -----------------------------------------------------------------------
-    # /gpstats
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpstats", description="View your Grand Prix garage and stats.")
-    async def gpstats(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        from datetime import datetime, timezone
-        available, on_cooldown = await get_available_racers(self.db, str(interaction.user.id))
-        all_entries = available + on_cooldown
-
-        if not all_entries:
-            await interaction.followup.send("Not registered. Use `/gpregister` first.", ephemeral=True)
-            return
-
-        for entry in all_entries:
-            racer = entry["racer"]
-            stats = entry["stats"]
-            cooldown_ends = entry.get("cooldown_ends")
-
-            if cooldown_ends:
-                ts = int(cooldown_ends.timestamp())
-                title = f"⚡ {racer['zappy_id']} — ❄️ Ready <t:{ts}:R>"
-            else:
-                title = f"⚡ {racer['zappy_id']} — Ready to Race"
-
-            embed = format_stats_embed(racer, stats, title=title)
-            await interaction.followup.send(embed=embed)
-
-    # -----------------------------------------------------------------------
-    # /gpgarage
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpgarage", description="Scout another player's Grand Prix Zappy.")
-    @app_commands.describe(player="The player to scout.")
-    async def gpgarage(self, interaction: discord.Interaction, player: discord.Member):
-        await interaction.response.defer()
-        racer = await get_racer(self.db, str(player.id))
-        if not racer:
-            await interaction.followup.send(f"{player.display_name} isn't registered.", ephemeral=True)
-            return
-        stats = await get_stats(self.db, racer["zappy_id"])
-        await interaction.followup.send(
-            embed=format_stats_embed(racer, stats,
-                title=f"⚡ {racer['zappy_id']} — {player.display_name}'s Garage")
-        )
-
-    # -----------------------------------------------------------------------
-    # /gpupgrade
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpupgrade", description="Spend ZAPP to upgrade a stat on one of your Zappies.")
-    @app_commands.describe(
-        zappy_id="Which Zappy to upgrade (e.g. Zappy #83)",
-        stat="Which stat to upgrade",
-        points="Points to add (1–5)",
-    )
-    @app_commands.choices(stat=[
-        app_commands.Choice(name="Speed",     value="speed"),
-        app_commands.Choice(name="Endurance", value="endurance"),
-        app_commands.Choice(name="Clutch",    value="clutch"),
-    ])
-    async def gpupgrade(self, interaction: discord.Interaction, zappy_id: str, stat: app_commands.Choice[str], points: int = 1):
-        await interaction.response.defer(ephemeral=True)
-        if not 1 <= points <= 5:
-            await interaction.followup.send("Enter between 1 and 5 points.", ephemeral=True)
-            return
-
-        # Verify this Zappy belongs to the player
-        all_racers = await get_all_racers(self.db, str(interaction.user.id))
-        owned_ids = [r["zappy_id"] for r in all_racers]
-        if zappy_id not in owned_ids:
-            await interaction.followup.send(
-                f"**{zappy_id}** isn't in your garage. Your Zappies: {', '.join(owned_ids) or 'none'}",
-                ephemeral=True,
-            )
-            return
-
-        result = await apply_upgrade(self.db, str(interaction.user.id), stat.value, points, zappy_id=zappy_id)
-        if not result["success"]:
-            await interaction.followup.send(f"❌ {result['error']}", ephemeral=True)
-            return
-        await interaction.followup.send(
-            f"✅ **{zappy_id}** — {stat.name} upgraded: {result['old_value']} → **{result['new_value']}** / {result['cap']}\n"
-            f"`{stat_bar(result['new_value'], result['cap'])}`\n\n"
-            f"Cost: **{result['cost']:,} ZAPP** · Balance: **{result['new_balance']:,} ZAPP**",
-            ephemeral=True,
-        )
-
-    # -----------------------------------------------------------------------
-    # /gpzap
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpzap", description="Check your ZAPP balance.")
-    async def gpzap(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-        bal = await get_zap_balance(self.db, str(interaction.user.id))
-        await interaction.followup.send(
-            f"⚡ Your ZAPP balance: **{bal:,} ZAP**\n"
-            f"ZAPP race entry: {ZAP_ENTRY:,}  ·  Win payout: {ZAP_PAYOUT:,}",
-            ephemeral=True,
-        )
-
-    # -----------------------------------------------------------------------
-    # /gpleaderboard
-    # -----------------------------------------------------------------------
-
-    @app_commands.command(name="gpleaderboard", description="Grand Prix leaderboard by wins.")
-    async def gpleaderboard(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        rows = (
-            self.db.table("zappy_racers")
-            .select("zappy_id, wins, losses")
-            .order("wins", desc=True)
-            .limit(10)
-            .execute()
-            .data
-        )
-        if not rows:
-            await interaction.followup.send("No races yet — be the first!")
-            return
-        medals = ["🥇", "🥈", "🥉"] + ["🏅"] * 7
-        lines  = []
-        for i, r in enumerate(rows):
-            total    = r["wins"] + r["losses"]
-            win_rate = f"{round(r['wins']/total*100)}%" if total else "—"
-            lines.append(f"{medals[i]} **{r['zappy_id']}** — {r['wins']}W / {r['losses']}L ({win_rate})")
-        embed = discord.Embed(
-            title="🏆 Zappy Grand Prix Leaderboard",
-            description="\n".join(lines),
-            color=discord.Color.gold(),
-        )
-        await interaction.followup.send(embed=embed)
+    return duel_ids
