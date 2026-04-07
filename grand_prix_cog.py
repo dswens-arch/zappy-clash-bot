@@ -1086,6 +1086,50 @@ class GrandPrixCog(commands.Cog):
         await interaction.followup.send(embed=embed, ephemeral=True)
 
     # -----------------------------------------------------------------------
+    # /gpclear — admin, unstick a player from the queue
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpclear", description="(Admin) Clear a stuck player from the race queue.")
+    @app_commands.describe(player="The player to clear (leave blank to clear yourself)")
+    @app_commands.default_permissions(administrator=True)
+    async def gpclear(self, interaction: discord.Interaction, player: discord.Member = None):
+        await interaction.response.defer(ephemeral=True)
+
+        target    = player or interaction.user
+        target_id = str(target.id)
+
+        was_active = target_id in active_players
+        active_players.discard(target_id)
+
+        # Also clear from either queue slot
+        cleared_queues = []
+        for q in [algo_queue, zap_queue]:
+            if q.player_a_id == target_id:
+                q.player_a_id    = None
+                q.player_a_racer = None
+                q.player_a_stats = None
+                q.player_a_paid  = False
+                cleared_queues.append(q.mode.upper())
+            if q.player_b_id == target_id:
+                q.player_b_id    = None
+                q.player_b_racer = None
+                q.player_b_stats = None
+                q.player_b_paid  = False
+                cleared_queues.append(q.mode.upper())
+
+        if was_active or cleared_queues:
+            detail = f" (removed from {', '.join(cleared_queues)} queue)" if cleared_queues else ""
+            await interaction.followup.send(
+                f"✅ **{target.display_name}** cleared{detail}. They can now join a race.",
+                ephemeral=True,
+            )
+        else:
+            await interaction.followup.send(
+                f"**{target.display_name}** wasn't in any queue or active state.",
+                ephemeral=True,
+            )
+
+    # -----------------------------------------------------------------------
     # /gpunregister
     # -----------------------------------------------------------------------
 
