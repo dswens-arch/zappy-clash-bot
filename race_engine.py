@@ -28,9 +28,10 @@ TIER_2_COST = 800   # stat points 7–9
 TIER_3_COST = 2000  # stat points 10–11
 
 # Stat initialization ranges
-STAT_BASE_MIN = 3
-STAT_BASE_MAX = 6
-STAT_CAP_MIN  = 8
+# Base 2-3 start + cap 10-11 = consistent ~15k-21k to fully upgrade
+STAT_BASE_MIN = 2
+STAT_BASE_MAX = 3
+STAT_CAP_MIN  = 10
 STAT_CAP_MAX  = 11
 
 # Race beat timing (seconds between Discord message edits)
@@ -299,15 +300,30 @@ def score_to_position(score: int, total_laps: int = 3, track_len: int = 14) -> i
     return base + round((score / total_laps) * (track_len - base - 1))
 
 
-def _margin_text(score_a: int, score_b: int, winner: str) -> str:
-    """Return 'Won by X lap(s)' or 'Won by a whisker' for a sweep."""
-    diff = abs(score_a - score_b)
-    if diff == 3:
-        return "Dominant — won every lap"
-    elif diff == 2:
-        return "Won by 2 laps"
+def _margin_text(result: dict) -> str:
+    """
+    Describe the race margin based on actual RNG roll gaps.
+    Uses average difference between winner and loser rolls across all laps.
+    """
+    winner = result["winner"]
+    total_margin = 0.0
+    for lap in ["lap1", "lap2", "lap3"]:
+        ra = result[lap]["roll_a"]
+        rb = result[lap]["roll_b"]
+        if winner == "a":
+            total_margin += ra - rb
+        else:
+            total_margin += rb - ra
+    avg = total_margin / 3.0
+
+    if avg < 0.5:
+        return "Separated at the wire"
+    elif avg < 1.5:
+        return "Won by a length"
+    elif avg < 3.0:
+        return "Clear victory"
     else:
-        return "Won by 1 lap"
+        return "Dominant run"
 
 
 def generate_narration(
@@ -492,7 +508,7 @@ def generate_narration(
         t_loser  = build_track(score_to_position(final_score_a), marker="🔴")
 
     win_line = random.choice(WIN_LINES).format(winner=winner_display)
-    margin   = _margin_text(final_score_a, final_score_b, final_winner)
+    margin   = _margin_text(result)
 
     if mode == "algo":
         payout_line = f"\U0001f3e6 **{winner_display}** receives **9 ALGO** · Bot rakes **1 ALGO**"
