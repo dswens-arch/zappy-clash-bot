@@ -122,7 +122,8 @@ def build_algorand_uri(
         "note":   note_b64,
     })
 
-    return f"algorand://{bot_address}?{params}"
+    # algorand:// scheme not supported in Discord buttons — use HTTPS Pera web
+    return f"https://perawallet.app/send/?receiver={bot_address}&{params}"
 
 
 def build_pera_uri(
@@ -148,7 +149,8 @@ def build_pera_uri(
         "xnote":    "1",
     })
 
-    return f"perawallet://send?{params}"
+    # perawallet:// scheme not supported in Discord buttons — use HTTPS Pera web
+    return f"https://perawallet.app/send/?{params}"
 
 
 def generate_qr_png(uri: str) -> io.BytesIO:
@@ -241,16 +243,9 @@ def make_payment_view(algo_uri: str, pera_uri: str):
 
             self.add_item(discord.ui.Button(
                 style=discord.ButtonStyle.link,
-                label="Open in Pera Wallet",
+                label="Pay 5 ALGO in Pera",
                 url=pera_uri,
                 emoji="⚡",
-                row=0,
-            ))
-            self.add_item(discord.ui.Button(
-                style=discord.ButtonStyle.link,
-                label="Open in Other Wallet",
-                url=algo_uri,
-                emoji="💳",
                 row=0,
             ))
 
