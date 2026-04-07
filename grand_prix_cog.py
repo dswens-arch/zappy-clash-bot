@@ -164,10 +164,11 @@ def board_racing(mode, zappy_a, zappy_b):
     img  = Image.new("RGB", (W,H), BG)
     draw = ImageDraw.Draw(img)
     _base(draw, mode)
-    draw.text((W//2, 88),  "RACE IN PROGRESS",         font=FONT_BOLD, fill=GREEN, anchor="mm")
-    draw.text((60, 125),   f"⚡  {zappy_a}",               font=FONT_MED,  fill=WHITE)
-    draw.text((60, 165),   f"⚡  {zappy_b}",               font=FONT_MED,  fill=WHITE)
-    draw.text((W//2, 215), "Race underway — result soon",   font=FONT_SM,   fill=MUTED, anchor="mm")
+    draw.text((W//2, 88),  "RACE IN PROGRESS",              font=FONT_BOLD, fill=GREEN,  anchor="mm")
+    draw.text((W//2, 128), f"{zappy_a}",                     font=FONT_MED,  fill=WHITE,  anchor="mm")
+    draw.text((W//2, 158), f"vs",                            font=FONT_SM,   fill=MUTED,  anchor="mm")
+    draw.text((W//2, 188), f"{zappy_b}",                     font=FONT_MED,  fill=WHITE,  anchor="mm")
+    draw.text((W//2, 228), "Race underway — result soon",    font=FONT_SM,   fill=MUTED,  anchor="mm")
     return _buf(img)
 
 
