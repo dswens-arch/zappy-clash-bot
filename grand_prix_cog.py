@@ -697,35 +697,73 @@ class GrandPrixCog(commands.Cog):
     # -----------------------------------------------------------------------
 
     async def _zap_join_a(self, interaction, q, channel):
-        from algo_layer import get_current_round
+        import base64
+        from urllib.parse import urlencode
+        from algo_layer import get_current_round, get_bot_address as _bot_addr
+
         duel = await create_duel(self.db, q.player_a_id, q.player_a_id)
         q.duel_id     = duel["id"]
         q.after_round = get_current_round()
 
-        await self._update_board(channel, q, "waiting", zappy_id=q.player_a_racer["zappy_id"])
-
-        ui   = build_zapp_payment_ui(q.duel_id)
-        view = make_zapp_payment_view(ui["algo_uri"], ui["pera_uri"])
-        await interaction.followup.send(
-            content=ui["instructions"],
-            file=discord.File(ui["qr_buf"], filename="pay.png"),
-            view=view,
-            ephemeral=True,
+        bot_address = _bot_addr()
+        note        = f"zgp:{q.duel_id}"
+        note_b64    = base64.b64encode(note.encode()).decode()
+        pera_web    = (
+            "https://perawallet.app/send/?"
+            + urlencode({"asset": ZAPP_ASA_ID, "receiver": bot_address,
+                         "amount": ZAP_ENTRY, "note": note_b64, "xnote": "1"})
         )
-        asyncio.create_task(self._poll_zapp(q, "a", channel))
+
+        view = discord.ui.View(timeout=None)
+        view.add_item(discord.ui.Button(
+            style=discord.ButtonStyle.link,
+            label=f"Pay {ZAP_ENTRY:,} ZAPP in Pera",
+            url=pera_web, emoji="⚡",
+        ))
+
+        await self._update_board(channel, q, "waiting", zappy_id=q.player_a_racer["zappy_id"])
+        await interaction.followup.send(
+            f"**Send {ZAP_ENTRY:,} ZAPP to enter the race**\n\n"
+            f"📱 Tap the button to open Pera — amount and note are pre-filled.\n\n"
+            f"```\nAddress : {bot_address}\nAsset   : ZAPP ({ZAPP_ASA_ID})\n"
+            f"Amount  : {ZAP_ENTRY:,}\nNote    : {note}\n```\n"
+            f"*The note must match exactly.*\n⏳ Waiting for your payment...",
+            view=view, ephemeral=True,
+        )
+        asyncio.create_task(self._poll_zapp_payment(q, "a", channel))
 
     async def _zap_join_b(self, interaction, q, channel):
+        import base64
+        from urllib.parse import urlencode
+        from algo_layer import get_bot_address as _bot_addr
+
         self.db.table("race_duels").update({"opponent_id": q.player_b_id}).eq("id", q.duel_id).execute()
 
-        ui   = build_zapp_payment_ui(q.duel_id)
-        view = make_zapp_payment_view(ui["algo_uri"], ui["pera_uri"])
-        await interaction.followup.send(
-            content=ui["instructions"],
-            file=discord.File(ui["qr_buf"], filename="pay.png"),
-            view=view,
-            ephemeral=True,
+        bot_address = _bot_addr()
+        note        = f"zgp:{q.duel_id}"
+        note_b64    = base64.b64encode(note.encode()).decode()
+        pera_web    = (
+            "https://perawallet.app/send/?"
+            + urlencode({"asset": ZAPP_ASA_ID, "receiver": bot_address,
+                         "amount": ZAP_ENTRY, "note": note_b64, "xnote": "1"})
         )
-        asyncio.create_task(self._poll_zapp(q, "b", channel))
+
+        view = discord.ui.View(timeout=None)
+        view.add_item(discord.ui.Button(
+            style=discord.ButtonStyle.link,
+            label=f"Pay {ZAP_ENTRY:,} ZAPP in Pera",
+            url=pera_web, emoji="⚡",
+        ))
+
+        await interaction.followup.send(
+            f"**Send {ZAP_ENTRY:,} ZAPP to enter the race**\n\n"
+            f"📱 Tap the button to open Pera — amount and note are pre-filled.\n\n"
+            f"```\nAddress : {bot_address}\nAsset   : ZAPP ({ZAPP_ASA_ID})\n"
+            f"Amount  : {ZAP_ENTRY:,}\nNote    : {note}\n```\n"
+            f"*The note must match exactly.*\n⏳ Waiting for your payment...",
+            view=view, ephemeral=True,
+        )
+        asyncio.create_task(self._poll_zapp_payment(q, "b", channel))
 
     # -----------------------------------------------------------------------
     # Shared race launcher
