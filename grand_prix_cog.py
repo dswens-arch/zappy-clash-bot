@@ -1389,17 +1389,16 @@ class GrandPrixCog(commands.Cog):
         after_round  = get_current_round()
         current_bal  = racer.get("algo_balance", 0)
 
-        # Generate QR of bot address for easy scanning
-        qr_buf = generate_qr_png(f"algorand://{bot_address}")
-
         await interaction.followup.send(
             f"**Deposit ALGO to your Grand Prix balance**\n\n"
-            f"Send any amount of ALGO to:\n"
-            f"```\n{bot_address}\n```\n"
-            f"📱 Scan the QR code with Pera to pre-fill the address.\n\n"
+            f"Open Pera Wallet and send any amount of ALGO to the address below.\n"
+            f"Long press the next message to copy it.\n\n"
             f"Current balance: **{current_bal:.2f} ALGO**\n"
             f"⏳ Watching for your deposit for 5 minutes...",
-            file=discord.File(qr_buf, filename="deposit.png"),
+            ephemeral=True,
+        )
+        await interaction.followup.send(
+            bot_address,
             ephemeral=True,
         )
 
