@@ -138,10 +138,14 @@ BOARD_IMAGES = {
 def _load_bg(mode, state) -> Image.Image:
     filename = BOARD_IMAGES[mode][state]
     path = os.path.join(_BOARDS_DIR, filename)
-    print(f"[grand_prix] Loading: {path} exists={os.path.exists(path)}")
     if os.path.exists(path):
-        return Image.open(path).convert("RGBA").resize((W, H))
-    print(f"[grand_prix] MISSING image — using dark fallback")
+        # Paste with padding so Discord mobile corner radius doesn't clip the art
+        PAD = 8
+        raw    = Image.open(path).convert("RGBA").resize((W - PAD * 2, H - PAD * 2))
+        canvas = Image.new("RGBA", (W, H), (8, 10, 20, 255))
+        canvas.paste(raw, (PAD, PAD), raw.split()[3])
+        return canvas
+    print(f"[grand_prix] MISSING image: {path}")
     return Image.new("RGBA", (W, H), (8, 10, 20, 255))
 
 
