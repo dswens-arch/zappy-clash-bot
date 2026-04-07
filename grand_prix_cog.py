@@ -58,15 +58,18 @@ from algo_layer import (
 )
 from zap_layer import (
     can_afford_entry,
-    deduct_entry,
+    get_zapp_balance,
+    build_zapp_payment_uri,
+    find_zapp_payment_sync,
     pay_winner,
     refund_entry,
-    get_zap_balance,
     ZAP_ENTRY,
     ZAP_PAYOUT,
     ZAP_WIN_BONUS,
     ZAP_LOSE_BONUS,
+    ZAPP_ASA_ID,
 )
+from algo_layer import get_current_round as _get_round
 
 
 # ---------------------------------------------------------------------------
@@ -451,11 +454,12 @@ class GrandPrixCog(commands.Cog):
             return
 
         if q.mode == "zap":
-            if not await can_afford_entry(self.db, user_id):
-                bal = await get_zap_balance(self.db, user_id)
+            wallet = available[0]["racer"]["wallet_address"] if available else None
+            if not wallet or not await can_afford_entry(wallet):
+                bal = await get_zapp_balance(wallet) if wallet else 0
                 await interaction.followup.send(
-                    f"Not enough ZAPP. Need **{ZAP_ENTRY:,}** — you have **{bal:,}**.\n"
-                    f"Race on the ALGO board to earn more ZAPP.",
+                    f"Not enough ZAPP. Need **{ZAP_ENTRY:,}** — you have **{bal:,}** in your wallet.\n"
+                    f"Earn ZAPP through Clash and Expedition.",
                     ephemeral=True,
                 )
                 return
@@ -622,47 +626,109 @@ class GrandPrixCog(commands.Cog):
             on_timeout=None,
         )
 
+    async def _poll_zapp_payment(self, q: RaceQueue, slot: str, channel):
+        """Poll indexer for ZAPP payment then trigger race when both paid."""
+        import asyncio as _asyncio
+
+        racer = q.player_a_racer if slot == "a" else q.player_b_racer
+        role  = "challenger" if slot == "a" else "opponent"
+
+        async def on_found(txid: str):
+            await confirm_payment(self.db, q.duel_id, role, txid)
+            if slot == "a":
+                q.player_a_paid = True
+                await channel.send(f"✅ **{q.player_a_racer['zappy_id']}** ZAPP payment confirmed — waiting for opponent...")
+            else:
+                q.player_b_paid = True
+                await channel.send(f"✅ **{q.player_b_racer['zappy_id']}** ZAPP payment confirmed!")
+            if q.player_a_paid and q.player_b_paid:
+                await self._launch_race(q, channel)
+
+        # Poll every 5 seconds for up to 3 minutes
+        import time
+        deadline = time.monotonic() + 180
+        while time.monotonic() < deadline:
+            txid = await _asyncio.to_thread(
+                find_zapp_payment_sync,
+                racer["wallet_address"],
+                q.duel_id,
+                q.after_round,
+            )
+            if txid:
+                await on_found(txid)
+                return
+            await _asyncio.sleep(5)
+
+        # Timeout — refund if they paid
+        active_players.discard(q.player_a_id if slot == "a" else q.player_b_id)
+        if slot == "a":
+            q.player_a_id = None; q.player_a_racer = None
+            await self._update_board(channel, q, "empty")
+        else:
+            q.player_b_id = None; q.player_b_racer = None
+
+    async def _poll_zapp(self, q: RaceQueue, slot: str, channel):
+        """Poll indexer for ZAPP ASA payment — mirrors _poll_algo."""
+        racer = q.player_a_racer if slot == "a" else q.player_b_racer
+        role  = "challenger" if slot == "a" else "opponent"
+
+        async def on_found(txid):
+            await confirm_payment(self.db, q.duel_id, role, txid)
+            if slot == "a":
+                q.player_a_paid = True
+                await channel.send(
+                    f"✅ **{q.player_a_racer['zappy_id']}** ZAPP payment confirmed — waiting for opponent..."
+                )
+            else:
+                q.player_b_paid = True
+                await channel.send(
+                    f"✅ **{q.player_b_racer['zappy_id']}** ZAPP payment confirmed!"
+                )
+            if q.player_a_paid and q.player_b_paid:
+                await self._launch_race(q, channel)
+
+        await wait_for_zapp_payment(
+            sender_address=racer["wallet_address"],
+            duel_id=q.duel_id,
+            after_round=q.after_round,
+            on_found=on_found,
+            on_timeout=None,
+        )
+
     # -----------------------------------------------------------------------
     # ZAP join flows
     # -----------------------------------------------------------------------
 
     async def _zap_join_a(self, interaction, q, channel):
-        result = await deduct_entry(self.db, q.player_a_id)
-        if not result["success"]:
-            active_players.discard(q.player_a_id)
-            q.player_a_id = None; q.player_a_racer = None
-            await interaction.followup.send(result["error"], ephemeral=True)
-            return
-
+        from algo_layer import get_current_round
         duel = await create_duel(self.db, q.player_a_id, q.player_a_id)
-        q.duel_id = duel["id"]
-        q.player_a_paid = True
+        q.duel_id     = duel["id"]
+        q.after_round = get_current_round()
 
         await self._update_board(channel, q, "waiting", zappy_id=q.player_a_racer["zappy_id"])
+
+        ui   = build_zapp_payment_ui(q.duel_id)
+        view = make_zapp_payment_view(ui["algo_uri"], ui["pera_uri"])
         await interaction.followup.send(
-            f"✅ **{ZAP_ENTRY:,} ZAPP** deducted — you're in the queue!\n"
-            f"Remaining balance: **{result['new_balance']:,} ZAPP**\n"
-            f"Waiting for an opponent...",
+            content=ui["instructions"],
+            file=discord.File(ui["qr_buf"], filename="pay.png"),
+            view=view,
             ephemeral=True,
         )
+        asyncio.create_task(self._poll_zapp(q, "a", channel))
 
     async def _zap_join_b(self, interaction, q, channel):
-        result = await deduct_entry(self.db, q.player_b_id)
-        if not result["success"]:
-            active_players.discard(q.player_b_id)
-            q.player_b_id = None; q.player_b_racer = None
-            await interaction.followup.send(result["error"], ephemeral=True)
-            return
-
         self.db.table("race_duels").update({"opponent_id": q.player_b_id}).eq("id", q.duel_id).execute()
-        q.player_b_paid = True
 
+        ui   = build_zapp_payment_ui(q.duel_id)
+        view = make_zapp_payment_view(ui["algo_uri"], ui["pera_uri"])
         await interaction.followup.send(
-            f"✅ **{ZAP_ENTRY:,} ZAPP** deducted — race starting!\n"
-            f"Remaining balance: **{result['new_balance']:,} ZAPP**",
+            content=ui["instructions"],
+            file=discord.File(ui["qr_buf"], filename="pay.png"),
+            view=view,
             ephemeral=True,
         )
-        await self._launch_race(q, channel)
+        asyncio.create_task(self._poll_zapp(q, "b", channel))
 
     # -----------------------------------------------------------------------
     # Shared race launcher
@@ -911,11 +977,7 @@ class GrandPrixCog(commands.Cog):
             view = JoinAlgoView() if q.mode == "algo" else JoinZapView()
             msg  = await channel.send(file=file, view=view)
             q.board_msg_id = msg.id
-            await interaction.followup.send(
-                f"No board found in this channel — posted a temporary one for the test. "
-                f"Use `/gpsetup` in your actual race channel to post permanent boards.",
-                ephemeral=True,
-            )
+            pass  # silently post temp board
 
         await self._update_board(channel, q, "racing",
             zappy_a=racer["zappy_id"], zappy_b=CPU_ZAPPY_ID)
