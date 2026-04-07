@@ -7,3 +7,4 @@ base58>=2.1.1
 Pillow
 qrcode[pil]
 py-algorand-sdk
+pypng
