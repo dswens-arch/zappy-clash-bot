@@ -275,7 +275,7 @@ def build_track(position: int, total: int = 14, marker: str = "🟢") -> str:
     position: 0 = start, total-1 = finish line
     marker: 🟢 for leader, 🔴 for trailer, 🟡 for tied
     """
-    track = ["⬜"] * total
+    track = ["——"] * total
     pos = min(position, total - 1)
     track[pos] = marker
     return "".join(track) + "🏁"
@@ -346,8 +346,8 @@ def generate_narration(
         "text": (
             "🎮 **ZAPPY GRAND PRIX**\n"
             f"*{wager} on the line — 3 laps — winner takes all*\n\n"
-            f"{zappy_a} ({name_a})  {t0}\n"
-            f"{zappy_b} ({name_b})  {t0}\n\n"
+            f"{zappy_a} ({name_a})\n{t0}\n\n"
+            f"{zappy_b} ({name_b})\n{t0}\n\n"
             "*Engines revving... lights on...*\n"
             "🔴 🔴 🔴 🔴 🔴"
         ),
@@ -368,8 +368,8 @@ def generate_narration(
         "delay": BEAT_DELAYS[0],
         "text": (
             f"{line}\n\n"
-            f"{zappy_a} ({name_a})  {ta}\n"
-            f"{zappy_b} ({name_b})  {tb}\n\n"
+            f"{zappy_a} ({name_a})\n{ta}\n\n"
+            f"{zappy_b} ({name_b})\n{tb}\n\n"
             f"*Lap 1 done — {leader_label} leads*"
         ),
     })
@@ -402,8 +402,8 @@ def generate_narration(
         "delay": BEAT_DELAYS[1],
         "text": (
             f"{line}\n\n"
-            f"{zappy_a} ({name_a})  {ta}\n"
-            f"{zappy_b} ({name_b})  {tb}\n\n"
+            f"{zappy_a} ({name_a})\n{ta}\n\n"
+            f"{zappy_b} ({name_b})\n{tb}\n\n"
             f"*Lap 2 done — {status}*"
         ),
     })
@@ -416,8 +416,8 @@ def generate_narration(
             "delay": BEAT_DELAYS[2],
             "text": (
                 f"{surge_line}\n\n"
-                f"{zappy_a} ({name_a})  {ta}\n"
-                f"{zappy_b} ({name_b})  {tb}\n\n"
+                f"{zappy_a} ({name_a})\n{ta}\n\n"
+                f"{zappy_b} ({name_b})\n{tb}\n\n"
                 "*Final lap incoming...*"
             ),
         })
@@ -427,8 +427,8 @@ def generate_narration(
             "delay": BEAT_DELAYS[2],
             "text": (
                 f"{tension}\n\n"
-                f"{zappy_a} ({name_a})  {ta}\n"
-                f"{zappy_b} ({name_b})  {tb}"
+                f"{zappy_a} ({name_a})\n{ta}\n\n"
+                f"{zappy_b} ({name_b})\n{tb}"
             ),
         })
 
@@ -455,8 +455,8 @@ def generate_narration(
         "delay": BEAT_DELAYS[3],
         "text": (
             f"{line}\n\n"
-            f"{zappy_a} ({name_a})  {ta}\n"
-            f"{zappy_b} ({name_b})  {tb}"
+            f"{zappy_a} ({name_a})\n{ta}\n\n"
+            f"{zappy_b} ({name_b})\n{tb}"
         ),
     })
 
@@ -465,8 +465,8 @@ def generate_narration(
         "delay": BEAT_DELAYS[4],
         "text": (
             f"{line}\n\n"
-            f"{zappy_a} ({name_a})  {ta}\n"
-            f"{zappy_b} ({name_b})  {tb}\n\n"
+            f"{zappy_a} ({name_a})\n{ta}\n\n"
+            f"{zappy_b} ({name_b})\n{tb}\n\n"
             "*Checking the replay...*"
         ),
     })
@@ -504,8 +504,8 @@ def generate_narration(
         "text": (
             f"{win_line}\n"
             f"*{margin}*\n\n"
-            f"🥇 {winner_zappy} ({winner_name})  {t_winner}\n"
-            f"   {bot_label}  {t_loser}\n\n"
+            f"🥇 {winner_zappy} ({winner_name})\n{t_winner}\n\n"
+            f"{bot_label}\n{t_loser}\n\n"
             f"{payout_line}"
         ),
     })
