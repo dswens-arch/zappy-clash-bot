@@ -153,8 +153,12 @@ def _t(draw, x, y, text, font, color):
 
 
 def _buf(img):
+    # Composite RGBA onto a dark background before converting
+    # so transparent areas don't turn white
+    bg = Image.new("RGBA", img.size, (8, 10, 20, 255))
+    bg.paste(img, mask=img.split()[3])  # use alpha channel as mask
     b = io.BytesIO()
-    img.convert("RGB").save(b, format="PNG")
+    bg.convert("RGB").save(b, format="PNG")
     b.seek(0)
     return b
 
