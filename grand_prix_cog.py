@@ -97,16 +97,15 @@ FONT_SM   = _font("Poppins-Regular.ttf", 14)
 
 
 # ---------------------------------------------------------------------------
-# Board image generator
+# Board image generator — composites text onto real background images
+# Images live in ./boards/ folder alongside this file in the repo
 # ---------------------------------------------------------------------------
 
-W, H  = 800, 280
-BG    = (8,   10,  20)
-PANEL = (14,  18,  35)
-WHITE = (240, 245, 255)
-MUTED = (120, 140, 170)
-GREEN = (50,  220, 120)
-TRACK = (20,  26,  50)
+W, H   = 798, 278
+WHITE  = (240, 245, 255)
+MUTED  = (180, 190, 210)
+GREEN  = (50,  220, 120)
+SHADOW = (0, 0, 0)
 
 ACCENTS = {
     "algo": (30,  180, 255),
@@ -114,85 +113,108 @@ ACCENTS = {
 }
 LABELS = {
     "algo": ("ALGO GRAND PRIX",  "5 ALGO entry  |  Winner takes 9 ALGO"),
-    "zap":  ("ZAPP GRAND PRIX",   "500 ZAPP entry  |  Winner takes 1,000 ZAPP"),
+    "zap":  ("ZAPP GRAND PRIX",  "500 ZAPP entry  |  Winner takes 1,000 ZAPP"),
+}
+
+# Resolve boards/ relative to this file so Railway always finds it
+_BOARDS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boards")
+
+BOARD_IMAGES = {
+    "algo": {
+        "empty":   "algoempty.png",
+        "waiting": "algowaiting.png",
+        "racing":  "algoracing.png",
+        "result":  "algoresult.png",
+    },
+    "zap": {
+        "empty":   "zappempty.png",
+        "waiting": "zappwaiting.png",
+        "racing":  "zappracing.png",
+        "result":  "zappresult.png",
+    },
 }
 
 
-def _base(draw, mode):
-    accent = ACCENTS[mode]
-    title, subtitle = LABELS[mode]
-    draw.rounded_rectangle([2, 2, W-3, H-3], radius=16, outline=accent, width=2)
-    draw.rounded_rectangle([2, 2, W-3, 52],  radius=16, fill=PANEL)
-    draw.rectangle([2, 36, W-3, 52],          fill=PANEL)
-    draw.text((24, 10), title,         font=FONT_MED, fill=accent)
-    draw.text((W-24, 10), subtitle,    font=FONT_SM,  fill=MUTED, anchor="ra")
-    draw.line([24, 56, W-24, 56],      fill=accent, width=1)
-    for y in [90, 140, 190]:
-        draw.line([24, y, W-24, y],    fill=TRACK, width=1)
+def _load_bg(mode, state) -> Image.Image:
+    filename = BOARD_IMAGES[mode][state]
+    path = os.path.join(_BOARDS_DIR, filename)
+    print(f"[grand_prix] Loading: {path} exists={os.path.exists(path)}")
+    if os.path.exists(path):
+        return Image.open(path).convert("RGBA").resize((W, H))
+    print(f"[grand_prix] MISSING image — using dark fallback")
+    return Image.new("RGBA", (W, H), (8, 10, 20, 255))
+
+
+def _t(draw, x, y, text, font, color):
+    """Draw text with drop shadow for readability over any background."""
+    draw.text((x+1, y+1), text, font=font, fill=(*SHADOW, 200), anchor="mm")
+    draw.text((x+2, y+2), text, font=font, fill=(*SHADOW, 120), anchor="mm")
+    draw.text((x, y), text, font=font, fill=color, anchor="mm")
 
 
 def _buf(img):
     b = io.BytesIO()
-    img.save(b, format="PNG")
+    img.convert("RGB").save(b, format="PNG")
     b.seek(0)
     return b
 
 
 def board_empty(mode):
-    img, draw = Image.new("RGB", (W,H), BG), None
+    img  = _load_bg(mode, "empty")
     draw = ImageDraw.Draw(img)
-    _base(draw, mode)
-    draw.text((W//2, 120), "NO RACE IN PROGRESS",  font=FONT_BOLD, fill=MUTED, anchor="mm")
-    draw.text((W//2, 162), "Be the first to join", font=FONT_REG,  fill=MUTED, anchor="mm")
+    accent = ACCENTS[mode]
+    title, subtitle = LABELS[mode]
+    _t(draw, W//2, 80,  title,                  FONT_BOLD, accent)
+    _t(draw, W//2, 118, subtitle,               FONT_SM,   MUTED)
+    _t(draw, W//2, 160, "NO RACE IN PROGRESS",  FONT_MED,  (160, 170, 190))
+    _t(draw, W//2, 190, "Be the first to join", FONT_SM,   (120, 130, 150))
     return _buf(img)
 
 
 def board_waiting(mode, zappy_id):
-    img  = Image.new("RGB", (W,H), BG)
+    img  = _load_bg(mode, "waiting")
     draw = ImageDraw.Draw(img)
     accent = ACCENTS[mode]
-    _base(draw, mode)
-    draw.text((W//2, 90),  "WAITING FOR OPPONENT",                   font=FONT_MED,  fill=accent, anchor="mm")
-    draw.rounded_rectangle([W//2-200, 108, W//2+200, 162],            radius=10, fill=PANEL, outline=accent, width=1)
-    draw.text((W//2, 135), f"⚡  {zappy_id}  is ready",              font=FONT_BOLD, fill=WHITE,  anchor="mm")
-    draw.text((W//2, 185), "Join to race · first to pay locks in",    font=FONT_SM,   fill=MUTED,  anchor="mm")
-    draw.text((W//2, 248), "Tap Join Race to enter",                  font=FONT_SM,   fill=accent, anchor="mm")
+    title, subtitle = LABELS[mode]
+    _t(draw, W//2, 45,  title,                                   FONT_BOLD, accent)
+    _t(draw, W//2, 82,  "WAITING FOR OPPONENT",                  FONT_MED,  accent)
+    _t(draw, W//2, 130, f"{zappy_id}  is ready",                 FONT_BOLD, WHITE)
+    _t(draw, 190,  245, zappy_id,                                FONT_SM,   WHITE)
+    _t(draw, 600,  245, "???",                                   FONT_SM,   MUTED)
+    _t(draw, W//2, 195, "Join to race · first to pay locks in",  FONT_SM,   MUTED)
+    _t(draw, W//2, 222, "Tap Join Race to enter",                FONT_SM,   accent)
     return _buf(img)
 
 
 def board_racing(mode, zappy_a, zappy_b):
-    img  = Image.new("RGB", (W,H), BG)
+    img  = _load_bg(mode, "racing")
     draw = ImageDraw.Draw(img)
-    _base(draw, mode)
-    draw.text((W//2, 88),  "RACE IN PROGRESS",              font=FONT_BOLD, fill=GREEN,  anchor="mm")
-    draw.text((W//2, 128), f"{zappy_a}",                     font=FONT_MED,  fill=WHITE,  anchor="mm")
-    draw.text((W//2, 158), f"vs",                            font=FONT_SM,   fill=MUTED,  anchor="mm")
-    draw.text((W//2, 188), f"{zappy_b}",                     font=FONT_MED,  fill=WHITE,  anchor="mm")
-    draw.text((W//2, 228), "Race underway — result soon",    font=FONT_SM,   fill=MUTED,  anchor="mm")
+    accent = ACCENTS[mode]
+    title, _ = LABELS[mode]
+    _t(draw, W//2, 50,  title,                         FONT_BOLD, accent)
+    _t(draw, W//2, 85,  "RACE IN PROGRESS",            FONT_MED,  GREEN)
+    _t(draw, W//2, 125, zappy_a,                       FONT_BOLD, WHITE)
+    _t(draw, W//2, 155, "vs",                          FONT_SM,   MUTED)
+    _t(draw, W//2, 185, zappy_b,                       FONT_BOLD, WHITE)
+    _t(draw, W//2, 225, "Race underway — result soon", FONT_SM,   MUTED)
     return _buf(img)
 
 
 def board_result(mode, zappy_a, zappy_b, winner, score_a, score_b, surge=False):
-    img  = Image.new("RGB", (W,H), BG)
+    img  = _load_bg(mode, "result")
     draw = ImageDraw.Draw(img)
     accent = ACCENTS[mode]
-    _base(draw, mode)
-    draw.text((W//2, 82),  "RACE RESULT",               font=FONT_MED,  fill=accent, anchor="mm")
-    draw.rounded_rectangle([W//2-230, 98, W//2+230, 158],    radius=10, fill=(16,36,16), outline=GREEN, width=2)
-    draw.text((W//2, 128), f"{winner}  WINS!",               font=FONT_BOLD, fill=GREEN,  anchor="mm")
+    title, _ = LABELS[mode]
     payout    = "9 ALGO paid out" if mode == "algo" else "1,000 ZAPP paid out"
     surge_tag = "  SURGE!" if surge else ""
-    # Board uses score diff for visual display (detailed roll data not passed here)
     diff = abs(score_a - score_b)
-    if diff == 3:
-        margin = "Dominant run"
-    elif diff == 2:
-        margin = "Clear victory"
-    else:
-        margin = "Close race"
-    draw.text((W//2, 178), f"{payout}  ·  {margin}{surge_tag}", font=FONT_SM, fill=MUTED, anchor="mm")
-    draw.text((W//2, 210), f"{zappy_a}  vs  {zappy_b}",     font=FONT_SM,   fill=MUTED,  anchor="mm")
-    draw.text((W//2, 250), "New race open below  ↓",         font=FONT_SM,   fill=accent, anchor="mm")
+    margin = "Dominant run" if diff == 3 else "Clear victory" if diff == 2 else "Close race"
+    _t(draw, W//2, 45,  title,                               FONT_BOLD, accent)
+    _t(draw, W//2, 82,  "RACE RESULT",                       FONT_MED,  accent)
+    _t(draw, W//2, 125, f"{winner}  WINS!",                  FONT_BOLD, GREEN)
+    _t(draw, W//2, 168, f"{payout}  ·  {margin}{surge_tag}", FONT_SM,   MUTED)
+    _t(draw, W//2, 198, f"{zappy_a}  vs  {zappy_b}",         FONT_SM,   MUTED)
+    _t(draw, W//2, 235, "New race open below",               FONT_SM,   accent)
     return _buf(img)
 
 
