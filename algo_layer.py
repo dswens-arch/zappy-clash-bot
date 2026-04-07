@@ -53,9 +53,9 @@ def get_indexer_client() -> indexer.IndexerClient:
 
 def get_bot_account() -> tuple[str, str]:
     """Return (private_key, address) for the bot's hot wallet."""
-    mn = os.getenv("BOT_MNEMONIC")
+    mn = os.getenv("BOT_WALLET_MNEMONIC") or os.getenv("BOT_MNEMONIC")
     if not mn:
-        raise EnvironmentError("BOT_MNEMONIC env var not set.")
+        raise EnvironmentError("BOT_WALLET_MNEMONIC env var not set.")
     private_key = mnemonic.to_private_key(mn)
     address = account.address_from_private_key(private_key)
     return private_key, address
