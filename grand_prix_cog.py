@@ -181,13 +181,14 @@ def board_result(mode, zappy_a, zappy_b, winner, score_a, score_b, surge=False):
     draw.text((W//2, 128), f"{winner}  WINS!",               font=FONT_BOLD, fill=GREEN,  anchor="mm")
     payout    = "9 ALGO paid out" if mode == "algo" else "1,000 ZAPP paid out"
     surge_tag = "  SURGE!" if surge else ""
+    # Board uses score diff for visual display (detailed roll data not passed here)
     diff = abs(score_a - score_b)
     if diff == 3:
-        margin = "Dominant"
+        margin = "Dominant run"
     elif diff == 2:
-        margin = "Won by 2 laps"
+        margin = "Clear victory"
     else:
-        margin = "Won by 1 lap"
+        margin = "Close race"
     draw.text((W//2, 178), f"{payout}  ·  {margin}{surge_tag}", font=FONT_SM, fill=MUTED, anchor="mm")
     draw.text((W//2, 210), f"{zappy_a}  vs  {zappy_b}",     font=FONT_SM,   fill=MUTED,  anchor="mm")
     draw.text((W//2, 250), "New race open below  ↓",         font=FONT_SM,   fill=accent, anchor="mm")
@@ -695,17 +696,12 @@ class GrandPrixCog(commands.Cog):
             except Exception as e:
                 print(f"[grand_prix] Rake error: {e}")
 
-            # ZAP participation bonuses
-            self._add_zap(winner_id, winner_racer.get("zap_balance", 0), 500)
-            self._add_zap(loser_id,  loser_racer.get("zap_balance", 0),  100)
-            await channel.send(f"⚡ Winner +500 ZAPP  ·  Runner-up +100 ZAPP{txid_display}")
+            await channel.send(f"🏦 Payout complete{txid_display}")
 
         elif q.mode == "algo" and test_mode:
             # Test mode — skip real payout, just log
             await write_race_result(self.db, q.duel_id, result, winner_id, "test")
-            self._add_zap(winner_id, winner_racer.get("zap_balance", 0), 500)
-            self._add_zap(loser_id,  loser_racer.get("zap_balance", 0),  100)
-            await channel.send(f"⚡ Winner +500 ZAPP  ·  Runner-up +100 ZAPP")
+            await channel.send(f"🏦 Test complete — no ALGO or ZAPP moved")
 
         else:  # zap mode
             if not test_mode:
