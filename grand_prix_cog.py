@@ -708,27 +708,26 @@ class GrandPrixCog(commands.Cog):
         bot_address = _bot_addr()
         note        = f"zgp:{q.duel_id}"
         note_b64    = base64.b64encode(note.encode()).decode()
-        pera_web    = (
-            "https://perawallet.app/send/?"
-            + urlencode({"asset": ZAPP_ASA_ID, "receiver": bot_address,
-                         "amount": ZAP_ENTRY, "note": note_b64, "xnote": "1"})
+        # Build algorand:// URI for QR code (wallet apps scan this natively)
+        from algo_layer import generate_qr_png as _qr
+        algo_uri = (
+            f"algorand://{bot_address}?"
+            + urlencode({"amount": 0, "asset": ZAPP_ASA_ID,
+                         "amount_asset": ZAP_ENTRY, "note": note_b64})
         )
-
-        view = discord.ui.View(timeout=None)
-        view.add_item(discord.ui.Button(
-            style=discord.ButtonStyle.link,
-            label=f"Pay {ZAP_ENTRY:,} ZAPP in Pera",
-            url=pera_web, emoji="⚡",
-        ))
+        qr_buf = _qr(algo_uri)
 
         await self._update_board(channel, q, "waiting", zappy_id=q.player_a_racer["zappy_id"])
         await interaction.followup.send(
             f"**Send {ZAP_ENTRY:,} ZAPP to enter the race**\n\n"
-            f"📱 Tap the button to open Pera — amount and note are pre-filled.\n\n"
+            f"📱 **Mobile** — scan the QR code with Pera Wallet.\n"
+            f"🖥️ **Desktop** — send manually using the details below.\n\n"
             f"```\nAddress : {bot_address}\nAsset   : ZAPP ({ZAPP_ASA_ID})\n"
             f"Amount  : {ZAP_ENTRY:,}\nNote    : {note}\n```\n"
-            f"*The note must match exactly.*\n⏳ Waiting for your payment...",
-            view=view, ephemeral=True,
+            f"*The note must match exactly or your entry won't register.*\n"
+            f"⏳ Waiting for your payment...",
+            file=discord.File(qr_buf, filename="pay_zapp.png"),
+            ephemeral=True,
         )
         asyncio.create_task(self._poll_zapp_payment(q, "a", channel))
 
@@ -742,26 +741,24 @@ class GrandPrixCog(commands.Cog):
         bot_address = _bot_addr()
         note        = f"zgp:{q.duel_id}"
         note_b64    = base64.b64encode(note.encode()).decode()
-        pera_web    = (
-            "https://perawallet.app/send/?"
-            + urlencode({"asset": ZAPP_ASA_ID, "receiver": bot_address,
-                         "amount": ZAP_ENTRY, "note": note_b64, "xnote": "1"})
+        from algo_layer import generate_qr_png as _qr
+        algo_uri = (
+            f"algorand://{bot_address}?"
+            + urlencode({"amount": 0, "asset": ZAPP_ASA_ID,
+                         "amount_asset": ZAP_ENTRY, "note": note_b64})
         )
-
-        view = discord.ui.View(timeout=None)
-        view.add_item(discord.ui.Button(
-            style=discord.ButtonStyle.link,
-            label=f"Pay {ZAP_ENTRY:,} ZAPP in Pera",
-            url=pera_web, emoji="⚡",
-        ))
+        qr_buf = _qr(algo_uri)
 
         await interaction.followup.send(
             f"**Send {ZAP_ENTRY:,} ZAPP to enter the race**\n\n"
-            f"📱 Tap the button to open Pera — amount and note are pre-filled.\n\n"
+            f"📱 **Mobile** — scan the QR code with Pera Wallet.\n"
+            f"🖥️ **Desktop** — send manually using the details below.\n\n"
             f"```\nAddress : {bot_address}\nAsset   : ZAPP ({ZAPP_ASA_ID})\n"
             f"Amount  : {ZAP_ENTRY:,}\nNote    : {note}\n```\n"
-            f"*The note must match exactly.*\n⏳ Waiting for your payment...",
-            view=view, ephemeral=True,
+            f"*The note must match exactly or your entry won't register.*\n"
+            f"⏳ Waiting for your payment...",
+            file=discord.File(qr_buf, filename="pay_zapp.png"),
+            ephemeral=True,
         )
         asyncio.create_task(self._poll_zapp_payment(q, "b", channel))
 
