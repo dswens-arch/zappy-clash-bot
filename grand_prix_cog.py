@@ -1408,12 +1408,17 @@ class GrandPrixCog(commands.Cog):
         )
 
     async def _watch_deposit(self, user_id, wallet_address, bot_address, after_round, interaction):
-        """Poll indexer for incoming ALGO from player wallet, credit their balance."""
+        """
+        Poll indexer for incoming ALGO from player wallet and credit their balance.
+        Each transaction ID is recorded in gp_deposits to prevent double-crediting
+        if the player taps /gpdeposit multiple times or the poller runs twice.
+        """
         import asyncio as _a, time
-        from algo_layer import get_algod_client, get_indexer_client
+        from algo_layer import get_indexer_client
 
         deadline = time.monotonic() + 300  # 5 min window
-        idx = get_indexer_client()
+        idx      = get_indexer_client()
+        credited = set()  # txids credited this session
 
         while time.monotonic() < deadline:
             try:
@@ -1424,19 +1429,43 @@ class GrandPrixCog(commands.Cog):
                     min_round=after_round,
                 )
                 for txn in res.get("transactions", []):
-                    pay = txn.get("payment-transaction", {})
+                    txid = txn.get("id", "")
+                    pay  = txn.get("payment-transaction", {})
+
                     if pay.get("receiver") != bot_address:
                         continue
+
                     amount_algo = pay.get("amount", 0) / 1_000_000
                     if amount_algo < 0.1:
                         continue
 
-                    # Credit their balance
-                    racer = await get_racer(self.db, user_id)
-                    new_bal = racer.get("algo_balance", 0) + amount_algo
+                    # Skip if already credited this session
+                    if txid in credited:
+                        continue
+
+                    # Skip if already recorded in Supabase (double-tap protection)
+                    existing = self.db.table("gp_deposits").select("txid").eq("txid", txid).execute()
+                    if existing.data:
+                        print(f"[grand_prix] Deposit {txid[:12]} already credited — skipping")
+                        credited.add(txid)
+                        continue
+
+                    # Record txid FIRST before crediting balance
+                    self.db.table("gp_deposits").insert({
+                        "txid":            txid,
+                        "discord_user_id": user_id,
+                        "amount_algo":     amount_algo,
+                    }).execute()
+                    credited.add(txid)
+
+                    # Now credit their balance
+                    racer   = await get_racer(self.db, user_id)
+                    new_bal = round(racer.get("algo_balance", 0) + amount_algo, 6)
                     self.db.table("zappy_racers").update(
-                        {"algo_balance": round(new_bal, 6)}
+                        {"algo_balance": new_bal}
                     ).eq("discord_user_id", user_id).eq("zappy_id", racer["zappy_id"]).execute()
+
+                    print(f"[grand_prix] Credited {amount_algo:.2f} ALGO to {user_id} txid={txid[:12]}")
 
                     try:
                         await interaction.followup.send(
@@ -1485,6 +1514,10 @@ class GrandPrixCog(commands.Cog):
                 await interaction.followup.send("Invalid amount. Use a number or 'all'.", ephemeral=True)
                 return
 
+        if withdraw_amount < 0.1:
+            await interaction.followup.send("Minimum withdrawal is 0.1 ALGO.", ephemeral=True)
+            return
+
         if withdraw_amount > balance:
             await interaction.followup.send(
                 f"Can't withdraw {withdraw_amount:.2f} ALGO — balance is only {balance:.2f} ALGO.",
@@ -1492,12 +1525,28 @@ class GrandPrixCog(commands.Cog):
             )
             return
 
-        if withdraw_amount < 0.1:
-            await interaction.followup.send("Minimum withdrawal is 0.1 ALGO.", ephemeral=True)
+        # CRITICAL: Deduct from Supabase FIRST before sending on-chain.
+        # Re-fetch balance at deduction time to prevent race conditions.
+        # Only deduct if balance still covers the amount.
+        new_bal = round(balance - withdraw_amount, 6)
+        result = (
+            self.db.table("zappy_racers")
+            .update({"algo_balance": new_bal})
+            .eq("discord_user_id", user_id)
+            .eq("zappy_id", racer["zappy_id"])
+            .gte("algo_balance", withdraw_amount)  # only update if balance is sufficient
+            .execute()
+        )
+
+        if not result.data:
+            # Balance was insufficient at deduction time — someone got here twice
+            await interaction.followup.send(
+                "Withdrawal failed — insufficient balance. Please try again.",
+                ephemeral=True,
+            )
             return
 
-        # Send on-chain
-        from algo_layer import send_payout as _send_algo
+        # Balance deducted — now send on-chain
         try:
             microalgos = int(withdraw_amount * 1_000_000)
             from algosdk import transaction as _txn
@@ -1516,12 +1565,6 @@ class GrandPrixCog(commands.Cog):
             txid   = client.send_transaction(signed)
             _txn.wait_for_confirmation(client, txid, 10)
 
-            # Deduct from balance
-            new_bal = round(balance - withdraw_amount, 6)
-            self.db.table("zappy_racers").update(
-                {"algo_balance": new_bal}
-            ).eq("discord_user_id", user_id).eq("zappy_id", racer["zappy_id"]).execute()
-
             await interaction.followup.send(
                 f"✅ **{withdraw_amount:.2f} ALGO** sent to your wallet!\n"
                 f"TX: `{txid[:14]}...`\n"
@@ -1530,9 +1573,13 @@ class GrandPrixCog(commands.Cog):
             )
 
         except Exception as e:
-            print(f"[grand_prix] Withdraw error: {e}")
+            # On-chain send failed — refund the Supabase balance
+            print(f"[grand_prix] Withdraw send error: {e}")
+            self.db.table("zappy_racers").update(
+                {"algo_balance": balance}
+            ).eq("discord_user_id", user_id).eq("zappy_id", racer["zappy_id"]).execute()
             await interaction.followup.send(
-                f"⚠️ Withdrawal failed — contact an admin.\nError: {e}",
+                f"⚠️ Withdrawal failed — your balance has been restored.\nContact an admin if this persists.",
                 ephemeral=True,
             )
 
