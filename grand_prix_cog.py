@@ -285,8 +285,8 @@ class RaceQueue:
 
     def reset(self):
         self.player_a_id:    str | None  = None
-        self.player_a_racer: dict | None = None  # full racer row
-        self.player_a_stats: dict | None = None  # selected zappy stats
+        self.player_a_racer: dict | None = None
+        self.player_a_stats: dict | None = None
         self.player_a_paid:  bool        = False
         self.player_b_id:    str | None  = None
         self.player_b_racer: dict | None = None
@@ -294,8 +294,9 @@ class RaceQueue:
         self.player_b_paid:  bool        = False
         self.duel_id:        str | None  = None
         self.after_round:    int         = 0
-        self.board_msg_id:   int | None  = None
         self.locked:         bool        = False
+        # board_msg_id intentionally NOT reset — the new board is posted
+        # by _post_new_board after each race and sets its own ID
 
 
 algo_queue = RaceQueue("algo")
@@ -924,10 +925,22 @@ class GrandPrixCog(commands.Cog):
 
     async def _update_board(self, channel, q, state, remove_button=False, **kw):
         if q.board_msg_id is None:
-            return
+            print(f"[grand_prix] _update_board: no board_msg_id for {q.mode} queue — posting new board")
+            await self._post_new_board(channel, q)
+            # Now try again with the new board
+            if q.board_msg_id is None:
+                return
         try:
             msg = await channel.fetch_message(q.board_msg_id)
         except discord.NotFound:
+            print(f"[grand_prix] _update_board: board message {q.board_msg_id} not found — posting new board")
+            await self._post_new_board(channel, q)
+            try:
+                msg = await channel.fetch_message(q.board_msg_id)
+            except Exception:
+                return
+        except Exception as e:
+            print(f"[grand_prix] _update_board error: {e}")
             return
         buf  = make_board_buf(q.mode, state, **kw)
         file = discord.File(buf, filename="board.png")
