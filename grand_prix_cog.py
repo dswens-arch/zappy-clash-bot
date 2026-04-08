@@ -1256,7 +1256,7 @@ class GrandPrixCog(commands.Cog):
 
     @app_commands.command(name="gpstats", description="View your Grand Prix garage and stats.")
     async def gpstats(self, interaction: discord.Interaction):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         from datetime import datetime, timezone
         available, on_cooldown = await get_available_racers(self.db, str(interaction.user.id))
         all_entries = available + on_cooldown
@@ -1277,7 +1277,7 @@ class GrandPrixCog(commands.Cog):
                 title = f"⚡ {racer['zappy_id']} — Ready to Race"
 
             embed = format_stats_embed(racer, stats, title=title)
-            await interaction.followup.send(embed=embed)
+            await interaction.followup.send(embed=embed, ephemeral=True)
 
     # -----------------------------------------------------------------------
     # /gpgarage
@@ -1286,7 +1286,7 @@ class GrandPrixCog(commands.Cog):
     @app_commands.command(name="gpgarage", description="Scout another player's Grand Prix Zappy.")
     @app_commands.describe(player="The player to scout.")
     async def gpgarage(self, interaction: discord.Interaction, player: discord.Member):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         racer = await get_racer(self.db, str(player.id))
         if not racer:
             await interaction.followup.send(f"{player.display_name} isn't registered.", ephemeral=True)
@@ -1294,7 +1294,8 @@ class GrandPrixCog(commands.Cog):
         stats = await get_stats(self.db, racer["zappy_id"])
         await interaction.followup.send(
             embed=format_stats_embed(racer, stats,
-                title=f"⚡ {racer['zappy_id']} — {player.display_name}'s Garage")
+                title=f"⚡ {racer['zappy_id']} — {player.display_name}'s Garage"),
+            ephemeral=True,
         )
 
     # -----------------------------------------------------------------------
@@ -1343,13 +1344,18 @@ class GrandPrixCog(commands.Cog):
     # /gpzap
     # -----------------------------------------------------------------------
 
-    @app_commands.command(name="gpzap", description="Check your ZAPP balance.")
+    @app_commands.command(name="gpzap", description="Check your ZAPP deposit balance.")
     async def gpzap(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        bal = await get_zap_balance(self.db, str(interaction.user.id))
+        racer = await get_racer(self.db, str(interaction.user.id))
+        if not racer:
+            await interaction.followup.send("Not registered. Use `/gpregister` first.", ephemeral=True)
+            return
+        bal = racer.get("zapp_balance", 0)
         await interaction.followup.send(
-            f"⚡ Your ZAPP balance: **{bal:,} ZAP**\n"
-            f"ZAPP race entry: {ZAP_ENTRY:,}  ·  Win payout: {ZAP_PAYOUT:,}",
+            f"⚡ ZAPP on deposit: **{bal:,} ZAPP**\n"
+            f"Race entry: {ZAP_ENTRY:,}  ·  Win payout: {ZAP_PAYOUT:,}\n"
+            f"Use `/gpzapdeposit` to add · `/gpzapwithdraw` to withdraw",
             ephemeral=True,
         )
 
@@ -1384,16 +1390,16 @@ class GrandPrixCog(commands.Cog):
             return
 
         algo_bal = all_racers[0].get("algo_balance", 0)
+        zapp_bal = all_racers[0].get("zapp_balance", 0)
         wallet   = all_racers[0]["wallet_address"]
-        zapp_bal = get_zapp_balance(wallet)
 
         label = "Your" if target == interaction.user else f"**{target.display_name}'s**"
         await interaction.followup.send(
             f"{label} Grand Prix Balances\n\n"
             f"⚡ ALGO on deposit: **{algo_bal:.2f} ALGO**\n"
-            f"🪙 ZAPP in wallet:  **{zapp_bal:,} ZAPP**\n"
+            f"🪙 ZAPP on deposit: **{zapp_bal:,} ZAPP**\n"
             f"👛 Wallet: `{wallet[:10]}...{wallet[-4:]}`\n\n"
-            f"Use `/gpdeposit` to add ALGO · `/gpwithdraw` to withdraw",
+            f"Use `/gpdeposit` to add ALGO · `/gpzapdeposit` to add ZAPP",
             ephemeral=True,
         )
 
