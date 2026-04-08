@@ -1131,8 +1131,7 @@ class GrandPrixCog(commands.Cog):
 
         stats = seed_stats(zappy_id)
 
-        # First Zappy — also sets the wallet and ZAP balance row
-        # Additional Zappies — use same wallet, share ZAP balance
+        # First Zappy — fresh balances
         if zappy_count == 0:
             self.db.table("zappy_racers").insert({
                 "discord_user_id": user_id,
@@ -1142,13 +1141,17 @@ class GrandPrixCog(commands.Cog):
                 "wins": 0, "losses": 0,
             }).execute()
         else:
-            # Additional Zappy — inherit wallet from first registration
+            # Additional Zappy — inherit wallet and current balances so all rows stay in sync
             existing_wallet = all_racers[0]["wallet_address"]
+            existing_algo   = all_racers[0].get("algo_balance", 0)
+            existing_zapp   = all_racers[0].get("zapp_balance", 0)
             self.db.table("zappy_racers").insert({
                 "discord_user_id": user_id,
                 "wallet_address":  existing_wallet,
                 "zappy_id":        zappy_id,
                 "zap_balance":     0,
+                "algo_balance":    existing_algo,
+                "zapp_balance":    existing_zapp,
                 "wins": 0, "losses": 0,
             }).execute()
 
