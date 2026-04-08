@@ -1359,26 +1359,38 @@ class GrandPrixCog(commands.Cog):
     # /gpbalance
     # -----------------------------------------------------------------------
 
-    @app_commands.command(name="gpbalance", description="Check your Grand Prix ALGO and ZAPP deposit balances.")
-    async def gpbalance(self, interaction: discord.Interaction):
+    @app_commands.command(name="gpbalance", description="Check Grand Prix ALGO and ZAPP balances.")
+    @app_commands.describe(player="(Admin) Check another player's balance")
+    async def gpbalance(self, interaction: discord.Interaction, player: discord.Member = None):
         await interaction.response.defer(ephemeral=True)
-        user_id = str(interaction.user.id)
-        all_racers = await get_all_racers(self.db, user_id)
 
-        if not all_racers:
-            await interaction.followup.send("Not registered. Use `/gpregister` first.", ephemeral=True)
+        # Admins can check anyone, players can only check themselves
+        is_admin = interaction.user.guild_permissions.administrator
+        if player and not is_admin:
+            await interaction.followup.send("Only admins can check other players' balances.", ephemeral=True)
             return
 
-        # ALGO balance — same across all Zappies, use first row
+        target    = player or interaction.user
+        target_id = str(target.id)
+        all_racers = await get_all_racers(self.db, target_id)
+
+        if not all_racers:
+            await interaction.followup.send(
+                f"**{target.display_name}** isn't registered in the Grand Prix.",
+                ephemeral=True,
+            )
+            return
+
         algo_bal = all_racers[0].get("algo_balance", 0)
-        # ZAPP balance — on-chain
         wallet   = all_racers[0]["wallet_address"]
         zapp_bal = get_zapp_balance(wallet)
 
+        label = "Your" if target == interaction.user else f"**{target.display_name}'s**"
         await interaction.followup.send(
-            f"**Grand Prix Deposit Balances**\n\n"
+            f"{label} Grand Prix Balances\n\n"
             f"⚡ ALGO on deposit: **{algo_bal:.2f} ALGO**\n"
-            f"🪙 ZAPP in wallet:  **{zapp_bal:,} ZAPP**\n\n"
+            f"🪙 ZAPP in wallet:  **{zapp_bal:,} ZAPP**\n"
+            f"👛 Wallet: `{wallet[:10]}...{wallet[-4:]}`\n\n"
             f"Use `/gpdeposit` to add ALGO · `/gpwithdraw` to withdraw",
             ephemeral=True,
         )
