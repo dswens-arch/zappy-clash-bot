@@ -458,12 +458,11 @@ class GrandPrixCog(commands.Cog):
             return
 
         if q.mode == "zap":
-            wallet = available[0]["racer"]["wallet_address"] if available else None
-            bal = get_zapp_balance(wallet) if wallet else 0
-            if not wallet or bal < ZAP_ENTRY:
+            zapp_bal = available[0]["racer"].get("zapp_balance", 0) if available else 0
+            if zapp_bal < ZAP_ENTRY:
                 await interaction.followup.send(
-                    f"Not enough ZAPP. Need **{ZAP_ENTRY:,}** — you have **{bal:,}** in your wallet.\n"
-                    f"Earn ZAPP through Clash and Expedition.",
+                    f"Not enough ZAPP on deposit. You have **{zapp_bal:,} ZAPP**\n"
+                    f"Use `/gpzapdeposit` to add ZAPP — minimum {ZAP_ENTRY:,} to race.",
                     ephemeral=True,
                 )
                 return
@@ -872,11 +871,17 @@ class GrandPrixCog(commands.Cog):
 
         else:  # zap mode
             if not test_mode:
-                await pay_winner(self.db, winner_id, loser_id)
-                await write_race_result(self.db, q.duel_id, result, winner_id, "zap")
+                # Credit winner 1000 ZAPP to Supabase balance
+                winner_zapp_bal = winner_racer.get("zapp_balance", 0)
+                new_winner_zapp = winner_zapp_bal + ZAP_PAYOUT
+                self.db.table("zappy_racers").update(
+                    {"zapp_balance": new_winner_zapp}
+                ).eq("discord_user_id", winner_id).eq("zappy_id", winner_racer["zappy_id"]).execute()
+
+                await write_race_result(self.db, q.duel_id, result, winner_id, "custodial")
                 await channel.send(
-                    f"🪙 **{ZAP_PAYOUT:,} ZAPP** paid to **{winner_racer['zappy_id']}**\n"
-                    f"⚡ Winner +{ZAP_WIN_BONUS} ZAPP bonus  ·  Runner-up +{ZAP_LOSE_BONUS} ZAPP"
+                    f"🪙 **{winner_racer['zappy_id']}** wins **{ZAP_PAYOUT:,} ZAPP** — credited to deposit balance\n"
+                    f"Use `/gpzapwithdraw` to send to your wallet anytime."
                 )
             else:
                 await write_race_result(self.db, q.duel_id, result, winner_id, "test")
@@ -1602,6 +1607,208 @@ class GrandPrixCog(commands.Cog):
             print(f"[grand_prix] Withdraw send error: {e}")
             self.db.table("zappy_racers").update(
                 {"algo_balance": balance}
+            ).eq("discord_user_id", user_id).eq("zappy_id", racer["zappy_id"]).execute()
+            await interaction.followup.send(
+                f"⚠️ Withdrawal failed — your balance has been restored.\nContact an admin if this persists.",
+                ephemeral=True,
+            )
+
+    # -----------------------------------------------------------------------
+    # /gpzapdeposit
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpzapdeposit", description="Deposit ZAPP to your Grand Prix balance.")
+    async def gpzapdeposit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+        racer   = await get_racer(self.db, user_id)
+
+        if not racer:
+            await interaction.followup.send("Not registered. Use `/gpregister` first.", ephemeral=True)
+            return
+
+        from algo_layer import get_bot_address, get_current_round, get_indexer_client
+        bot_address  = get_bot_address()
+        after_round  = get_current_round()
+        current_bal  = racer.get("zapp_balance", 0)
+
+        await interaction.followup.send(
+            f"**Deposit ZAPP to your Grand Prix balance**\n\n"
+            f"Open Pera Wallet and send ZAPP (ASA {ZAPP_ASA_ID}) to the address below.\n"
+            f"Long press the next message to copy it.\n\n"
+            f"Current balance: **{current_bal:,} ZAPP**\n"
+            f"⏳ Watching for your deposit for 5 minutes...",
+            ephemeral=True,
+        )
+        await interaction.followup.send(bot_address, ephemeral=True)
+
+        asyncio.create_task(
+            self._watch_zapp_deposit(user_id, racer["wallet_address"], bot_address, after_round, racer["zappy_id"], interaction)
+        )
+
+    async def _watch_zapp_deposit(self, user_id, wallet_address, bot_address, after_round, zappy_id, interaction):
+        """Poll indexer for incoming ZAPP from player wallet, credit their balance."""
+        import asyncio as _a, time
+        from algo_layer import get_indexer_client
+
+        deadline = time.monotonic() + 300
+        idx      = get_indexer_client()
+        credited = set()
+
+        while time.monotonic() < deadline:
+            try:
+                res = idx.search_transactions(
+                    address=wallet_address,
+                    address_role="sender",
+                    txn_type="axfer",
+                    asset_id=ZAPP_ASA_ID,
+                    min_round=after_round,
+                )
+                for txn in res.get("transactions", []):
+                    txid  = txn.get("id", "")
+                    axfer = txn.get("asset-transfer-transaction", {})
+
+                    if axfer.get("receiver") != bot_address:
+                        continue
+                    if axfer.get("asset-id") != ZAPP_ASA_ID:
+                        continue
+
+                    amount = axfer.get("amount", 0)
+                    if amount < 1:
+                        continue
+
+                    if txid in credited:
+                        continue
+
+                    # Double-credit protection via gp_deposits table
+                    existing = self.db.table("gp_deposits").select("txid").eq("txid", txid).execute()
+                    if existing.data:
+                        credited.add(txid)
+                        continue
+
+                    # Record txid first
+                    self.db.table("gp_deposits").insert({
+                        "txid":            txid,
+                        "discord_user_id": user_id,
+                        "amount_algo":     amount,
+                    }).execute()
+                    credited.add(txid)
+
+                    # Credit balance
+                    racer   = await get_racer(self.db, user_id)
+                    new_bal = racer.get("zapp_balance", 0) + amount
+                    self.db.table("zappy_racers").update(
+                        {"zapp_balance": new_bal}
+                    ).eq("discord_user_id", user_id).eq("zappy_id", zappy_id).execute()
+
+                    print(f"[grand_prix] Credited {amount:,} ZAPP to {user_id} txid={txid[:12]}")
+
+                    try:
+                        await interaction.followup.send(
+                            f"✅ **{amount:,} ZAPP** deposited!\n"
+                            f"New balance: **{new_bal:,} ZAPP**\n"
+                            f"You're ready to race. Tap **Join Race** on the ZAPP board.",
+                            ephemeral=True,
+                        )
+                    except Exception:
+                        pass
+                    return
+
+            except Exception as e:
+                print(f"[grand_prix] ZAPP deposit watch error: {e}")
+
+            await _a.sleep(5)
+
+    # -----------------------------------------------------------------------
+    # /gpzapwithdraw
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpzapwithdraw", description="Withdraw your ZAPP deposit balance to your wallet.")
+    @app_commands.describe(amount="Amount of ZAPP to withdraw (or 'all')")
+    async def gpzapwithdraw(self, interaction: discord.Interaction, amount: str = "all"):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+        racer   = await get_racer(self.db, user_id)
+
+        if not racer:
+            await interaction.followup.send("Not registered.", ephemeral=True)
+            return
+
+        balance = racer.get("zapp_balance", 0)
+
+        if balance <= 0:
+            await interaction.followup.send("No ZAPP balance to withdraw.", ephemeral=True)
+            return
+
+        if amount.lower() == "all":
+            withdraw_amount = balance
+        else:
+            try:
+                withdraw_amount = int(amount)
+            except ValueError:
+                await interaction.followup.send("Invalid amount. Use a whole number or 'all'.", ephemeral=True)
+                return
+
+        if withdraw_amount < 1:
+            await interaction.followup.send("Minimum withdrawal is 1 ZAPP.", ephemeral=True)
+            return
+
+        if withdraw_amount > balance:
+            await interaction.followup.send(
+                f"Can't withdraw {withdraw_amount:,} ZAPP — balance is only {balance:,} ZAPP.",
+                ephemeral=True,
+            )
+            return
+
+        # Deduct first with conditional check
+        new_bal = balance - withdraw_amount
+        result  = (
+            self.db.table("zappy_racers")
+            .update({"zapp_balance": new_bal})
+            .eq("discord_user_id", user_id)
+            .eq("zappy_id", racer["zappy_id"])
+            .gte("zapp_balance", withdraw_amount)
+            .execute()
+        )
+
+        if not result.data:
+            await interaction.followup.send(
+                "Withdrawal failed — insufficient balance. Please try again.",
+                ephemeral=True,
+            )
+            return
+
+        # Send on-chain
+        try:
+            from algosdk import transaction as _txn
+            from algo_layer import get_algod_client, get_bot_account
+            private_key, bot_addr = get_bot_account()
+            client = get_algod_client()
+            params = client.suggested_params()
+            txn = _txn.AssetTransferTxn(
+                sender=bot_addr,
+                sp=params,
+                receiver=racer["wallet_address"],
+                amt=withdraw_amount,
+                index=ZAPP_ASA_ID,
+                note=b"gpzapwithdraw",
+            )
+            signed = txn.sign(private_key)
+            txid   = client.send_transaction(signed)
+            _txn.wait_for_confirmation(client, txid, 10)
+
+            await interaction.followup.send(
+                f"✅ **{withdraw_amount:,} ZAPP** sent to your wallet!\n"
+                f"TX: `{txid[:14]}...`\n"
+                f"Remaining balance: **{new_bal:,} ZAPP**",
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            # Refund on failure
+            print(f"[grand_prix] ZAPP withdraw error: {e}")
+            self.db.table("zappy_racers").update(
+                {"zapp_balance": balance}
             ).eq("discord_user_id", user_id).eq("zappy_id", racer["zappy_id"]).execute()
             await interaction.followup.send(
                 f"⚠️ Withdrawal failed — your balance has been restored.\nContact an admin if this persists.",
