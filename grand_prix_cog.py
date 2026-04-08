@@ -593,11 +593,11 @@ class GrandPrixCog(commands.Cog):
             q.player_a_id = None; q.player_a_racer = None
             return
 
-        # Deduct instantly from Supabase balance
+        # Deduct from ALL rows for this player (keeps all Zappies in sync)
         new_balance = balance - 5
         self.db.table("zappy_racers").update(
             {"algo_balance": new_balance}
-        ).eq("discord_user_id", q.player_a_id).eq("zappy_id", racer["zappy_id"]).execute()
+        ).eq("discord_user_id", q.player_a_id).execute()
 
         duel = await create_duel(self.db, q.player_a_id, q.player_a_id)
         q.duel_id     = duel["id"]
@@ -612,8 +612,8 @@ class GrandPrixCog(commands.Cog):
         )
 
     async def _algo_join_b(self, interaction, q, channel):
-        racer = q.player_b_racer
-        balance = racer.get("algo_balance", 0)
+        primary = await get_racer(self.db, q.player_b_id)
+        balance = primary.get("algo_balance", 0) if primary else 0
 
         if balance < 5:
             await interaction.followup.send(
@@ -628,7 +628,7 @@ class GrandPrixCog(commands.Cog):
         new_balance = balance - 5
         self.db.table("zappy_racers").update(
             {"algo_balance": new_balance}
-        ).eq("discord_user_id", q.player_b_id).eq("zappy_id", racer["zappy_id"]).execute()
+        ).eq("discord_user_id", q.player_b_id).execute()
 
         self.db.table("race_duels").update({"opponent_id": q.player_b_id}).eq("id", q.duel_id).execute()
         q.player_b_paid = True
@@ -840,12 +840,13 @@ class GrandPrixCog(commands.Cog):
 
     async def _settle(self, q, channel, result, winner_racer, loser_racer, winner_id, loser_id, test_mode=False):
         if q.mode == "algo" and not test_mode:
-            # Credit winner 9 ALGO to their Supabase balance
-            winner_bal = winner_racer.get("algo_balance", 0)
-            new_winner_bal = winner_bal + 9
-            self.db.table("zappy_racers").update(
-                {"algo_balance": new_winner_bal}
-            ).eq("discord_user_id", winner_id).eq("zappy_id", winner_racer["zappy_id"]).execute()
+            # Credit winner 9 ALGO to primary balance row
+            winner_primary = await get_racer(self.db, winner_id)
+            if winner_primary:
+                new_winner_bal = winner_primary.get("algo_balance", 0) + 9
+                self.db.table("zappy_racers").update(
+                    {"algo_balance": new_winner_bal}
+                ).eq("discord_user_id", winner_id).execute()
 
             await write_race_result(self.db, q.duel_id, result, winner_id, "custodial")
 
@@ -871,12 +872,13 @@ class GrandPrixCog(commands.Cog):
 
         else:  # zap mode
             if not test_mode:
-                # Credit winner 1000 ZAPP to Supabase balance
-                winner_zapp_bal = winner_racer.get("zapp_balance", 0)
-                new_winner_zapp = winner_zapp_bal + ZAP_PAYOUT
-                self.db.table("zappy_racers").update(
-                    {"zapp_balance": new_winner_zapp}
-                ).eq("discord_user_id", winner_id).eq("zappy_id", winner_racer["zappy_id"]).execute()
+                # Credit winner ZAPP to primary balance row
+                winner_primary = await get_racer(self.db, winner_id)
+                if winner_primary:
+                    new_winner_zapp = winner_primary.get("zapp_balance", 0) + ZAP_PAYOUT
+                    self.db.table("zappy_racers").update(
+                        {"zapp_balance": new_winner_zapp}
+                    ).eq("discord_user_id", winner_id).execute()
 
                 await write_race_result(self.db, q.duel_id, result, winner_id, "custodial")
                 await channel.send(
@@ -1599,7 +1601,7 @@ class GrandPrixCog(commands.Cog):
             print(f"[grand_prix] Withdraw send error: {e}")
             self.db.table("zappy_racers").update(
                 {"algo_balance": balance}
-            ).eq("discord_user_id", user_id).eq("zappy_id", racer["zappy_id"]).execute()
+            ).eq("discord_user_id", user_id).execute()
             await interaction.followup.send(
                 f"⚠️ Withdrawal failed — your balance has been restored.\nContact an admin if this persists.",
                 ephemeral=True,
@@ -1758,7 +1760,6 @@ class GrandPrixCog(commands.Cog):
             self.db.table("zappy_racers")
             .update({"zapp_balance": new_bal})
             .eq("discord_user_id", user_id)
-            .eq("zappy_id", racer["zappy_id"])
             .gte("zapp_balance", withdraw_amount)
             .execute()
         )
@@ -1801,7 +1802,7 @@ class GrandPrixCog(commands.Cog):
             print(f"[grand_prix] ZAPP withdraw error: {e}")
             self.db.table("zappy_racers").update(
                 {"zapp_balance": balance}
-            ).eq("discord_user_id", user_id).eq("zappy_id", racer["zappy_id"]).execute()
+            ).eq("discord_user_id", user_id).execute()
             await interaction.followup.send(
                 f"⚠️ Withdrawal failed — your balance has been restored.\nContact an admin if this persists.",
                 ephemeral=True,
