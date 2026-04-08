@@ -280,7 +280,8 @@ class JoinZapView(discord.ui.View):
 
 class RaceQueue:
     def __init__(self, mode: str):
-        self.mode = mode
+        self.mode          = mode
+        self.board_msg_id: int | None = None  # set by _post_new_board, never reset
         self.reset()
 
     def reset(self):
@@ -295,8 +296,7 @@ class RaceQueue:
         self.duel_id:        str | None  = None
         self.after_round:    int         = 0
         self.locked:         bool        = False
-        # board_msg_id intentionally NOT reset — the new board is posted
-        # by _post_new_board after each race and sets its own ID
+        # board_msg_id intentionally NOT reset — persists across races
 
 
 algo_queue = RaceQueue("algo")
