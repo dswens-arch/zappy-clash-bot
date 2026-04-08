@@ -1106,14 +1106,6 @@ class GrandPrixCog(commands.Cog):
     async def gpregister(self, interaction: discord.Interaction, wallet_address: str, zappy_id: str):
         await interaction.response.defer(ephemeral=True)
         user_id  = str(interaction.user.id)
-        existing = await get_racer(self.db, user_id)
-
-        if existing:
-            await interaction.followup.send(
-                f"Already registered with **{existing['zappy_id']}**. Use `/gpstats` to check in.",
-                ephemeral=True,
-            )
-            return
 
         if len(wallet_address) != 58:
             await interaction.followup.send(
