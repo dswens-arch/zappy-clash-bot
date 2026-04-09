@@ -867,7 +867,16 @@ async def cmd_expedition(interaction: discord.Interaction):
     user_id = str(interaction.user.id)
 
     # Check already ran today
-    if expedition_already_ran_today(user_id):
+    try:
+        already_ran = await asyncio.to_thread(expedition_already_ran_today, user_id)
+    except Exception as e:
+        print(f"⚠️ Supabase error in /expedition already_ran check: {e}")
+        await interaction.followup.send(
+            "⚠️ Couldn't reach the database right now. Try again in a moment!",
+            ephemeral=True
+        )
+        return
+    if already_ran:
         await interaction.followup.send(
             "⏳ You've already run an expedition today. Come back tomorrow!",
             ephemeral=True
@@ -875,7 +884,15 @@ async def cmd_expedition(interaction: discord.Interaction):
         return
 
     # Check wallet linked
-    wallet = get_wallet(user_id)
+    try:
+        wallet = await asyncio.to_thread(get_wallet, user_id)
+    except Exception as e:
+        print(f"⚠️ Supabase error in /expedition get_wallet: {e}")
+        await interaction.followup.send(
+            "⚠️ Couldn't reach the database right now. Try again in a moment!",
+            ephemeral=True
+        )
+        return
     if not wallet:
         await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
         return
@@ -899,7 +916,15 @@ async def cmd_expedition(interaction: discord.Interaction):
 
     # Get combined CP for zone unlock
     from database import get_player_rank
-    rank_data   = get_player_rank(user_id)
+    try:
+        rank_data = await asyncio.to_thread(get_player_rank, user_id)
+    except Exception as e:
+        print(f"⚠️ Supabase error in /expedition get_player_rank: {e}")
+        await interaction.followup.send(
+            "⚠️ Couldn't reach the database right now. Try again in a moment!",
+            ephemeral=True
+        )
+        return
     cp_total    = rank_data.get("cp_total", 0)
     eligible    = get_eligible_zones(cp_total)
     zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
