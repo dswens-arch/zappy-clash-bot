@@ -43,7 +43,6 @@ class Fighter:
     ability_used:    bool  = field(default=False, init=False)
     survived_zero:   bool  = field(default=False, init=False)   # Nine Lives tracker
     iron_shell_used: bool  = field(default=False, init=False)   # Iron Shell one-time shield tracker
-    divine_shield_active: bool = field(default=False, init=False)  # Blocks all incoming damage this round
 
     @property
     def display_name(self) -> str:
@@ -86,10 +85,8 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     ins_reduction = defender.INS * 0.3   # INS reduces ~30% of damage
     damage = max(1, raw_damage - ins_reduction)
 
-    # Crit check — guaranteed_crit set by Patience ability
-    is_crit = getattr(attacker, 'guaranteed_crit', False) or random.random() < attacker.crit_chance
-    if getattr(attacker, 'guaranteed_crit', False):
-        attacker.guaranteed_crit = False   # consume it
+    # Crit check
+    is_crit = random.random() < attacker.crit_chance
     flavor_note = ""
 
     if is_crit:
@@ -136,8 +133,8 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         return True, f"🔥 **INFERNO SURGE!** {fighter.display_name}'s VLT doubles this round!"
 
     elif name == "Divine Shield":
-        fighter.divine_shield_active = True
-        return True, f"😇 **DIVINE SHIELD!** {fighter.display_name} is protected — all incoming damage blocked this round!"
+        opponent.INS = min(100, opponent.INS - 30)
+        return True, f"😇 **DIVINE SHIELD!** {fighter.display_name} blocks all incoming damage this round!"
 
     elif name == "Soul Deal":
         steal = 10
@@ -171,23 +168,6 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         else:
             fighter.SPK = min(100, fighter.SPK * 3)
         return True, f"🐱 **CHAOS MODE!** The Shitty Kitty goes feral — {stat} tripled! Nobody expected that."
-
-    elif name == "Pack Hunt":
-        # VLT escalates each round — tracked via round_num passed from caller
-        bonus = (round_num - 1) * 10
-        fighter.VLT = min(100, fighter.VLT + bonus)
-        fighter.ability_used = False   # re-triggers every round
-        return True, f"🐺 **PACK HUNT!** {fighter.display_name} closes in — VLT +{bonus} this round!"
-
-    elif name == "Patience":
-        if round_num == 1:
-            # Skip round 1, set up guaranteed crit for round 2
-            fighter.ability_used = False   # don't lock it out
-            return True, f"🐸 **PATIENCE...** {fighter.display_name} goes still. Something is coming."
-        elif round_num == 2:
-            fighter.crit_multiplier = getattr(fighter, 'crit_multiplier', 2.0) * 2
-            fighter.guaranteed_crit = True
-            return True, f"🐸 **PATIENCE PAYS OFF!** {fighter.display_name} strikes — guaranteed crit, double multiplier!"
 
     elif name == "Chroma Shift":
         stats = {"VLT": fighter.VLT, "INS": fighter.INS, "SPK": fighter.SPK}
@@ -318,12 +298,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # ── Fighter A attacks Fighter B ──
         dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
 
-        # Divine Shield: fighter_b takes no damage this round
-        if fighter_b.divine_shield_active:
-            round_msg.append(f"  😇 {fighter_b.display_name}'s Divine Shield holds — 0 damage!")
-            fighter_b.divine_shield_active = False
         # Iron Shell: one-time full absorb, only if fighter_b has the combo
-        elif fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
+        if fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
             dmg_a = 0
             fighter_b.iron_shell_used = True
             round_msg.append(f"  🛡️ {fighter_b.display_name}'s Iron Shell absorbs everything — survives on 1 HP!")
@@ -340,12 +316,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # ── Fighter B attacks Fighter A ──
         dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
 
-        # Divine Shield: fighter_a takes no damage this round
-        if fighter_a.divine_shield_active:
-            round_msg.append(f"  😇 {fighter_a.display_name}'s Divine Shield holds — 0 damage!")
-            fighter_a.divine_shield_active = False
         # Iron Shell: one-time full absorb, only if fighter_a has the combo
-        elif fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
+        if fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
             dmg_b = 0
             fighter_a.iron_shell_used = True
             round_msg.append(f"  🛡️ {fighter_a.display_name}'s Iron Shell absorbs everything — survives on 1 HP!")
@@ -387,9 +359,20 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
     elif fighter_b.hp > fighter_a.hp:
         winner, loser = fighter_b, fighter_a
     else:
-        # Tie — higher VLT wins
-        winner, loser = (fighter_a, fighter_b) if fighter_a.VLT >= fighter_b.VLT else (fighter_b, fighter_a)
-        log.append("⚡ It's a tie on HP — higher VLT wins the tiebreak!")
+        # Tie — weighted random roll based on total stats
+        total_a = fighter_a.VLT + fighter_a.INS + fighter_a.SPK
+        total_b = fighter_b.VLT + fighter_b.INS + fighter_b.SPK
+        roll_a  = random.randint(1, total_a)
+        roll_b  = random.randint(1, total_b)
+        log.append(
+            f"⚡ **TIE — Fate decides!**\n"
+            f"  🎲 **{fighter_a.display_name}** rolls **{roll_a}** (out of {total_a})\n"
+            f"  🎲 **{fighter_b.display_name}** rolls **{roll_b}** (out of {total_b})"
+        )
+        if roll_a >= roll_b:
+            winner, loser = fighter_a, fighter_b
+        else:
+            winner, loser = fighter_b, fighter_a
 
     # ── Result message ──
     is_upset = (winner == fighter_a and a_is_underdog) or (winner == fighter_b and not a_is_underdog)
