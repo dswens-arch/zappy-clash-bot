@@ -2172,7 +2172,7 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             # Fetch Zappy data — use collection table for consistent stats
             from zappy_collection import ZAPPY_COLLECTION
-            from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+            from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS, HERO_IMAGES, COLLAB_IMAGES
             from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
 
             def _get_fighter_data(asset_id):
@@ -2185,7 +2185,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                             "asset_id":  asset_id,
                             "name":      f"Zappy Hero — {hero_type}",
                             "unit_name": hero_type,
-                            "image_url": "",
+                            "image_url": HERO_IMAGES.get(hero_type, ""),
                             "stats":     hero_data,
                             "traits":    {"hero_type": hero_type},
                         }
@@ -2199,7 +2199,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                             "asset_id":  asset_id,
                             "name":      f"{collab_type}",
                             "unit_name": collab_type,
-                            "image_url": "",
+                            "image_url": COLLAB_IMAGES.get(collab_type, ""),
                             "stats":     collab_data,
                             "traits":    {"collab_type": collab_type},
                         }
