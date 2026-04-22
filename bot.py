@@ -2297,8 +2297,15 @@ async def close_and_resolve(channel: discord.TextChannel):
             lose_cp  = int(CP_LOSS * cp_multiplier)
             upset_cp = int(CP_UPSET_BONUS * cp_multiplier) if result["is_upset"] else 0
 
-            await asyncio.to_thread(award_cp, winner_id, win_cp + upset_cp, f"bracket_win_{bracket_id}")
-            await asyncio.to_thread(award_cp, loser_id,  lose_cp,            f"bracket_loss_{bracket_id}")
+            try:
+                await asyncio.to_thread(award_cp, winner_id, win_cp + upset_cp, f"bracket_win_{bracket_id}")
+            except Exception as cp_err:
+                print(f"[ERROR] award_cp failed for winner {winner_id}: {cp_err}")
+
+            try:
+                await asyncio.to_thread(award_cp, loser_id, lose_cp, f"bracket_loss_{bracket_id}")
+            except Exception as cp_err:
+                print(f"[ERROR] award_cp failed for loser {loser_id}: {cp_err}")
 
             # Check CP milestones for both players
             from database import get_player_rank
@@ -2419,7 +2426,10 @@ async def close_and_resolve(channel: discord.TextChannel):
             champ_name = champ_asset["name"] if champ_asset else f"ASA {next_round[0]['asset_id']}"
 
             bonus_cp = int(CP_BRACKET_WIN * cp_multiplier)
-            await asyncio.to_thread(award_cp, champion_id, bonus_cp, f"bracket_champion_{bracket_id}")
+            try:
+                await asyncio.to_thread(award_cp, champion_id, bonus_cp, f"bracket_champion_{bracket_id}")
+            except Exception as cp_err:
+                print(f"[ERROR] award_cp failed for champion {champion_id}: {cp_err}")
 
             # Set 48-hour cooldown on champion Zappy
             await asyncio.to_thread(set_champion_cooldown, next_round[0]["asset_id"])
