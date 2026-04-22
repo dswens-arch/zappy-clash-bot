@@ -685,6 +685,62 @@ async def cmd_testbracket(interaction: discord.Interaction):
     await close_and_resolve(channel)
 
 
+@tree.command(name="startbracket", description="ADMIN ONLY - manually start a real bracket session with full 30-min registration")
+@app_commands.describe(session="Which session type to run: morning or evening")
+@app_commands.choices(session=[
+    app_commands.Choice(name="morning", value="morning"),
+    app_commands.Choice(name="evening", value="evening"),
+])
+async def cmd_startbracket(interaction: discord.Interaction, session: str = "evening"):
+    """
+    Emergency manual bracket trigger for when the scheduled session fails.
+    Uses the real session flow — full 30-minute registration window, then resolves.
+    Only the server owner can run this.
+    """
+    global active_bracket_id, registration_open
+
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+        return
+
+    if registration_open:
+        await interaction.response.send_message(
+            f"⚠️ A bracket is already open (`{active_bracket_id}`). "
+            f"Wait for it to close before starting another.",
+            ephemeral=True
+        )
+        return
+
+    await interaction.response.send_message(
+        f"⚡ Starting **{session}** bracket manually — 30-minute registration window opening now.",
+        ephemeral=True
+    )
+
+    channel = bot.get_channel(CLASH_CHANNEL)
+
+    # Use a timestamped bracket ID so it doesn't collide with a scheduled one
+    bracket_id = f"{session}_{datetime.now(timezone.utc).date().isoformat()}_manual"
+    active_bracket_id = bracket_id
+    registration_open = True
+
+    session_name = "☀️ Morning" if session == "morning" else "🌙 Night"
+    cp_note = "\n\nTonight's Night session has a **1.25x CP multiplier** on all wins. 🔥" if session == "evening" else ""
+
+    await channel.send(
+        f"@everyone\n"
+        f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
+        f"\n"
+        f"Registration is open for **30 minutes**.\n"
+        f"Use `/clash` to enter your Zappy!"
+        f"{cp_note}"
+    )
+
+    # Full 30-minute window
+    await asyncio.sleep(30 * 60)
+
+    await close_and_resolve(channel)
+
+
 @tree.command(name="streak", description="Check your daily play streak")
 async def cmd_streak(interaction: discord.Interaction):
     """Show streak details and milestones."""
