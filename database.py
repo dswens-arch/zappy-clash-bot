@@ -146,34 +146,48 @@ CP_LOSS          =  30   # Participation CP
 CP_UPSET_BONUS   =  40
 CP_BRACKET_WIN   = 200   # Winning the full bracket
 
-def award_cp(discord_user_id: str, amount: int, reason: str) -> dict:
+def award_cp(discord_user_id: str, amount: int, reason: str, retries: int = 3, delay: float = 2.0) -> dict:
     """
     Award Clash Points to a player.
     Upserts their total — adds to existing CP.
+    Retries on transient Supabase errors (e.g. 502 Bad Gateway).
     """
-    db = get_supabase()
+    import time
 
-    # Get current CP
-    existing = db.table("leaderboard").select("cp_total").eq("discord_user_id", discord_user_id).execute()
-    current_cp = existing.data[0]["cp_total"] if existing.data else 0
+    last_error = None
+    for attempt in range(retries):
+        try:
+            db = get_supabase()
 
-    new_cp = current_cp + amount
-    data = {
-        "discord_user_id": discord_user_id,
-        "cp_total":        new_cp,
-        "updated_at":      datetime.now(timezone.utc).isoformat(),
-    }
-    result = db.table("leaderboard").upsert(data, on_conflict="discord_user_id").execute()
+            # Get current CP
+            existing = db.table("leaderboard").select("cp_total").eq("discord_user_id", discord_user_id).execute()
+            current_cp = existing.data[0]["cp_total"] if existing.data else 0
 
-    # Log the CP transaction
-    db.table("cp_log").insert({
-        "discord_user_id": discord_user_id,
-        "amount":          amount,
-        "reason":          reason,
-        "logged_at":       datetime.now(timezone.utc).isoformat(),
-    }).execute()
+            new_cp = current_cp + amount
+            data = {
+                "discord_user_id": discord_user_id,
+                "cp_total":        new_cp,
+                "updated_at":      datetime.now(timezone.utc).isoformat(),
+            }
+            result = db.table("leaderboard").upsert(data, on_conflict="discord_user_id").execute()
 
-    return {"discord_user_id": discord_user_id, "cp_awarded": amount, "new_total": new_cp}
+            # Log the CP transaction
+            db.table("cp_log").insert({
+                "discord_user_id": discord_user_id,
+                "amount":          amount,
+                "reason":          reason,
+                "logged_at":       datetime.now(timezone.utc).isoformat(),
+            }).execute()
+
+            return {"discord_user_id": discord_user_id, "cp_awarded": amount, "new_total": new_cp}
+
+        except Exception as e:
+            last_error = e
+            print(f"[WARN] award_cp attempt {attempt + 1}/{retries} failed for {discord_user_id}: {e}")
+            if attempt < retries - 1:
+                time.sleep(delay)
+
+    raise RuntimeError(f"award_cp failed after {retries} attempts for {discord_user_id}: {last_error}")
 
 
 def get_leaderboard(limit: int = 10) -> list:
