@@ -33,6 +33,15 @@ from discord.ext import commands, tasks
 from database import get_supabase   # reuse existing Supabase client
 
 from gp_accounting import credit, debit, get_balance, get_ledger, reconcile_algo
+# Feature flag — set to True to use the new position-based race engine
+USE_RACE_V2 = True
+
+from race_engine_v2 import (
+    simulate_race   as simulate_race_v2,
+    narrate_race    as narrate_race_v2,
+    RaceResult,
+    FINISH_LINE,
+)
 from race_engine import (
     seed_stats,
     resolve_race,
