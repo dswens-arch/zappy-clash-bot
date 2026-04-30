@@ -32,6 +32,7 @@ from discord.ext import commands, tasks
 
 from database import get_supabase   # reuse existing Supabase client
 
+from gp_accounting import credit, debit, get_balance, get_ledger, reconcile_algo
 from race_engine import (
     seed_stats,
     resolve_race,
@@ -593,11 +594,14 @@ class GrandPrixCog(commands.Cog):
             q.player_a_id = None; q.player_a_racer = None
             return
 
-        # Deduct from ALL rows for this player (keeps all Zappies in sync)
-        new_balance = balance - 5
-        self.db.table("zappy_racers").update(
-            {"algo_balance": new_balance}
-        ).eq("discord_user_id", q.player_a_id).execute()
+        result = debit(self.db, q.player_a_id, "ALGO", 5,
+                      reason="race_entry", ref_id=None,
+                      zappy_id=racer["zappy_id"])
+        if not result["ok"]:
+            await interaction.followup.send(result["error"], ephemeral=True)
+            active_players.discard(q.player_a_id)
+            q.player_a_id = None; q.player_a_racer = None
+            return
 
         duel = await create_duel(self.db, q.player_a_id, q.player_a_id)
         q.duel_id     = duel["id"]
@@ -606,7 +610,7 @@ class GrandPrixCog(commands.Cog):
         await self._update_board(channel, q, "waiting", zappy_id=racer["zappy_id"])
         await interaction.followup.send(
             f"✅ **5 ALGO** deducted — you're in the queue!\n"
-            f"Remaining balance: **{new_balance:.2f} ALGO**\n"
+            f"Remaining balance: **{result['balance_after']:.2f} ALGO**\n"
             f"Waiting for an opponent...",
             ephemeral=True,
         )
@@ -625,17 +629,21 @@ class GrandPrixCog(commands.Cog):
             q.player_b_id = None; q.player_b_racer = None
             return
 
-        new_balance = balance - 5
-        self.db.table("zappy_racers").update(
-            {"algo_balance": new_balance}
-        ).eq("discord_user_id", q.player_b_id).execute()
+        result = debit(self.db, q.player_b_id, "ALGO", 5,
+                      reason="race_entry", ref_id=None,
+                      zappy_id=racer["zappy_id"])
+        if not result["ok"]:
+            await interaction.followup.send(result["error"], ephemeral=True)
+            active_players.discard(q.player_b_id)
+            q.player_b_id = None; q.player_b_racer = None
+            return
 
         self.db.table("race_duels").update({"opponent_id": q.player_b_id}).eq("id", q.duel_id).execute()
         q.player_b_paid = True
 
         await interaction.followup.send(
             f"✅ **5 ALGO** deducted — race starting!\n"
-            f"Remaining balance: **{new_balance:.2f} ALGO**",
+            f"Remaining balance: **{result['balance_after']:.2f} ALGO**",
             ephemeral=True,
         )
         await self._launch_race(q, channel)
@@ -840,13 +848,9 @@ class GrandPrixCog(commands.Cog):
 
     async def _settle(self, q, channel, result, winner_racer, loser_racer, winner_id, loser_id, test_mode=False):
         if q.mode == "algo" and not test_mode:
-            # Credit winner 9 ALGO to primary balance row
-            winner_primary = await get_racer(self.db, winner_id)
-            if winner_primary:
-                new_winner_bal = winner_primary.get("algo_balance", 0) + 9
-                self.db.table("zappy_racers").update(
-                    {"algo_balance": new_winner_bal}
-                ).eq("discord_user_id", winner_id).execute()
+            credit(self.db, winner_id, "ALGO", 9,
+                   reason="race_win", ref_id=q.duel_id,
+                   zappy_id=winner_racer["zappy_id"])
 
             await write_race_result(self.db, q.duel_id, result, winner_id, "custodial")
 
@@ -872,13 +876,9 @@ class GrandPrixCog(commands.Cog):
 
         else:  # zap mode
             if not test_mode:
-                # Credit winner ZAPP to primary balance row
-                winner_primary = await get_racer(self.db, winner_id)
-                if winner_primary:
-                    new_winner_zapp = winner_primary.get("zapp_balance", 0) + ZAP_PAYOUT
-                    self.db.table("zappy_racers").update(
-                        {"zapp_balance": new_winner_zapp}
-                    ).eq("discord_user_id", winner_id).execute()
+                credit(self.db, winner_id, "ZAPP", ZAP_PAYOUT,
+                       reason="race_win", ref_id=q.duel_id,
+                       zappy_id=winner_racer["zappy_id"])
 
                 await write_race_result(self.db, q.duel_id, result, winner_id, "custodial")
                 await channel.send(
@@ -1213,6 +1213,131 @@ class GrandPrixCog(commands.Cog):
                 f"**{target.display_name}** wasn't in any queue or active state.",
                 ephemeral=True,
             )
+
+    # -----------------------------------------------------------------------
+    # /gprefund
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gprefund", description="(Admin) Refund ALGO or ZAPP to a player.")
+    @app_commands.describe(
+        player="Player to refund",
+        currency="ALGO or ZAPP",
+        amount="Amount to refund",
+    )
+    @app_commands.choices(currency=[
+        app_commands.Choice(name="ALGO", value="algo"),
+        app_commands.Choice(name="ZAPP", value="zapp"),
+    ])
+    @app_commands.default_permissions(administrator=True)
+    async def gprefund(self, interaction: discord.Interaction, player: discord.Member, currency: app_commands.Choice[str], amount: float):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(player.id)
+        racer   = await get_racer(self.db, user_id)
+
+        if not racer:
+            await interaction.followup.send(f"**{player.display_name}** isn't registered.", ephemeral=True)
+            return
+
+        cur  = "ALGO" if currency.value == "algo" else "ZAPP"
+        res  = credit(self.db, user_id, cur, amount,
+                      reason="admin_refund", ref_id=None)
+        before = res["balance_before"]
+        after  = res["balance_after"]
+        if cur == "ALGO":
+            await interaction.followup.send(
+                f"✅ Refunded **{amount:.2f} ALGO** to **{player.display_name}**\n"
+                f"Balance: {before:.2f} → {after:.2f} ALGO",
+                ephemeral=True,
+            )
+        else:
+            await interaction.followup.send(
+                f"✅ Refunded **{int(amount):,} ZAPP** to **{player.display_name}**\n"
+                f"Balance: {int(before):,} → {int(after):,} ZAPP",
+                ephemeral=True,
+            )
+
+    # -----------------------------------------------------------------------
+    # /gpledger — transaction history
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpledger", description="View your Grand Prix transaction history.")
+    @app_commands.describe(
+        player="(Admin) View another player's ledger",
+        currency="Filter by ALGO or ZAPP",
+    )
+    @app_commands.choices(currency=[
+        app_commands.Choice(name="ALGO", value="ALGO"),
+        app_commands.Choice(name="ZAPP", value="ZAPP"),
+        app_commands.Choice(name="Both", value=""),
+    ])
+    async def gpledger(self, interaction: discord.Interaction,
+                       currency: app_commands.Choice[str] = None,
+                       player: discord.Member = None):
+        await interaction.response.defer(ephemeral=True)
+
+        is_admin = interaction.user.guild_permissions.administrator
+        if player and not is_admin:
+            await interaction.followup.send("Only admins can view other players' ledgers.", ephemeral=True)
+            return
+
+        target    = player or interaction.user
+        target_id = str(target.id)
+        cur       = currency.value if currency else None
+
+        txns = get_ledger(self.db, target_id, currency=cur or None, limit=15)
+
+        if not txns:
+            await interaction.followup.send("No transactions found.", ephemeral=True)
+            return
+
+        label = "Your" if target == interaction.user else f"{target.display_name}'s"
+        lines = [f"**{label} Recent Transactions**\n"]
+        for t in txns:
+            sign   = "+" if t["amount"] > 0 else ""
+            ts     = t["created_at"][:10]
+            reason = t["reason"].replace("_", " ")
+            lines.append(
+                f"`{ts}` {sign}{t['amount']:,.2f} **{t['currency']}** — {reason} "
+                f"→ bal: {t['balance_after']:,.2f}"
+            )
+
+        await interaction.followup.send("\n".join(lines), ephemeral=True)
+
+    # -----------------------------------------------------------------------
+    # /gpreconcile — admin balance audit
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpreconcile", description="(Admin) Reconcile ALGO balances against on-chain.")
+    @app_commands.default_permissions(administrator=True)
+    async def gpreconcile(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        await interaction.followup.send("🔍 Running reconciliation — this may take a moment...", ephemeral=True)
+
+        try:
+            report = await reconcile_algo(self.db)
+        except Exception as e:
+            await interaction.followup.send(f"Reconciliation failed: {e}", ephemeral=True)
+            return
+
+        lines = [f"**ALGO Reconciliation Report**\n"
+                 f"Checked: {report['checked']} players\n"]
+
+        if report["discrepancies"]:
+            lines.append(f"⚠️ **{len(report['discrepancies'])} discrepancies found:**")
+            for d in report["discrepancies"]:
+                lines.append(
+                    f"`{d['discord_user_id']}` — DB: {d['db_balance']:.2f} | "
+                    f"Expected: {d['expected']:.2f} | Diff: {d['diff']:+.2f} ALGO"
+                )
+        else:
+            lines.append(f"✅ All {len(report['clean'])} players balanced")
+
+        if report["errors"]:
+            lines.append(f"\n❌ {len(report['errors'])} errors during check")
+            for e in report["errors"]:
+                lines.append(f"`{e['discord_user_id']}` — {e['error']}")
+
+        await interaction.followup.send("\n".join(lines), ephemeral=True)
 
     # -----------------------------------------------------------------------
     # /gpunregister
@@ -1558,26 +1683,17 @@ class GrandPrixCog(commands.Cog):
             )
             return
 
-        # CRITICAL: Deduct from Supabase FIRST before sending on-chain.
-        # Re-fetch balance at deduction time to prevent race conditions.
-        # Only deduct if balance still covers the amount.
-        new_bal = round(balance - withdraw_amount, 6)
-        result = (
-            self.db.table("zappy_racers")
-            .update({"algo_balance": new_bal})
-            .eq("discord_user_id", user_id)
-            .eq("zappy_id", racer["zappy_id"])
-            .gte("algo_balance", withdraw_amount)  # only update if balance is sufficient
-            .execute()
-        )
-
-        if not result.data:
-            # Balance was insufficient at deduction time — someone got here twice
+        # Debit via accounting layer (atomic conditional check)
+        debit_result = debit(self.db, user_id, "ALGO", withdraw_amount,
+                             reason="withdrawal", ref_id=None,
+                             zappy_id=racer["zappy_id"])
+        if not debit_result["ok"]:
             await interaction.followup.send(
-                "Withdrawal failed — insufficient balance. Please try again.",
+                f"Withdrawal failed — {debit_result['error']}",
                 ephemeral=True,
             )
             return
+        new_bal = debit_result["balance_after"]
 
         # Balance deducted — now send on-chain
         try:
@@ -1697,14 +1813,10 @@ class GrandPrixCog(commands.Cog):
                     }).execute()
                     credited.add(txid)
 
-                    # Credit balance
-                    racer   = await get_racer(self.db, user_id)
-                    new_bal = racer.get("zapp_balance", 0) + amount
-                    self.db.table("zappy_racers").update(
-                        {"zapp_balance": new_bal}
-                    ).eq("discord_user_id", user_id).eq("zappy_id", zappy_id).execute()
-
-                    print(f"[grand_prix] Credited {amount:,} ZAPP to {user_id} txid={txid[:12]}")
+                    # Credit their balance via accounting layer
+                    credit(self.db, user_id, "ZAPP", amount,
+                           reason="deposit", ref_id=txid)
+                    new_bal = get_balance(self.db, user_id, "ZAPP")
 
                     try:
                         await interaction.followup.send(
@@ -1763,22 +1875,16 @@ class GrandPrixCog(commands.Cog):
             )
             return
 
-        # Deduct first with conditional check
-        new_bal = balance - withdraw_amount
-        result  = (
-            self.db.table("zappy_racers")
-            .update({"zapp_balance": new_bal})
-            .eq("discord_user_id", user_id)
-            .gte("zapp_balance", withdraw_amount)
-            .execute()
-        )
-
-        if not result.data:
+        debit_result = debit(self.db, user_id, "ZAPP", withdraw_amount,
+                             reason="withdrawal", ref_id=None,
+                             zappy_id=racer["zappy_id"])
+        if not debit_result["ok"]:
             await interaction.followup.send(
-                "Withdrawal failed — insufficient balance. Please try again.",
+                f"Withdrawal failed — {debit_result['error']}",
                 ephemeral=True,
             )
             return
+        new_bal = int(debit_result["balance_after"])
 
         # Send on-chain
         try:
