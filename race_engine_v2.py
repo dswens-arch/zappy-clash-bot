@@ -195,96 +195,94 @@ async def narrate_race(
     mode: str = "algo",
 ) -> None:
     """
-    Send narration messages to the channel tick by tick.
-    Filters to ~10 interesting moments so the race reads well
-    regardless of how many ticks it took.
+    Narrate the race by editing a single message for track updates,
+    and posting key event callouts as separate messages.
     """
 
-    winner_name  = name_a if result.winner == "a" else name_b
-    loser_name   = name_b if result.winner == "a" else name_a
-    margin       = abs(result.pos_a - result.pos_b)
-    finish_line  = _finish_phrase(margin)
+    winner_name = name_a if result.winner == "a" else name_b
+    loser_name  = name_b if result.winner == "a" else name_a
+    margin      = abs(result.pos_a - result.pos_b)
+    finish_line = _finish_phrase(margin)
+    ticks       = result.ticks
 
-    # Opening
+    # Opening post
     await channel.send(
         f"🚦 **LIGHTS OUT!**\n"
         f"**{name_a}** vs **{name_b}** — first to position {FINISH_LINE} wins!"
     )
     await asyncio.sleep(BEAT_SECONDS)
 
-    # Select ticks to narrate — always include first, last few, and interesting moments
-    ticks = result.ticks
-    interesting = set()
-    interesting.add(0)                          # first tick
-    interesting.add(len(ticks) - 1)            # last tick
-    interesting.add(len(ticks) - 2)            # second to last
+    # Post the live track message — this one gets edited each tick
+    def render_track(t: Tick) -> str:
+        a_marker = "🟢" if t.pos_a >= t.pos_b else "🔴"
+        b_marker = "🟢" if t.pos_b > t.pos_a  else "🔴"
+        track_a  = build_track(t.pos_a, a_marker)
+        track_b  = build_track(t.pos_b, b_marker)
+        gap_line = _gap_phrase(t.gap, t.leader, name_a, name_b)
+        return (
+            f"**{name_a}**  `{t.pos_a:2d}/20`\n{track_a}\n\n"
+            f"**{name_b}**  `{t.pos_b:2d}/20`\n{track_b}\n\n"
+            f"*{gap_line}*"
+        )
 
-    # Add surges, big stumbles, lead changes
-    prev_leader = None
-    for i, t in enumerate(ticks):
+    track_msg = await channel.send(render_track(ticks[0]))
+    await asyncio.sleep(BEAT_SECONDS)
+
+    # Select interesting ticks to narrate callouts for
+    interesting = set()
+    prev_leader = ticks[0].leader
+    for i, t in enumerate(ticks[1:], 1):
         if t.surge_a or t.surge_b:
             interesting.add(i)
         if t.move_a <= -2 or t.move_b <= -2:
             interesting.add(i)
         if t.leader != prev_leader and t.leader != "tied":
             interesting.add(i)
-            prev_leader = t.leader
+        prev_leader = t.leader
 
-    # Add periodic updates every ~3 ticks
-    for i in range(0, len(ticks), 3):
-        interesting.add(i)
-
-    selected = sorted(interesting)[:12]   # cap at 12 narration beats
-
-    prev_leader = None
-    for i in selected:
-        t = ticks[i]
-
-        # Build track display
-        if result.winner == "a":
-            track_a = build_track(t.pos_a, "🟢" if t.pos_a >= t.pos_b else "🔴")
-            track_b = build_track(t.pos_b, "🔴" if t.pos_a >= t.pos_b else "🟢")
-        else:
-            track_a = build_track(t.pos_a, "🔴" if t.pos_b >= t.pos_a else "🟢")
-            track_b = build_track(t.pos_b, "🟢" if t.pos_b >= t.pos_a else "🔴")
-
-        # Event line
+    # Work through all ticks — edit track, post callouts for interesting ones
+    prev_leader = ticks[0].leader
+    for i, t in enumerate(ticks[1:], 1):
         events = []
-        if t.surge_a: events.append(f"⚡ **{name_a}** hits a SURGE!")
-        elif t.move_a <= -2: events.append(f"💥 **{name_a}** stumbles badly!")
-        elif t.move_a == -1: events.append(f"**{name_a}** slips back.")
 
-        if t.surge_b: events.append(f"⚡ **{name_b}** hits a SURGE!")
-        elif t.move_b <= -2: events.append(f"💥 **{name_b}** stumbles badly!")
-        elif t.move_b == -1: events.append(f"**{name_b}** slips back.")
+        if t.surge_a:
+            events.append(f"⚡ **{name_a}** hits a SURGE!")
+        elif t.move_a <= -2:
+            events.append(f"💥 **{name_a}** stumbles badly!")
 
-        # Lead change call-out
+        if t.surge_b:
+            events.append(f"⚡ **{name_b}** hits a SURGE!")
+        elif t.move_b <= -2:
+            events.append(f"💥 **{name_b}** stumbles badly!")
+
         if t.leader != prev_leader and t.leader != "tied" and prev_leader is not None:
             leader_name = name_a if t.leader == "a" else name_b
             events.append(f"🔀 **{leader_name}** takes the lead!")
         prev_leader = t.leader
 
-        gap_line = _gap_phrase(t.gap, t.leader, name_a, name_b)
-        event_line = "  ".join(events) + "\n" if events else ""
+        # Post callout if something notable happened
+        if events:
+            await channel.send("  ".join(events))
+            await asyncio.sleep(0.4)
 
-        msg = (
-            f"{event_line}"
-            f"{name_a}  `{t.pos_a:2d}/20`\n{track_a}\n\n"
-            f"{name_b}  `{t.pos_b:2d}/20`\n{track_b}\n\n"
-            f"*{gap_line}*"
-        )
-        await channel.send(msg)
+        # Always edit the track message
+        await track_msg.edit(content=render_track(t))
         await asyncio.sleep(BEAT_SECONDS)
 
-    # Finish
+    # Final result — edit track to show finish, then post winner message
+    last = ticks[-1]
+    winner_pos = last.pos_a if result.winner == "a" else last.pos_b
+    loser_pos  = last.pos_b if result.winner == "a" else last.pos_a
+
+    final_track = (
+        f"🥇 **{winner_name}**  `{FINISH_LINE}/20`\n{build_track(FINISH_LINE, '🟢')}\n\n"
+        f"**{loser_name}**  `{loser_pos:2d}/20`\n{build_track(loser_pos, '🔴')}"
+    )
+    await track_msg.edit(content=final_track)
     await asyncio.sleep(0.5)
-    winner_pos = result.pos_a if result.winner == "a" else result.pos_b
-    loser_pos  = result.pos_b if result.winner == "a" else result.pos_a
 
     await channel.send(
         f"🏆 **{winner_name} WINS!**\n"
         f"*{finish_line}*\n\n"
-        f"🥇 {winner_name}\n{build_track(FINISH_LINE, '🟢')}\n\n"
-        f"{loser_name}\n{build_track(loser_pos, '🔴')}\n\n"
         f"{payout_str}"
     )
