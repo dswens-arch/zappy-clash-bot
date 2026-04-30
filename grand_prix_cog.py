@@ -1616,14 +1616,10 @@ class GrandPrixCog(commands.Cog):
                     }).execute()
                     credited.add(txid)
 
-                    # Now credit their balance
-                    racer   = await get_racer(self.db, user_id)
-                    new_bal = round(racer.get("algo_balance", 0) + amount_algo, 6)
-                    self.db.table("zappy_racers").update(
-                        {"algo_balance": new_bal}
-                    ).eq("discord_user_id", user_id).eq("zappy_id", racer["zappy_id"]).execute()
-
-                    print(f"[grand_prix] Credited {amount_algo:.2f} ALGO to {user_id} txid={txid[:12]}")
+                    # Credit via accounting layer — logs the transaction
+                    result  = credit(self.db, user_id, "ALGO", amount_algo,
+                                     reason="deposit", ref_id=txid)
+                    new_bal = result["balance_after"]
 
                     try:
                         await interaction.followup.send(
