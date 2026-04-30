@@ -827,29 +827,98 @@ class GrandPrixCog(commands.Cog):
 
         self.db.table("race_duels").update({"status": "racing"}).eq("id", q.duel_id).execute()
 
-        # Use pre-selected stats from queue (set during Zappy picker)
         stats_a = q.player_a_stats or await get_stats(self.db, racer_a["zappy_id"])
         stats_b = q.player_b_stats or await get_stats(self.db, racer_b["zappy_id"])
-        result  = resolve_race(stats_a, stats_b)
 
-        race_msg = await channel.send("🏁 **Race starting...**")
+        id_a = racer_a.get("discord_user_id") or q.player_a_id
+        id_b = racer_b.get("discord_user_id") or q.player_b_id
 
-        id_a = racer_a.get("discord_user_id") or (self.db.table("zappy_racers").select("discord_user_id").eq("zappy_id", racer_a["zappy_id"]).execute().data or [{}])[0].get("discord_user_id", "unknown")
-        id_b = racer_b.get("discord_user_id") or (self.db.table("zappy_racers").select("discord_user_id").eq("zappy_id", racer_b["zappy_id"]).execute().data or [{}])[0].get("discord_user_id", "unknown")
+        if USE_RACE_V2:
+            result = await asyncio.to_thread(simulate_race_v2, stats_a, stats_b)
+            payout_str = (
+                "💰 **9 ALGO** to the winner" if q.mode == "algo"
+                else "💰 **1,000 ZAPP** to the winner"
+            )
+            await narrate_race_v2(
+                channel, result,
+                name_a=racer_a["zappy_id"],
+                name_b=racer_b["zappy_id"],
+                payout_str=payout_str,
+                mode=q.mode,
+            )
+            await self._settle_v2(q, channel, result, racer_a, racer_b, id_a, id_b)
+        else:
+            result   = resolve_race(stats_a, stats_b)
+            race_msg = await channel.send("🏁 **Race starting...**")
+            await run_race_narration(
+                message=race_msg, result=result,
+                name_a=f"<@{id_a}>", name_b=f"<@{id_b}>",
+                zappy_a=racer_a["zappy_id"], zappy_b=racer_b["zappy_id"],
+                mode=q.mode,
+            )
+            winner_racer = racer_a if result["winner"] == "a" else racer_b
+            loser_racer  = racer_b if result["winner"] == "a" else racer_a
+            winner_id    = id_a    if result["winner"] == "a" else id_b
+            loser_id     = id_b    if result["winner"] == "a" else id_a
+            await self._settle(q, channel, result, winner_racer, loser_racer, winner_id, loser_id)
 
-        await run_race_narration(
-            message=race_msg, result=result,
-            name_a=f"<@{id_a}>", name_b=f"<@{id_b}>",
-            zappy_a=racer_a["zappy_id"], zappy_b=racer_b["zappy_id"],
-            mode=q.mode,
+    async def _settle_v2(self, q: RaceQueue, channel, result, racer_a, racer_b, id_a, id_b):
+        """Settle a v2 position-based race result."""
+        winner_id    = id_a if result.winner == "a" else id_b
+        loser_id     = id_b if result.winner == "a" else id_a
+        winner_racer = racer_a if result.winner == "a" else racer_b
+        loser_racer  = racer_b if result.winner == "a" else racer_a
+        test_mode    = (id_a == id_b)
+
+        # Win/loss records
+        self.db.table("zappy_racers").update(
+            {"wins": winner_racer.get("wins", 0) + 1}
+        ).eq("discord_user_id", winner_id).eq("zappy_id", winner_racer["zappy_id"]).execute()
+        self.db.table("zappy_racers").update(
+            {"losses": loser_racer.get("losses", 0) + 1}
+        ).eq("discord_user_id", loser_id).eq("zappy_id", loser_racer["zappy_id"]).execute()
+
+        # Cooldowns
+        from datetime import datetime, timezone, timedelta
+        now = datetime.now(timezone.utc)
+        self.db.table("zappy_stats").update({"last_raced_at": now.isoformat()}).eq("zappy_id", winner_racer["zappy_id"]).execute()
+        self.db.table("zappy_stats").update({"last_raced_at": now.isoformat()}).eq("zappy_id", loser_racer["zappy_id"]).execute()
+
+        if q.mode == "algo" and not test_mode:
+            credit(self.db, winner_id, "ALGO", 9,
+                   reason="race_win", ref_id=q.duel_id,
+                   zappy_id=winner_racer["zappy_id"])
+            await channel.send(
+                f"🏦 **{winner_racer['zappy_id']}** wins **9 ALGO** — credited to deposit balance\n"
+                f"Use `/gpwithdraw` to send to your wallet anytime."
+            )
+        elif q.mode == "zap" and not test_mode:
+            credit(self.db, winner_id, "ZAPP", 1000,
+                   reason="race_win", ref_id=q.duel_id,
+                   zappy_id=winner_racer["zappy_id"])
+            await channel.send(
+                f"🪙 **{winner_racer['zappy_id']}** wins **1,000 ZAPP** — credited to deposit balance\n"
+                f"Use `/gpzapwithdraw` to send to your wallet anytime."
+            )
+        elif test_mode:
+            await channel.send("🧪 Test complete — no funds moved")
+
+        # Board result
+        score_a = 1 if result.winner == "a" else 0
+        score_b = 0 if result.winner == "a" else 1
+        await self._update_board(channel, q, "result",
+            zappy_a=racer_a["zappy_id"],
+            zappy_b=racer_b["zappy_id"],
+            winner=winner_racer["zappy_id"],
+            score_a=score_a, score_b=score_b,
         )
 
-        winner_racer = racer_a if result["winner"] == "a" else racer_b
-        loser_racer  = racer_b if result["winner"] == "a" else racer_a
-        winner_id    = id_a    if result["winner"] == "a" else id_b
-        loser_id     = id_b    if result["winner"] == "a" else id_a
-
-        await self._settle(q, channel, result, winner_racer, loser_racer, winner_id, loser_id)
+        # Reset and post new empty board
+        active_players.discard(id_a)
+        active_players.discard(id_b)
+        q.reset()
+        await asyncio.sleep(2)
+        await self._post_new_board(channel, q)
 
     # -----------------------------------------------------------------------
     # Settle — payout, ZAP, records, board
@@ -1081,29 +1150,33 @@ class GrandPrixCog(commands.Cog):
         self.db.table("race_duels").update({"status": "racing"}).eq("id", q.duel_id).execute()
 
         stats_a = await get_stats(self.db, racer["zappy_id"])
-        result  = resolve_race(stats_a, cpu_stats)
-
         mode_label = "ALGO" if mode.value == "algo" else "ZAPP"
-        race_msg = await channel.send(f"🧪 **TEST RACE ({mode_label} mode) — no real funds move**")
 
-        await run_race_narration(
-            message=race_msg, result=result,
-            name_a=f"<@{user_id}>", name_b="🤖 CPU",
-            zappy_a=racer["zappy_id"], zappy_b=CPU_ZAPPY_ID,
-            mode=mode.value,
-        )
-
-        winner_racer = racer      if result["winner"] == "a" else cpu_racer
-        loser_racer  = cpu_racer  if result["winner"] == "a" else racer
-        winner_id    = user_id    if result["winner"] == "a" else "cpu"
-        loser_id     = "cpu"      if result["winner"] == "a" else user_id
-
-        await self._settle(
-            q, channel, result,
-            winner_racer, loser_racer,
-            winner_id, loser_id,
-            test_mode=True,
-        )
+        if USE_RACE_V2:
+            result = await asyncio.to_thread(simulate_race_v2, stats_a, cpu_stats)
+            payout_str = f"🧪 *Test mode ({mode_label}) — no real funds moved*"
+            await narrate_race_v2(
+                channel, result,
+                name_a=racer["zappy_id"],
+                name_b=cpu_racer["zappy_id"],
+                payout_str=payout_str,
+                mode=mode.value,
+            )
+            await self._settle_v2(q, channel, result, racer, cpu_racer, user_id, "cpu")
+        else:
+            result   = resolve_race(stats_a, cpu_stats)
+            race_msg = await channel.send(f"🧪 **TEST RACE ({mode_label} mode) — no real funds move**")
+            await run_race_narration(
+                message=race_msg, result=result,
+                name_a=f"<@{user_id}>", name_b="🤖 CPU",
+                zappy_a=racer["zappy_id"], zappy_b=CPU_ZAPPY_ID,
+                mode=mode.value,
+            )
+            winner_racer = racer     if result["winner"] == "a" else cpu_racer
+            loser_racer  = cpu_racer if result["winner"] == "a" else racer
+            winner_id    = user_id   if result["winner"] == "a" else "cpu"
+            loser_id     = "cpu"     if result["winner"] == "a" else user_id
+            await self._settle(q, channel, result, winner_racer, loser_racer, winner_id, loser_id, test_mode=True)
 
     # -----------------------------------------------------------------------
     # /gpregister
