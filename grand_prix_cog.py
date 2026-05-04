@@ -383,10 +383,25 @@ class GrandPrixCog(commands.Cog):
             return
 
         # Fetch all registered Zappies for this player with their stats
-        available = await self._get_available_racers(user_id)
-        if not available:
+        available, on_cooldown = await self._get_all_racers_with_cooldown(user_id)
+
+        if not available and not on_cooldown:
             await interaction.followup.send(
                 "You need to `/gpregister` first to join the Grand Prix.",
+                ephemeral=True,
+            )
+            return
+
+        if not available:
+            # All Zappies on cooldown — tell them when the earliest is ready
+            earliest = min(on_cooldown, key=lambda x: x["ready_at"])
+            ts = int(earliest["ready_at"].timestamp())
+            names = ", ".join(f"**{e['racer']['zappy_id']}**" for e in on_cooldown)
+            await interaction.followup.send(
+                f"❄️ All your Zappies are cooling down!\n"
+                f"{names}\n\n"
+                f"**{earliest['racer']['zappy_id']}** is ready <t:{ts}:R>.\n"
+                f"Register more Zappies with `/gpregister` to keep racing.",
                 ephemeral=True,
             )
             return
@@ -694,7 +709,10 @@ class GrandPrixCog(commands.Cog):
                     f"<@{winner_id}> new balance: **{int(credit_result['balance_after']):,} ZAPP** | GG <@{loser_id}>"
                 )
 
-            # Update win/loss records
+            # Update win/loss records and stamp cooldown
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc).isoformat()
+
             winner_row = self.db.table("zappy_racers").select("wins").eq(
                 "discord_user_id", winner_id).order("registered_at").limit(1).execute()
             loser_row = self.db.table("zappy_racers").select("losses").eq(
@@ -702,12 +720,18 @@ class GrandPrixCog(commands.Cog):
 
             if winner_row.data:
                 new_wins = (winner_row.data[0].get("wins") or 0) + 1
-                self.db.table("zappy_racers").update({"wins": new_wins}).eq(
-                    "discord_user_id", winner_id).execute()
+                self.db.table("zappy_racers").update({
+                    "wins": new_wins,
+                    "last_raced_at": now,
+                }).eq("discord_user_id", winner_id).eq(
+                    "zappy_id", winner_racer["zappy_id"]).execute()
             if loser_row.data:
                 new_losses = (loser_row.data[0].get("losses") or 0) + 1
-                self.db.table("zappy_racers").update({"losses": new_losses}).eq(
-                    "discord_user_id", loser_id).execute()
+                self.db.table("zappy_racers").update({
+                    "losses": new_losses,
+                    "last_raced_at": now,
+                }).eq("discord_user_id", loser_id).eq(
+                    "zappy_id", loser_racer["zappy_id"]).execute()
 
         except Exception as e:
             print(f"[grand_prix] settle error: {e}")
@@ -784,8 +808,10 @@ class GrandPrixCog(commands.Cog):
     async def _get_available_racers(self, user_id: str) -> list[dict]:
         """
         Return all Zappies registered to this player with their stats.
+        Filters out Zappies that raced in the last 30 minutes.
         Each entry: {"racer": {...}, "stats": {...}}
         """
+        from datetime import datetime, timezone, timedelta
         racers_res = self.db.table("zappy_racers").select("*").eq(
             "discord_user_id", user_id
         ).order("registered_at", desc=False).execute()
@@ -793,8 +819,19 @@ class GrandPrixCog(commands.Cog):
         if not racers_res.data:
             return []
 
+        now      = datetime.now(timezone.utc)
+        cooldown = timedelta(minutes=30)
         available = []
+
         for racer in racers_res.data:
+            last_raced = racer.get("last_raced_at")
+            if last_raced:
+                if isinstance(last_raced, str):
+                    last_raced = datetime.fromisoformat(last_raced.replace("Z", "+00:00"))
+                if now - last_raced < cooldown:
+                    # On cooldown — skip
+                    continue
+
             stats_res = self.db.table("zappy_stats").select("*").eq(
                 "zappy_id", racer["zappy_id"]
             ).execute()
@@ -806,6 +843,46 @@ class GrandPrixCog(commands.Cog):
             available.append({"racer": racer, "stats": stats})
 
         return available
+
+    async def _get_all_racers_with_cooldown(self, user_id: str) -> tuple[list[dict], list[dict]]:
+        """
+        Returns (available, on_cooldown) — used to give better error messages
+        when all Zappies are cooling down.
+        """
+        from datetime import datetime, timezone, timedelta
+        racers_res = self.db.table("zappy_racers").select("*").eq(
+            "discord_user_id", user_id
+        ).order("registered_at", desc=False).execute()
+
+        if not racers_res.data:
+            return [], []
+
+        now       = datetime.now(timezone.utc)
+        cooldown  = timedelta(minutes=30)
+        available = []
+        cooling   = []
+
+        for racer in racers_res.data:
+            last_raced = racer.get("last_raced_at")
+            if last_raced:
+                if isinstance(last_raced, str):
+                    last_raced = datetime.fromisoformat(last_raced.replace("Z", "+00:00"))
+                if now - last_raced < cooldown:
+                    ready_at = last_raced + cooldown
+                    cooling.append({"racer": racer, "ready_at": ready_at})
+                    continue
+
+            stats_res = self.db.table("zappy_stats").select("*").eq(
+                "zappy_id", racer["zappy_id"]
+            ).execute()
+            stats = stats_res.data[0] if stats_res.data else {
+                "speed": 5, "speed_max": 10,
+                "endurance": 5, "endurance_max": 10,
+                "clutch": 5, "clutch_max": 10,
+            }
+            available.append({"racer": racer, "stats": stats})
+
+        return available, cooling
 
     # -----------------------------------------------------------------------
     # /gpsetup — post both boards (admin only)
