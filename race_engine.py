@@ -43,14 +43,23 @@ def _active_stat(pos: int, stats: dict) -> int:
 def _roll(stat: int, pos: int) -> int:
     """
     Generate a single movement roll.
-    Base: 0-2. Stat bonus: +0/+1/+2 based on tier.
+    Base: 0-2. Stat bonus: +0/+1/+2/+3 based on tier.
     Stumble chance: 8% early, 18% elsewhere → -1 or -2.
+
+    Bonus tiers:
+      1-3  → +0
+      4-6  → +1
+      7-9  → +2
+      10-11 → +3
     """
     stumble_chance = STUMBLE_EARLY if pos < 3 else STUMBLE_LATE
     if random.random() < stumble_chance:
         return random.randint(-2, -1)
     base  = random.randint(0, 2)
-    bonus = (stat - 1) // 4   # 0 for stat 1-4, 1 for 5-8, 2 for 9-11
+    if stat <= 3:   bonus = 0
+    elif stat <= 6: bonus = 1
+    elif stat <= 9: bonus = 2
+    else:           bonus = 3
     return base + bonus
 
 
