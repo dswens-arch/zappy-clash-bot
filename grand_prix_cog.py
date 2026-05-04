@@ -296,6 +296,36 @@ class GrandPrixCog(commands.Cog):
     @expiry_task.before_loop
     async def before_expiry(self):
         await self.bot.wait_until_ready()
+        await self._restore_board_ids()
+
+    async def _restore_board_ids(self):
+        """Read board_msg_id and channel_id from Supabase on startup."""
+        try:
+            rows = self.db.table("gp_boards").select("*").execute().data or []
+            for row in rows:
+                mode       = row.get("mode")
+                msg_id     = row.get("board_msg_id")
+                channel_id = row.get("channel_id")
+                if not mode or not msg_id or not channel_id:
+                    continue
+
+                q = algo_queue if mode == "algo" else zap_queue
+                q.board_msg_id = msg_id
+
+                # Verify the message still exists
+                channel = self.bot.get_channel(channel_id)
+                if not channel:
+                    print(f"[grand_prix] Restore: channel {channel_id} not found for {mode} board")
+                    continue
+                try:
+                    await channel.fetch_message(msg_id)
+                    print(f"[grand_prix] Restored {mode} board msg_id={msg_id} channel={channel_id}")
+                except discord.NotFound:
+                    print(f"[grand_prix] Board message gone for {mode} — will need /gpsetup{mode}")
+                    q.board_msg_id = None
+                    self.db.table("gp_boards").delete().eq("mode", mode).execute()
+        except Exception as e:
+            print(f"[grand_prix] Board restore error: {e}")
 
     # -----------------------------------------------------------------------
     # Button interaction router
@@ -730,6 +760,15 @@ class GrandPrixCog(commands.Cog):
         view = JoinAlgoView() if q.mode == "algo" else JoinZapView()
         msg  = await channel.send(file=file, view=view)
         q.board_msg_id = msg.id
+        # Persist so the new board survives a Railway restart
+        try:
+            self.db.table("gp_boards").upsert({
+                "mode":         q.mode,
+                "board_msg_id": msg.id,
+                "channel_id":   channel.id,
+            }).execute()
+        except Exception as e:
+            print(f"[grand_prix] Failed to persist board_msg_id: {e}")
 
     # -----------------------------------------------------------------------
     # Helper: get racer from DB
@@ -781,8 +820,13 @@ class GrandPrixCog(commands.Cog):
             view=JoinAlgoView(),
         )
         algo_queue.board_msg_id = msg.id
+        self.db.table("gp_boards").upsert({
+            "mode":         "algo",
+            "board_msg_id": msg.id,
+            "channel_id":   interaction.channel.id,
+        }).execute()
         await interaction.followup.send(
-            f"✅ ALGO board posted. Msg ID: `{msg.id}`\nPin this message to keep it visible.",
+            f"✅ ALGO board posted and saved. Msg ID: `{msg.id}`\nPin this message to keep it visible.",
             ephemeral=True,
         )
 
@@ -795,8 +839,13 @@ class GrandPrixCog(commands.Cog):
             view=JoinZapView(),
         )
         zap_queue.board_msg_id = msg.id
+        self.db.table("gp_boards").upsert({
+            "mode":         "zap",
+            "board_msg_id": msg.id,
+            "channel_id":   interaction.channel.id,
+        }).execute()
         await interaction.followup.send(
-            f"✅ ZAPP board posted. Msg ID: `{msg.id}`\nPin this message to keep it visible.",
+            f"✅ ZAPP board posted and saved. Msg ID: `{msg.id}`\nPin this message to keep it visible.",
             ephemeral=True,
         )
 
@@ -1033,9 +1082,10 @@ class GrandPrixCog(commands.Cog):
         channel = interaction.channel
         await self._update_board(channel, found_queue, "empty")
 
+        bal_display = f"{refund['balance_after']:.4f}" if found_currency == "ALGO" else f"{int(refund['balance_after']):,}"
         await interaction.followup.send(
             f"✅ Queue spot cancelled. **{found_amount} {found_currency}** refunded.\n"
-            f"New balance: **{refund['balance_after']:.4f if found_currency == 'ALGO' else int(refund['balance_after']):,} {found_currency}**",
+            f"New balance: **{bal_display} {found_currency}**",
             ephemeral=True,
         )
 
