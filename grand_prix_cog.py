@@ -23,13 +23,15 @@ from discord.ext import commands, tasks
 # Layer imports — adjust paths to match your project layout
 # ---------------------------------------------------------------------------
 from algo_layer import (
-    create_duel_record,
-    confirm_payment,
-    find_algo_payment_sync,
-    pay_winner_algo,
-    refund_algo,
-    write_race_result,
-    get_algo_balance,
+    find_payment_txn,
+    send_payout,
+    send_refund,
+    get_account_balance,
+    get_bot_address,
+    get_current_round,
+    build_payment_ui,
+    make_payment_view,
+    WAGER_MICROALGO,
 )
 from zap_layer import (
     can_afford_entry,
@@ -264,33 +266,48 @@ class GrandPrixCog(commands.Cog):
     # -----------------------------------------------------------------------
 
     async def _algo_join(self, interaction, q, channel, user_id, racer, slot):
-        import algosdk
-        from algo_layer import get_bot_wallet_address, get_current_round
-
-        bot_address  = await get_bot_wallet_address(self.db)
-        after_round  = await get_current_round()
+        bot_address = get_bot_address()
+        after_round = await asyncio.to_thread(get_current_round)
         q.after_round = after_round
 
         if slot == "a":
-            # Create duel record, post deposit instructions
-            duel_id = await create_duel_record(
-                self.db, user_id, racer["wallet_address"], racer["zappy_id"]
-            )
+            # Create duel record in Supabase directly
+            import uuid
+            duel_id = str(uuid.uuid4())
+            self.db.table("race_duels").insert({
+                "id":             duel_id,
+                "challenger_id":  user_id,
+                "challenger_zappy": racer["zappy_id"],
+                "status":         "pending",
+                "mode":           "algo",
+            }).execute()
             q.duel_id = duel_id
+
             await self._update_board(channel, q, "waiting_a", zappy_a=racer["zappy_id"])
+
+            ui = await asyncio.to_thread(build_payment_ui, duel_id)
+            view = make_payment_view(ui["algo_uri"], ui["pera_uri"])
+            qr_file = discord.File(ui["qr_buf"], filename="pay.png")
             await interaction.followup.send(
-                f"⚡ **Slot A locked — {racer['zappy_id']}**\n"
-                f"Send exactly **5 ALGO** to:\n```\n{bot_address}\n```\n"
-                f"Include your duel ID `{duel_id}` in the note field.\n"
-                f"You have **3 minutes** to send payment.",
+                f"⚡ **Slot A locked — {racer['zappy_id']}**\n{ui['instructions']}",
+                file=qr_file,
+                view=view,
                 ephemeral=True,
             )
         else:
+            # Update duel record with opponent
+            self.db.table("race_duels").update({
+                "opponent_id":    user_id,
+                "opponent_zappy": racer["zappy_id"],
+            }).eq("id", q.duel_id).execute()
+
+            ui = await asyncio.to_thread(build_payment_ui, q.duel_id)
+            view = make_payment_view(ui["algo_uri"], ui["pera_uri"])
+            qr_file = discord.File(ui["qr_buf"], filename="pay.png")
             await interaction.followup.send(
-                f"⚡ **Slot B locked — {racer['zappy_id']}**\n"
-                f"Send exactly **5 ALGO** to:\n```\n{bot_address}\n```\n"
-                f"Include duel ID `{q.duel_id}` in the note field.\n"
-                f"You have **3 minutes**.",
+                f"⚡ **Slot B locked — {racer['zappy_id']}**\n{ui['instructions']}",
+                file=qr_file,
+                view=view,
                 ephemeral=True,
             )
             await self._update_board(channel, q, "waiting_b",
@@ -307,18 +324,26 @@ class GrandPrixCog(commands.Cog):
 
     async def _poll_algo_payment(self, q, channel, user_id, racer, slot, after_round):
         import time
-        deadline = time.monotonic() + 180   # 3-minute window
+        from algo_layer import build_payment_note
+        bot_address   = get_bot_address()
+        expected_note = build_payment_note(q.duel_id)
+        deadline      = time.monotonic() + 180
 
         while time.monotonic() < deadline:
             txid = await asyncio.to_thread(
-                find_algo_payment_sync,
+                find_payment_txn,
                 racer["wallet_address"],
-                q.duel_id,
+                bot_address,
+                WAGER_MICROALGO,
                 after_round,
+                expected_note,
             )
             if txid:
+                # Record payment in Supabase
                 role = "challenger" if slot == "a" else "opponent"
-                await confirm_payment(self.db, q.duel_id, role, txid)
+                txid_field = "challenger_txid" if slot == "a" else "opponent_txid"
+                self.db.table("race_duels").update({txid_field: txid}).eq("id", q.duel_id).execute()
+
                 if slot == "a":
                     q.player_a_paid = True
                     await channel.send(
@@ -335,14 +360,11 @@ class GrandPrixCog(commands.Cog):
             await asyncio.sleep(5)
 
         # ---- TIMEOUT — clear the player and notify -------------------------
-        # This is the fix for the silent stuck-queue state.
         timed_out_racer = racer["zappy_id"]
         self._clear_player(user_id, q)
 
-        # If slot A timed out, the board goes back to empty.
-        # If slot B timed out, slot A is still valid — board goes back to waiting_a.
         if slot == "a":
-            other_id = q.player_b_id  # may already be None if B also timed out
+            other_id = q.player_b_id
             if other_id:
                 self._clear_player(other_id, q)
             await self._update_board(channel, q, "empty")
@@ -351,14 +373,12 @@ class GrandPrixCog(commands.Cog):
                 f"Board reset. Try again when ready."
             )
         else:
-            # Slot A stays in the queue — board reverts to waiting_a
             await self._update_board(channel, q, "waiting_a",
                                      zappy_a=q.player_a_racer["zappy_id"] if q.player_a_racer else "?")
             await channel.send(
                 f"⏱ **{timed_out_racer}** didn't send payment in time — slot B is open again."
             )
 
-        # Try to notify the timed-out player directly
         try:
             member = channel.guild.get_member(int(user_id))
             if member:
@@ -379,9 +399,15 @@ class GrandPrixCog(commands.Cog):
         await deduct_entry(self.db, user_id)
 
         if slot == "a":
-            duel_id = await create_duel_record(
-                self.db, user_id, None, racer["zappy_id"], mode="zap"
-            )
+            import uuid
+            duel_id = str(uuid.uuid4())
+            self.db.table("race_duels").insert({
+                "id":               duel_id,
+                "challenger_id":    user_id,
+                "challenger_zappy": racer["zappy_id"],
+                "status":           "pending",
+                "mode":             "zap",
+            }).execute()
             q.duel_id = duel_id
             q.player_a_paid = True
             await self._update_board(channel, q, "waiting_a", zappy_a=racer["zappy_id"])
@@ -391,6 +417,10 @@ class GrandPrixCog(commands.Cog):
                 ephemeral=True,
             )
         else:
+            self.db.table("race_duels").update({
+                "opponent_id":    user_id,
+                "opponent_zappy": racer["zappy_id"],
+            }).eq("id", q.duel_id).execute()
             q.player_b_paid = True
             await interaction.followup.send(
                 f"⚡ **{ZAP_ENTRY:,} ZAP deducted — slot B locked for {racer['zappy_id']}**\n"
@@ -400,7 +430,6 @@ class GrandPrixCog(commands.Cog):
             await self._update_board(channel, q, "waiting_b",
                                      zappy_a=q.player_a_racer["zappy_id"],
                                      zappy_b=racer["zappy_id"])
-            # Both paid instantly — launch
             await self._launch_race(q, channel)
 
     # -----------------------------------------------------------------------
@@ -447,15 +476,34 @@ class GrandPrixCog(commands.Cog):
                       winner_id, loser_id):
         try:
             if q.mode == "algo":
-                await pay_winner_algo(self.db, winner_id, loser_id, q.duel_id)
-                await write_race_result(self.db, q.duel_id, result, winner_id, "algo")
+                # Look up winner's wallet address
+                winner_row = (
+                    self.db.table("zappy_racers")
+                    .select("wallet_address")
+                    .eq("discord_user_id", winner_id)
+                    .single()
+                    .execute()
+                    .data
+                )
+                if not winner_row:
+                    raise RuntimeError(f"No wallet found for winner {winner_id}")
+
+                txid = await asyncio.to_thread(send_payout, winner_row["wallet_address"], q.duel_id)
+                self.db.table("race_duels").update({
+                    "status":      "complete",
+                    "winner_id":   winner_id,
+                    "payout_txid": txid,
+                }).eq("id", q.duel_id).execute()
                 await channel.send(
                     f"🏆 **{winner_racer['zappy_id']}** wins! **9 ALGO** sent to wallet.\n"
                     f"<@{winner_id}> | GG <@{loser_id}>"
                 )
             else:
                 balances = await pay_winner_zap(self.db, winner_id, loser_id)
-                await write_race_result(self.db, q.duel_id, result, winner_id, "zap")
+                self.db.table("race_duels").update({
+                    "status":    "complete",
+                    "winner_id": winner_id,
+                }).eq("id", q.duel_id).execute()
                 await channel.send(
                     f"🏆 **{winner_racer['zappy_id']}** wins! "
                     f"**{ZAP_PAYOUT:,} ZAP** credited.\n"
@@ -465,8 +513,8 @@ class GrandPrixCog(commands.Cog):
                 )
 
             # Update win/loss records
-            self.db.table("zappy_racers").update({"wins": self.db.rpc("increment", {"row_id": winner_id, "field": "wins"})}).eq("discord_user_id", winner_id).execute()
-            self.db.table("zappy_racers").update({"losses": self.db.rpc("increment", {"row_id": loser_id, "field": "losses"})}).eq("discord_user_id", loser_id).execute()
+            self.db.rpc("increment_wins",   {"p_user_id": winner_id}).execute()
+            self.db.rpc("increment_losses", {"p_user_id": loser_id}).execute()
 
         except Exception as e:
             print(f"[grand_prix] settle error: {e}")
@@ -475,7 +523,6 @@ class GrandPrixCog(commands.Cog):
                 f"Duel ID: `{q.duel_id}`"
             )
         finally:
-            # Always clean up regardless of payout success
             self._clear_player(winner_id, q)
             self._clear_player(loser_id, q)
             q.reset()
@@ -681,7 +728,7 @@ class GrandPrixCog(commands.Cog):
         if not racer:
             await interaction.followup.send("You're not registered. Run `/gpregister` first.", ephemeral=True)
             return
-        algo_bal = await get_algo_balance(self.db, user_id)
+        algo_bal = await asyncio.to_thread(get_account_balance, racer["wallet_address"]) if racer.get("wallet_address") else 0
         zap_bal  = await get_zap_balance(self.db, user_id)
         await interaction.followup.send(
             f"**{racer['zappy_id']} — Balances**\n"
