@@ -1544,6 +1544,203 @@ class GrandPrixCog(commands.Cog):
         )
 
     # -----------------------------------------------------------------------
+    # Upgrade helpers
+    # -----------------------------------------------------------------------
+
+    UPGRADE_TIERS = [
+        (6,  200),   # points 1-6: 200 ZAPP each
+        (9,  800),   # points 7-9: 800 ZAPP each
+        (11, 2000),  # points 10-11: 2000 ZAPP each
+    ]
+
+    def _upgrade_cost(self, current: int) -> int | None:
+        """Cost in ZAPP to go from current to current+1. None if at cap."""
+        next_point = current + 1
+        for ceiling, cost in self.UPGRADE_TIERS:
+            if next_point <= ceiling:
+                return cost
+        return None  # already at max tier
+
+    def _cost_to_max(self, current: int, cap: int) -> int:
+        """Total ZAPP needed to reach cap from current."""
+        total = 0
+        for p in range(current + 1, cap + 1):
+            cost = self._upgrade_cost(p - 1)
+            if cost is None:
+                break
+            total += cost
+        return total
+
+    # -----------------------------------------------------------------------
+    # /gpupgradeinfo — show stats, caps, and upgrade costs
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpupgradeinfo", description="See your Zappy's stats, hidden caps, and upgrade costs.")
+    @app_commands.describe(zappy_id="Which Zappy to check (leave blank for your first)")
+    async def gpupgradeinfo(self, interaction: discord.Interaction, zappy_id: str = None):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+
+        available = await self._get_available_racers(user_id)
+        if not available:
+            await interaction.followup.send("You're not registered. Use `/gpregister` first.", ephemeral=True)
+            return
+
+        # Find the right Zappy
+        entry = None
+        if zappy_id:
+            for e in available:
+                if e["racer"]["zappy_id"].lower() == zappy_id.lower():
+                    entry = e
+                    break
+            if not entry:
+                await interaction.followup.send(f"Zappy `{zappy_id}` not found on your account.", ephemeral=True)
+                return
+        else:
+            entry = available[0]
+
+        racer = entry["racer"]
+        stats = entry["stats"]
+        zid   = racer["zappy_id"]
+
+        def stat_line(name: str, key: str) -> str:
+            cur  = stats.get(key, 0)
+            cap  = stats.get(f"{key}_max", 11)
+            next_cost = self._upgrade_cost(cur)
+            to_max    = self._cost_to_max(cur, cap)
+            bar  = stat_bar(cur, cap)
+            if cur >= cap:
+                status = "**MAXED**"
+            else:
+                status = f"next point: **{next_cost:,} ZAPP** · to max: **{to_max:,} ZAPP**"
+            return f"`{bar}` **{cur}/{cap}** — {status}"
+
+        embed = discord.Embed(
+            title=f"⚡ {zid} — Upgrade Info",
+            color=discord.Color.from_rgb(30, 180, 255),
+        )
+        embed.add_field(name="🏎  Speed (governs pos 0-6)",
+                        value=stat_line("Speed", "speed"), inline=False)
+        embed.add_field(name="💪 Endurance (governs pos 7-13)",
+                        value=stat_line("Endurance", "endurance"), inline=False)
+        embed.add_field(name="🎯 Clutch (governs pos 14-19)",
+                        value=stat_line("Clutch", "clutch"), inline=False)
+
+        total_to_max = (
+            self._cost_to_max(stats.get("speed", 0),     stats.get("speed_max", 11)) +
+            self._cost_to_max(stats.get("endurance", 0), stats.get("endurance_max", 11)) +
+            self._cost_to_max(stats.get("clutch", 0),    stats.get("clutch_max", 11))
+        )
+        embed.set_footer(text=f"Total ZAPP to fully max {zid}: {total_to_max:,}")
+
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+    # -----------------------------------------------------------------------
+    # /gpupgrade — spend ZAPP to raise a stat by one point
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpupgrade", description="Spend ZAPP to upgrade a stat on your Zappy.")
+    @app_commands.describe(
+        stat="Which stat to upgrade",
+        zappy_id="Which Zappy to upgrade (leave blank for your first)",
+    )
+    @app_commands.choices(stat=[
+        app_commands.Choice(name="Speed",     value="speed"),
+        app_commands.Choice(name="Endurance", value="endurance"),
+        app_commands.Choice(name="Clutch",    value="clutch"),
+    ])
+    async def gpupgrade(self, interaction: discord.Interaction,
+                        stat: str, zappy_id: str = None):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+
+        available = await self._get_available_racers(user_id)
+        if not available:
+            await interaction.followup.send("You're not registered.", ephemeral=True)
+            return
+
+        # Find Zappy
+        entry = None
+        if zappy_id:
+            for e in available:
+                if e["racer"]["zappy_id"].lower() == zappy_id.lower():
+                    entry = e
+                    break
+            if not entry:
+                await interaction.followup.send(f"Zappy `{zappy_id}` not found.", ephemeral=True)
+                return
+        else:
+            entry = available[0]
+
+        racer      = entry["racer"]
+        stats      = entry["stats"]
+        zid        = racer["zappy_id"]
+        current    = stats.get(stat, 0)
+        cap        = stats.get(f"{stat}_max", 11)
+
+        if current >= cap:
+            await interaction.followup.send(
+                f"**{zid}**'s {stat.capitalize()} is already maxed at **{cap}**.",
+                ephemeral=True,
+            )
+            return
+
+        cost = self._upgrade_cost(current)
+        if cost is None:
+            await interaction.followup.send("That stat is already at the maximum tier.", ephemeral=True)
+            return
+
+        # Check balance
+        bal = await asyncio.to_thread(get_balance, self.db, user_id, "ZAPP")
+        if bal < cost:
+            await interaction.followup.send(
+                f"Not enough ZAPP. This upgrade costs **{cost:,}** — you have **{int(bal):,}**.",
+                ephemeral=True,
+            )
+            return
+
+        # Debit ZAPP
+        debit_result = await asyncio.to_thread(
+            debit, self.db, user_id, "ZAPP", cost,
+            f"gp_upgrade_{stat}", zid, zid
+        )
+        if not debit_result["ok"]:
+            await interaction.followup.send(
+                f"Upgrade failed: {debit_result['error']}", ephemeral=True)
+            return
+
+        # Apply stat increase
+        new_val = current + 1
+        self.db.table("zappy_stats").update({
+            stat:               new_val,
+            "total_zap_spent":  (stats.get("total_zap_spent", 0) or 0) + cost,
+        }).eq("zappy_id", zid).execute()
+
+        next_cost = self._upgrade_cost(new_val)
+        to_max    = self._cost_to_max(new_val, cap)
+        bar       = stat_bar(new_val, cap)
+
+        embed = discord.Embed(
+            title=f"⚡ {zid} — {stat.capitalize()} Upgraded!",
+            color=discord.Color.green(),
+        )
+        embed.add_field(
+            name=f"{stat.capitalize()}",
+            value=f"`{bar}` **{new_val}/{cap}**",
+            inline=False,
+        )
+        if new_val >= cap:
+            embed.add_field(name="🏆 MAXED!", value="This stat has hit its cap.", inline=False)
+        else:
+            embed.add_field(
+                name="Next upgrade",
+                value=f"**{next_cost:,} ZAPP** · {to_max:,} ZAPP to max",
+                inline=False,
+            )
+        embed.set_footer(text=f"ZAPP balance: {int(debit_result['balance_after']):,}")
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+    # -----------------------------------------------------------------------
     # /gpleaderboard
     # -----------------------------------------------------------------------
 
