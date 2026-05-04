@@ -124,7 +124,12 @@ class GrandPrixCog(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.db  = bot.supabase   # adjust if your attribute name differs
+        # Use bot.supabase if already attached (set in on_ready), otherwise init directly
+        if hasattr(bot, "supabase"):
+            self.db = bot.supabase
+        else:
+            from database import get_supabase
+            self.db = get_supabase()
         self.expiry_task.start()
 
     # -----------------------------------------------------------------------
