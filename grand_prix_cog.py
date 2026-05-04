@@ -666,7 +666,35 @@ class GrandPrixCog(commands.Cog):
     # /gpsetup — post both boards (admin only)
     # -----------------------------------------------------------------------
 
-    @app_commands.command(name="gpsetup", description="[Admin] Post Grand Prix boards in this channel.")
+    @app_commands.command(name="gpsetupalgo", description="[Admin] Post the ALGO Grand Prix board in this channel.")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def gpsetupalgo(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        msg = await interaction.channel.send(
+            file=discord.File(board_empty("algo"), filename="board_algo.png"),
+            view=JoinAlgoView(),
+        )
+        algo_queue.board_msg_id = msg.id
+        await interaction.followup.send(
+            f"✅ ALGO board posted. Msg ID: `{msg.id}`\nPin this message to keep it visible.",
+            ephemeral=True,
+        )
+
+    @app_commands.command(name="gpsetupzap", description="[Admin] Post the ZAPP Grand Prix board in this channel.")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def gpsetupzap(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        msg = await interaction.channel.send(
+            file=discord.File(board_empty("zap"), filename="board_zap.png"),
+            view=JoinZapView(),
+        )
+        zap_queue.board_msg_id = msg.id
+        await interaction.followup.send(
+            f"✅ ZAPP board posted. Msg ID: `{msg.id}`\nPin this message to keep it visible.",
+            ephemeral=True,
+        )
+
+    @app_commands.command(name="gpsetup", description="[Admin] Post both Grand Prix boards in this channel (single channel only).")
     @app_commands.checks.has_permissions(administrator=True)
     async def gpsetup(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -685,10 +713,10 @@ class GrandPrixCog(commands.Cog):
         zap_queue.board_msg_id = zap_msg.id
 
         await interaction.followup.send(
-            f"✅ Both boards posted.\n"
-            f"ALGO board msg ID: `{algo_msg.id}`\n"
-            f"ZAPP board msg ID: `{zap_msg.id}`\n\n"
-            f"Pin both messages to keep them visible.",
+            f"✅ Both boards posted in this channel.\n"
+            f"ALGO msg ID: `{algo_msg.id}`\n"
+            f"ZAPP msg ID: `{zap_msg.id}`\n\n"
+            f"⚠️ If using separate channels, use `/gpsetupalgo` and `/gpsetupzap` instead.",
             ephemeral=True,
         )
 
