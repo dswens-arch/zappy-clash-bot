@@ -737,6 +737,72 @@ class GrandPrixCog(commands.Cog):
         )
 
     # -----------------------------------------------------------------------
+    # /gprefund — manually refund a player (admin only)
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gprefund", description="[Admin] Manually refund a player's balance.")
+    @app_commands.describe(
+        player="The player to refund",
+        amount="Amount to refund (whole numbers — ALGO or ZAPP)",
+        currency="Which currency to refund",
+        reason="Reason for the refund (logged in gp_transactions)",
+    )
+    @app_commands.choices(currency=[
+        app_commands.Choice(name="ALGO", value="ALGO"),
+        app_commands.Choice(name="ZAPP", value="ZAPP"),
+    ])
+    @app_commands.checks.has_permissions(administrator=True)
+    async def gprefund(self, interaction: discord.Interaction,
+                       player: discord.Member,
+                       amount: float,
+                       currency: str,
+                       reason: str = "manual_refund"):
+        await interaction.response.defer(ephemeral=True)
+
+        if amount <= 0:
+            await interaction.followup.send("Amount must be positive.", ephemeral=True)
+            return
+
+        user_id = str(player.id)
+        racer   = await self._get_racer(user_id)
+        if not racer:
+            await interaction.followup.send(
+                f"**{player.display_name}** isn't registered in Grand Prix.",
+                ephemeral=True,
+            )
+            return
+
+        result = await asyncio.to_thread(
+            credit, self.db, user_id, currency, amount,
+            reason, None, racer.get("zappy_id")
+        )
+
+        if not result.get("ok"):
+            await interaction.followup.send(
+                f"Refund failed: {result.get('error', 'unknown error')}",
+                ephemeral=True,
+            )
+            return
+
+        unit = ".4f" if currency == "ALGO" else ",d"
+        await interaction.followup.send(
+            f"✅ Refunded **{amount} {currency}** to **{player.display_name}**.\n"
+            f"Before: `{result['balance_before']:{unit}}` → After: `{result['balance_after']:{unit}}`\n"
+            f"Reason logged: `{reason}`",
+            ephemeral=True,
+        )
+
+        # Optionally DM the player
+        try:
+            await player.send(
+                f"⚡ An admin issued you a **{amount} {currency}** Grand Prix refund.\n"
+                f"Reason: {reason}\n"
+                f"New balance: **{result['balance_after']:{unit}} {currency}**"
+            )
+        except Exception:
+            pass
+
+    # -----------------------------------------------------------------------
     # /gpcancel — player cancels their own slot A queue position for a refund
     # -----------------------------------------------------------------------
 
