@@ -640,7 +640,7 @@ class GrandPrixCog(commands.Cog):
 
         result = debit(self.db, q.player_b_id, "ALGO", 5,
                       reason="race_entry", ref_id=None,
-                      zappy_id=racer["zappy_id"])
+                      zappy_id=q.player_b_racer["zappy_id"])
         if not result["ok"]:
             await interaction.followup.send(result["error"], ephemeral=True)
             active_players.discard(q.player_b_id)
