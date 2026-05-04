@@ -25,6 +25,162 @@ from discord.ext import commands, tasks
 from algo_layer import get_bot_address  # still needed for gpbalance display
 from zap_layer import ZAP_ENTRY, ZAP_PAYOUT, ZAP_WIN_BONUS, ZAP_LOSE_BONUS
 from gp_accounting import credit, debit, get_balance
+
+import io
+import os
+from PIL import Image, ImageDraw, ImageFont
+
+# ---------------------------------------------------------------------------
+# Fonts
+# ---------------------------------------------------------------------------
+
+def _font(name: str, size: int) -> ImageFont.FreeTypeFont:
+    for path in [
+        f"./fonts/{name}",
+        f"/usr/share/fonts/truetype/google-fonts/{name}",
+        f"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    ]:
+        if os.path.exists(path):
+            return ImageFont.truetype(path, size)
+    return ImageFont.load_default()
+
+FONT_BOLD = _font("Poppins-Bold.ttf",    36)
+FONT_MED  = _font("Poppins-Medium.ttf",  22)
+FONT_REG  = _font("Poppins-Regular.ttf", 16)
+FONT_SM   = _font("Poppins-Regular.ttf", 14)
+
+# ---------------------------------------------------------------------------
+# Board image generator
+# ---------------------------------------------------------------------------
+
+W, H   = 798, 278
+WHITE  = (240, 245, 255)
+MUTED  = (180, 190, 210)
+GREEN  = (50,  220, 120)
+SHADOW = (0, 0, 0)
+
+ACCENTS = {
+    "algo": (30,  180, 255),
+    "zap":  (255, 200,  50),
+}
+LABELS = {
+    "algo": ("ALGO GRAND PRIX",  "5 ALGO entry  |  Winner takes 9 ALGO"),
+    "zap":  ("ZAPP GRAND PRIX",  "500 ZAPP entry  |  Winner takes 1,000 ZAPP"),
+}
+
+_BOARDS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boards")
+
+BOARD_IMAGES = {
+    "algo": {
+        "empty":   "algoempty.png",
+        "waiting": "algowaiting.png",
+        "racing":  "algoracing.png",
+        "result":  "algoresult.png",
+    },
+    "zap": {
+        "empty":   "zappempty.png",
+        "waiting": "zappwaiting.png",
+        "racing":  "zappracing.png",
+        "result":  "zappresult.png",
+    },
+}
+
+
+def _load_bg(mode, state) -> Image.Image:
+    filename = BOARD_IMAGES[mode][state]
+    path = os.path.join(_BOARDS_DIR, filename)
+    if os.path.exists(path):
+        PAD_L, PAD_R, PAD_T, PAD_B = 6, 6, 6, 14
+        new_w = W - PAD_L - PAD_R
+        new_h = H - PAD_T - PAD_B
+        raw    = Image.open(path).convert("RGBA").resize((new_w, new_h))
+        canvas = Image.new("RGBA", (W, H), (8, 10, 20, 255))
+        canvas.paste(raw, (PAD_L, PAD_T), raw.split()[3])
+        return canvas
+    print(f"[grand_prix] MISSING board image: {path}")
+    return Image.new("RGBA", (W, H), (8, 10, 20, 255))
+
+
+def _t(draw, x, y, text, font, color):
+    draw.text((x+1, y+1), text, font=font, fill=(*SHADOW, 200), anchor="mm")
+    draw.text((x+2, y+2), text, font=font, fill=(*SHADOW, 120), anchor="mm")
+    draw.text((x, y), text, font=font, fill=color, anchor="mm")
+
+
+def _buf(img):
+    bg = Image.new("RGBA", img.size, (8, 10, 20, 255))
+    bg.paste(img, mask=img.split()[3])
+    b = io.BytesIO()
+    bg.convert("RGB").save(b, format="PNG")
+    b.seek(0)
+    return b
+
+
+def board_empty(mode):
+    img  = _load_bg(mode, "empty")
+    draw = ImageDraw.Draw(img)
+    accent = ACCENTS[mode]
+    title, subtitle = LABELS[mode]
+    _t(draw, W//2, 80,  title,                  FONT_BOLD, accent)
+    _t(draw, W//2, 118, subtitle,               FONT_SM,   MUTED)
+    _t(draw, W//2, 160, "NO RACE IN PROGRESS",  FONT_MED,  (160, 170, 190))
+    _t(draw, W//2, 190, "Be the first to join", FONT_SM,   (120, 130, 150))
+    return _buf(img)
+
+
+def board_waiting(mode, zappy_id):
+    img  = _load_bg(mode, "waiting")
+    draw = ImageDraw.Draw(img)
+    accent = ACCENTS[mode]
+    title, subtitle = LABELS[mode]
+    _t(draw, W//2, 45,  title,                                   FONT_BOLD, accent)
+    _t(draw, W//2, 82,  "WAITING FOR OPPONENT",                  FONT_MED,  accent)
+    _t(draw, W//2, 130, f"{zappy_id}  is ready",                 FONT_BOLD, WHITE)
+    _t(draw, 190,  245, zappy_id,                                FONT_SM,   WHITE)
+    _t(draw, 600,  245, "???",                                   FONT_SM,   MUTED)
+    _t(draw, W//2, 195, "Join to race · entry fee debited on join", FONT_SM, MUTED)
+    _t(draw, W//2, 222, "Tap Join Race to enter",                FONT_SM,   accent)
+    return _buf(img)
+
+
+def board_racing(mode, zappy_a, zappy_b):
+    img  = _load_bg(mode, "racing")
+    draw = ImageDraw.Draw(img)
+    accent = ACCENTS[mode]
+    title, _ = LABELS[mode]
+    _t(draw, W//2, 50,  title,                         FONT_BOLD, accent)
+    _t(draw, W//2, 85,  "RACE IN PROGRESS",            FONT_MED,  GREEN)
+    _t(draw, W//2, 125, zappy_a,                       FONT_BOLD, WHITE)
+    _t(draw, W//2, 155, "vs",                          FONT_SM,   MUTED)
+    _t(draw, W//2, 185, zappy_b,                       FONT_BOLD, WHITE)
+    _t(draw, W//2, 225, "Race underway — result soon", FONT_SM,   MUTED)
+    return _buf(img)
+
+
+def board_result(mode, zappy_a, zappy_b, winner, score_a, score_b, surge=False):
+    img  = _load_bg(mode, "result")
+    draw = ImageDraw.Draw(img)
+    accent = ACCENTS[mode]
+    title, _ = LABELS[mode]
+    payout    = "9 ALGO paid out" if mode == "algo" else "1,000 ZAPP paid out"
+    surge_tag = "  SURGE!" if surge else ""
+    diff   = abs(score_a - score_b)
+    margin = "Dominant run" if diff == 3 else "Clear victory" if diff == 2 else "Close race"
+    _t(draw, W//2, 45,  title,                               FONT_BOLD, accent)
+    _t(draw, W//2, 82,  "RACE RESULT",                       FONT_MED,  accent)
+    _t(draw, W//2, 125, f"{winner}  WINS!",                  FONT_BOLD, GREEN)
+    _t(draw, W//2, 168, f"{payout}  ·  {margin}{surge_tag}", FONT_SM,   MUTED)
+    _t(draw, W//2, 198, f"{zappy_a}  vs  {zappy_b}",         FONT_SM,   MUTED)
+    _t(draw, W//2, 235, "New race open below",               FONT_SM,   accent)
+    return _buf(img)
+
+
+def make_board_buf(mode, state, **kw):
+    if state == "empty":   return board_empty(mode)
+    if state == "waiting": return board_waiting(mode, **kw)
+    if state == "racing":  return board_racing(mode, **kw)
+    if state == "result":  return board_result(mode, **kw)
+    return board_empty(mode)
 from race_engine import resolve_race, run_race_narration, get_stats, seed_stats
 
 # ---------------------------------------------------------------------------
@@ -279,7 +435,7 @@ class GrandPrixCog(commands.Cog):
                 "wager_algo":    5,
             }).execute()
             q.duel_id = result.data[0]["id"]
-            await self._update_board(channel, q, "waiting_a", zappy_a=racer["zappy_id"])
+            await self._update_board(channel, q, "waiting", zappy_id=racer["zappy_id"])
             await interaction.followup.send(
                 f"⚡ **Slot A locked — {racer['zappy_id']}**\n"
                 f"5 ALGO debited. Waiting for an opponent...\n"
@@ -291,7 +447,7 @@ class GrandPrixCog(commands.Cog):
                 "opponent_id": user_id,
                 "status":      "ready",
             }).eq("id", q.duel_id).execute()
-            await self._update_board(channel, q, "waiting_b",
+            await self._update_board(channel, q, "racing",
                                      zappy_a=q.player_a_racer["zappy_id"],
                                      zappy_b=racer["zappy_id"])
             await interaction.followup.send(
@@ -326,7 +482,7 @@ class GrandPrixCog(commands.Cog):
                 "wager_algo":    0,
             }).execute()
             q.duel_id = result.data[0]["id"]
-            await self._update_board(channel, q, "waiting_a", zappy_a=racer["zappy_id"])
+            await self._update_board(channel, q, "waiting", zappy_id=racer["zappy_id"])
             await interaction.followup.send(
                 f"⚡ **Slot A locked — {racer['zappy_id']}**\n"
                 f"{ZAP_ENTRY:,} ZAPP debited. Waiting for an opponent...\n"
@@ -338,7 +494,7 @@ class GrandPrixCog(commands.Cog):
                 "opponent_id": user_id,
                 "status":      "ready",
             }).eq("id", q.duel_id).execute()
-            await self._update_board(channel, q, "waiting_b",
+            await self._update_board(channel, q, "racing",
                                      zappy_a=q.player_a_racer["zappy_id"],
                                      zappy_b=racer["zappy_id"])
             await interaction.followup.send(
@@ -431,57 +587,46 @@ class GrandPrixCog(commands.Cog):
                 f"Duel ID: `{q.duel_id}`"
             )
         finally:
+            # Show result board on the existing message (no button)
+            winner_name = winner_racer["zappy_id"]
+            loser_name  = loser_racer["zappy_id"]
+            score_a = result.get("score_a", 0)
+            score_b = result.get("score_b", 0)
+            await self._update_board(channel, q, "result",
+                                     remove_button=True,
+                                     zappy_a=winner_name, zappy_b=loser_name,
+                                     winner=winner_name,
+                                     score_a=score_a, score_b=score_b)
+            await asyncio.sleep(10)
+
+            # Post a fresh empty board below the result
             self._clear_player(winner_id, q)
             self._clear_player(loser_id, q)
             q.reset()
-            await asyncio.sleep(8)
-            await self._update_board(channel, q, "empty")
+            await self._post_new_board(channel, q)
 
     # -----------------------------------------------------------------------
     # Board image update
-    # Swap in your Pillow compositing function here.
     # -----------------------------------------------------------------------
 
-    async def _update_board(self, channel, q: RaceQueue, state: str,
-                            zappy_a: str = "", zappy_b: str = ""):
-        """
-        state options: "empty" | "waiting_a" | "waiting_b" | "racing"
-        Posts or edits the pinned board message.
-        """
-        mode_label = "ALGO" if q.mode == "algo" else "ZAP"
-        entry_label = "5 ALGO" if q.mode == "algo" else f"{ZAP_ENTRY:,} ZAP"
-
-        lines = {
-            "empty":     f"⚡ **ZAPPY GRAND PRIX — {mode_label}**\n"
-                         f"Entry: **{entry_label}**\n"
-                         f"🟢 Slot A — open\n🟢 Slot B — open\n\n"
-                         f"Tap **Join Race** to enter.",
-            "waiting_a": f"⚡ **ZAPPY GRAND PRIX — {mode_label}**\n"
-                         f"🟡 Slot A — **{zappy_a}** (waiting for payment)\n"
-                         f"🟢 Slot B — open\n\n"
-                         f"Tap **Join Race** to race them!",
-            "waiting_b": f"⚡ **ZAPPY GRAND PRIX — {mode_label}**\n"
-                         f"🟡 Slot A — **{zappy_a}**\n"
-                         f"🟡 Slot B — **{zappy_b}**\n\n"
-                         f"🏁 Both in — race starting soon...",
-            "racing":    f"⚡ **ZAPPY GRAND PRIX — {mode_label}**\n"
-                         f"🏎 **{zappy_a}** vs **{zappy_b}**\n\n"
-                         f"🔴 Race in progress — join after this one.",
-        }
-        content = lines.get(state, lines["empty"])
-        view = JoinAlgoView() if q.mode == "algo" else JoinZapView()
-
+    async def _update_board(self, channel, q, state, remove_button=False, **kw):
+        if q.board_msg_id is None:
+            return
         try:
-            if q.board_msg_id:
-                msg = await channel.fetch_message(q.board_msg_id)
-                await msg.edit(content=content, view=view)
-            else:
-                msg = await channel.send(content=content, view=view)
-                q.board_msg_id = msg.id
+            msg = await channel.fetch_message(q.board_msg_id)
         except discord.NotFound:
-            # Board message was deleted — post a new one
-            msg = await channel.send(content=content, view=view)
-            q.board_msg_id = msg.id
+            return
+        buf  = make_board_buf(q.mode, state, **kw)
+        file = discord.File(buf, filename="board.png")
+        view = (JoinAlgoView() if q.mode == "algo" else JoinZapView()) if not remove_button else discord.utils.MISSING
+        await msg.edit(attachments=[file], view=view)
+
+    async def _post_new_board(self, channel, q):
+        buf  = board_empty(q.mode)
+        file = discord.File(buf, filename="board.png")
+        view = JoinAlgoView() if q.mode == "algo" else JoinZapView()
+        msg  = await channel.send(file=file, view=view)
+        q.board_msg_id = msg.id
 
     # -----------------------------------------------------------------------
     # Helper: get racer from DB
@@ -502,22 +647,22 @@ class GrandPrixCog(commands.Cog):
         channel = interaction.channel
 
         algo_msg = await channel.send(
-            "⚡ **ZAPPY GRAND PRIX — ALGO**\nEntry: **5 ALGO**\n"
-            "🟢 Slot A — open\n🟢 Slot B — open\n\nTap **Join Race** to enter.",
+            file=discord.File(board_empty("algo"), filename="board_algo.png"),
             view=JoinAlgoView(),
         )
+        algo_queue.board_msg_id = algo_msg.id
+
         zap_msg = await channel.send(
-            f"⚡ **ZAPPY GRAND PRIX — ZAP**\nEntry: **{ZAP_ENTRY:,} ZAP**\n"
-            "🟢 Slot A — open\n🟢 Slot B — open\n\nTap **Join Race** to enter.",
+            file=discord.File(board_empty("zap"), filename="board_zap.png"),
             view=JoinZapView(),
         )
-        algo_queue.board_msg_id = algo_msg.id
-        zap_queue.board_msg_id  = zap_msg.id
+        zap_queue.board_msg_id = zap_msg.id
 
         await interaction.followup.send(
-            f"✅ Both boards posted. Pin them and you're done.\n"
-            f"ALGO board: {algo_msg.jump_url}\n"
-            f"ZAP board: {zap_msg.jump_url}",
+            f"✅ Both boards posted.\n"
+            f"ALGO board msg ID: `{algo_msg.id}`\n"
+            f"ZAPP board msg ID: `{zap_msg.id}`\n\n"
+            f"Pin both messages to keep them visible.",
             ephemeral=True,
         )
 
