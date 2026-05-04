@@ -511,7 +511,9 @@ class GrandPrixCog(commands.Cog):
 
     async def _launch_race(self, q: RaceQueue, channel):
         q.locked = True
+        # Update board to racing state AND remove the Join Race button immediately
         await self._update_board(channel, q, "racing",
+                                 remove_button=True,
                                  zappy_a=q.player_a_racer["zappy_id"],
                                  zappy_b=q.player_b_racer["zappy_id"])
 
