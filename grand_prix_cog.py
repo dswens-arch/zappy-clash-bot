@@ -702,8 +702,8 @@ class GrandPrixCog(commands.Cog):
             "discord_user_id": user_id,
             "wallet_address":  wallet_address,
             "zappy_id":        zappy_id,
-            "zap_balance":     0,
             "algo_balance":    0,
+            "zapp_balance":    0,
             "wins": 0, "losses": 0,
         }).execute()
         self.db.table("zappy_stats").insert({"zappy_id": zappy_id, **stats}).execute()
