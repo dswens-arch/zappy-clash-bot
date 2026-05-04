@@ -286,3 +286,43 @@ async def narrate_race(
         f"*{finish_line}*\n\n"
         f"{payout_str}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Stat seeding — generates randomized base stats for a new Zappy
+# ---------------------------------------------------------------------------
+
+import random as _random
+
+STAT_BASE_MIN = 2
+STAT_BASE_MAX = 3
+STAT_CAP_MIN  = 10
+STAT_CAP_MAX  = 11
+
+def seed_stats(zappy_id: str) -> dict:
+    rng = _random.Random(zappy_id)
+    def rand_stat():
+        base = rng.randint(STAT_BASE_MIN, STAT_BASE_MAX)
+        cap  = rng.randint(STAT_CAP_MIN, STAT_CAP_MAX)
+        return base, cap
+    speed_base,     speed_max     = rand_stat()
+    endurance_base, endurance_max = rand_stat()
+    clutch_base,    clutch_max    = rand_stat()
+    return {
+        "speed":           speed_base,
+        "speed_max":       speed_max,
+        "endurance":       endurance_base,
+        "endurance_max":   endurance_max,
+        "clutch":          clutch_base,
+        "clutch_max":      clutch_max,
+        "total_zap_spent": 0,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Supabase stat lookup
+# ---------------------------------------------------------------------------
+
+async def get_stats(db, zappy_id: str) -> dict | None:
+    res = db.table("zappy_stats").select("*").eq("zappy_id", zappy_id).execute()
+    return res.data[0] if res.data else None
