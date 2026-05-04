@@ -360,13 +360,159 @@ async def cmd_clash(interaction: discord.Interaction):
             inline=False,
         )
 
-    # Build button view
+    # Build a lookup dict of all eligible asset_ids for ASA manual entry validation
+    scored_ids = {z["asset_id"]: z for z in scored}
+
+    # ── Shared registration helper (used by both pick paths) ──────────────────
+    async def _do_register(inter: discord.Interaction, zappy: dict, pick_view=None):
+        """Register a zappy and send confirmation. Optionally disables pick_view."""
+        asset_id = zappy["asset_id"]
+        stats    = zappy["stats"]
+        name     = zappy["name"]
+
+        if pick_view:
+            pick_view.chosen = True
+            for item in pick_view.children:
+                item.disabled = True
+
+        await asyncio.to_thread(register_for_bracket, user_id, asset_id, active_bracket_id)
+
+        confirm = discord.Embed(
+            title=f"✅ {name} is in the bracket!",
+            description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
+            color=0xF5E642,
+        )
+        if stats.get("combo"):
+            confirm.add_field(name="Combo", value=stats["combo"], inline=False)
+        if stats.get("ability") and isinstance(stats["ability"], dict):
+            ab = stats["ability"]
+            confirm.add_field(name=f"⚡ {ab.get('name','Ability')}", value=ab.get("desc",""), inline=False)
+        if zappy.get("image_url"):
+            confirm.set_thumbnail(url=zappy["image_url"])
+        confirm.set_footer(text=f"Fights start when registration closes · Watch <#{CLASH_CHANNEL}>")
+        await inter.followup.send(embed=confirm, ephemeral=True)
+
+        clash_ch = bot.get_channel(CLASH_CHANNEL)
+        if clash_ch:
+            await clash_ch.send(
+                f"⚡ **{inter.user.display_name}** enters the bracket with "
+                f"**{name}** — VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
+            )
+
+    # ── Confirm/Cancel view shown after ASA lookup ────────────────────────────
+    class ConfirmAsaView(discord.ui.View):
+        def __init__(self, zappy: dict, pick_view):
+            super().__init__(timeout=60)
+            self.zappy     = zappy
+            self.pick_view = pick_view
+            self.resolved  = False
+
+        @discord.ui.button(label="✅ Confirm — Enter Bracket", style=discord.ButtonStyle.success)
+        async def confirm(self, inter: discord.Interaction, button: discord.ui.Button):
+            if self.resolved:
+                await inter.response.send_message("Already confirmed!", ephemeral=True)
+                return
+            try:
+                await inter.response.defer(ephemeral=True)
+            except discord.errors.NotFound:
+                return
+            self.resolved = True
+            for item in self.children:
+                item.disabled = True
+            await _do_register(inter, self.zappy, pick_view=self.pick_view)
+
+        @discord.ui.button(label="❌ Cancel", style=discord.ButtonStyle.secondary)
+        async def cancel(self, inter: discord.Interaction, button: discord.ui.Button):
+            self.resolved = True
+            for item in self.children:
+                item.disabled = True
+            await inter.response.edit_message(
+                content="Cancelled. You can still pick from the list above.",
+                embed=None,
+                view=self,
+            )
+
+    # ── Modal for manual ASA entry ────────────────────────────────────────────
+    class AsaInputModal(discord.ui.Modal, title="Enter your Zappy's ASA Number"):
+        asa_field = discord.ui.TextInput(
+            label="ASA ID",
+            placeholder="e.g. 12345678",
+            min_length=1,
+            max_length=20,
+            required=True,
+        )
+
+        def __init__(self, pick_view):
+            super().__init__()
+            self.pick_view = pick_view
+
+        async def on_submit(self, inter: discord.Interaction):
+            raw = self.asa_field.value.strip()
+
+            # Validate it's a number
+            if not raw.isdigit():
+                await inter.response.send_message(
+                    "❌ That doesn't look like a valid ASA ID — numbers only.",
+                    ephemeral=True,
+                )
+                return
+
+            entered_id = int(raw)
+
+            # Check against the user's eligible Zappies
+            zappy = scored_ids.get(entered_id)
+            if not zappy:
+                # Give a specific reason if we can tell why
+                all_asset_ids = [z["asset_id"] for z in (
+                    ownership["zappies"] +
+                    [{"asset_id": h["asset_id"]} for h in ownership.get("heroes", [])] +
+                    [{"asset_id": c["asset_id"]} for c in ownership.get("collabs", [])]
+                )]
+                if entered_id not in all_asset_ids:
+                    msg = "❌ That ASA isn't in your linked wallet."
+                else:
+                    msg = "❌ That Zappy is on cooldown or isn't in the collection data."
+                await inter.response.send_message(msg, ephemeral=True)
+                return
+
+            # Build stat preview embed
+            stats = zappy["stats"]
+            name  = zappy["name"]
+            preview = discord.Embed(
+                title=f"🔍 {name}",
+                description=(
+                    f"⚡ VLT {stats.get('VLT','?')} · "
+                    f"🛡️ INS {stats.get('INS','?')} · "
+                    f"🎲 SPK {stats.get('SPK','?')}"
+                ),
+                color=0xF5E642,
+            )
+            if stats.get("combo"):
+                preview.add_field(name="Combo", value=stats["combo"], inline=False)
+            if stats.get("ability") and isinstance(stats["ability"], dict):
+                ab = stats["ability"]
+                preview.add_field(
+                    name=f"⚡ Ability: {ab.get('name','?')}",
+                    value=ab.get("desc",""),
+                    inline=False,
+                )
+            if zappy.get("image_url"):
+                preview.set_thumbnail(url=zappy["image_url"])
+            preview.set_footer(text=f"ASA {entered_id} · Is this the one?")
+
+            await inter.response.send_message(
+                embed=preview,
+                view=ConfirmAsaView(zappy, self.pick_view),
+                ephemeral=True,
+            )
+
+    # ── Main pick view (top 5 + manual entry button) ──────────────────────────
     class ClashPickView(discord.ui.View):
         def __init__(self):
             super().__init__(timeout=60)
             self.chosen = False
+
             for z in top5:
-                s = z["stats"]
                 btn = discord.ui.Button(
                     label=z["name"][:60],
                     style=discord.ButtonStyle.primary,
@@ -374,6 +520,15 @@ async def cmd_clash(interaction: discord.Interaction):
                 )
                 btn.callback = self._make_callback(z)
                 self.add_item(btn)
+
+            # Manual ASA entry button — always last
+            asa_btn = discord.ui.Button(
+                label="🔍 Enter ASA number",
+                style=discord.ButtonStyle.secondary,
+                row=4,
+            )
+            asa_btn.callback = self._asa_button_callback
+            self.add_item(asa_btn)
 
         def _make_callback(self, zappy: dict):
             async def callback(inter: discord.Interaction):
@@ -383,42 +538,18 @@ async def cmd_clash(interaction: discord.Interaction):
                 try:
                     await inter.response.defer(ephemeral=True)
                 except discord.errors.NotFound:
-                    return  # Interaction expired — user can try again
+                    return
                 self.chosen = True
                 for item in self.children:
                     item.disabled = True
-
-                asset_id = zappy["asset_id"]
-                stats    = zappy["stats"]
-                name     = zappy["name"]
-
-                # Register
-                await asyncio.to_thread(register_for_bracket, user_id, asset_id, active_bracket_id)
-
-                # Confirmation embed
-                confirm = discord.Embed(
-                    title=f"✅ {name} is in the bracket!",
-                    description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
-                    color=0xF5E642,
-                )
-                if stats.get("combo"):
-                    confirm.add_field(name="Combo", value=stats["combo"], inline=False)
-                if stats.get("ability") and isinstance(stats["ability"], dict):
-                    ab = stats["ability"]
-                    confirm.add_field(name=f"⚡ {ab.get('name','Ability')}", value=ab.get("desc",""), inline=False)
-                if zappy.get("image_url"):
-                    confirm.set_thumbnail(url=zappy["image_url"])
-                confirm.set_footer(text=f"Fights start when registration closes · Watch #{CLASH_CHANNEL}")
-                await inter.followup.send(embed=confirm, ephemeral=True)
-
-                # Public announcement
-                clash_ch = bot.get_channel(CLASH_CHANNEL)
-                if clash_ch:
-                    await clash_ch.send(
-                        f"⚡ **{inter.user.display_name}** enters the bracket with "
-                        f"**{name}** — VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
-                    )
+                await _do_register(inter, zappy, pick_view=None)
             return callback
+
+        async def _asa_button_callback(self, inter: discord.Interaction):
+            if self.chosen:
+                await inter.response.send_message("Already picked!", ephemeral=True)
+                return
+            await inter.response.send_modal(AsaInputModal(pick_view=self))
 
     await interaction.followup.send(embed=embed, view=ClashPickView(), ephemeral=True)
 
