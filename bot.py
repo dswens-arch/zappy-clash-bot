@@ -2549,6 +2549,10 @@ async def on_ready():
     print(f"⚡ Zappy Clash bot online as {bot.user}")
     setup_auction_commands(bot, tree, GUILD_ID)
 
+    # Attach Supabase client to bot so cogs can access it via bot.supabase
+    from database import get_supabase
+    bot.supabase = get_supabase()
+
     # Grand Prix
     await bot.add_cog(GrandPrixCog(bot))
     bot.add_view(grand_prix_cog.JoinAlgoView())
