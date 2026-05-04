@@ -639,7 +639,10 @@ class GrandPrixCog(commands.Cog):
             return
         buf  = make_board_buf(q.mode, state, **kw)
         file = discord.File(buf, filename="board.png")
-        view = (JoinAlgoView() if q.mode == "algo" else JoinZapView()) if not remove_button else discord.utils.MISSING
+        if remove_button:
+            view = discord.ui.View()   # empty view removes all buttons
+        else:
+            view = JoinAlgoView() if q.mode == "algo" else JoinZapView()
         await msg.edit(attachments=[file], view=view)
 
     async def _post_new_board(self, channel, q):
