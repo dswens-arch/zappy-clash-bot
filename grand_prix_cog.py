@@ -181,7 +181,7 @@ def make_board_buf(mode, state, **kw):
     if state == "racing":  return board_racing(mode, **kw)
     if state == "result":  return board_result(mode, **kw)
     return board_empty(mode)
-from race_engine import resolve_race, run_race_narration, get_stats, seed_stats
+from race_engine import simulate_race, narrate_race, seed_stats, get_stats
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -517,27 +517,34 @@ class GrandPrixCog(commands.Cog):
 
         stats_a = await get_stats(self.db, q.player_a_racer["zappy_id"])
         stats_b = await get_stats(self.db, q.player_b_racer["zappy_id"])
-        result  = resolve_race(stats_a, stats_b)
 
-        race_msg = await channel.send(
-            f"🏁 **RACE STARTING** — "
-            f"<@{q.player_a_id}> ({q.player_a_racer['zappy_id']}) vs "
-            f"<@{q.player_b_id}> ({q.player_b_racer['zappy_id']})"
+        # Fall back to neutral stats if not found
+        if not stats_a:
+            stats_a = {"speed": 5, "endurance": 5, "clutch": 5}
+        if not stats_b:
+            stats_b = {"speed": 5, "endurance": 5, "clutch": 5}
+
+        result = simulate_race(stats_a, stats_b)
+
+        winner_id    = q.player_a_id    if result.winner == "a" else q.player_b_id
+        loser_id     = q.player_b_id    if result.winner == "a" else q.player_a_id
+        winner_racer = q.player_a_racer if result.winner == "a" else q.player_b_racer
+        loser_racer  = q.player_b_racer if result.winner == "a" else q.player_a_racer
+
+        payout_str = (
+            f"💰 **9 ALGO** credited to <@{winner_id}>'s balance"
+            if q.mode == "algo" else
+            f"💰 **{ZAP_PAYOUT:,} ZAPP** credited to <@{winner_id}>'s balance"
         )
 
-        await run_race_narration(
-            message=race_msg,
+        await narrate_race(
+            channel=channel,
             result=result,
-            name_a=f"<@{q.player_a_id}>",
-            name_b=f"<@{q.player_b_id}>",
-            zappy_a=q.player_a_racer["zappy_id"],
-            zappy_b=q.player_b_racer["zappy_id"],
+            name_a=q.player_a_racer["zappy_id"],
+            name_b=q.player_b_racer["zappy_id"],
+            payout_str=payout_str,
+            mode=q.mode,
         )
-
-        winner_id    = q.player_a_id    if result["winner"] == "a" else q.player_b_id
-        loser_id     = q.player_b_id    if result["winner"] == "a" else q.player_a_id
-        winner_racer = q.player_a_racer if result["winner"] == "a" else q.player_b_racer
-        loser_racer  = q.player_b_racer if result["winner"] == "a" else q.player_a_racer
 
         await self._settle(q, channel, result, winner_racer, loser_racer, winner_id, loser_id)
 
@@ -601,8 +608,9 @@ class GrandPrixCog(commands.Cog):
             # Show result board on the existing message (no button)
             winner_name = winner_racer["zappy_id"]
             loser_name  = loser_racer["zappy_id"]
-            score_a = result.get("score_a", 0)
-            score_b = result.get("score_b", 0)
+            # v2 RaceResult is a dataclass — use attribute access
+            score_a = result.pos_a if hasattr(result, "pos_a") else 0
+            score_b = result.pos_b if hasattr(result, "pos_b") else 0
             await self._update_board(channel, q, "result",
                                      remove_button=True,
                                      zappy_a=winner_name, zappy_b=loser_name,
