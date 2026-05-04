@@ -577,8 +577,19 @@ class GrandPrixCog(commands.Cog):
                 )
 
             # Update win/loss records
-            self.db.rpc("increment_wins",   {"p_user_id": winner_id}).execute()
-            self.db.rpc("increment_losses", {"p_user_id": loser_id}).execute()
+            winner_row = self.db.table("zappy_racers").select("wins").eq(
+                "discord_user_id", winner_id).order("registered_at").limit(1).execute()
+            loser_row = self.db.table("zappy_racers").select("losses").eq(
+                "discord_user_id", loser_id).order("registered_at").limit(1).execute()
+
+            if winner_row.data:
+                new_wins = (winner_row.data[0].get("wins") or 0) + 1
+                self.db.table("zappy_racers").update({"wins": new_wins}).eq(
+                    "discord_user_id", winner_id).execute()
+            if loser_row.data:
+                new_losses = (loser_row.data[0].get("losses") or 0) + 1
+                self.db.table("zappy_racers").update({"losses": new_losses}).eq(
+                    "discord_user_id", loser_id).execute()
 
         except Exception as e:
             print(f"[grand_prix] settle error: {e}")
