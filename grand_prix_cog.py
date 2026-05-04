@@ -1040,6 +1040,371 @@ class GrandPrixCog(commands.Cog):
         )
 
     # -----------------------------------------------------------------------
+    # /gpdeposit — show bot address, poll for incoming ALGO
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpdeposit", description="Deposit ALGO to your Grand Prix balance.")
+    async def gpdeposit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+        racer   = await self._get_racer(user_id)
+
+        if not racer:
+            await interaction.followup.send("Not registered. Use `/gpregister` first.", ephemeral=True)
+            return
+
+        from algo_layer import get_bot_address as _gba, get_current_round as _gcr, get_indexer_client as _gic
+        bot_address = _gba()
+        after_round = await asyncio.to_thread(_gcr)
+        current_bal = await asyncio.to_thread(get_balance, self.db, user_id, "ALGO")
+
+        await interaction.followup.send(
+            f"**Deposit ALGO to your Grand Prix balance**\n\n"
+            f"Open Pera Wallet and send any amount of ALGO to the address below.\n"
+            f"Long press the next message to copy it.\n\n"
+            f"Current balance: **{current_bal:.4f} ALGO**\n"
+            f"⏳ Watching for your deposit for 5 minutes...",
+            ephemeral=True,
+        )
+        await interaction.followup.send(bot_address, ephemeral=True)
+
+        asyncio.create_task(
+            self._watch_algo_deposit(user_id, racer["wallet_address"], bot_address,
+                                     after_round, racer["zappy_id"], interaction)
+        )
+
+    async def _watch_algo_deposit(self, user_id, wallet_address, bot_address,
+                                   after_round, zappy_id, interaction):
+        import time
+        from algo_layer import get_indexer_client as _gic
+        deadline = time.monotonic() + 300
+        idx      = _gic()
+        credited: set[str] = set()
+
+        while time.monotonic() < deadline:
+            try:
+                res = idx.search_transactions(
+                    address=wallet_address,
+                    address_role="sender",
+                    txn_type="pay",
+                    min_round=after_round,
+                )
+                for txn in res.get("transactions", []):
+                    txid = txn.get("id", "")
+                    pay  = txn.get("payment-transaction", {})
+
+                    if pay.get("receiver") != bot_address:
+                        continue
+                    amount_algo = pay.get("amount", 0) / 1_000_000
+                    if amount_algo < 0.1:
+                        continue
+                    if txid in credited:
+                        continue
+
+                    # Double-credit protection
+                    existing = self.db.table("gp_deposits").select("txid").eq("txid", txid).execute()
+                    if existing.data:
+                        credited.add(txid)
+                        continue
+
+                    # Record txid FIRST
+                    self.db.table("gp_deposits").insert({
+                        "txid":            txid,
+                        "discord_user_id": user_id,
+                        "amount_algo":     amount_algo,
+                    }).execute()
+                    credited.add(txid)
+
+                    result = await asyncio.to_thread(
+                        credit, self.db, user_id, "ALGO", amount_algo,
+                        "gp_deposit", txid, zappy_id
+                    )
+                    print(f"[grand_prix] ALGO deposit {amount_algo:.4f} to {user_id} txid={txid[:12]}")
+
+                    try:
+                        await interaction.followup.send(
+                            f"✅ **{amount_algo:.4f} ALGO** deposited!\n"
+                            f"New balance: **{result['balance_after']:.4f} ALGO**\n"
+                            f"You're ready to race. Tap **Join Race** on the ALGO board.",
+                            ephemeral=True,
+                        )
+                    except Exception:
+                        pass
+                    return
+
+            except Exception as e:
+                print(f"[grand_prix] ALGO deposit watch error: {e}")
+
+            await asyncio.sleep(5)
+
+    # -----------------------------------------------------------------------
+    # /gpwithdraw — send ALGO balance back to player wallet
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpwithdraw", description="Withdraw your ALGO balance to your wallet.")
+    @app_commands.describe(amount="Amount of ALGO to withdraw, or 'all'")
+    async def gpwithdraw(self, interaction: discord.Interaction, amount: str = "all"):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+        racer   = await self._get_racer(user_id)
+
+        if not racer:
+            await interaction.followup.send("Not registered.", ephemeral=True)
+            return
+
+        balance = await asyncio.to_thread(get_balance, self.db, user_id, "ALGO")
+        if balance <= 0:
+            await interaction.followup.send("No ALGO balance to withdraw.", ephemeral=True)
+            return
+
+        if amount.lower() == "all":
+            withdraw_amount = balance
+        else:
+            try:
+                withdraw_amount = float(amount)
+            except ValueError:
+                await interaction.followup.send("Invalid amount. Use a number or 'all'.", ephemeral=True)
+                return
+
+        if withdraw_amount < 0.1:
+            await interaction.followup.send("Minimum withdrawal is 0.1 ALGO.", ephemeral=True)
+            return
+        if withdraw_amount > balance:
+            await interaction.followup.send(
+                f"Can't withdraw {withdraw_amount:.4f} ALGO — balance is only {balance:.4f} ALGO.",
+                ephemeral=True,
+            )
+            return
+
+        # Debit FIRST before sending on-chain
+        debit_result = await asyncio.to_thread(
+            debit, self.db, user_id, "ALGO", withdraw_amount,
+            "gp_withdraw", None, racer.get("zappy_id")
+        )
+        if not debit_result["ok"]:
+            await interaction.followup.send(
+                f"Withdrawal failed: {debit_result['error']}", ephemeral=True)
+            return
+
+        try:
+            from algosdk import transaction as _txn
+            from algo_layer import get_algod_client as _gac, get_bot_account as _gba
+            private_key, bot_addr = _gba()
+            client = _gac()
+            params = client.suggested_params()
+            txn = _txn.PaymentTxn(
+                sender=bot_addr, sp=params,
+                receiver=racer["wallet_address"],
+                amt=int(withdraw_amount * 1_000_000),
+                note=b"gpwithdraw",
+            )
+            signed = txn.sign(private_key)
+            txid   = client.send_transaction(signed)
+            _txn.wait_for_confirmation(client, txid, 10)
+
+            await interaction.followup.send(
+                f"✅ **{withdraw_amount:.4f} ALGO** sent to your wallet!\n"
+                f"TX: `{txid[:14]}...`\n"
+                f"Remaining balance: **{debit_result['balance_after']:.4f} ALGO**",
+                ephemeral=True,
+            )
+        except Exception as e:
+            # Refund on failure
+            print(f"[grand_prix] Withdraw send error: {e}")
+            await asyncio.to_thread(
+                credit, self.db, user_id, "ALGO", withdraw_amount,
+                "gp_withdraw_refund", None, racer.get("zappy_id")
+            )
+            await interaction.followup.send(
+                "⚠️ Withdrawal failed — your balance has been restored. Contact an admin if this persists.",
+                ephemeral=True,
+            )
+
+    # -----------------------------------------------------------------------
+    # /gpzapdeposit — show bot address, poll for incoming ZAPP
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpzapdeposit", description="Deposit ZAPP to your Grand Prix balance.")
+    async def gpzapdeposit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+        racer   = await self._get_racer(user_id)
+
+        if not racer:
+            await interaction.followup.send("Not registered. Use `/gpregister` first.", ephemeral=True)
+            return
+
+        from algo_layer import get_bot_address as _gba, get_current_round as _gcr
+        from zap_layer import ZAPP_ASA_ID
+        bot_address = _gba()
+        after_round = await asyncio.to_thread(_gcr)
+        current_bal = await asyncio.to_thread(get_balance, self.db, user_id, "ZAPP")
+
+        await interaction.followup.send(
+            f"**Deposit ZAPP to your Grand Prix balance**\n\n"
+            f"Open Pera Wallet and send ZAPP (ASA `{ZAPP_ASA_ID}`) to the address below.\n"
+            f"Long press the next message to copy it.\n\n"
+            f"Current balance: **{int(current_bal):,} ZAPP**\n"
+            f"⏳ Watching for your deposit for 5 minutes...",
+            ephemeral=True,
+        )
+        await interaction.followup.send(bot_address, ephemeral=True)
+
+        asyncio.create_task(
+            self._watch_zapp_deposit(user_id, racer["wallet_address"], bot_address,
+                                     after_round, racer["zappy_id"], interaction)
+        )
+
+    async def _watch_zapp_deposit(self, user_id, wallet_address, bot_address,
+                                   after_round, zappy_id, interaction):
+        import time
+        from algo_layer import get_indexer_client as _gic
+        from zap_layer import ZAPP_ASA_ID
+        deadline = time.monotonic() + 300
+        idx      = _gic()
+        credited: set[str] = set()
+
+        while time.monotonic() < deadline:
+            try:
+                res = idx.search_transactions(
+                    address=wallet_address,
+                    address_role="sender",
+                    txn_type="axfer",
+                    asset_id=ZAPP_ASA_ID,
+                    min_round=after_round,
+                )
+                for txn in res.get("transactions", []):
+                    txid  = txn.get("id", "")
+                    axfer = txn.get("asset-transfer-transaction", {})
+
+                    if axfer.get("receiver") != bot_address:
+                        continue
+                    if axfer.get("asset-id") != ZAPP_ASA_ID:
+                        continue
+                    amount = axfer.get("amount", 0)
+                    if amount < 1:
+                        continue
+                    if txid in credited:
+                        continue
+
+                    existing = self.db.table("gp_deposits").select("txid").eq("txid", txid).execute()
+                    if existing.data:
+                        credited.add(txid)
+                        continue
+
+                    self.db.table("gp_deposits").insert({
+                        "txid":            txid,
+                        "discord_user_id": user_id,
+                        "amount_algo":     amount,
+                    }).execute()
+                    credited.add(txid)
+
+                    result = await asyncio.to_thread(
+                        credit, self.db, user_id, "ZAPP", amount,
+                        "gp_deposit", txid, zappy_id
+                    )
+                    print(f"[grand_prix] ZAPP deposit {amount:,} to {user_id} txid={txid[:12]}")
+
+                    try:
+                        await interaction.followup.send(
+                            f"✅ **{amount:,} ZAPP** deposited!\n"
+                            f"New balance: **{int(result['balance_after']):,} ZAPP**\n"
+                            f"You're ready to race. Tap **Join Race** on the ZAPP board.",
+                            ephemeral=True,
+                        )
+                    except Exception:
+                        pass
+                    return
+
+            except Exception as e:
+                print(f"[grand_prix] ZAPP deposit watch error: {e}")
+
+            await asyncio.sleep(5)
+
+    # -----------------------------------------------------------------------
+    # /gpzapwithdraw — send ZAPP balance back to player wallet
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(name="gpzapwithdraw", description="Withdraw your ZAPP balance to your wallet.")
+    @app_commands.describe(amount="Amount of ZAPP to withdraw, or 'all'")
+    async def gpzapwithdraw(self, interaction: discord.Interaction, amount: str = "all"):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+        racer   = await self._get_racer(user_id)
+
+        if not racer:
+            await interaction.followup.send("Not registered.", ephemeral=True)
+            return
+
+        from zap_layer import ZAPP_ASA_ID
+        balance = await asyncio.to_thread(get_balance, self.db, user_id, "ZAPP")
+        if balance <= 0:
+            await interaction.followup.send("No ZAPP balance to withdraw.", ephemeral=True)
+            return
+
+        if amount.lower() == "all":
+            withdraw_amount = int(balance)
+        else:
+            try:
+                withdraw_amount = int(amount)
+            except ValueError:
+                await interaction.followup.send("Invalid amount. Use a whole number or 'all'.", ephemeral=True)
+                return
+
+        if withdraw_amount < 1:
+            await interaction.followup.send("Minimum withdrawal is 1 ZAPP.", ephemeral=True)
+            return
+        if withdraw_amount > balance:
+            await interaction.followup.send(
+                f"Can't withdraw {withdraw_amount:,} ZAPP — balance is only {int(balance):,} ZAPP.",
+                ephemeral=True,
+            )
+            return
+
+        debit_result = await asyncio.to_thread(
+            debit, self.db, user_id, "ZAPP", withdraw_amount,
+            "gp_withdraw", None, racer.get("zappy_id")
+        )
+        if not debit_result["ok"]:
+            await interaction.followup.send(
+                f"Withdrawal failed: {debit_result['error']}", ephemeral=True)
+            return
+
+        try:
+            from algosdk import transaction as _txn
+            from algo_layer import get_algod_client as _gac, get_bot_account as _gba
+            private_key, bot_addr = _gba()
+            client = _gac()
+            params = client.suggested_params()
+            txn = _txn.AssetTransferTxn(
+                sender=bot_addr, sp=params,
+                receiver=racer["wallet_address"],
+                amt=withdraw_amount,
+                index=ZAPP_ASA_ID,
+                note=b"gpzapwithdraw",
+            )
+            signed = txn.sign(private_key)
+            txid   = client.send_transaction(signed)
+            _txn.wait_for_confirmation(client, txid, 10)
+
+            await interaction.followup.send(
+                f"✅ **{withdraw_amount:,} ZAPP** sent to your wallet!\n"
+                f"TX: `{txid[:14]}...`\n"
+                f"Remaining balance: **{int(debit_result['balance_after']):,} ZAPP**",
+                ephemeral=True,
+            )
+        except Exception as e:
+            print(f"[grand_prix] ZAPP withdraw send error: {e}")
+            await asyncio.to_thread(
+                credit, self.db, user_id, "ZAPP", withdraw_amount,
+                "gp_withdraw_refund", None, racer.get("zappy_id")
+            )
+            await interaction.followup.send(
+                "⚠️ Withdrawal failed — your balance has been restored. Contact an admin if this persists.",
+                ephemeral=True,
+            )
+
+    # -----------------------------------------------------------------------
     # /gpregister
     # -----------------------------------------------------------------------
 
