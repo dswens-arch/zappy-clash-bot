@@ -633,8 +633,10 @@ class GrandPrixCog(commands.Cog):
     # -----------------------------------------------------------------------
 
     async def _get_racer(self, user_id: str) -> dict | None:
-        result = self.db.table("zappy_racers").select("*").eq("discord_user_id", user_id).maybe_single().execute()
-        return result.data if result else None
+        result = self.db.table("zappy_racers").select("*").eq(
+            "discord_user_id", user_id
+        ).order("registered_at", desc=False).limit(1).execute()
+        return result.data[0] if result.data else None
 
     # -----------------------------------------------------------------------
     # /gpsetup — post both boards (admin only)
