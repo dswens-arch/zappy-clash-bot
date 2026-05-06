@@ -1774,22 +1774,172 @@ class GrandPrixCog(commands.Cog):
     # /gpstats
     # -----------------------------------------------------------------------
 
-    @app_commands.command(name="gpstats", description="Your Zappy's race stats and record.")
+    # -----------------------------------------------------------------------
+    # Shared Zappy picker helper
+    # -----------------------------------------------------------------------
+
+    async def _pick_zappy(self, interaction, prompt: str, callback,
+                          exclude_maxed: bool = False):
+        """
+        Show a Zappy picker if player has multiple, otherwise call callback
+        directly with the single racer entry.
+        exclude_maxed: if True, fully maxed Zappies are hidden (used for upgrade).
+        """
+        user_id   = str(interaction.user.id)
+        available = await self._get_available_racers(user_id)
+
+        # Also include cooling-down Zappies for info commands
+        _, cooling = await self._get_all_racers_with_cooldown(user_id)
+        for c in cooling:
+            stats_res = self.db.table("zappy_stats").select("*").eq(
+                "zappy_id", c["racer"]["zappy_id"]
+            ).execute()
+            stats = stats_res.data[0] if stats_res.data else {}
+            available.append({"racer": c["racer"], "stats": stats})
+
+        if not available:
+            await interaction.followup.send(
+                "You're not registered. Use `/gpregister` first.", ephemeral=True
+            )
+            return
+
+        if exclude_maxed:
+            def _is_maxed(entry):
+                s = entry["stats"]
+                return (
+                    s.get("speed", 0)     >= s.get("speed_max", 11) and
+                    s.get("endurance", 0) >= s.get("endurance_max", 11) and
+                    s.get("clutch", 0)    >= s.get("clutch_max", 11)
+                )
+            available = [e for e in available if not _is_maxed(e)]
+            if not available:
+                await interaction.followup.send(
+                    "🏆 All your Zappies are fully maxed — nothing left to upgrade!",
+                    ephemeral=True,
+                )
+                return
+
+        if len(available) == 1:
+            await callback(interaction, available[0])
+            return
+
+        cog = self
+
+        class AsaLookupModal(discord.ui.Modal, title="Enter ASA ID"):
+            asa_input = discord.ui.TextInput(
+                label="ASA ID",
+                placeholder="e.g. 2644039660",
+                min_length=5,
+                max_length=15,
+            )
+
+            async def on_submit(self, modal_interaction: discord.Interaction):
+                await modal_interaction.response.defer(ephemeral=True)
+                try:
+                    asset_id = int(self.asa_input.value.strip())
+                except ValueError:
+                    await modal_interaction.followup.send(
+                        "That doesn't look like a valid ASA ID.", ephemeral=True)
+                    return
+
+                # Find this Zappy in the player's available list
+                match = None
+                for e in available:
+                    # Try to find by asset_id if stored, or fall back to name lookup
+                    from zappy_collection import ZAPPY_COLLECTION
+                    entry_data = ZAPPY_COLLECTION.get(asset_id)
+                    if entry_data and entry_data["name"] == e["racer"]["zappy_id"]:
+                        match = e
+                        break
+                    # Also check heroes/collabs
+                    from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+                    if asset_id in HERO_ASSET_IDS:
+                        name = f"Zappy Hero — {HERO_ASSET_IDS[asset_id]}"
+                        if e["racer"]["zappy_id"] == name:
+                            match = e
+                            break
+                    if asset_id in COLLAB_ASSET_IDS:
+                        if e["racer"]["zappy_id"] == "Shitty Zappy Kitty":
+                            match = e
+                            break
+
+                if not match:
+                    await modal_interaction.followup.send(
+                        f"ASA `{asset_id}` isn't registered to your account, or isn't recognised.",
+                        ephemeral=True,
+                    )
+                    return
+
+                await callback(modal_interaction, match)
+
+        class PickView(discord.ui.View):
+            def __init__(self):
+                super().__init__(timeout=60)
+                for entry in available[:5]:
+                    zid = entry["racer"]["zappy_id"]
+                    btn = discord.ui.Button(
+                        label=zid,
+                        style=discord.ButtonStyle.primary,
+                        custom_id=f"pick_{zid}",
+                    )
+                    btn.callback = self._make_cb(entry)
+                    self.add_item(btn)
+                # Manual ASA entry if more than 5
+                if len(available) > 5:
+                    manual = discord.ui.Button(
+                        label="Enter ASA manually",
+                        style=discord.ButtonStyle.secondary,
+                        emoji="🔢",
+                        custom_id="pick_manual_asa",
+                    )
+                    manual.callback = self._manual_cb
+                    self.add_item(manual)
+
+            async def _manual_cb(self, btn_interaction: discord.Interaction):
+                await btn_interaction.response.send_modal(AsaLookupModal())
+
+            def _make_cb(self, entry):
+                async def cb(btn_interaction: discord.Interaction):
+                    for item in self.children:
+                        item.disabled = True
+                    await btn_interaction.response.defer(ephemeral=True)
+                    await callback(btn_interaction, entry)
+                return cb
+
+        extra = f" (+{len(available) - 5} more — use **Enter ASA manually**)" \
+                if len(available) > 5 else ""
+        await interaction.followup.send(
+            f"{prompt}{extra}", view=PickView(), ephemeral=True
+        )
+
+    @app_commands.command(name="gpstats", description="View race record and stats for one of your Zappies.")
     async def gpstats(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        user_id = str(interaction.user.id)
-        racer   = await self._get_racer(user_id)
-        if not racer:
-            await interaction.followup.send("Run `/gpregister` first.", ephemeral=True)
-            return
-        stats = await get_stats(self.db, racer["zappy_id"])
-        total = racer["wins"] + racer["losses"]
-        pct   = round(racer["wins"] / total * 100) if total else 0
-        await interaction.followup.send(
-            f"⚡ **{racer['zappy_id']}**\n"
-            f"Record: {racer['wins']}W / {racer['losses']}L ({pct}%)\n"
-            f"Speed: {stats.get('speed', '?')}  |  Endurance: {stats.get('endurance', '?')}  |  Clutch: {stats.get('clutch', '?')}",
-            ephemeral=True,
+
+        async def show_stats(intr, entry):
+            racer = entry["racer"]
+            stats = entry["stats"]
+            total = racer["wins"] + racer["losses"]
+            pct   = round(racer["wins"] / total * 100) if total else 0
+            spd   = stats.get("speed", "?")
+            end   = stats.get("endurance", "?")
+            clt   = stats.get("clutch", "?")
+            spd_m = stats.get("speed_max", "?")
+            end_m = stats.get("endurance_max", "?")
+            clt_m = stats.get("clutch_max", "?")
+            await intr.followup.send(
+                f"⚡ **{racer['zappy_id']}**\n"
+                f"Record: **{racer['wins']}W / {racer['losses']}L** ({pct}%)\n\n"
+                f"Speed `{stat_bar(spd, spd_m)}` {spd}/{spd_m}\n"
+                f"Endurance `{stat_bar(end, end_m)}` {end}/{end_m}\n"
+                f"Clutch `{stat_bar(clt, clt_m)}` {clt}/{clt_m}",
+                ephemeral=True,
+            )
+
+        await self._pick_zappy(
+            interaction,
+            prompt="Which Zappy do you want to check?",
+            callback=show_stats,
         )
 
     # -----------------------------------------------------------------------
@@ -1825,169 +1975,129 @@ class GrandPrixCog(commands.Cog):
     # -----------------------------------------------------------------------
 
     @app_commands.command(name="gpupgradeinfo", description="See your Zappy's stats, hidden caps, and upgrade costs.")
-    @app_commands.describe(zappy_id="Which Zappy to check (leave blank for your first)")
-    async def gpupgradeinfo(self, interaction: discord.Interaction, zappy_id: str = None):
+    async def gpupgradeinfo(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        user_id = str(interaction.user.id)
 
-        available = await self._get_available_racers(user_id)
-        if not available:
-            await interaction.followup.send("You're not registered. Use `/gpregister` first.", ephemeral=True)
-            return
+        async def show_info(intr, entry):
+            racer = entry["racer"]
+            stats = entry["stats"]
+            zid   = racer["zappy_id"]
 
-        # Find the right Zappy
-        entry = None
-        if zappy_id:
-            for e in available:
-                if e["racer"]["zappy_id"].lower() == zappy_id.lower():
-                    entry = e
-                    break
-            if not entry:
-                await interaction.followup.send(f"Zappy `{zappy_id}` not found on your account.", ephemeral=True)
-                return
-        else:
-            entry = available[0]
+            def stat_line(name: str, key: str) -> str:
+                cur  = stats.get(key, 0)
+                cap  = stats.get(f"{key}_max", 11)
+                next_cost = self._upgrade_cost(cur)
+                to_max    = self._cost_to_max(cur, cap)
+                bar  = stat_bar(cur, cap)
+                if cur >= cap:
+                    status = "**MAXED**"
+                else:
+                    status = f"next: **{next_cost:,} ZAPP** · to max: **{to_max:,} ZAPP**"
+                return f"`{bar}` **{cur}/{cap}** — {status}"
 
-        racer = entry["racer"]
-        stats = entry["stats"]
-        zid   = racer["zappy_id"]
+            embed = discord.Embed(
+                title=f"⚡ {zid} — Upgrade Info",
+                color=discord.Color.from_rgb(30, 180, 255),
+            )
+            embed.add_field(name="🏎  Speed (pos 0–6)",      value=stat_line("Speed",     "speed"),     inline=False)
+            embed.add_field(name="💪 Endurance (pos 7–13)",  value=stat_line("Endurance", "endurance"), inline=False)
+            embed.add_field(name="🎯 Clutch (pos 14–19)",    value=stat_line("Clutch",    "clutch"),    inline=False)
+            total_to_max = (
+                self._cost_to_max(stats.get("speed", 0),     stats.get("speed_max", 11)) +
+                self._cost_to_max(stats.get("endurance", 0), stats.get("endurance_max", 11)) +
+                self._cost_to_max(stats.get("clutch", 0),    stats.get("clutch_max", 11))
+            )
+            embed.set_footer(text=f"Total ZAPP to fully max {zid}: {total_to_max:,}")
+            await intr.followup.send(embed=embed, ephemeral=True)
 
-        def stat_line(name: str, key: str) -> str:
-            cur  = stats.get(key, 0)
-            cap  = stats.get(f"{key}_max", 11)
-            next_cost = self._upgrade_cost(cur)
-            to_max    = self._cost_to_max(cur, cap)
-            bar  = stat_bar(cur, cap)
-            if cur >= cap:
-                status = "**MAXED**"
-            else:
-                status = f"next point: **{next_cost:,} ZAPP** · to max: **{to_max:,} ZAPP**"
-            return f"`{bar}` **{cur}/{cap}** — {status}"
-
-        embed = discord.Embed(
-            title=f"⚡ {zid} — Upgrade Info",
-            color=discord.Color.from_rgb(30, 180, 255),
+        await self._pick_zappy(
+            interaction,
+            prompt="Which Zappy do you want to check upgrade costs for?",
+            callback=show_info,
         )
-        embed.add_field(name="🏎  Speed (governs pos 0-6)",
-                        value=stat_line("Speed", "speed"), inline=False)
-        embed.add_field(name="💪 Endurance (governs pos 7-13)",
-                        value=stat_line("Endurance", "endurance"), inline=False)
-        embed.add_field(name="🎯 Clutch (governs pos 14-19)",
-                        value=stat_line("Clutch", "clutch"), inline=False)
-
-        total_to_max = (
-            self._cost_to_max(stats.get("speed", 0),     stats.get("speed_max", 11)) +
-            self._cost_to_max(stats.get("endurance", 0), stats.get("endurance_max", 11)) +
-            self._cost_to_max(stats.get("clutch", 0),    stats.get("clutch_max", 11))
-        )
-        embed.set_footer(text=f"Total ZAPP to fully max {zid}: {total_to_max:,}")
-
-        await interaction.followup.send(embed=embed, ephemeral=True)
 
     # -----------------------------------------------------------------------
     # /gpupgrade — spend ZAPP to raise a stat by one point
     # -----------------------------------------------------------------------
 
     @app_commands.command(name="gpupgrade", description="Spend ZAPP to upgrade a stat on your Zappy.")
-    @app_commands.describe(
-        stat="Which stat to upgrade",
-        zappy_id="Which Zappy to upgrade (leave blank for your first)",
-    )
+    @app_commands.describe(stat="Which stat to upgrade")
     @app_commands.choices(stat=[
         app_commands.Choice(name="Speed",     value="speed"),
         app_commands.Choice(name="Endurance", value="endurance"),
         app_commands.Choice(name="Clutch",    value="clutch"),
     ])
-    async def gpupgrade(self, interaction: discord.Interaction,
-                        stat: str, zappy_id: str = None):
+    async def gpupgrade(self, interaction: discord.Interaction, stat: str):
         await interaction.response.defer(ephemeral=True)
         user_id = str(interaction.user.id)
 
-        available = await self._get_available_racers(user_id)
-        if not available:
-            await interaction.followup.send("You're not registered.", ephemeral=True)
-            return
+        async def do_upgrade(intr, entry):
+            racer   = entry["racer"]
+            stats   = entry["stats"]
+            zid     = racer["zappy_id"]
+            current = stats.get(stat, 0)
+            cap     = stats.get(f"{stat}_max", 11)
 
-        # Find Zappy
-        entry = None
-        if zappy_id:
-            for e in available:
-                if e["racer"]["zappy_id"].lower() == zappy_id.lower():
-                    entry = e
-                    break
-            if not entry:
-                await interaction.followup.send(f"Zappy `{zappy_id}` not found.", ephemeral=True)
+            if current >= cap:
+                await intr.followup.send(
+                    f"**{zid}**'s {stat.capitalize()} is already maxed at **{cap}**.",
+                    ephemeral=True,
+                )
                 return
-        else:
-            entry = available[0]
 
-        racer      = entry["racer"]
-        stats      = entry["stats"]
-        zid        = racer["zappy_id"]
-        current    = stats.get(stat, 0)
-        cap        = stats.get(f"{stat}_max", 11)
+            cost = self._upgrade_cost(current)
+            if cost is None:
+                await intr.followup.send("That stat is already at the maximum tier.", ephemeral=True)
+                return
 
-        if current >= cap:
-            await interaction.followup.send(
-                f"**{zid}**'s {stat.capitalize()} is already maxed at **{cap}**.",
-                ephemeral=True,
+            bal = await asyncio.to_thread(get_balance, self.db, user_id, "ZAPP")
+            if bal < cost:
+                await intr.followup.send(
+                    f"Not enough ZAPP. This upgrade costs **{cost:,}** — you have **{int(bal):,}**.",
+                    ephemeral=True,
+                )
+                return
+
+            debit_result = await asyncio.to_thread(
+                debit, self.db, user_id, "ZAPP", cost,
+                f"gp_upgrade_{stat}", zid, zid
             )
-            return
+            if not debit_result["ok"]:
+                await intr.followup.send(f"Upgrade failed: {debit_result['error']}", ephemeral=True)
+                return
 
-        cost = self._upgrade_cost(current)
-        if cost is None:
-            await interaction.followup.send("That stat is already at the maximum tier.", ephemeral=True)
-            return
+            new_val = current + 1
+            self.db.table("zappy_stats").update({
+                stat:              new_val,
+                "total_zap_spent": (stats.get("total_zap_spent", 0) or 0) + cost,
+            }).eq("zappy_id", zid).execute()
 
-        # Check balance
-        bal = await asyncio.to_thread(get_balance, self.db, user_id, "ZAPP")
-        if bal < cost:
-            await interaction.followup.send(
-                f"Not enough ZAPP. This upgrade costs **{cost:,}** — you have **{int(bal):,}**.",
-                ephemeral=True,
+            next_cost = self._upgrade_cost(new_val)
+            to_max    = self._cost_to_max(new_val, cap)
+            bar       = stat_bar(new_val, cap)
+
+            embed = discord.Embed(
+                title=f"⚡ {zid} — {stat.capitalize()} Upgraded!",
+                color=discord.Color.green(),
             )
-            return
+            embed.add_field(name=stat.capitalize(), value=f"`{bar}` **{new_val}/{cap}**", inline=False)
+            if new_val >= cap:
+                embed.add_field(name="🏆 MAXED!", value="This stat has hit its cap.", inline=False)
+            else:
+                embed.add_field(
+                    name="Next upgrade",
+                    value=f"**{next_cost:,} ZAPP** · {to_max:,} ZAPP to max",
+                    inline=False,
+                )
+            embed.set_footer(text=f"ZAPP balance: {int(debit_result['balance_after']):,}")
+            await intr.followup.send(embed=embed, ephemeral=True)
 
-        # Debit ZAPP
-        debit_result = await asyncio.to_thread(
-            debit, self.db, user_id, "ZAPP", cost,
-            f"gp_upgrade_{stat}", zid, zid
+        await self._pick_zappy(
+            interaction,
+            prompt=f"Which Zappy do you want to upgrade {stat.capitalize()} on?",
+            callback=do_upgrade,
+            exclude_maxed=True,
         )
-        if not debit_result["ok"]:
-            await interaction.followup.send(
-                f"Upgrade failed: {debit_result['error']}", ephemeral=True)
-            return
-
-        # Apply stat increase
-        new_val = current + 1
-        self.db.table("zappy_stats").update({
-            stat:               new_val,
-            "total_zap_spent":  (stats.get("total_zap_spent", 0) or 0) + cost,
-        }).eq("zappy_id", zid).execute()
-
-        next_cost = self._upgrade_cost(new_val)
-        to_max    = self._cost_to_max(new_val, cap)
-        bar       = stat_bar(new_val, cap)
-
-        embed = discord.Embed(
-            title=f"⚡ {zid} — {stat.capitalize()} Upgraded!",
-            color=discord.Color.green(),
-        )
-        embed.add_field(
-            name=f"{stat.capitalize()}",
-            value=f"`{bar}` **{new_val}/{cap}**",
-            inline=False,
-        )
-        if new_val >= cap:
-            embed.add_field(name="🏆 MAXED!", value="This stat has hit its cap.", inline=False)
-        else:
-            embed.add_field(
-                name="Next upgrade",
-                value=f"**{next_cost:,} ZAPP** · {to_max:,} ZAPP to max",
-                inline=False,
-            )
-        embed.set_footer(text=f"ZAPP balance: {int(debit_result['balance_after']):,}")
-        await interaction.followup.send(embed=embed, ephemeral=True)
 
     # -----------------------------------------------------------------------
     # /gpleaderboard
