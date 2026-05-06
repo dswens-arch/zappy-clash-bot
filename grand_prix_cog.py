@@ -292,23 +292,76 @@ class GrandPrixCog(commands.Cog):
             from database import get_supabase
             self.db = get_supabase()
         self.expiry_task.start()
+        self.ownership_cleanup_task.start()
 
     # -----------------------------------------------------------------------
-    # Background task — clean up duels that never started
+    # Background tasks
     # -----------------------------------------------------------------------
 
     @tasks.loop(seconds=30)
     async def expiry_task(self):
         try:
-            # Optional: call your process_expired_duels helper here
-            pass
+            pass  # reserved for duel expiry if needed later
         except Exception as e:
             print(f"[grand_prix] expiry_task error: {e}")
+
+    @tasks.loop(hours=24)
+    async def ownership_cleanup_task(self):
+        """
+        Nightly task — check all registered wallets and remove any Zappy rows
+        where the NFT is no longer held. Stats are preserved so the next owner
+        inherits them on registration.
+        """
+        try:
+            from algorand_lookup import verify_wallet_owns_zappy
+            print("[grand_prix] Starting nightly ownership cleanup...")
+
+            # Get all unique wallet addresses
+            rows = self.db.table("zappy_racers").select(
+                "discord_user_id, wallet_address, zappy_id"
+            ).execute().data or []
+
+            # Group by wallet to avoid hitting the indexer per-Zappy
+            wallets: dict[str, list[dict]] = {}
+            for row in rows:
+                w = row["wallet_address"]
+                wallets.setdefault(w, []).append(row)
+
+            removed = 0
+            for wallet_address, racers in wallets.items():
+                try:
+                    holding = await verify_wallet_owns_zappy(wallet_address)
+                    all_held = {
+                        z["name"] for z in (
+                            holding.get("zappies", []) +
+                            holding.get("heroes", []) +
+                            holding.get("collabs", [])
+                        )
+                    }
+                    for racer in racers:
+                        if racer["zappy_id"] not in all_held:
+                            self.db.table("zappy_racers").delete().eq(
+                                "discord_user_id", racer["discord_user_id"]
+                            ).eq("zappy_id", racer["zappy_id"]).execute()
+                            print(f"[grand_prix] Cleanup: removed {racer['zappy_id']} "
+                                  f"from {racer['discord_user_id']} — no longer in wallet")
+                            removed += 1
+                    await asyncio.sleep(0.5)  # small delay between wallet checks
+                except Exception as e:
+                    print(f"[grand_prix] Cleanup error for wallet {wallet_address[:10]}...: {e}")
+
+            print(f"[grand_prix] Ownership cleanup complete — {removed} Zappy(s) removed")
+        except Exception as e:
+            print(f"[grand_prix] ownership_cleanup_task error: {e}")
 
     @expiry_task.before_loop
     async def before_expiry(self):
         await self.bot.wait_until_ready()
         await self._restore_board_ids()
+
+    @ownership_cleanup_task.before_loop
+    async def before_ownership_cleanup(self):
+        await self.bot.wait_until_ready()
 
     async def _restore_board_ids(self):
         """Read board_msg_id and channel_id from Supabase on startup."""
@@ -516,6 +569,33 @@ class GrandPrixCog(commands.Cog):
     # -----------------------------------------------------------------------
 
     async def _enter_queue(self, interaction, q, channel, user_id, racer, stats):
+        # Verify the player still owns this Zappy before locking a slot
+        try:
+            from algorand_lookup import verify_wallet_owns_zappy
+            holding = await verify_wallet_owns_zappy(racer["wallet_address"])
+            all_held = {
+                z["name"] for z in (
+                    holding.get("zappies", []) +
+                    holding.get("heroes", []) +
+                    holding.get("collabs", [])
+                )
+            }
+            if racer["zappy_id"] not in all_held:
+                # NFT no longer in wallet — remove from lineup, keep stats
+                self.db.table("zappy_racers").delete().eq(
+                    "discord_user_id", user_id
+                ).eq("zappy_id", racer["zappy_id"]).execute()
+                print(f"[grand_prix] Removed {racer['zappy_id']} from {user_id} — no longer in wallet")
+                await interaction.followup.send(
+                    f"⚠️ **{racer['zappy_id']}** is no longer in your wallet — it's been removed from your lineup.\n"
+                    f"If you still own it, re-register with `/gpregister`. Run `/gpregister` to see your current Zappies.",
+                    ephemeral=True,
+                )
+                return
+        except Exception as e:
+            # Don't block the race if verification fails — log and continue
+            print(f"[grand_prix] Ownership check error for {racer['zappy_id']}: {e}")
+
         async with _join_lock:
             if user_id in active_players:
                 await interaction.followup.send("You just joined — check your DMs.", ephemeral=True)
@@ -867,6 +947,15 @@ class GrandPrixCog(commands.Cog):
             }
             available.append({"racer": racer, "stats": stats})
 
+        # Sort by total stat power — strongest Zappies appear first in the picker
+        available.sort(
+            key=lambda e: (
+                e["stats"].get("speed", 0) +
+                e["stats"].get("endurance", 0) +
+                e["stats"].get("clutch", 0)
+            ),
+            reverse=True,
+        )
         return available
 
     async def _get_all_racers_with_cooldown(self, user_id: str) -> tuple[list[dict], list[dict]]:
