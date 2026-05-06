@@ -306,10 +306,10 @@ class GrandPrixCog(commands.Cog):
     @tasks.loop(hours=24)
     async def ownership_cleanup_task(self):
         """
-        Nightly task — check all registered wallets and remove any Zappy rows
-        where the NFT is no longer held. Stats are preserved so the next owner
-        inherits them on registration.
+        Nightly task — TEMPORARILY DISABLED pending review of false-positive removals.
+        Re-enable by removing the return statement below once the lookup issue is resolved.
         """
+        return  # DISABLED — was incorrectly removing Zappies due to bad indexer responses
         try:
             from algorand_lookup import verify_wallet_owns_zappy
             print("[grand_prix] Starting nightly ownership cleanup...")
@@ -329,6 +329,14 @@ class GrandPrixCog(commands.Cog):
             for wallet_address, racers in wallets.items():
                 try:
                     holding = await verify_wallet_owns_zappy(wallet_address)
+
+                    # Safety check — if lookup returned an error or 0 assets total,
+                    # skip this wallet entirely. Don't treat a failed/empty lookup
+                    # as "wallet is empty" and wipe everything.
+                    if holding.get("error"):
+                        print(f"[grand_prix] Cleanup: skipping {wallet_address[:10]}... — indexer error: {holding['error']}")
+                        continue
+
                     all_held = {
                         z["name"] for z in (
                             holding.get("zappies", []) +
@@ -336,6 +344,10 @@ class GrandPrixCog(commands.Cog):
                             holding.get("collabs", [])
                         )
                     }
+
+                    if len(all_held) == 0:
+                        print(f"[grand_prix] Cleanup: skipping {wallet_address[:10]}... — 0 assets returned, likely bad lookup")
+                        continue
                     for racer in racers:
                         if racer["zappy_id"] not in all_held:
                             self.db.table("zappy_racers").delete().eq(
