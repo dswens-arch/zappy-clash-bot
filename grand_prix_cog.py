@@ -147,10 +147,10 @@ def board_waiting(mode, zappy_id):
     _t(draw, W//2, 195, "Join to race · entry fee debited on join",  FONT_SM,   MUTED)
     _t(draw, W//2, 222, "Tap Join Race to enter",                    FONT_SM,   accent)
     # Lower left slot label — Zappy name on one line, username below it
-    _t(draw, 190,  238, zappy_name,   FONT_SM, WHITE)
+    _t(draw, 210,  228, zappy_name,   FONT_SM, WHITE)
     if display_name:
-        _t(draw, 190, 256, display_name, FONT_SM, MUTED)
-    _t(draw, 600,  245, "???",        FONT_SM, MUTED)
+        _t(draw, 210, 246, display_name, FONT_SM, MUTED)
+    _t(draw, 600,  237, "???",        FONT_SM, MUTED)
     return _buf(img)
 
 
