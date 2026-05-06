@@ -1532,50 +1532,166 @@ class GrandPrixCog(commands.Cog):
             )
 
     # -----------------------------------------------------------------------
-    # /gpregister
+    # /gpregister — look up wallet, find Zappies, let player pick one
     # -----------------------------------------------------------------------
 
-    @app_commands.command(name="gpregister", description="Register your Zappy for the Grand Prix.")
-    @app_commands.describe(
-        wallet_address="Your Algorand wallet address (58 characters)",
-        zappy_id="Your Zappy NFT ID (e.g. ZAP-447)",
-    )
-    async def gpregister(self, interaction: discord.Interaction,
-                         wallet_address: str, zappy_id: str):
+    ZAPPY_CREATOR = "EUCSNIT6VEW5XY5KQN74HIYQBROGT6KB3BPYWXSKST32V5IGWLG7GSCQOA"
+
+    @app_commands.command(name="gpregister", description="Register a Zappy to your Grand Prix account.")
+    @app_commands.describe(wallet_address="Your Algorand wallet address (58 characters)")
+    async def gpregister(self, interaction: discord.Interaction, wallet_address: str):
         await interaction.response.defer(ephemeral=True)
         user_id = str(interaction.user.id)
 
-        existing = await self._get_racer(user_id)
-        if existing:
-            await interaction.followup.send(
-                f"Already registered with **{existing['zappy_id']}**. Use `/gpstats` to check in.",
-                ephemeral=True,
-            )
-            return
-
         if len(wallet_address) != 58:
             await interaction.followup.send(
-                "Invalid Algorand address — should be 58 characters.",
+                "That doesn't look like a valid Algorand address — should be 58 characters.",
                 ephemeral=True,
             )
             return
 
-        stats = seed_stats(zappy_id)
-        self.db.table("zappy_racers").insert({
-            "discord_user_id": user_id,
-            "wallet_address":  wallet_address,
-            "zappy_id":        zappy_id,
-            "algo_balance":    0,
-            "zapp_balance":    0,
-            "wins": 0, "losses": 0,
-        }).execute()
-        self.db.table("zappy_stats").insert({"zappy_id": zappy_id, **stats}).execute()
+        # Look up Zappies held by this wallet
+        await interaction.followup.send(
+            "🔍 Scanning your wallet for Zappies...", ephemeral=True
+        )
+
+        try:
+            from algo_layer import get_indexer_client
+            idx = get_indexer_client()
+            zappies = await asyncio.to_thread(
+                self._fetch_wallet_zappies, idx, wallet_address
+            )
+        except Exception as e:
+            print(f"[grand_prix] gpregister lookup error: {e}")
+            await interaction.followup.send(
+                "⚠️ Couldn't reach the Algorand indexer right now. Try again in a moment.",
+                ephemeral=True,
+            )
+            return
+
+        if not zappies:
+            await interaction.followup.send(
+                "No Zappies found in that wallet. Make sure you're using the right address and that you hold at least one Zappy NFT.",
+                ephemeral=True,
+            )
+            return
+
+        # Filter out already-registered Zappies
+        already = self.db.table("zappy_racers").select("zappy_id").eq(
+            "discord_user_id", user_id
+        ).execute().data or []
+        registered_ids = {r["zappy_id"] for r in already}
+        unregistered   = [z for z in zappies if z["name"] not in registered_ids]
+
+        if not unregistered:
+            await interaction.followup.send(
+                f"All your Zappies are already registered! Use `/gpupgradeinfo` to check their stats.",
+                ephemeral=True,
+            )
+            return
+
+        cog = self
+
+        class ZappyRegisterView(discord.ui.View):
+            def __init__(self):
+                super().__init__(timeout=60)
+                self.chosen = False
+                for z in unregistered[:5]:
+                    btn = discord.ui.Button(
+                        label=z["name"],
+                        style=discord.ButtonStyle.primary,
+                        custom_id=f"gpreg_{z['asset_id']}",
+                    )
+                    btn.callback = self._make_cb(z)
+                    self.add_item(btn)
+
+            def _make_cb(self, z):
+                async def cb(btn_interaction: discord.Interaction):
+                    if self.chosen:
+                        await btn_interaction.response.send_message(
+                            "Already picked!", ephemeral=True)
+                        return
+                    self.chosen = True
+                    for item in self.children:
+                        item.disabled = True
+                    await btn_interaction.response.defer(ephemeral=True)
+
+                    zappy_id = z["name"]
+                    stats    = seed_stats(zappy_id)
+
+                    cog.db.table("zappy_racers").insert({
+                        "discord_user_id": user_id,
+                        "wallet_address":  wallet_address,
+                        "zappy_id":        zappy_id,
+                        "algo_balance":    0,
+                        "zapp_balance":    0,
+                        "wins":            0,
+                        "losses":          0,
+                    }).execute()
+                    cog.db.table("zappy_stats").insert({
+                        "zappy_id": zappy_id, **stats
+                    }).execute()
+
+                    await btn_interaction.followup.send(
+                        f"✅ **{zappy_id}** registered and ready to race!\n\n"
+                        f"Use `/gpupgradeinfo` to see their stats.\n"
+                        f"Use `/gpdeposit` or `/gpzapdeposit` to fund your balance.\n"
+                        f"Register more Zappies any time with `/gpregister`.",
+                        ephemeral=True,
+                    )
+                return cb
+
+        names = ", ".join(f"**{z['name']}**" for z in unregistered[:5])
+        extra = f" (+{len(unregistered) - 5} more — run `/gpregister` again to see them)" \
+                if len(unregistered) > 5 else ""
 
         await interaction.followup.send(
-            f"✅ **{zappy_id}** registered! Run `/gpbalance` to check your starting balances.\n"
-            f"Head to the Grand Prix channel and tap **Join Race** when you're ready.",
+            f"Found **{len(unregistered)}** unregistered Zappy{'s' if len(unregistered) != 1 else ''} in your wallet.\n"
+            f"{names}{extra}\n\n"
+            f"Tap one to register it:",
+            view=ZappyRegisterView(),
             ephemeral=True,
         )
+
+    def _fetch_wallet_zappies(self, idx, wallet_address: str) -> list[dict]:
+        """
+        Return all Zappy NFTs held by wallet_address.
+        Filters by creator address to ensure only real Zappies are returned.
+        """
+        try:
+            response = idx.search_assets(creator=self.ZAPPY_CREATOR)
+            creator_asset_ids = {
+                a["index"] for a in response.get("assets", [])
+            }
+        except Exception as e:
+            print(f"[grand_prix] Asset lookup error: {e}")
+            creator_asset_ids = set()
+
+        try:
+            account_info = idx.lookup_account_assets(wallet_address)
+            held_assets  = account_info.get("assets", [])
+        except Exception as e:
+            print(f"[grand_prix] Wallet lookup error: {e}")
+            return []
+
+        zappies = []
+        for asset in held_assets:
+            asset_id = asset.get("asset-id")
+            amount   = asset.get("amount", 0)
+            if amount == 0:
+                continue
+            if asset_id not in creator_asset_ids:
+                continue
+            # Look up asset name
+            try:
+                info = idx.search_assets(asset_id=asset_id)
+                name = info["assets"][0]["params"].get("name", f"ASA-{asset_id}") \
+                       if info.get("assets") else f"ASA-{asset_id}"
+            except Exception:
+                name = f"ASA-{asset_id}"
+            zappies.append({"asset_id": asset_id, "name": name})
+
+        return zappies
 
     # -----------------------------------------------------------------------
     # /gpbalance
