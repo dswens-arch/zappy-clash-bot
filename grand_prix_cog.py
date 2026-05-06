@@ -1843,7 +1843,6 @@ class GrandPrixCog(commands.Cog):
                     )
                     return
 
-                stats = seed_stats(name)
                 cog.db.table("zappy_racers").insert({
                     "discord_user_id": user_id,
                     "wallet_address":  wallet_address,
@@ -1853,9 +1852,15 @@ class GrandPrixCog(commands.Cog):
                     "wins":            0,
                     "losses":          0,
                 }).execute()
-                cog.db.table("zappy_stats").insert({
-                    "zappy_id": name, **stats
-                }).execute()
+                # Only insert stats if they don't already exist — preserves upgrades
+                existing_stats = cog.db.table("zappy_stats").select("zappy_id").eq(
+                    "zappy_id", name
+                ).execute()
+                if not existing_stats.data:
+                    stats = seed_stats(name)
+                    cog.db.table("zappy_stats").insert({
+                        "zappy_id": name, **stats
+                    }).execute()
 
                 await modal_interaction.followup.send(
                     f"✅ **{name}** (ASA `{asset_id}`) registered and ready to race!\n\n"
@@ -1912,9 +1917,15 @@ class GrandPrixCog(commands.Cog):
                         "wins":            0,
                         "losses":          0,
                     }).execute()
-                    cog.db.table("zappy_stats").insert({
-                        "zappy_id": zappy_id, **stats
-                    }).execute()
+                    # Upsert stats — preserves upgrades if Zappy was previously registered
+                    existing_stats = cog.db.table("zappy_stats").select("zappy_id").eq(
+                        "zappy_id", zappy_id
+                    ).execute()
+                    if not existing_stats.data:
+                        stats = seed_stats(zappy_id)
+                        cog.db.table("zappy_stats").insert({
+                            "zappy_id": zappy_id, **stats
+                        }).execute()
 
                     await btn_interaction.followup.send(
                         f"✅ **{zappy_id}** registered and ready to race!\n\n"
@@ -2162,7 +2173,10 @@ class GrandPrixCog(commands.Cog):
 
     @app_commands.command(name="gpupgradeinfo", description="See your Zappy's stats, hidden caps, and upgrade costs.")
     async def gpupgradeinfo(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
+        try:
+            await interaction.response.defer(ephemeral=True)
+        except discord.errors.HTTPException:
+            return  # already acknowledged, ignore
 
         async def show_info(intr, entry):
             racer = entry["racer"]
