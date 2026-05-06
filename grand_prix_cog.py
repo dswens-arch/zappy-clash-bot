@@ -129,17 +129,28 @@ def board_empty(mode):
 
 
 def board_waiting(mode, zappy_id):
+    # Split "Zappy #306 (Dano)" into zappy name and optional username
+    display_name = ""
+    zappy_name   = zappy_id
+    if "(" in zappy_id and zappy_id.endswith(")"):
+        parts      = zappy_id.rsplit("(", 1)
+        zappy_name = parts[0].strip()
+        display_name = parts[1].rstrip(")")
+
     img  = _load_bg(mode, "waiting")
     draw = ImageDraw.Draw(img)
     accent = ACCENTS[mode]
     title, subtitle = LABELS[mode]
-    _t(draw, W//2, 45,  title,                                   FONT_BOLD, accent)
-    _t(draw, W//2, 82,  "WAITING FOR OPPONENT",                  FONT_MED,  accent)
-    _t(draw, W//2, 130, f"{zappy_id}  is ready",                 FONT_BOLD, WHITE)
-    _t(draw, 190,  245, zappy_id,                                FONT_SM,   WHITE)
-    _t(draw, 600,  245, "???",                                   FONT_SM,   MUTED)
-    _t(draw, W//2, 195, "Join to race · entry fee debited on join", FONT_SM, MUTED)
-    _t(draw, W//2, 222, "Tap Join Race to enter",                FONT_SM,   accent)
+    _t(draw, W//2, 45,  title,                                      FONT_BOLD, accent)
+    _t(draw, W//2, 82,  "WAITING FOR OPPONENT",                     FONT_MED,  accent)
+    _t(draw, W//2, 130, f"{zappy_name}  is ready",                  FONT_BOLD, WHITE)
+    _t(draw, W//2, 195, "Join to race · entry fee debited on join",  FONT_SM,   MUTED)
+    _t(draw, W//2, 222, "Tap Join Race to enter",                    FONT_SM,   accent)
+    # Lower left slot label — Zappy name on one line, username below it
+    _t(draw, 190,  238, zappy_name,   FONT_SM, WHITE)
+    if display_name:
+        _t(draw, 190, 256, display_name, FONT_SM, MUTED)
+    _t(draw, 600,  245, "???",        FONT_SM, MUTED)
     return _buf(img)
 
 
