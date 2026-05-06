@@ -516,11 +516,13 @@ class GrandPrixCog(commands.Cog):
             if q.player_a_id is None:
                 q.player_a_id    = user_id
                 q.player_a_racer = racer
+                q.player_a_racer["display_name"] = interaction.user.display_name
                 active_players.add(user_id)
                 slot = "a"
             elif q.player_b_id is None and q.player_a_id != user_id:
                 q.player_b_id    = user_id
                 q.player_b_racer = racer
+                q.player_b_racer["display_name"] = interaction.user.display_name
                 active_players.add(user_id)
                 slot = "b"
             else:
@@ -560,7 +562,8 @@ class GrandPrixCog(commands.Cog):
                 "wager_algo":    5,
             }).execute()
             q.duel_id = result.data[0]["id"]
-            await self._update_board(channel, q, "waiting", zappy_id=racer["zappy_id"])
+            await self._update_board(channel, q, "waiting",
+                                     zappy_id=f"{racer['zappy_id']} ({interaction.user.display_name})")
             await interaction.followup.send(
                 f"⚡ **Slot A locked — {racer['zappy_id']}**\n"
                 f"5 ALGO debited. Waiting for an opponent...\n"
@@ -573,8 +576,8 @@ class GrandPrixCog(commands.Cog):
                 "status":      "ready",
             }).eq("id", q.duel_id).execute()
             await self._update_board(channel, q, "racing",
-                                     zappy_a=q.player_a_racer["zappy_id"],
-                                     zappy_b=racer["zappy_id"])
+                                     zappy_a=f"{q.player_a_racer['zappy_id']} ({q.player_a_racer.get('display_name', '')})",
+                                     zappy_b=f"{racer['zappy_id']} ({interaction.user.display_name})")
             await interaction.followup.send(
                 f"⚡ **Slot B locked — {racer['zappy_id']}**\n"
                 f"5 ALGO debited. Race starting now!\n"
@@ -607,7 +610,8 @@ class GrandPrixCog(commands.Cog):
                 "wager_algo":    0,
             }).execute()
             q.duel_id = result.data[0]["id"]
-            await self._update_board(channel, q, "waiting", zappy_id=racer["zappy_id"])
+            await self._update_board(channel, q, "waiting",
+                                     zappy_id=f"{racer['zappy_id']} ({interaction.user.display_name})")
             await interaction.followup.send(
                 f"⚡ **Slot A locked — {racer['zappy_id']}**\n"
                 f"{ZAP_ENTRY:,} ZAPP debited. Waiting for an opponent...\n"
@@ -620,8 +624,8 @@ class GrandPrixCog(commands.Cog):
                 "status":      "ready",
             }).eq("id", q.duel_id).execute()
             await self._update_board(channel, q, "racing",
-                                     zappy_a=q.player_a_racer["zappy_id"],
-                                     zappy_b=racer["zappy_id"])
+                                     zappy_a=f"{q.player_a_racer['zappy_id']} ({q.player_a_racer.get('display_name', '')})",
+                                     zappy_b=f"{racer['zappy_id']} ({interaction.user.display_name})")
             await interaction.followup.send(
                 f"⚡ **Slot B locked — {racer['zappy_id']}**\n"
                 f"{ZAP_ENTRY:,} ZAPP debited. Race starting now!\n"
