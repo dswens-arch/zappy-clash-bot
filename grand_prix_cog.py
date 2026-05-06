@@ -229,6 +229,7 @@ class RaceQueue:
         self.duel_id:        str | None = None
         self.after_round:    int = 0
         self.board_msg_id:   int | None = None
+        self.active_players: set[str] = set()  # players in this queue/race
 
     def reset(self):
         self.player_a_id    = None
@@ -240,14 +241,11 @@ class RaceQueue:
         self.locked         = False
         self.duel_id        = None
         self.after_round    = 0
+        self.active_players.clear()
 
 
 algo_queue = RaceQueue("algo")
 zap_queue  = RaceQueue("zap")
-
-# Global set — player is in here from queue-join until race resolves.
-# Blocks joining either board while already active.
-active_players: set[str] = set()
 
 # THE FIX: one lock shared across both queues.
 # Ensures slot A/B assignment is atomic even when two players tap simultaneously.
@@ -413,8 +411,8 @@ class GrandPrixCog(commands.Cog):
 
     def _clear_player(self, user_id: str, q: RaceQueue | None = None):
         """Remove player from active set and clear their queue slot."""
-        active_players.discard(user_id)
         for queue in ([q] if q else [algo_queue, zap_queue]):
+            queue.active_players.discard(user_id)
             if queue.player_a_id == user_id:
                 queue.player_a_id    = None
                 queue.player_a_racer = None
@@ -433,9 +431,9 @@ class GrandPrixCog(commands.Cog):
         user_id = str(interaction.user.id)
         channel = interaction.channel
 
-        if user_id in active_players:
+        if user_id in q.active_players:
             await interaction.followup.send(
-                "You're already in a race or queue. Finish that one first.",
+                "You're already in this queue or race. Finish that one first.",
                 ephemeral=True,
             )
             return
@@ -629,7 +627,7 @@ class GrandPrixCog(commands.Cog):
             print(f"[grand_prix] Ownership check error for {racer['zappy_id']}: {e}")
 
         async with _join_lock:
-            if user_id in active_players:
+            if user_id in q.active_players:
                 await interaction.followup.send("You just joined — check your DMs.", ephemeral=True)
                 return
             if q.locked:
@@ -640,13 +638,13 @@ class GrandPrixCog(commands.Cog):
                 q.player_a_id    = user_id
                 q.player_a_racer = racer
                 q.player_a_racer["display_name"] = interaction.user.display_name
-                active_players.add(user_id)
+                q.active_players.add(user_id)
                 slot = "a"
             elif q.player_b_id is None and q.player_a_id != user_id:
                 q.player_b_id    = user_id
                 q.player_b_racer = racer
                 q.player_b_racer["display_name"] = interaction.user.display_name
-                active_players.add(user_id)
+                q.active_players.add(user_id)
                 slot = "b"
             else:
                 await interaction.followup.send(
@@ -1110,7 +1108,7 @@ class GrandPrixCog(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         user_id = str(player.id)
 
-        was_active = user_id in active_players
+        was_active = user_id in algo_queue.active_players or user_id in zap_queue.active_players
         in_algo    = algo_queue.player_a_id == user_id or algo_queue.player_b_id == user_id
         in_zap     = zap_queue.player_a_id  == user_id or zap_queue.player_b_id  == user_id
 
@@ -1275,7 +1273,7 @@ class GrandPrixCog(commands.Cog):
                     "You're in slot B — the race is about to start. Can't cancel at this point.",
                     ephemeral=True,
                 )
-            elif user_id not in active_players:
+            elif user_id not in algo_queue.active_players and user_id not in zap_queue.active_players:
                 await interaction.followup.send(
                     "You're not in any queue right now.",
                     ephemeral=True,
