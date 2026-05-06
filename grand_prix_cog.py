@@ -215,6 +215,11 @@ def stat_bar(current: int, cap: int, width: int = 11) -> str:
 # In-memory state
 # ---------------------------------------------------------------------------
 
+# Tracks which Zappy IDs are currently in any queue or race across both boards.
+# Prevents the same Zappy from entering ALGO and ZAP simultaneously.
+active_zappies: set[str] = set()
+
+
 class RaceQueue:
     """Holds state for one board (ALGO or ZAP)."""
     def __init__(self, mode: str):
@@ -232,6 +237,10 @@ class RaceQueue:
         self.active_players: set[str] = set()  # players in this queue/race
 
     def reset(self):
+        # Clear Zappy IDs from global active set before wiping racer data
+        for racer in [self.player_a_racer, self.player_b_racer]:
+            if racer and racer.get("zappy_id"):
+                active_zappies.discard(racer["zappy_id"])
         self.player_a_id    = None
         self.player_a_racer = None
         self.player_a_paid  = False
@@ -426,10 +435,14 @@ class GrandPrixCog(commands.Cog):
         for queue in ([q] if q else [algo_queue, zap_queue]):
             queue.active_players.discard(user_id)
             if queue.player_a_id == user_id:
+                if queue.player_a_racer:
+                    active_zappies.discard(queue.player_a_racer.get("zappy_id", ""))
                 queue.player_a_id    = None
                 queue.player_a_racer = None
                 queue.player_a_paid  = False
             if queue.player_b_id == user_id:
+                if queue.player_b_racer:
+                    active_zappies.discard(queue.player_b_racer.get("zappy_id", ""))
                 queue.player_b_id    = None
                 queue.player_b_racer = None
                 queue.player_b_paid  = False
@@ -647,16 +660,30 @@ class GrandPrixCog(commands.Cog):
                 return
 
             if q.player_a_id is None:
+                if racer["zappy_id"] in active_zappies:
+                    await interaction.followup.send(
+                        f"**{racer['zappy_id']}** is already in a race on another board. Pick a different Zappy.",
+                        ephemeral=True,
+                    )
+                    return
                 q.player_a_id    = user_id
                 q.player_a_racer = racer
                 q.player_a_racer["display_name"] = interaction.user.display_name
                 q.active_players.add(user_id)
+                active_zappies.add(racer["zappy_id"])
                 slot = "a"
             elif q.player_b_id is None and q.player_a_id != user_id:
+                if racer["zappy_id"] in active_zappies:
+                    await interaction.followup.send(
+                        f"**{racer['zappy_id']}** is already in a race on another board. Pick a different Zappy.",
+                        ephemeral=True,
+                    )
+                    return
                 q.player_b_id    = user_id
                 q.player_b_racer = racer
                 q.player_b_racer["display_name"] = interaction.user.display_name
                 q.active_players.add(user_id)
+                active_zappies.add(racer["zappy_id"])
                 slot = "b"
             else:
                 await interaction.followup.send(
