@@ -275,7 +275,16 @@ async def narrate_race(
             events.append(f"🔀 **{leader_name}** takes the lead!")
 
         prev_leader = t.leader
-        await race_msg.edit(content=render(t, events if events else None))
+        # Always edit the track message — retry once on transient Discord errors
+        for attempt in range(2):
+            try:
+                await race_msg.edit(content=render(t, events if events else None))
+                break
+            except discord.errors.DiscordServerError:
+                if attempt == 0:
+                    await asyncio.sleep(1)
+                else:
+                    raise
         await asyncio.sleep(BEAT_SECONDS)
 
     # Final edit — show result in same message
