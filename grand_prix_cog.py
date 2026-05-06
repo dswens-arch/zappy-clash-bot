@@ -504,29 +504,57 @@ class GrandPrixCog(commands.Cog):
     # Zappy picker — ephemeral embed + buttons, shown when player has >1 Zappy
     # -----------------------------------------------------------------------
 
-    async def _show_zappy_picker(self, interaction, q, channel, user_id, available):
-        cog = self  # capture for button callbacks
+    async def _show_zappy_picker(self, interaction, q, channel, user_id, available, page=0):
+        cog      = self
+        per_page = 5
+        total    = len(available)
+        pages    = max(1, (total + per_page - 1) // per_page)
+        page     = max(0, min(page, pages - 1))
+        slice_   = available[page * per_page : (page + 1) * per_page]
+
+        def _stat_value(entry):
+            s = entry["stats"]
+            spd = s.get("speed",     s.get("VLT", 0))
+            end = s.get("endurance", s.get("INS", 0))
+            clt = s.get("clutch",    s.get("SPK", 0))
+            sm  = s.get("speed_max",     s.get("speed_max", 11))
+            em  = s.get("endurance_max", s.get("endurance_max", 11))
+            cm  = s.get("clutch_max",    s.get("clutch_max", 11))
+            return spd, end, clt, sm, em, cm
 
         class ZappyPickView(discord.ui.View):
             def __init__(self):
                 super().__init__(timeout=60)
                 self.chosen = False
-                for entry in available[:5]:
+                for entry in slice_:
                     racer = entry["racer"]
-                    stats = entry["stats"]
-                    label = (
-                        f"{racer['zappy_id']}  "
-                        f"SPD {stats['speed']}  "
-                        f"END {stats['endurance']}  "
-                        f"CLT {stats['clutch']}"
-                    )[:80]
+                    spd, end, clt, *_ = _stat_value(entry)
+                    label = f"{racer['zappy_id']}  SPD {spd}  END {end}  CLT {clt}"[:80]
                     btn = discord.ui.Button(
                         label=label,
                         style=discord.ButtonStyle.primary,
                         custom_id=f"gp_pick_{racer['zappy_id']}",
+                        row=0,
                     )
-                    btn.callback = self._make_cb(racer, stats)
+                    btn.callback = self._make_cb(racer, entry["stats"])
                     self.add_item(btn)
+
+                # Pagination row
+                if page > 0:
+                    prev_btn = discord.ui.Button(
+                        label="◀ Prev", style=discord.ButtonStyle.secondary,
+                        custom_id="gp_pick_prev", row=1,
+                    )
+                    prev_btn.callback = self._prev_cb
+                    self.add_item(prev_btn)
+
+                if page < pages - 1:
+                    next_btn = discord.ui.Button(
+                        label="Next ▶", style=discord.ButtonStyle.secondary,
+                        custom_id="gp_pick_next", row=1,
+                    )
+                    next_btn.callback = self._next_cb
+                    self.add_item(next_btn)
 
             def _make_cb(self, racer, stats):
                 async def cb(btn_interaction: discord.Interaction):
@@ -538,27 +566,31 @@ class GrandPrixCog(commands.Cog):
                     for item in self.children:
                         item.disabled = True
                     await btn_interaction.response.defer(ephemeral=True)
-                    await cog._enter_queue(btn_interaction, q, channel,
-                                           user_id, racer, stats)
+                    await cog._enter_queue(btn_interaction, q, channel, user_id, racer, stats)
                 return cb
 
+            async def _prev_cb(self, btn_interaction: discord.Interaction):
+                await btn_interaction.response.defer(ephemeral=True)
+                await cog._show_zappy_picker(btn_interaction, q, channel, user_id, available, page - 1)
+
+            async def _next_cb(self, btn_interaction: discord.Interaction):
+                await btn_interaction.response.defer(ephemeral=True)
+                await cog._show_zappy_picker(btn_interaction, q, channel, user_id, available, page + 1)
+
         embed = discord.Embed(
-            title="⚡ Pick your Zappy",
-            description="Choose which Zappy to race with.",
+            title=f"⚡ Pick your Zappy  ({page + 1}/{pages})",
+            description=f"Sorted by total power. Showing {page * per_page + 1}–{min((page + 1) * per_page, total)} of {total}.",
             color=discord.Color.from_rgb(30, 180, 255),
         )
-        for entry in available[:5]:
+        for entry in slice_:
             racer = entry["racer"]
-            stats = entry["stats"]
+            spd, end, clt, sm, em, cm = _stat_value(entry)
             embed.add_field(
                 name=racer["zappy_id"],
                 value=(
-                    f"Speed `{stat_bar(stats['speed'], stats['speed_max'])}` "
-                    f"{stats['speed']}/{stats['speed_max']}\n"
-                    f"Endurance `{stat_bar(stats['endurance'], stats['endurance_max'])}` "
-                    f"{stats['endurance']}/{stats['endurance_max']}\n"
-                    f"Clutch `{stat_bar(stats['clutch'], stats['clutch_max'])}` "
-                    f"{stats['clutch']}/{stats['clutch_max']}"
+                    f"Speed `{stat_bar(spd, sm)}` {spd}/{sm}\n"
+                    f"Endurance `{stat_bar(end, em)}` {end}/{em}\n"
+                    f"Clutch `{stat_bar(clt, cm)}` {clt}/{cm}"
                 ),
                 inline=False,
             )
@@ -947,15 +979,16 @@ class GrandPrixCog(commands.Cog):
             }
             available.append({"racer": racer, "stats": stats})
 
+        def _total_power(e):
+            s = e["stats"]
+            # Handle both speed/endurance/clutch and VLT/INS/SPK key formats
+            return (
+                s.get("speed", 0) + s.get("endurance", 0) + s.get("clutch", 0) +
+                s.get("VLT", 0) + s.get("INS", 0) + s.get("SPK", 0)
+            )
+
         # Sort by total stat power — strongest Zappies appear first in the picker
-        available.sort(
-            key=lambda e: (
-                e["stats"].get("speed", 0) +
-                e["stats"].get("endurance", 0) +
-                e["stats"].get("clutch", 0)
-            ),
-            reverse=True,
-        )
+        available.sort(key=_total_power, reverse=True)
         return available
 
     async def _get_all_racers_with_cooldown(self, user_id: str) -> tuple[list[dict], list[dict]]:
