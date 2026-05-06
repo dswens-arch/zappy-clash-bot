@@ -663,14 +663,23 @@ class GrandPrixCog(commands.Cog):
             f"💰 **{ZAP_PAYOUT:,} ZAPP** credited to <@{winner_id}>'s balance"
         )
 
-        await narrate_race(
-            channel=channel,
-            result=result,
-            name_a=q.player_a_racer["zappy_id"],
-            name_b=q.player_b_racer["zappy_id"],
-            payout_str=payout_str,
-            mode=q.mode,
-        )
+        try:
+            await narrate_race(
+                channel=channel,
+                result=result,
+                name_a=q.player_a_racer["zappy_id"],
+                name_b=q.player_b_racer["zappy_id"],
+                payout_str=payout_str,
+                mode=q.mode,
+            )
+        except Exception as e:
+            print(f"[grand_prix] narrate_race error (race still settling): {e}")
+            try:
+                await channel.send(
+                    f"⚡ Race narration hit an error — but the result stands. Settling now..."
+                )
+            except Exception:
+                pass
 
         await self._settle(q, channel, result, winner_racer, loser_racer, winner_id, loser_id)
 
@@ -1070,10 +1079,12 @@ class GrandPrixCog(commands.Cog):
             )
             return
 
-        unit = ".4f" if currency == "ALGO" else ",d"
+        def fmt(val):
+            return f"{val:.4f}" if currency == "ALGO" else f"{int(val):,}"
+
         await interaction.followup.send(
             f"✅ Refunded **{amount} {currency}** to **{player.display_name}**.\n"
-            f"Before: `{result['balance_before']:{unit}}` → After: `{result['balance_after']:{unit}}`\n"
+            f"Before: `{fmt(result['balance_before'])}` → After: `{fmt(result['balance_after'])}`\n"
             f"Reason logged: `{reason}`",
             ephemeral=True,
         )
