@@ -1590,6 +1590,94 @@ class GrandPrixCog(commands.Cog):
 
         cog = self
 
+        class AsaModal(discord.ui.Modal, title="Enter ASA ID"):
+            asa_input = discord.ui.TextInput(
+                label="ASA ID",
+                placeholder="e.g. 2644039660",
+                min_length=5,
+                max_length=15,
+            )
+
+            async def on_submit(self, modal_interaction: discord.Interaction):
+                await modal_interaction.response.defer(ephemeral=True)
+                from algorand_lookup import verify_wallet_owns_zappy
+                from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
+                from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+
+                try:
+                    asset_id = int(self.asa_input.value.strip())
+                except ValueError:
+                    await modal_interaction.followup.send(
+                        "That doesn't look like a valid ASA ID — enter numbers only.",
+                        ephemeral=True,
+                    )
+                    return
+
+                # Verify it's a real Zappy
+                is_valid = (
+                    asset_id in ZAPPY_ASSET_IDS or
+                    asset_id in HERO_ASSET_IDS or
+                    asset_id in COLLAB_ASSET_IDS
+                )
+                if not is_valid:
+                    await modal_interaction.followup.send(
+                        f"ASA `{asset_id}` isn't a recognised Zappy NFT.",
+                        ephemeral=True,
+                    )
+                    return
+
+                # Verify wallet actually holds it
+                holding = await verify_wallet_owns_zappy(wallet_address)
+                all_held_ids = {
+                    z["asset_id"] for z in (
+                        holding.get("zappies", []) +
+                        holding.get("heroes", []) +
+                        holding.get("collabs", [])
+                    )
+                }
+                if asset_id not in all_held_ids:
+                    await modal_interaction.followup.send(
+                        f"ASA `{asset_id}` wasn't found in your wallet. Make sure you own it.",
+                        ephemeral=True,
+                    )
+                    return
+
+                # Get name
+                if asset_id in HERO_ASSET_IDS:
+                    name = f"Zappy Hero — {HERO_ASSET_IDS[asset_id]}"
+                elif asset_id in COLLAB_ASSET_IDS:
+                    name = "Shitty Zappy Kitty"
+                else:
+                    name = ZAPPY_COLLECTION[asset_id]["name"]
+
+                if name in registered_ids:
+                    await modal_interaction.followup.send(
+                        f"**{name}** is already registered on your account.",
+                        ephemeral=True,
+                    )
+                    return
+
+                stats = seed_stats(name)
+                cog.db.table("zappy_racers").insert({
+                    "discord_user_id": user_id,
+                    "wallet_address":  wallet_address,
+                    "zappy_id":        name,
+                    "algo_balance":    0,
+                    "zapp_balance":    0,
+                    "wins":            0,
+                    "losses":          0,
+                }).execute()
+                cog.db.table("zappy_stats").insert({
+                    "zappy_id": name, **stats
+                }).execute()
+
+                await modal_interaction.followup.send(
+                    f"✅ **{name}** (ASA `{asset_id}`) registered and ready to race!\n\n"
+                    f"Use `/gpupgradeinfo` to see their stats.\n"
+                    f"Use `/gpdeposit` or `/gpzapdeposit` to fund your balance.",
+                    ephemeral=True,
+                )
+
         class ZappyRegisterView(discord.ui.View):
             def __init__(self):
                 super().__init__(timeout=60)
@@ -1602,6 +1690,18 @@ class GrandPrixCog(commands.Cog):
                     )
                     btn.callback = self._make_cb(z)
                     self.add_item(btn)
+                # Always add manual entry as last button
+                manual_btn = discord.ui.Button(
+                    label="Enter ASA manually",
+                    style=discord.ButtonStyle.secondary,
+                    emoji="🔢",
+                    custom_id="gpreg_manual",
+                )
+                manual_btn.callback = self._manual_cb
+                self.add_item(manual_btn)
+
+            async def _manual_cb(self, btn_interaction: discord.Interaction):
+                await btn_interaction.response.send_modal(AsaModal())
 
             def _make_cb(self, z):
                 async def cb(btn_interaction: discord.Interaction):
@@ -1639,12 +1739,12 @@ class GrandPrixCog(commands.Cog):
                     )
                 return cb
 
-        extra = f" (+{len(unregistered) - 5} more — run `/gpregister` again to see them)" \
+        extra = f" (+{len(unregistered) - 5} more not shown)" \
                 if len(unregistered) > 5 else ""
 
         await interaction.followup.send(
             f"Found **{len(unregistered)}** unregistered Zappy{'s' if len(unregistered) != 1 else ''} in your wallet{extra}.\n\n"
-            f"Tap one to register it:",
+            f"Tap one to register it, or use **Enter ASA manually** if yours isn't listed:",
             view=ZappyRegisterView(),
             ephemeral=True,
         )
