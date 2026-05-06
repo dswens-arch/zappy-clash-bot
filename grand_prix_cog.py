@@ -2036,22 +2036,33 @@ class GrandPrixCog(commands.Cog):
     async def gpupgrade(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         user_id = str(interaction.user.id)
+        cog = self
 
-        async def show_upgrade_panel(intr, entry):
+        async def show_upgrade_panel(intr, entry, fresh_stats=None):
             racer = entry["racer"]
-            stats = entry["stats"]
             zid   = racer["zappy_id"]
 
-            bal = await asyncio.to_thread(get_balance, self.db, user_id, "ZAPP")
+            # Always fetch fresh stats from DB
+            stats_res = cog.db.table("zappy_stats").select("*").eq("zappy_id", zid).execute()
+            stats = stats_res.data[0] if stats_res.data else (fresh_stats or entry["stats"])
+
+            bal = await asyncio.to_thread(get_balance, cog.db, user_id, "ZAPP")
 
             def stat_line(key: str) -> str:
-                cur = stats.get(key, 0)
-                cap = stats.get(f"{key}_max", 11)
-                cost = self._upgrade_cost(cur)
+                cur  = stats.get(key, 0)
+                cap  = stats.get(f"{key}_max", 11)
+                cost = cog._upgrade_cost(cur)
                 bar  = stat_bar(cur, cap)
                 if cur >= cap:
                     return f"`{bar}` {cur}/{cap} — **MAXED**"
-                return f"`{bar}` {cur}/{cap} — next point: **{cost:,} ZAPP**"
+                return f"`{bar}` {cur}/{cap} — next: **{cost:,} ZAPP**"
+
+            # Calculate max all cost
+            total_to_max = (
+                cog._cost_to_max(stats.get("speed", 0),     stats.get("speed_max", 11)) +
+                cog._cost_to_max(stats.get("endurance", 0), stats.get("endurance_max", 11)) +
+                cog._cost_to_max(stats.get("clutch", 0),    stats.get("clutch_max", 11))
+            )
 
             embed = discord.Embed(
                 title=f"⚡ {zid} — Choose a stat to upgrade",
@@ -2062,21 +2073,21 @@ class GrandPrixCog(commands.Cog):
             embed.add_field(name="💪 Endurance (pos 7–13)", value=stat_line("endurance"), inline=False)
             embed.add_field(name="🎯 Clutch (pos 14–19)",   value=stat_line("clutch"),    inline=False)
 
-            cog = self
-
             class StatPickView(discord.ui.View):
                 def __init__(self):
                     super().__init__(timeout=60)
+                    any_upgradeable = False
                     for stat_key, label, emoji in [
                         ("speed",     "Speed",     "🏎"),
                         ("endurance", "Endurance", "💪"),
                         ("clutch",    "Clutch",    "🎯"),
                     ]:
-                        cur = stats.get(stat_key, 0)
-                        cap = stats.get(f"{stat_key}_max", 11)
+                        cur  = stats.get(stat_key, 0)
+                        cap  = stats.get(f"{stat_key}_max", 11)
                         cost = cog._upgrade_cost(cur)
                         if cur >= cap or cost is None:
-                            continue  # skip maxed stats
+                            continue
+                        any_upgradeable = True
                         btn = discord.ui.Button(
                             label=f"{label} — {cost:,} ZAPP",
                             style=discord.ButtonStyle.primary,
@@ -2086,39 +2097,62 @@ class GrandPrixCog(commands.Cog):
                         btn.callback = self._make_cb(stat_key, cur, cap, cost)
                         self.add_item(btn)
 
+                    # Max All button — only if there's something to upgrade and player can afford it
+                    if any_upgradeable and total_to_max > 0 and bal >= total_to_max:
+                        max_btn = discord.ui.Button(
+                            label=f"⚡ Max All — {total_to_max:,} ZAPP",
+                            style=discord.ButtonStyle.danger,
+                            custom_id="upgrade_max_all",
+                            row=1,
+                        )
+                        max_btn.callback = self._max_all_cb
+                        self.add_item(max_btn)
+
                 def _make_cb(self, stat_key, current, cap, cost):
                     async def cb(btn_interaction: discord.Interaction):
+                        # Disable all buttons immediately to prevent double-tap
                         for item in self.children:
                             item.disabled = True
                         await btn_interaction.response.defer(ephemeral=True)
 
-                        # Re-check balance
-                        bal_now = await asyncio.to_thread(get_balance, cog.db, user_id, "ZAPP")
-                        if bal_now < cost:
+                        # Reload current stat fresh from DB before deducting
+                        fresh = cog.db.table("zappy_stats").select("*").eq("zappy_id", zid).execute()
+                        live_stats = fresh.data[0] if fresh.data else stats
+                        live_current = live_stats.get(stat_key, 0)
+                        live_cap     = live_stats.get(f"{stat_key}_max", 11)
+                        live_cost    = cog._upgrade_cost(live_current)
+
+                        if live_current >= live_cap or live_cost is None:
                             await btn_interaction.followup.send(
-                                f"Not enough ZAPP. Need **{cost:,}** — you have **{int(bal_now):,}**.",
+                                f"**{stat_key.capitalize()}** is already maxed!", ephemeral=True)
+                            return
+
+                        bal_now = await asyncio.to_thread(get_balance, cog.db, user_id, "ZAPP")
+                        if bal_now < live_cost:
+                            await btn_interaction.followup.send(
+                                f"Not enough ZAPP. Need **{live_cost:,}** — you have **{int(bal_now):,}**.",
                                 ephemeral=True,
                             )
                             return
 
                         debit_result = await asyncio.to_thread(
-                            debit, cog.db, user_id, "ZAPP", cost,
-                            f"gp_upgrade_{stat_key}", racer["zappy_id"], racer["zappy_id"]
+                            debit, cog.db, user_id, "ZAPP", live_cost,
+                            f"gp_upgrade_{stat_key}", zid, zid
                         )
                         if not debit_result["ok"]:
                             await btn_interaction.followup.send(
                                 f"Upgrade failed: {debit_result['error']}", ephemeral=True)
                             return
 
-                        new_val = current + 1
+                        new_val = live_current + 1
                         cog.db.table("zappy_stats").update({
                             stat_key:          new_val,
-                            "total_zap_spent": (stats.get("total_zap_spent", 0) or 0) + cost,
+                            "total_zap_spent": (live_stats.get("total_zap_spent", 0) or 0) + live_cost,
                         }).eq("zappy_id", zid).execute()
 
                         next_cost = cog._upgrade_cost(new_val)
-                        to_max    = cog._cost_to_max(new_val, cap)
-                        bar       = stat_bar(new_val, cap)
+                        to_max    = cog._cost_to_max(new_val, live_cap)
+                        bar       = stat_bar(new_val, live_cap)
 
                         result_embed = discord.Embed(
                             title=f"⚡ {zid} — {stat_key.capitalize()} Upgraded!",
@@ -2126,10 +2160,10 @@ class GrandPrixCog(commands.Cog):
                         )
                         result_embed.add_field(
                             name=stat_key.capitalize(),
-                            value=f"`{bar}` **{new_val}/{cap}**",
+                            value=f"`{bar}` **{new_val}/{live_cap}**",
                             inline=False,
                         )
-                        if new_val >= cap:
+                        if new_val >= live_cap:
                             result_embed.add_field(name="🏆 MAXED!", value="This stat has hit its hidden cap.", inline=False)
                         else:
                             result_embed.add_field(
@@ -2139,7 +2173,69 @@ class GrandPrixCog(commands.Cog):
                             )
                         result_embed.set_footer(text=f"ZAPP balance: {int(debit_result['balance_after']):,}")
                         await btn_interaction.followup.send(embed=result_embed, ephemeral=True)
+
+                        # Re-send fresh panel so they can keep upgrading
+                        await show_upgrade_panel(btn_interaction, entry)
                     return cb
+
+                async def _max_all_cb(self, btn_interaction: discord.Interaction):
+                    for item in self.children:
+                        item.disabled = True
+                    await btn_interaction.response.defer(ephemeral=True)
+
+                    # Reload fresh stats
+                    fresh = cog.db.table("zappy_stats").select("*").eq("zappy_id", zid).execute()
+                    live_stats = fresh.data[0] if fresh.data else stats
+
+                    total_cost = (
+                        cog._cost_to_max(live_stats.get("speed", 0),     live_stats.get("speed_max", 11)) +
+                        cog._cost_to_max(live_stats.get("endurance", 0), live_stats.get("endurance_max", 11)) +
+                        cog._cost_to_max(live_stats.get("clutch", 0),    live_stats.get("clutch_max", 11))
+                    )
+
+                    bal_now = await asyncio.to_thread(get_balance, cog.db, user_id, "ZAPP")
+                    if bal_now < total_cost:
+                        await btn_interaction.followup.send(
+                            f"Not enough ZAPP to max all. Need **{total_cost:,}** — you have **{int(bal_now):,}**.",
+                            ephemeral=True,
+                        )
+                        return
+
+                    debit_result = await asyncio.to_thread(
+                        debit, cog.db, user_id, "ZAPP", total_cost,
+                        "gp_upgrade_max_all", zid, zid
+                    )
+                    if not debit_result["ok"]:
+                        await btn_interaction.followup.send(
+                            f"Max all failed: {debit_result['error']}", ephemeral=True)
+                        return
+
+                    updates = {}
+                    total_spent = live_stats.get("total_zap_spent", 0) or 0
+                    for stat_key in ["speed", "endurance", "clutch"]:
+                        cur = live_stats.get(stat_key, 0)
+                        cap = live_stats.get(f"{stat_key}_max", 11)
+                        cost = cog._cost_to_max(cur, cap)
+                        updates[stat_key] = cap
+                        total_spent += cost
+
+                    updates["total_zap_spent"] = total_spent
+                    cog.db.table("zappy_stats").update(updates).eq("zappy_id", zid).execute()
+
+                    embed = discord.Embed(
+                        title=f"⚡ {zid} — FULLY MAXED!",
+                        description=f"All stats upgraded to their hidden caps.",
+                        color=discord.Color.gold(),
+                    )
+                    for stat_key, emoji in [("speed", "🏎"), ("endurance", "💪"), ("clutch", "🎯")]:
+                        cap = live_stats.get(f"{stat_key}_max", 11)
+                        embed.add_field(
+                            name=f"{emoji} {stat_key.capitalize()}",
+                            value=f"`{stat_bar(cap, cap)}` **{cap}/{cap}** 🏆",
+                            inline=True,
+                        )
+                    embed.set_footer(text=f"ZAPP balance: {int(debit_result['balance_after']):,}")
+                    await btn_interaction.followup.send(embed=embed, ephemeral=True)
 
             await intr.followup.send(embed=embed, view=StatPickView(), ephemeral=True)
 
