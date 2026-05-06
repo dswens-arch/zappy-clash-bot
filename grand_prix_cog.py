@@ -187,6 +187,7 @@ from race_engine import simulate_race, narrate_race, seed_stats, get_stats
 # Constants
 # ---------------------------------------------------------------------------
 ALGO_ENTRY   = 5_000_000   # microALGO
+DEPOSIT_POLL_INTERVAL = 15  # seconds between indexer polls — keep low to save API quota
 ALGO_PAYOUT  = 9_000_000
 ALGO_RAKE    = 1_000_000
 STAT_CAP_MAX = 11
@@ -1273,7 +1274,7 @@ class GrandPrixCog(commands.Cog):
             except Exception as e:
                 print(f"[grand_prix] ALGO deposit watch error: {e}")
 
-            await asyncio.sleep(5)
+            await asyncio.sleep(DEPOSIT_POLL_INTERVAL)
 
     # -----------------------------------------------------------------------
     # /gpwithdraw — send ALGO balance back to player wallet
@@ -1457,7 +1458,7 @@ class GrandPrixCog(commands.Cog):
             except Exception as e:
                 print(f"[grand_prix] ZAPP deposit watch error: {e}")
 
-            await asyncio.sleep(5)
+            await asyncio.sleep(DEPOSIT_POLL_INTERVAL)
 
     # -----------------------------------------------------------------------
     # /gpzapwithdraw — send ZAPP balance back to player wallet
