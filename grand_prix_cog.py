@@ -1006,6 +1006,10 @@ class GrandPrixCog(commands.Cog):
                     # On cooldown — skip
                     continue
 
+            # Skip if already racing on another board
+            if racer["zappy_id"] in active_zappies:
+                continue
+
             stats_res = self.db.table("zappy_stats").select("*").eq(
                 "zappy_id", racer["zappy_id"]
             ).execute()
@@ -1055,6 +1059,10 @@ class GrandPrixCog(commands.Cog):
                     ready_at = last_raced + cooldown
                     cooling.append({"racer": racer, "ready_at": ready_at})
                     continue
+
+            # Skip if already racing on another board
+            if racer["zappy_id"] in active_zappies:
+                continue
 
             stats_res = self.db.table("zappy_stats").select("*").eq(
                 "zappy_id", racer["zappy_id"]
