@@ -91,10 +91,11 @@ class Tick:
 
 @dataclass
 class RaceResult:
-    winner:  str          # "a" or "b"
-    ticks:   list[Tick]
-    pos_a:   int
-    pos_b:   int
+    winner:             str          # "a" or "b"
+    ticks:              list[Tick]
+    pos_a:              int
+    pos_b:              int
+    sudden_death_rolls: tuple | None = None  # (roll_a, roll_b) if sudden death
 
 
 # ---------------------------------------------------------------------------
@@ -134,23 +135,30 @@ def simulate_race(stats_a: dict, stats_b: dict) -> RaceResult:
 
     # Determine winner — if both hit finish line on same tick, sudden death roll
     last = ticks[-1]
+    sudden_death_rolls = None
     if last.pos_a >= FINISH_LINE and last.pos_b >= FINISH_LINE:
-        # Sudden death — highest clutch roll wins, re-roll on tie
         stats_a_clutch = stats_a.get("clutch", stats_a.get("SPK", 5))
         stats_b_clutch = stats_b.get("clutch", stats_b.get("SPK", 5))
-        for _ in range(10):  # max 10 re-rolls to prevent infinite loop
+        for _ in range(10):
             roll_a = _roll(stats_a_clutch, FINISH_LINE)
             roll_b = _roll(stats_b_clutch, FINISH_LINE)
             if roll_a != roll_b:
                 winner = "a" if roll_a > roll_b else "b"
-                ticks[-1].sudden_death = True
+                sudden_death_rolls = (roll_a, roll_b)
+                last.sudden_death = True
                 break
         else:
-            winner = "a"  # extremely unlikely fallback
+            winner = "a"
     else:
         winner = "a" if last.pos_a >= last.pos_b else "b"
 
-    return RaceResult(winner=winner, ticks=ticks, pos_a=last.pos_a, pos_b=last.pos_b)
+    return RaceResult(
+        winner=winner,
+        ticks=ticks,
+        pos_a=last.pos_a,
+        pos_b=last.pos_b,
+        sudden_death_rolls=sudden_death_rolls,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -247,7 +255,19 @@ async def narrate_race(
         )
 
     def render_final(winner_pos: int, loser_pos: int, sudden_death: bool = False) -> str:
-        sd_line = "⚡ **SUDDEN DEATH** — both hit 20! Clutch roll decides it!\n\n" if sudden_death else ""
+        if sudden_death and result.sudden_death_rolls:
+            roll_a, roll_b = result.sudden_death_rolls
+            winner_roll = roll_a if result.winner == "a" else roll_b
+            loser_roll  = roll_b if result.winner == "a" else roll_a
+            sd_line = (
+                f"⚡ **SUDDEN DEATH** — both hit 20!\n"
+                f"Clutch roll: **{winner_name}** rolled `{winner_roll}` · "
+                f"**{loser_name}** rolled `{loser_roll}`\n\n"
+            )
+        elif sudden_death:
+            sd_line = "⚡ **SUDDEN DEATH** — both hit 20! Clutch roll decides it!\n\n"
+        else:
+            sd_line = ""
         return (
             f"{sd_line}"
             f"```\n"
