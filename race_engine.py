@@ -69,13 +69,14 @@ def _roll(stat: int, pos: int) -> int:
 
 @dataclass
 class Tick:
-    tick:    int
-    pos_a:   int
-    pos_b:   int
-    move_a:  int
-    move_b:  int
-    surge_a: bool = False
-    surge_b: bool = False
+    tick:         int
+    pos_a:        int
+    pos_b:        int
+    move_a:       int
+    move_b:       int
+    surge_a:      bool = False
+    surge_b:      bool = False
+    sudden_death: bool = False
 
     @property
     def gap(self) -> int:
@@ -131,9 +132,23 @@ def simulate_race(stats_a: dict, stats_b: dict) -> RaceResult:
         if pos_a >= FINISH_LINE or pos_b >= FINISH_LINE:
             break
 
-    # Determine winner — if tie on same tick, higher position wins
+    # Determine winner — if both hit finish line on same tick, sudden death roll
     last = ticks[-1]
-    winner = "a" if last.pos_a >= last.pos_b else "b"
+    if last.pos_a >= FINISH_LINE and last.pos_b >= FINISH_LINE:
+        # Sudden death — highest clutch roll wins, re-roll on tie
+        stats_a_clutch = stats_a.get("clutch", stats_a.get("SPK", 5))
+        stats_b_clutch = stats_b.get("clutch", stats_b.get("SPK", 5))
+        for _ in range(10):  # max 10 re-rolls to prevent infinite loop
+            roll_a = _roll(stats_a_clutch, FINISH_LINE)
+            roll_b = _roll(stats_b_clutch, FINISH_LINE)
+            if roll_a != roll_b:
+                winner = "a" if roll_a > roll_b else "b"
+                ticks[-1].sudden_death = True
+                break
+        else:
+            winner = "a"  # extremely unlikely fallback
+    else:
+        winner = "a" if last.pos_a >= last.pos_b else "b"
 
     return RaceResult(winner=winner, ticks=ticks, pos_a=last.pos_a, pos_b=last.pos_b)
 
@@ -231,8 +246,10 @@ async def narrate_race(
             f"*{gap_line}*"
         )
 
-    def render_final(winner_pos: int, loser_pos: int) -> str:
+    def render_final(winner_pos: int, loser_pos: int, sudden_death: bool = False) -> str:
+        sd_line = "⚡ **SUDDEN DEATH** — both hit 20! Clutch roll decides it!\n\n" if sudden_death else ""
         return (
+            f"{sd_line}"
             f"```\n"
             f"🥇 {winner_name:<19} {FINISH_LINE:>2}/20\n"
             f"{build_track(FINISH_LINE, '🟢')}\n\n"
@@ -288,10 +305,10 @@ async def narrate_race(
         await asyncio.sleep(BEAT_SECONDS)
 
     # Final edit — show result in same message
-    last      = ticks[-1]
+    last       = ticks[-1]
     winner_pos = last.pos_a if result.winner == "a" else last.pos_b
     loser_pos  = last.pos_b if result.winner == "a" else last.pos_a
-    await race_msg.edit(content=render_final(winner_pos, loser_pos))
+    await race_msg.edit(content=render_final(winner_pos, loser_pos, sudden_death=getattr(last, 'sudden_death', False)))
 
 
 # ---------------------------------------------------------------------------
