@@ -624,32 +624,8 @@ class GrandPrixCog(commands.Cog):
     # -----------------------------------------------------------------------
 
     async def _enter_queue(self, interaction, q, channel, user_id, racer, stats):
-        # Verify the player still owns this Zappy before locking a slot
-        try:
-            from algorand_lookup import verify_wallet_owns_zappy
-            holding = await verify_wallet_owns_zappy(racer["wallet_address"])
-            all_held = {
-                z["name"] for z in (
-                    holding.get("zappies", []) +
-                    holding.get("heroes", []) +
-                    holding.get("collabs", [])
-                )
-            }
-            if racer["zappy_id"] not in all_held:
-                # NFT no longer in wallet — remove from lineup, keep stats
-                self.db.table("zappy_racers").delete().eq(
-                    "discord_user_id", user_id
-                ).eq("zappy_id", racer["zappy_id"]).execute()
-                print(f"[grand_prix] Removed {racer['zappy_id']} from {user_id} — no longer in wallet")
-                await interaction.followup.send(
-                    f"⚠️ **{racer['zappy_id']}** is no longer in your wallet — it's been removed from your lineup.\n"
-                    f"If you still own it, re-register with `/gpregister`. Run `/gpregister` to see your current Zappies.",
-                    ephemeral=True,
-                )
-                return
-        except Exception as e:
-            # Don't block the race if verification fails — log and continue
-            print(f"[grand_prix] Ownership check error for {racer['zappy_id']}: {e}")
+        # Ownership check disabled — false positive rate too high with current indexer
+        # Re-enable once a more reliable verification method is implemented
 
         async with _join_lock:
             if user_id in q.active_players:
