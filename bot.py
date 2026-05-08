@@ -1707,9 +1707,48 @@ async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: 
     skipped = []
     failed  = []
 
+    # Pre-check Supabase for any asset_ids that already have traits.
+    # This prevents Railway (which can't reach IPFS) from overwriting good
+    # trait data that was inserted manually via the importer tool.
+    supabase_has_traits = set()
+    try:
+        from database import get_supabase
+        _db = get_supabase()
+        _rows = _db.table("extra_zappies").select("asset_id,background").in_("asset_id", asset_ids).execute()
+        for _row in (_rows.data or []):
+            if _row.get("background"):
+                supabase_has_traits.add(int(_row["asset_id"]))
+    except Exception as _e:
+        print(f"⚠️ Supabase pre-check failed (non-fatal): {_e}")
+
     async with aiohttp.ClientSession() as session:
         for asset_id in asset_ids:
-            # Skip if already has traits
+            # Skip if Supabase already has traits for this Zappy
+            if asset_id in supabase_has_traits:
+                # Still load into live memory if not already there
+                if asset_id not in ZAPPY_ASSET_IDS:
+                    try:
+                        from database import get_supabase
+                        _db = get_supabase()
+                        _r = _db.table("extra_zappies").select("*").eq("asset_id", asset_id).execute()
+                        if _r.data:
+                            row = _r.data[0]
+                            ZAPPY_COLLECTION[asset_id] = {
+                                "name": row["name"], "unit_name": row["unit_name"],
+                                "image_url": row["image_url"], "background": row["background"],
+                                "body": row["body"], "earring": row["earring"],
+                                "eyes": row["eyes"], "eyewear": row["eyewear"],
+                                "head": row["head"], "mouth": row["mouth"], "skin": row["skin"],
+                            }
+                            ZAPPY_ASSET_IDS.add(asset_id)
+                            added.append((asset_id, row["name"], ZAPPY_COLLECTION[asset_id]))
+                    except Exception as _e:
+                        print(f"⚠️ Could not load {asset_id} from Supabase: {_e}")
+                else:
+                    skipped.append(asset_id)
+                continue
+
+            # Skip if already in live memory with traits
             if asset_id in ZAPPY_ASSET_IDS:
                 existing = ZAPPY_COLLECTION.get(asset_id, {})
                 if any([existing.get("background"), existing.get("body"), existing.get("skin")]):
