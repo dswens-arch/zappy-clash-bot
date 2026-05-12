@@ -45,7 +45,11 @@ def get_trait_hint(event: dict, stats: dict) -> str | None:
     trait_text = event.get("trait_text")
     if not trait_text or not stats:
         return None
-    dominant = max(stats, key=lambda k: stats.get(k, 0))
+    # Filter out None/non-numeric values — some Zappies have incomplete stats
+    valid_stats = {k: v for k, v in stats.items() if isinstance(v, (int, float))}
+    if not valid_stats:
+        return None
+    dominant = max(valid_stats, key=lambda k: valid_stats[k])
     return trait_text.get(dominant)
 
 
