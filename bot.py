@@ -41,7 +41,10 @@ from token_rewards   import award_win_tokens, award_streak_tokens
 from expedition_engine import (
     start_run, get_run, end_run, advance_beat, check_nft_drop,
     build_scene_embed, build_outcome_embed, build_run_complete_embed,
-    ExpeditionView, ZoneSelectView, ZappySelectView, get_collection_bonus,
+    build_question_embed, build_question_result_embed,
+    beat_needs_question, record_question_answer,
+    ExpeditionView, ZoneSelectView, ZappySelectView, HardModeSelectView,
+    get_collection_bonus,
 )
 from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from nft_rewards       import award_nft_prize, claim_nft_prize
@@ -1427,9 +1430,44 @@ async def _show_smart_zappy_select(
             "stats":     chosen["stats"],
             "image_url": chosen.get("image_url", ""),
         }
-        await _run_expedition_beat(chosen_inter, user_id, zone_num, zappy_data, zappy_count, entry_fee=fee)
+        # Hard mode select before starting the run
+        await _show_hard_mode_select(chosen_inter, user_id, zone_num, zappy_data, zappy_count, fee)
 
     view = SmartZappyView(ranked, zone_num, on_zappy_chosen)
+    await inter.followup.send(embed=embed, view=view, ephemeral=True)
+
+
+async def _show_hard_mode_select(
+    inter: discord.Interaction,
+    user_id: str,
+    zone_num: int,
+    zappy_data: dict,
+    zappy_count: int,
+    fee: int,
+):
+    """Show hard mode opt-in screen after Zappy is chosen."""
+    zone = ZONES[zone_num]
+
+    embed = discord.Embed(
+        title       = "⚡ Choose Your Mode",
+        description = (
+            f"**{zappy_data['name']}** is ready for **{zone['name']}**.\n\n"
+            "**⚡ Hard Mode**\n"
+            "Before each action, answer a question about the Zappy world. "
+            "Get it right → guaranteed best outcome. "
+            "Get it wrong → guaranteed bad outcome. High risk, high reward.\n\n"
+            "**🌿 Normal Mode**\n"
+            "Your Zappy's stats determine outcomes. No questions, no penalties."
+        ),
+        color = zone["color"],
+    )
+    if zappy_data.get("image_url"):
+        embed.set_thumbnail(url=zappy_data["image_url"])
+
+    async def on_mode_chosen(mode_inter: discord.Interaction, zone_num_inner: int, hard_mode: bool):
+        await _run_expedition_beat(mode_inter, user_id, zone_num_inner, zappy_data, zappy_count, entry_fee=fee, hard_mode=hard_mode)
+
+    view = HardModeSelectView(zone_num, on_mode_chosen)
     await inter.followup.send(embed=embed, view=view, ephemeral=True)
 
 
@@ -1440,10 +1478,11 @@ async def _run_expedition_beat(
     zappy: dict,
     zappy_count: int,
     entry_fee: int = 0,
+    hard_mode: bool = False,
 ):
     """Start or continue an expedition beat."""
     # Start fresh run
-    run = start_run(user_id, zone_num, zappy, zappy_count)
+    run = start_run(user_id, zone_num, zappy, zappy_count, hard_mode=hard_mode)
     run['entry_fee'] = entry_fee
 
     async def on_choice(inter: discord.Interaction, choice_index: int):
@@ -1540,32 +1579,201 @@ async def _run_expedition_beat(
             end_run(user_id)
         else:
             # Next beat
-            scene_embed = build_scene_embed(updated_run)
-            image_path  = f"./images/{updated_run['events'][updated_run['beat']].get('image', '')}.png"
-            view        = ExpeditionView(updated_run, on_choice)
+            await _send_beat(inter, updated_run, on_choice)
 
-            files = []
-            if os.path.exists(image_path):
-                files.append(discord.File(image_path))
+    async def _send_beat(dest_inter: discord.Interaction, current_run: dict, choice_callback):
+        """Send scene + question (if hard mode) or scene + choices directly."""
+        scene_embed  = build_scene_embed(current_run)
+        beat_event   = current_run['events'][current_run['beat']]
+        image_name   = beat_event.get('image', '')
+        image_path   = f"./images/{image_name}.png" if image_name else ""
 
+        files = []
+        if image_path and os.path.exists(image_path):
+            files.append(discord.File(image_path))
+
+        if beat_needs_question(current_run):
+            # Hard mode: show scene + question, choices come after answer
+            q_embed      = build_question_embed(current_run)
+            snapped_beat = current_run['beat']  # snapshot before any advance
+
+            async def on_answer(ans_inter: discord.Interaction, correct: bool):
+                record_question_answer(user_id, correct)
+                snapped_event = current_run['events'][snapped_beat]
+                result_embed  = build_question_result_embed(correct, snapped_event)
+                choice_view   = ExpeditionView(current_run, choice_callback)
+                await ans_inter.followup.send(embed=result_embed, view=choice_view, ephemeral=True)
+
+            q_view = QuestionView(current_run, on_answer)
+            embeds = [scene_embed, q_embed]
             if files:
-                await inter.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
+                await dest_inter.followup.send(embeds=embeds, view=q_view, files=files, ephemeral=True)
             else:
-                await inter.followup.send(embed=scene_embed, view=view, ephemeral=True)
+                await dest_inter.followup.send(embeds=embeds, view=q_view, ephemeral=True)
+        else:
+            # Normal mode: straight to choices
+            choice_view = ExpeditionView(current_run, choice_callback)
+            if files:
+                await dest_inter.followup.send(embed=scene_embed, view=choice_view, files=files, ephemeral=True)
+            else:
+                await dest_inter.followup.send(embed=scene_embed, view=choice_view, ephemeral=True)
 
     # Post first beat
-    scene_embed = build_scene_embed(run)
-    image_path  = f"./images/{run['events'][0].get('image', '')}.png"
-    view        = ExpeditionView(run, on_choice)
+    await _send_beat(interaction, run, on_choice)
 
-    files = []
-    if os.path.exists(image_path):
-        files.append(discord.File(image_path))
 
-    if files:
-        await interaction.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
+
+@tree.command(name="testexpedition", description="ADMIN ONLY - test expedition without awarding CP or tokens")
+@app_commands.describe(
+    zone="Zone number to test (1-5)",
+    hard_mode="Test hard mode question flow",
+    asset_id="Optional: specific Zappy ASA ID to use (uses your first Zappy if omitted)",
+)
+async def cmd_testexpedition(
+    interaction: discord.Interaction,
+    zone: int,
+    hard_mode: bool = False,
+    asset_id: int = 0,
+):
+    """Admin test run — full expedition flow but no CP, tokens, DB writes, or token transfers."""
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+        return
+
+    if zone not in range(1, 6):
+        await interaction.response.send_message("❌ Zone must be 1–5.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+    user_id = str(interaction.user.id)
+
+    # Grab a real Zappy from your wallet for authentic stat testing
+    wallet = get_wallet(user_id)
+    if not wallet:
+        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+        return
+
+    ownership = await verify_wallet(user_id, wallet)
+    if not ownership["owns"]:
+        await interaction.followup.send("❌ No Zappies found in linked wallet.", ephemeral=True)
+        return
+
+    all_zappies = ownership["zappies"] + [
+        {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"}
+        for h in ownership["heroes"]
+    ]
+
+    # Pick specific Zappy or rank best for zone
+    if asset_id:
+        raw = next((z for z in all_zappies if z["asset_id"] == asset_id), None)
+        if not raw:
+            await interaction.followup.send(f"❌ ASA {asset_id} not found in your wallet.", ephemeral=True)
+            return
+        ranked = rank_zappies_for_zone([raw], zone)
     else:
-        await interaction.followup.send(embed=scene_embed, view=view, ephemeral=True)
+        ranked = rank_zappies_for_zone(all_zappies, zone)
+
+    if not ranked:
+        await interaction.followup.send("❌ Couldn't rank Zappies for that zone.", ephemeral=True)
+        return
+
+    chosen = ranked[0]
+    zappy_data = {
+        "asset_id":  chosen["asset_id"],
+        "name":      chosen.get("name", chosen.get("unit_name", "Test Zappy")),
+        "unit_name": chosen.get("unit_name", ""),
+        "is_hero":   False,
+        "is_collab": False,
+        "traits":    chosen.get("traits", {}),
+        "stats":     chosen["stats"],
+        "image_url": chosen.get("image_url", ""),
+    }
+    zappy_count = len(all_zappies)
+
+    zone_data = ZONES[zone]
+    mode_label = "⚡ Hard Mode" if hard_mode else "🌿 Normal Mode"
+
+    await interaction.followup.send(
+        f"🧪 **Test Run Starting** — {zone_data['emoji']} {zone_data['name']} · {mode_label}\n"
+        f"Zappy: **{zappy_data['name']}** · "
+        f"VLT {zappy_data['stats'].get('VLT','?')} · "
+        f"INS {zappy_data['stats'].get('INS','?')} · "
+        f"SPK {zappy_data['stats'].get('SPK','?')}\n"
+        f"⚠️ *No CP, tokens, or DB writes — test only.*",
+        ephemeral=True,
+    )
+
+    # Start the run with test_mode flag — skips all rewards at completion
+    run = start_run(user_id, zone, zappy_data, zappy_count, hard_mode=hard_mode)
+    run['entry_fee'] = 0
+    run['test_mode'] = True  # signals completion handler to skip rewards
+
+    async def on_choice_test(inter: discord.Interaction, choice_index: int):
+        updated_run = advance_beat(user_id, choice_index)
+        if not updated_run:
+            await inter.followup.send("Something went wrong with your test run.", ephemeral=True)
+            return
+
+        outcome_embed = build_outcome_embed(updated_run)
+        await inter.followup.send(embed=outcome_embed, ephemeral=True)
+
+        if updated_run["complete"]:
+            # Test mode: skip all DB saves, token transfers, NFT drops
+            final_embed = build_run_complete_embed(updated_run, nft_drop=False)
+            hard_summary = ""
+            if hard_mode:
+                correct  = updated_run.get("hard_mode_correct", 0)
+                wrong    = updated_run.get("hard_mode_wrong", 0)
+                hard_summary = f"\n⚡ Hard Mode: {correct}/{correct+wrong} correct"
+            final_embed.description = (
+                f"⚡ **{updated_run['total_cp']} CP** (not awarded — test)\n"
+                f"🪙 **{updated_run['total_tokens']} tokens** (not sent — test)\n"
+                f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
+                + hard_summary
+            )
+            final_embed.set_footer(text="🧪 Test run — no rewards issued")
+            await inter.followup.send(embed=final_embed, ephemeral=True)
+            end_run(user_id)
+        else:
+            await _send_beat_test(inter, updated_run, on_choice_test)
+
+    async def _send_beat_test(dest_inter: discord.Interaction, current_run: dict, choice_callback):
+        """Same as _send_beat but used by test run — identical logic, separate closure."""
+        scene_embed  = build_scene_embed(current_run)
+        beat_event   = current_run['events'][current_run['beat']]
+        image_name   = beat_event.get('image', '')
+        image_path   = f"./images/{image_name}.png" if image_name else ""
+
+        files = []
+        if image_path and os.path.exists(image_path):
+            files.append(discord.File(image_path))
+
+        if beat_needs_question(current_run):
+            q_embed      = build_question_embed(current_run)
+            snapped_beat = current_run['beat']
+
+            async def on_answer_test(ans_inter: discord.Interaction, correct: bool):
+                record_question_answer(user_id, correct)
+                snapped_event = current_run['events'][snapped_beat]
+                result_embed  = build_question_result_embed(correct, snapped_event)
+                choice_view   = ExpeditionView(current_run, choice_callback)
+                await ans_inter.followup.send(embed=result_embed, view=choice_view, ephemeral=True)
+
+            q_view = QuestionView(current_run, on_answer_test)
+            embeds = [scene_embed, q_embed]
+            if files:
+                await dest_inter.followup.send(embeds=embeds, view=q_view, files=files, ephemeral=True)
+            else:
+                await dest_inter.followup.send(embeds=embeds, view=q_view, ephemeral=True)
+        else:
+            choice_view = ExpeditionView(current_run, choice_callback)
+            if files:
+                await dest_inter.followup.send(embed=scene_embed, view=choice_view, files=files, ephemeral=True)
+            else:
+                await dest_inter.followup.send(embed=scene_embed, view=choice_view, ephemeral=True)
+
+    # Fire first beat
+    await _send_beat_test(interaction, run, on_choice_test)
 
 
 @tree.command(name="claimnft", description="Claim your pending NFT prize from a Zone 5 expedition")
