@@ -1618,24 +1618,25 @@ ZONE4_EVENTS = [
 # ═══════════════════════════════════════════════════════
 
 ZONE5_EVENTS = [
+    # ── ORIGINAL 6 ────────────────────────────────────────────────
     {
         "title": "The Storm Crown",
         "image": "zone5_e1",
         "scene": (
             "The summit is ringed by a permanent storm that only the worthy can pass. "
-            "Lightning strikes the peak every few seconds. "
+            "Lightning strikes every few seconds — you've counted. Sixteen seconds between the big ones. "
             "You are either very brave or very stubborn."
         ),
         "stat": "VLT",
         "trait_text": {
             "VLT": "The storm reads your charge and pauses. Like it's deciding whether you deserve this.",
             "INS": "Your insulation is the only reason this is survivable. You know that.",
-            "SPK": "The lightning pattern has a gap. Sixteen seconds between the big strikes. You've already timed it.",
+            "SPK": "Sixteen seconds. You've already timed it twice to confirm. It's consistent.",
         },
         "question": {
-            "prompt": "The Storm Crown strikes every few seconds. Lightning physics in the Zappy world: where does the next strike land?",
-            "answers": ["The highest conductive point in the area", "Randomly — no pattern", "The lowest point — electricity seeks ground"],
-            "correct": 0,
+            "prompt": "You've counted sixteen seconds between big strikes. A small strike just fired. How long until the next big one?",
+            "answers": ["Sixteen seconds — the pattern resets after every strike", "Less — small strikes don't reset the clock", "More — the storm needs to recharge after any discharge"],
+            "correct": 1,
         },
         "choices": [
             {
@@ -1651,14 +1652,14 @@ ZONE5_EVENTS = [
                 "outcomes": {
                     "high": {"text": "You time it perfectly and sprint through in the sixteen-second window. Not a bolt lands near you.", "cp": 195, "tokens": 608, "tone": "good"},
                     "mid":  {"text": "You catch most of the gap but clip the tail end. Minor hit. You make it.", "cp": 130, "tokens": 355, "tone": "neutral"},
-                    "low":  {"text": "The gap is shorter than you expected. You're mid-run when the next strike comes.", "cp": 40, "tokens": 55, "tone": "bad"},
+                    "low":  {"text": "The gap was shorter than the pattern suggested. You're mid-run when the next strike comes.", "cp": 40, "tokens": 55, "tone": "bad"},
                 }
             },
             {
                 "label": "🧲 Draw the lightning to you",
                 "outcomes": {
-                    "high": {"text": "You become a lightning rod — pulling every strike to you and absorbing it completely. The storm depletes itself against you. A legendary maneuver.", "cp": 220, "tokens": 680, "tone": "good"},
-                    "mid":  {"text": "You draw most strikes and absorb them. Some you can't. You arrive at the summit charged beyond capacity.", "cp": 145, "tokens": 395, "tone": "good"},
+                    "high": {"text": "You become a lightning rod — pulling every strike and absorbing it completely. The storm depletes itself against you. A legendary maneuver.", "cp": 220, "tokens": 680, "tone": "good"},
+                    "mid":  {"text": "You draw most strikes and absorb them. Some you can't. You arrive charged beyond capacity.", "cp": 145, "tokens": 395, "tone": "good"},
                     "low":  {"text": "You draw the lightning but can't absorb it. The storm teaches you the difference.", "cp": 30, "tokens": 50, "tone": "bad"},
                 }
             },
@@ -1674,13 +1675,13 @@ ZONE5_EVENTS = [
         ),
         "stat": "INS",
         "trait_text": {
-            "VLT": "The gatekeeper notes your charge output and raises one brow. You've earned their attention.",
+            "VLT": "The gatekeeper notes your charge output and raises one brow.",
             "INS": "Your insulation has decades of field wear on it. The gatekeeper sees this and nods.",
-            "SPK": "The gatekeeper's eyes read something in your energy — like they've seen your decisions play out and made a judgment already.",
+            "SPK": "The gatekeeper's eyes read something in your energy — like they've already made a judgment.",
         },
         "question": {
-            "prompt": "The Apex Gatekeeper asks why your Zappy deserves to stand here. What's the correct answer?",
-            "answers": ["Because they made it here", "Because they have the highest stats", "Because they were the fastest"],
+            "prompt": "The gatekeeper asks 'why does your Zappy deserve to stand here?' The gate behind them only opens for one kind of answer. Which?",
+            "answers": ["An honest one", "A confident one", "A humble one"],
             "correct": 0,
         },
         "choices": [
@@ -1695,17 +1696,17 @@ ZONE5_EVENTS = [
             {
                 "label": "📖 Tell your story",
                 "outcomes": {
-                    "high": {"text": "You tell them everything — every zone, every choice, every mistake and recovery. When you finish, the gatekeeper is silent for a long moment, then steps aside fully.", "cp": 260, "tokens": 810, "tone": "good"},
-                    "mid":  {"text": "You give a good account of yourself. The gatekeeper is satisfied. Gate opens.", "cp": 170, "tokens": 475, "tone": "good"},
-                    "low":  {"text": "Your story is a little thin for the Apex. The gatekeeper opens the gate anyway. Everyone gets one chance.", "cp": 58, "tokens": 82, "tone": "neutral"},
+                    "high": {"text": "You tell them everything — every zone, every choice, every mistake and recovery. When you finish, the gatekeeper steps aside fully.", "cp": 260, "tokens": 810, "tone": "good"},
+                    "mid":  {"text": "You give a good account. The gatekeeper is satisfied. Gate opens.", "cp": 170, "tokens": 475, "tone": "good"},
+                    "low":  {"text": "Your story is thin. The gatekeeper opens the gate anyway. Everyone gets one chance.", "cp": 58, "tokens": 82, "tone": "neutral"},
                 }
             },
             {
                 "label": "🤫 Stay silent",
                 "outcomes": {
-                    "high": {"text": "Silence. The gatekeeper holds your gaze for a long moment, then nods slowly. 'Sometimes that's the right answer.' Gate opens wide.", "cp": 255, "tokens": 795, "tone": "good"},
+                    "high": {"text": "Silence. The gatekeeper holds your gaze, then nods. 'Sometimes that's the right answer.' Gate opens wide.", "cp": 255, "tokens": 795, "tone": "good"},
                     "mid":  {"text": "The silence is read as confidence. The gatekeeper nods and stands aside.", "cp": 162, "tokens": 452, "tone": "good"},
-                    "low":  {"text": "The silence is read as uncertainty. The gatekeeper sighs and opens the gate. 'Work on it.'", "cp": 50, "tokens": 72, "tone": "neutral"},
+                    "low":  {"text": "The silence is read as uncertainty. 'Work on it,' they say, opening the gate.", "cp": 50, "tokens": 72, "tone": "neutral"},
                 }
             },
         ]
@@ -1714,26 +1715,26 @@ ZONE5_EVENTS = [
         "title": "The Infinite Generator",
         "image": "zone5_e3",
         "scene": (
-            "At the peak: a generator the size of a building, spinning silently, "
-            "generating more power than anything should. "
-            "It has no off switch. It has no purpose listed. It simply hums with the energy of everything."
+            "At the peak: a generator the size of a building, spinning silently. "
+            "It has no off switch. No purpose listed. "
+            "But you notice something — every expedition zone below feels slightly warmer when you stand near it."
         ),
         "stat": "VLT",
         "trait_text": {
-            "VLT": "The generator recognizes your charge signature. It spins slightly faster when you approach.",
+            "VLT": "The generator spins slightly faster when you approach. It recognizes your charge signature.",
             "INS": "Without your insulation, being this close would be dangerous. With it, it's just spectacular.",
-            "SPK": "You can feel the generator's output frequency — and you think you could sync with it.",
+            "SPK": "The warmth below isn't random. Every zone. That tells you something about what this thing does.",
         },
         "question": {
-            "prompt": "The Infinite Generator has no off switch and no stated purpose. What is it most likely doing?",
-            "answers": ["Powering something elsewhere — a relay or hidden system", "Running itself for the sake of running", "Charging the entire expedition zone network"],
-            "correct": 2,
+            "prompt": "The generator has no purpose listed, but every zone below feels warmer near it. What does that most likely mean?",
+            "answers": ["It powers the entire expedition zone network", "It's leaking heat — a sign it's about to fail", "It runs on ambient warmth from the zones below it"],
+            "correct": 0,
         },
         "choices": [
             {
                 "label": "⚡ Draw power from it",
                 "outcomes": {
-                    "high": {"text": "You interface with the generator and draw a measured amount. It gives generously, as if it has been waiting for someone worth giving to.", "cp": 245, "tokens": 762, "tone": "good"},
+                    "high": {"text": "You interface carefully and draw a measured amount. It gives generously — as if waiting for someone worth giving to.", "cp": 245, "tokens": 762, "tone": "good"},
                     "mid":  {"text": "You draw what you can handle. The generator doesn't notice. You leave significantly charged.", "cp": 162, "tokens": 450, "tone": "good"},
                     "low":  {"text": "You draw too much and the feedback bounces you. The generator spins on, unaffected.", "cp": 50, "tokens": 70, "tone": "bad"},
                 }
@@ -1741,17 +1742,17 @@ ZONE5_EVENTS = [
             {
                 "label": "🔭 Study it",
                 "outcomes": {
-                    "high": {"text": "Your study reveals a maintenance port with stored energy reserves — meant for authorized Zappies but with no access restrictions remaining. You take everything.", "cp": 250, "tokens": 780, "tone": "good"},
-                    "mid":  {"text": "You learn something fundamental about how the expedition zones are powered. The knowledge will help in future runs.", "cp": 165, "tokens": 458, "tone": "good"},
+                    "high": {"text": "Your study reveals a maintenance port with stored reserves — meant for authorized Zappies, no access restrictions remaining. You take everything.", "cp": 250, "tokens": 780, "tone": "good"},
+                    "mid":  {"text": "You learn something about how the expedition zones are powered. The knowledge will help in future runs.", "cp": 165, "tokens": 458, "tone": "good"},
                     "low":  {"text": "The generator is beyond full comprehension. You leave knowing less than you arrived with.", "cp": 40, "tokens": 55, "tone": "neutral"},
                 }
             },
             {
                 "label": "🎁 Leave an offering",
                 "outcomes": {
-                    "high": {"text": "You leave something at the generator's base. It hums louder — a frequency of acknowledgment — and the surrounding area releases a cache you didn't see when you arrived.", "cp": 255, "tokens": 795, "tone": "good"},
-                    "mid":  {"text": "The generator accepts your offering in its quiet way. Something shifts in the area.", "cp": 158, "tokens": 438, "tone": "good"},
-                    "low":  {"text": "The generator does not respond to offerings. It does not care what you leave. It just spins.", "cp": 45, "tokens": 60, "tone": "neutral"},
+                    "high": {"text": "You leave something at the base. The generator hums louder — acknowledgment — and a cache you didn't see when you arrived appears nearby.", "cp": 255, "tokens": 795, "tone": "good"},
+                    "mid":  {"text": "The generator accepts your offering quietly. Something shifts.", "cp": 158, "tokens": 438, "tone": "good"},
+                    "low":  {"text": "The generator does not respond to offerings. It just spins.", "cp": 45, "tokens": 60, "tone": "neutral"},
                 }
             },
         ]
@@ -1760,34 +1761,34 @@ ZONE5_EVENTS = [
         "title": "The Last Broadcast",
         "image": "zone5_e4",
         "scene": (
-            "A single antenna at the summit is transmitting a signal — not to anyone nearby, but out, far. "
-            "The control panel is still warm. "
-            "You could add something to the broadcast."
+            "A single antenna at the summit is transmitting outward — not to anyone nearby, but far. "
+            "The control panel is still warm to the touch. "
+            "The transmission log shows the last manual entry was three hours ago."
         ),
         "stat": "SPK",
         "trait_text": {
-            "VLT": "Your charge gives the broadcast a stronger signal than most Zappies could produce.",
-            "INS": "Your insulation doesn't factor here — this is about what you say, not how well you can take a hit.",
-            "SPK": "You know what this broadcast is. You've heard pieces of it throughout your runs.",
+            "VLT": "Your charge gives any signal you add a stronger output than most Zappies could produce.",
+            "INS": "This isn't about insulation. It's about what you say.",
+            "SPK": "Three hours ago. Someone was here. The question is whether they left voluntarily.",
         },
         "question": {
-            "prompt": "The summit antenna has been broadcasting continuously. The control panel is warm. What does 'still warm' indicate?",
-            "answers": ["Someone was here recently", "The system is actively maintained", "The broadcast auto-runs without any operator"],
+            "prompt": "The panel is warm and the log shows a manual entry three hours ago. What does 'still warm' combined with a recent entry tell you?",
+            "answers": ["Someone left recently and may still be nearby", "The panel runs hot constantly — age does that", "Three hours is too long for residual warmth — something else is heating it"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "📡 Add your signal",
                 "outcomes": {
-                    "high": {"text": "Your signal is clear and strong. It joins the broadcast and travels outward. Something — somewhere — receives it. A reply comes back in the form of a resource drop.", "cp": 230, "tokens": 752, "tone": "good"},
+                    "high": {"text": "Your signal is clear and strong. Something receives it. A reply comes back as a resource drop.", "cp": 230, "tokens": 752, "tone": "good"},
                     "mid":  {"text": "Your signal goes out. Whether it reaches anyone, you don't know. The act feels important.", "cp": 145, "tokens": 413, "tone": "good"},
-                    "low":  {"text": "Your signal is weak. It joins the broadcast but gets lost quickly. You still tried. That goes on record somewhere.", "cp": 45, "tokens": 52, "tone": "neutral"},
+                    "low":  {"text": "Your signal is weak and gets lost. You still tried. That goes on record somewhere.", "cp": 45, "tokens": 52, "tone": "neutral"},
                 }
             },
             {
                 "label": "🔍 Decode what's there",
                 "outcomes": {
-                    "high": {"text": "You decode the existing broadcast — it's been running for years, a map of the entire expedition path with hidden caches marked. You copy it all.", "cp": 245, "tokens": 787, "tone": "good"},
+                    "high": {"text": "The broadcast has been running for years — a map of the entire expedition path with hidden caches marked. You copy it all.", "cp": 245, "tokens": 787, "tone": "good"},
                     "mid":  {"text": "You decode fragments. Enough to find one cache that wasn't on any map you had.", "cp": 155, "tokens": 437, "tone": "good"},
                     "low":  {"text": "The encoding is beyond you. The broadcast continues, mysterious and ancient.", "cp": 35, "tokens": 50, "tone": "neutral"},
                 }
@@ -1795,9 +1796,9 @@ ZONE5_EVENTS = [
             {
                 "label": "📴 Shut it down",
                 "outcomes": {
-                    "high": {"text": "You shut it down cleanly. In the silence that follows, you realize the broadcast was powering a containment field. Whatever was inside it is now free — and grateful.", "cp": 260, "tokens": 840, "tone": "good"},
+                    "high": {"text": "You shut it down. In the silence, you realize the broadcast was powering a containment field. Whatever was inside is now free — and grateful.", "cp": 260, "tokens": 840, "tone": "good"},
                     "mid":  {"text": "You shut it down. The quiet feels significant. Something in the area shifts.", "cp": 148, "tokens": 420, "tone": "neutral"},
-                    "low":  {"text": "The shutdown triggers a failsafe alarm. You silence it quickly and leave before anything else happens.", "cp": 30, "tokens": 50, "tone": "bad"},
+                    "low":  {"text": "The shutdown triggers a failsafe alarm. You silence it and leave quickly.", "cp": 30, "tokens": 50, "tone": "bad"},
                 }
             },
         ]
@@ -1808,43 +1809,43 @@ ZONE5_EVENTS = [
         "rival": True,
         "scene": (
             "At the summit — of all places — another Zappy. "
-            "You've both made it this far. The rarest cache in the expedition network sits between you. "
-            "The view is spectacular. The stakes are as high as they get."
+            "You've both made it this far. A cache sits between you. "
+            "They're eyeing it. You're eyeing it. Neither of you moves."
         ),
         "stat": "INS",
         "trait_text": {
             "VLT": "Your charge is high enough that they're measuring you. You're both formidable up here.",
             "INS": "You've taken everything the expedition threw at you and you're still standing clean. They know it.",
-            "SPK": "You can read them completely. Every tell, every hesitation. You could play this perfectly.",
+            "SPK": "Neither of you moves. That tells you something — they're not sure they can win a race either.",
         },
         "question": {
-            "prompt": "You and a rival have both reached the Apex Summit. The cache sits between you. What's the rarest outcome possible?",
-            "answers": ["A split where both leave with more than either expected", "One wins everything and the other leaves with nothing", "A tie resolved by stats"],
+            "prompt": "You're both standing still, watching the cache. Neither has moved. What does that tell you about the other Zappy?",
+            "answers": ["They're not confident they'd win a sprint — use that", "They're waiting for you to make the first mistake", "They're about to propose a split — wait them out"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "🏆 Claim it first",
                 "outcomes": {
-                    "high": {"text": "Your speed and insulation carry you there first. You take the cache and offer a respectful nod. They return it. Two veterans at the top.", "cp": 275, "tokens": 885, "tone": "good"},
-                    "mid":  {"text": "You get there slightly first and take the larger share. They accept this. The summit has rules.", "cp": 182, "tokens": 507, "tone": "neutral"},
-                    "low":  {"text": "They're faster. They take the cache cleanly. You were one step behind at the top of the world.", "cp": 60, "tokens": 90, "tone": "bad"},
+                    "high": {"text": "You sprint the moment you read their hesitation. You're right — they weren't ready. Cache is yours. They nod.", "cp": 275, "tokens": 885, "tone": "good"},
+                    "mid":  {"text": "Close race. You edge them out and take the larger share.", "cp": 182, "tokens": 507, "tone": "neutral"},
+                    "low":  {"text": "They were faster than they looked. They take the cache cleanly.", "cp": 60, "tokens": 90, "tone": "bad"},
                 }
             },
             {
                 "label": "🤝 Propose a split",
                 "outcomes": {
-                    "high": {"text": "They agree. You both open the cache together and find it's larger inside than outside — enough for both of you to walk away significantly richer. The summit rewards generosity.", "cp": 280, "tokens": 910, "tone": "good"},
-                    "mid":  {"text": "They agree to split. It's a fair division. You both leave with something worth having.", "cp": 178, "tokens": 495, "tone": "good"},
-                    "low":  {"text": "They don't want to split. You negotiate a long time. Eventually you take a small portion and move on.", "cp": 55, "tokens": 75, "tone": "neutral"},
+                    "high": {"text": "They agree immediately — turns out they were hoping for this. The cache is larger than it looked. Both of you leave with more than expected.", "cp": 280, "tokens": 910, "tone": "good"},
+                    "mid":  {"text": "They agree. Fair division. You both leave with something worth having.", "cp": 178, "tokens": 495, "tone": "good"},
+                    "low":  {"text": "They don't want to split. Long silence. You eventually take a small portion.", "cp": 55, "tokens": 75, "tone": "neutral"},
                 }
             },
             {
                 "label": "🎲 Let the summit decide",
                 "outcomes": {
-                    "high": {"text": "You step back and let chance handle it. The summit flips in your favor. The cache is yours. The rival respects the gesture.", "cp": 272, "tokens": 875, "tone": "good"},
-                    "mid":  {"text": "The summit is neutral. You get half. So do they.", "cp": 175, "tokens": 488, "tone": "neutral"},
-                    "low":  {"text": "The summit does not favor you today. The cache goes to the rival. You kept your dignity though.", "cp": 58, "tokens": 80, "tone": "neutral"},
+                    "high": {"text": "You step back. They look surprised, then do the same. The cache stays unclaimed — until the summit deposits a second one. Both of you take one.", "cp": 272, "tokens": 875, "tone": "good"},
+                    "mid":  {"text": "The summit is neutral. You get half.", "cp": 175, "tokens": 488, "tone": "neutral"},
+                    "low":  {"text": "The summit doesn't favor you today. The cache goes to the rival.", "cp": 58, "tokens": 80, "tone": "neutral"},
                 }
             },
         ]
@@ -1854,90 +1855,90 @@ ZONE5_EVENTS = [
         "image": "zone5_e6",
         "scene": (
             "You are at the very top. "
-            "The whole world spreads out below you — the Fields, the Bay, the Circuit, the Null Space, all of it. "
-            "You have earned this view. What do you do with it?"
+            "The whole world spreads out below — the Fields, the Bay, the Circuit, the Null Space, all of it. "
+            "You can see every zone from here. Including one section of Voltage Bay that looks different from above."
         ),
         "stat": None,
         "trait_text": {
             "VLT": "Your charge crackles quietly in the thin air. You feel like a live wire against the sky.",
-            "INS": "Your insulation has kept you standing through everything that tried to stop you. Up here, it's just you.",
-            "SPK": "You see everything from up here. Including things you missed on the way up.",
+            "INS": "Your insulation has kept you standing through everything. Up here, it's just you.",
+            "SPK": "That section of Voltage Bay — it's darker than the rest. Something's submerged there.",
         },
         "question": {
-            "prompt": "You're at the Apex. Looking down you can see all five zones. Which zone has a cache you didn't find on the way up?",
-            "answers": ["There's always one in Voltage Bay below the waterline", "The Null Space hides one behind the Logic Door", "The Static Fields always has one near the toll bridge"],
+            "prompt": "From the apex you can see a darker section of Voltage Bay that looks different from above. What does a darker patch in a coastal zone most likely indicate?",
+            "answers": ["Something submerged — deeper water or a sunken structure", "A dead zone — no electrical activity", "A storm shadow — the bay gets less sun there"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "🌟 Take it all in",
                 "outcomes": {
-                    "high": {"text": "You stand there for a long moment. The view fills you. You come down changed — more experience, more CP, and a feeling that this was worth every step.", "cp": 280, "tokens": 910, "tone": "good"},
-                    "mid":  {"text": "You take it in as best you can. It's a lot. You carry some of it back down with you.", "cp": 175, "tokens": 507, "tone": "good"},
-                    "low":  {"text": "It's a bit overwhelming honestly. You sit down. That's fine. The view waits for you.", "cp": 60, "tokens": 87, "tone": "neutral"},
+                    "high": {"text": "You stand here for a long moment. The view fills you. You come down changed — more CP, and a feeling that this was worth every step.", "cp": 280, "tokens": 910, "tone": "good"},
+                    "mid":  {"text": "You take it in as best you can. You carry some of it back down with you.", "cp": 175, "tokens": 507, "tone": "good"},
+                    "low":  {"text": "It's overwhelming. You sit down. The view waits for you.", "cp": 60, "tokens": 87, "tone": "neutral"},
                 }
             },
             {
                 "label": "🏴 Plant your flag",
                 "outcomes": {
-                    "high": {"text": "You plant your flag at the apex and the whole expedition record updates. You are now part of the summit's history. A bonus cache activates in your name.", "cp": 290, "tokens": 945, "tone": "good"},
-                    "mid":  {"text": "You plant it. It stands. Future expeditions will see it. The summit logs your arrival.", "cp": 180, "tokens": 525, "tone": "good"},
-                    "low":  {"text": "You plant your flag. The wind is strong up here. It blows sideways a little. Still counts.", "cp": 65, "tokens": 98, "tone": "neutral"},
+                    "high": {"text": "You plant your flag and the expedition record updates. You are now part of the summit's history. A bonus cache activates.", "cp": 290, "tokens": 945, "tone": "good"},
+                    "mid":  {"text": "You plant it. It stands. Future expeditions will see it.", "cp": 180, "tokens": 525, "tone": "good"},
+                    "low":  {"text": "The wind is strong up here. Your flag blows sideways. Still counts.", "cp": 65, "tokens": 98, "tone": "neutral"},
                 }
             },
             {
                 "label": "🔄 Begin the descent",
                 "outcomes": {
-                    "high": {"text": "You turn around immediately, already planning the next run. The summit respects the drive. It drops a significant reward at your feet as you leave.", "cp": 275, "tokens": 892, "tone": "good"},
-                    "mid":  {"text": "You head back down with purpose. The experience is already crystallizing into something useful.", "cp": 168, "tokens": 483, "tone": "good"},
+                    "high": {"text": "You turn around already planning the next run. The summit drops a reward at your feet as you leave.", "cp": 275, "tokens": 892, "tone": "good"},
+                    "mid":  {"text": "You head down with purpose. The experience crystallizes into something useful.", "cp": 168, "tokens": 483, "tone": "good"},
                     "low":  {"text": "You head down. The summit is behind you. There is always the next time.", "cp": 55, "tokens": 77, "tone": "neutral"},
                 }
             },
         ]
     },
-    # ── APEX SUMMIT EXTENDED POOL ─────────────────────────────────
+    # ── EXTENDED POOL ─────────────────────────────────────────────
     {
         "title": "The Fractured Ledge",
         "image": "zone5_e7",
         "scene": (
-            "The final approach path splits across a fractured ledge. "
-            "Chunks of rock float at different heights, held by the summit's ambient charge. "
-            "Miss a landing and you're very far down very fast."
+            "The final approach splits across a fractured ledge. "
+            "Chunks of rock float at different heights on ambient charge. "
+            "The larger, darker ones barely move. The smaller pale ones drift constantly."
         ),
         "stat": "SPK",
         "trait_text": {
-            "VLT": "The floating rocks pulse at a frequency your body reads like a heartbeat.",
+            "VLT": "The floating rocks pulse at your frequency.",
             "INS": "If you fall and grab a rock, your insulation handles the charge. Small comfort.",
-            "SPK": "You can map every arc and landing in your head before you take a single step.",
+            "SPK": "You can map every arc and landing before you take a single step.",
         },
         "question": {
-            "prompt": "Rocks float on ambient charge at the Apex. Which rocks are most stable to land on?",
-            "answers": ["Larger, darker rocks — higher charge density keeps them locked", "Smaller rocks — less mass, easier for the charge to hold steady", "Any rock near the cliff face — backed by solid ground"],
+            "prompt": "The larger darker rocks barely move. The smaller pale ones drift constantly. Which do you land on?",
+            "answers": ["Larger darker ones — more stable", "Smaller pale ones — lighter means easier to correct a bad landing", "Whichever is closest — speed matters more than stability"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "🦘 Leap across",
                 "outcomes": {
-                    "high": {"text": "Each landing is exact. You cross the fractured ledge like you designed it. The summit takes notice.", "cp": 255, "tokens": 800, "tone": "good"},
+                    "high": {"text": "Each landing is exact. You cross like you designed it.", "cp": 255, "tokens": 800, "tone": "good"},
                     "mid":  {"text": "Two wobbles, one near miss. You make it across breathing hard.", "cp": 165, "tokens": 462, "tone": "neutral"},
-                    "low":  {"text": "Third rock was not stable. You survive the fall somehow. Dignity: gone. Run: continuing.", "cp": 48, "tokens": 65, "tone": "bad"},
+                    "low":  {"text": "Third rock was unstable. You survive the fall. Dignity: gone. Run: continuing.", "cp": 48, "tokens": 65, "tone": "bad"},
                 }
             },
             {
                 "label": "⚡ Charge-lock the rocks",
                 "outcomes": {
-                    "high": {"text": "You emit a charge pulse that locks the rocks into a stable bridge. You walk across casually. A previous summit visitor would have paid anything for this.", "cp": 268, "tokens": 835, "tone": "good"},
-                    "mid":  {"text": "Partial lock. The rocks stabilize enough for a quick crossing. You don't linger.", "cp": 172, "tokens": 482, "tone": "neutral"},
-                    "low":  {"text": "Your pulse destabilizes them further. You're now leaping across moving targets. Still make it.", "cp": 52, "tokens": 70, "tone": "bad"},
+                    "high": {"text": "You emit a pulse that locks the rocks into a stable bridge. You walk across casually.", "cp": 268, "tokens": 835, "tone": "good"},
+                    "mid":  {"text": "Partial lock. The rocks stabilize enough for a quick crossing.", "cp": 172, "tokens": 482, "tone": "neutral"},
+                    "low":  {"text": "Your pulse destabilizes them further. You're now leaping across moving targets.", "cp": 52, "tokens": 70, "tone": "bad"},
                 }
             },
             {
                 "label": "🧗 Climb the cliff face instead",
                 "outcomes": {
-                    "high": {"text": "The cliff face has better handholds than expected. You find a route no one has used recently and discover an untouched cache tucked into a crevice.", "cp": 260, "tokens": 812, "tone": "good"},
-                    "mid":  {"text": "Slow but safe. You reach the top intact and slightly more muscular.", "cp": 158, "tokens": 440, "tone": "neutral"},
-                    "low":  {"text": "The cliff is harder than it looked. You make it but you need a moment at the top.", "cp": 50, "tokens": 68, "tone": "neutral"},
+                    "high": {"text": "The cliff has better handholds than expected. You find a route no one has used recently and discover an untouched cache in a crevice.", "cp": 260, "tokens": 812, "tone": "good"},
+                    "mid":  {"text": "Slow but safe. You reach the top intact.", "cp": 158, "tokens": 440, "tone": "neutral"},
+                    "low":  {"text": "The cliff is harder than it looked. You make it but need a moment at the top.", "cp": 50, "tokens": 68, "tone": "neutral"},
                 }
             },
         ]
@@ -1946,45 +1947,46 @@ ZONE5_EVENTS = [
         "title": "The Memory Archive",
         "image": "zone5_e8",
         "scene": (
-            "Embedded in the summit rock: a crystalline archive storing the memories of every Zappy "
-            "who has ever reached the top. You can feel them pressing against the surface. "
-            "An inscription reads: *Contribute or consume. Never both.*"
+            "Embedded in the summit rock: a crystalline archive storing memories of every Zappy "
+            "who has reached the top. "
+            "An inscription reads: *Contribute or consume. Never both.* "
+            "You contributed a memory already. It's been accepted."
         ),
         "stat": "SPK",
         "trait_text": {
-            "VLT": "Your charge interacts with the crystal's lattice — it wants to pull you in deeper.",
-            "INS": "Your insulation keeps the archive's output at a readable level rather than overwhelming.",
-            "SPK": "You can hear specific voices in the archive. One of them sounds like a better version of you.",
+            "VLT": "Your charge interacts with the crystal lattice — it wants to pull you in deeper.",
+            "INS": "Your insulation keeps the archive's output at a readable level.",
+            "SPK": "You contributed. The inscription says never both. The answer is obvious.",
         },
         "question": {
-            "prompt": "The inscription says 'Contribute or consume. Never both.' What happens if you try to do both?",
-            "answers": ["The archive rejects you and you gain nothing", "You get a partial benefit from each", "The archive keeps your contribution and gives you nothing back"],
+            "prompt": "You've already contributed a memory. The inscription says 'contribute or consume, never both.' What's the correct next action?",
+            "answers": ["Consume — you've contributed, now take", "Contribute again to earn more access", "Walk away — you've done your part"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "📥 Add your memory",
                 "outcomes": {
-                    "high": {"text": "You contribute a memory — a real one, something that cost you. The archive receives it and in exchange gives you the most relevant memory of a Zappy who faced your exact situation.", "cp": 248, "tokens": 775, "tone": "good"},
-                    "mid":  {"text": "You contribute. The archive acknowledges it. You feel lighter and slightly more certain of your next move.", "cp": 160, "tokens": 448, "tone": "good"},
-                    "low":  {"text": "You contribute but the archive already has this memory — someone else learned what you learned. It thanks you with a modest reward.", "cp": 55, "tokens": 78, "tone": "neutral"},
+                    "high": {"text": "You contribute something real. The archive gives you back the most relevant memory of a Zappy who faced your exact situation.", "cp": 248, "tokens": 775, "tone": "good"},
+                    "mid":  {"text": "You contribute. The archive acknowledges. You feel lighter and more certain of your next move.", "cp": 160, "tokens": 448, "tone": "good"},
+                    "low":  {"text": "The archive already has this memory. It thanks you with a modest reward.", "cp": 55, "tokens": 78, "tone": "neutral"},
                 }
             },
             {
                 "label": "📤 Take from it",
                 "outcomes": {
-                    "high": {"text": "You draw from the archive carefully and find exactly what you needed: the routing map of an Apex runner from two years ago who found every cache in one run.", "cp": 252, "tokens": 790, "tone": "good"},
-                    "mid":  {"text": "You find useful knowledge — a tip, a warning, a pattern. It helps.", "cp": 162, "tokens": 452, "tone": "good"},
-                    "low":  {"text": "You take memories that don't apply to you. Confusing. You leave more uncertain than you arrived.", "cp": 42, "tokens": 58, "tone": "neutral"},
+                    "high": {"text": "You draw carefully and find exactly what you needed: the routing map of an Apex runner who found every cache in one run.", "cp": 252, "tokens": 790, "tone": "good"},
+                    "mid":  {"text": "You find useful knowledge — a tip, a warning, a pattern.", "cp": 162, "tokens": 452, "tone": "good"},
+                    "low":  {"text": "You take memories that don't apply to you. You leave more uncertain than you arrived.", "cp": 42, "tokens": 58, "tone": "neutral"},
                 }
             },
             {
                 "label": "🤲 Both — add and take",
                 "trap": True,
                 "outcomes": {
-                    "high": {"text": "The archive warned you. It locks you out the moment you try both. You stand in front of it, locked, for an uncomfortable minute.", "cp": 12, "tokens": 25, "tone": "bad"},
-                    "mid":  {"text": "The inscription was specific. You ignored it. The archive gives you nothing and keeps what you offered.", "cp": 8, "tokens": 0, "tone": "bad"},
-                    "low":  {"text": "The archive does not appreciate greed at the summit. The rejection is firm and slightly embarrassing.", "cp": 5, "tokens": 0, "tone": "bad"},
+                    "high": {"text": "The archive warned you. It locks you out the moment you try both.", "cp": 12, "tokens": 25, "tone": "bad"},
+                    "mid":  {"text": "The inscription was specific. You ignored it. The archive gives you nothing.", "cp": 8, "tokens": 0, "tone": "bad"},
+                    "low":  {"text": "The archive does not appreciate greed at the summit.", "cp": 5, "tokens": 0, "tone": "bad"},
                 }
             },
         ]
@@ -1993,45 +1995,46 @@ ZONE5_EVENTS = [
         "title": "The Summit Patrol",
         "image": "zone5_e9",
         "scene": (
-            "Two large Apex Guardians — automated defense constructs — are running a patrol route across the summit path. "
-            "They move in a predictable figure-eight pattern. "
-            "Their scan radius is tight, but their response is not."
+            "Two large Apex Guardians run a patrol route across the summit path. "
+            "They move in a figure-eight. "
+            "The outer edges of the pattern are where they spend the least time — "
+            "they accelerate through the curves and slow at the center crossing."
         ),
         "stat": "INS",
         "trait_text": {
-            "VLT": "The Guardians' scanners flag elevated charge signatures. You're definitely in their range.",
+            "VLT": "The Guardians' scanners flag elevated charge signatures. You're in their range.",
             "INS": "Their electrostatic scanners struggle with well-insulated Zappies. You're harder to detect.",
-            "SPK": "You've mapped their route already. Nineteen seconds between crossings at the narrow gap.",
+            "SPK": "They slow at the center crossing. That means the outer edges are moving fast — brief windows.",
         },
         "question": {
-            "prompt": "The Guardians run a figure-eight pattern. Where's the safest crossing point?",
-            "answers": ["The center of the eight — both paths cross there but briefly", "The outer edges — farthest from their turning points", "Directly behind them — following their path"],
-            "correct": 1,
+            "prompt": "The Guardians slow at the center crossing and accelerate through the outer curves. Where's the safest place to cross?",
+            "answers": ["The outer edges — they move through fast, creating brief gaps", "The center crossing — they're slowest there, easier to time", "Directly behind them — match their speed and follow"],
+            "correct": 0,
         },
         "choices": [
             {
                 "label": "🕵️ Slip through unseen",
                 "outcomes": {
-                    "high": {"text": "You read the pattern perfectly, slip through the outer edge gap, and cross without a single scan pinging you. Textbook stealth at the summit.", "cp": 258, "tokens": 808, "tone": "good"},
-                    "mid":  {"text": "One scanner clips you on the exit. Not a full hit — they recalibrate and you're already gone.", "cp": 168, "tokens": 470, "tone": "neutral"},
-                    "low":  {"text": "Both Guardians converge. You take their full attention. It hurts. You still make it past.", "cp": 50, "tokens": 68, "tone": "bad"},
+                    "high": {"text": "You use the outer edge gap perfectly. Not a single scan pings you.", "cp": 258, "tokens": 808, "tone": "good"},
+                    "mid":  {"text": "One scanner clips you on exit. Not a full hit — they recalibrate and you're gone.", "cp": 168, "tokens": 470, "tone": "neutral"},
+                    "low":  {"text": "Both Guardians converge. You take their full attention and still make it past.", "cp": 50, "tokens": 68, "tone": "bad"},
                 }
             },
             {
                 "label": "⚡ Overload their systems",
                 "outcomes": {
-                    "high": {"text": "A precise charge pulse fries both Guardians' scanners simultaneously. They patrol blind while you cross freely. You collect their disabled components.", "cp": 265, "tokens": 828, "tone": "good"},
-                    "mid":  {"text": "You fry one Guardian's scanner. The other still sees you. Tense crossing but you make it.", "cp": 170, "tokens": 475, "tone": "neutral"},
-                    "low":  {"text": "Your pulse alerts both Guardians instead of disabling them. They are now very aware of you.", "cp": 45, "tokens": 62, "tone": "bad"},
+                    "high": {"text": "A precise pulse fries both scanners simultaneously. They patrol blind while you cross freely.", "cp": 265, "tokens": 828, "tone": "good"},
+                    "mid":  {"text": "You fry one Guardian's scanner. The other still sees you. Tense but you make it.", "cp": 170, "tokens": 475, "tone": "neutral"},
+                    "low":  {"text": "Your pulse alerts both Guardians instead of disabling them.", "cp": 45, "tokens": 62, "tone": "bad"},
                 }
             },
             {
                 "label": "🚶 Just walk through confidently",
                 "trap": True,
                 "outcomes": {
-                    "high": {"text": "Surprisingly, confidence doesn't fool automated constructs. Their scanners trigger regardless. You are not the protagonist of a heist movie.", "cp": 15, "tokens": 25, "tone": "bad"},
-                    "mid":  {"text": "The Guardians flag you immediately. You run. They're slower than expected. You make it but you dropped something.", "cp": 22, "tokens": 15, "tone": "bad"},
-                    "low":  {"text": "Both Guardians are on you in seconds. The summit does not reward bluster.", "cp": 8, "tokens": 0, "tone": "bad"},
+                    "high": {"text": "Confidence doesn't fool automated constructs. Their scanners trigger regardless.", "cp": 15, "tokens": 25, "tone": "bad"},
+                    "mid":  {"text": "The Guardians flag you immediately. You run. They're slower than expected.", "cp": 22, "tokens": 15, "tone": "bad"},
+                    "low":  {"text": "Both Guardians are on you in seconds.", "cp": 8, "tokens": 0, "tone": "bad"},
                 }
             },
         ]
@@ -2040,44 +2043,45 @@ ZONE5_EVENTS = [
         "title": "The Whiteout",
         "image": "zone5_e10",
         "scene": (
-            "A sudden whiteout — pure electrical fog — drops visibility to zero. "
-            "You can hear the summit cache somewhere in this. You can feel it. "
-            "Moving blind at the Apex is not recommended but here you are."
+            "A sudden electrical fog drops visibility to zero. "
+            "You can't see — but you can feel. "
+            "Objects with stored charge show up as faint warmth in your perception. "
+            "The cache is out there somewhere."
         ),
         "stat": "INS",
         "trait_text": {
-            "VLT": "Your charge acts like a sensor — objects with residual electricity show up as heat in your perception.",
-            "INS": "The fog has charge density that would saturate an uninsulated Zappy in seconds. You're fine.",
-            "SPK": "You've navigated by feeling before. The cache has a distinctive hum if you're quiet enough.",
+            "VLT": "Every charged object within twenty feet registers as heat against your skin.",
+            "INS": "The fog has charge density that would saturate an uninsulated Zappy fast. You're fine.",
+            "SPK": "You've navigated by feeling before. Be quiet enough and the cache hums.",
         },
         "question": {
-            "prompt": "You're navigating an electrical whiteout. Which sense is most useful to a Zappy in zero visibility?",
-            "answers": ["Charge sensitivity — feeling electrical gradients in the environment", "Sound — echoes off charged surfaces", "Memory — you mapped the area before the fog hit"],
+            "prompt": "You can feel charged objects as faint warmth through the fog. The cache has stored charge. What's the most direct way to find it?",
+            "answers": ["Stand still and rotate slowly — map the warmth sources before moving", "Move fast in a straight line and adjust when you feel something", "Shout and listen for echo — sound works when sight doesn't"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "⚡ Navigate by charge",
                 "outcomes": {
-                    "high": {"text": "Your charge sensitivity paints a complete picture of the summit through the fog. You walk directly to the cache without a single wrong step.", "cp": 262, "tokens": 820, "tone": "good"},
+                    "high": {"text": "Your charge sensitivity maps the summit through the fog. You walk directly to the cache without a single wrong step.", "cp": 262, "tokens": 820, "tone": "good"},
                     "mid":  {"text": "Your charge sense is good but not perfect in a whiteout. You find the cache on the second attempt.", "cp": 168, "tokens": 470, "tone": "neutral"},
-                    "low":  {"text": "The fog interferes with your charge reading. You find the cache eventually, after finding several things that weren't the cache.", "cp": 52, "tokens": 72, "tone": "neutral"},
+                    "low":  {"text": "The fog interferes with your reading. You find the cache eventually, after finding several things that weren't it.", "cp": 52, "tokens": 72, "tone": "neutral"},
                 }
             },
             {
                 "label": "🧭 Move in a spiral",
                 "outcomes": {
-                    "high": {"text": "Methodical spiral sweep. You cover the entire area systematically and find not just the main cache but two smaller ones the fog had been hiding.", "cp": 270, "tokens": 845, "tone": "good"},
-                    "mid":  {"text": "The spiral works. You find the cache on your second loop. Takes time but gets the job done.", "cp": 165, "tokens": 462, "tone": "neutral"},
+                    "high": {"text": "Methodical spiral. You cover the area systematically and find not just the main cache but two smaller ones the fog was hiding.", "cp": 270, "tokens": 845, "tone": "good"},
+                    "mid":  {"text": "The spiral works. You find the cache on your second loop.", "cp": 165, "tokens": 462, "tone": "neutral"},
                     "low":  {"text": "Your spiral goes wide. You exit the fog without finding anything and have to re-enter.", "cp": 45, "tokens": 60, "tone": "neutral"},
                 }
             },
             {
                 "label": "🛑 Wait for it to clear",
                 "outcomes": {
-                    "high": {"text": "You wait. Patiently. The whiteout clears after exactly ninety seconds and you walk directly to the cache in clear air.", "cp": 248, "tokens": 772, "tone": "good"},
-                    "mid":  {"text": "You wait a while. The fog thins enough to navigate. You find the cache safely.", "cp": 155, "tokens": 432, "tone": "neutral"},
-                    "low":  {"text": "The whiteout doesn't clear. You're still waiting when it starts to get worse.", "cp": 40, "tokens": 55, "tone": "bad"},
+                    "high": {"text": "You wait. The whiteout clears after ninety seconds and you walk directly to the cache in clear air.", "cp": 248, "tokens": 772, "tone": "good"},
+                    "mid":  {"text": "You wait. The fog thins enough to navigate. You find the cache safely.", "cp": 155, "tokens": 432, "tone": "neutral"},
+                    "low":  {"text": "The whiteout doesn't clear. You're still waiting when it starts getting worse.", "cp": 40, "tokens": 55, "tone": "bad"},
                 }
             },
         ]
@@ -2086,45 +2090,45 @@ ZONE5_EVENTS = [
         "title": "The Altitude Sickness",
         "image": "zone5_e11",
         "scene": (
-            "The Apex atmosphere is thinly charged — most Zappies feel the effect eventually. "
-            "Your systems are flickering slightly. "
-            "Push through or address it before something important stops working."
+            "The Apex atmosphere runs thin on charge. "
+            "Your systems are flickering — output dropping, perception narrowing. "
+            "You have two options: stop and stabilize, or push through and risk your systems locking up entirely."
         ),
         "stat": "INS",
         "trait_text": {
-            "VLT": "Your high VLT means the thin charge density is starving your system more than most.",
+            "VLT": "High VLT burns through thin charge density faster than lower-output Zappies. You're feeling it more.",
             "INS": "Your insulation has been managing this since Zone 4. You're showing the strain but holding.",
-            "SPK": "You know exactly what's happening and exactly how long you have before it becomes a real problem.",
+            "SPK": "You know exactly what's happening and how long you have before it becomes unrecoverable.",
         },
         "question": {
-            "prompt": "You're experiencing altitude sickness at the Apex. What's the correct immediate response?",
-            "answers": ["Reduce output, conserve charge, stabilize before pushing on", "Increase output to compensate for thin charge density", "Ignore it and push through — mind over matter"],
+            "prompt": "Your systems are flickering and output is dropping. Pushing through risks full lockup. Stopping means losing time. Which risk is worse?",
+            "answers": ["Full lockup — you can't recover mid-run, lost time you can recover from", "Lost time — at the summit, time equals missed caches", "They're equal risks — flip a coin"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "🛑 Stop and stabilize",
                 "outcomes": {
-                    "high": {"text": "You stop, reduce output, and let your systems rebalance. Two minutes later you're fully functional and moving again — faster than if you'd pushed through.", "cp": 245, "tokens": 762, "tone": "good"},
+                    "high": {"text": "You stop, reduce output, and let your systems rebalance. Two minutes later you're fully functional and faster than if you'd pushed through.", "cp": 245, "tokens": 762, "tone": "good"},
                     "mid":  {"text": "Stabilization takes longer than expected but works. You continue with steady systems.", "cp": 158, "tokens": 440, "tone": "neutral"},
-                    "low":  {"text": "You stabilize partially. Your systems are still flickering but manageable. Press on carefully.", "cp": 52, "tokens": 72, "tone": "neutral"},
+                    "low":  {"text": "You stabilize partially. Systems still flickering but manageable.", "cp": 52, "tokens": 72, "tone": "neutral"},
                 }
             },
             {
                 "label": "💊 Use an emergency charge",
                 "outcomes": {
-                    "high": {"text": "Your emergency charge tops you up to full. The altitude sickness clears. You feel artificially excellent and completely fine with it.", "cp": 252, "tokens": 788, "tone": "good"},
-                    "mid":  {"text": "The emergency charge helps. You're not at full but you're functional.", "cp": 162, "tokens": 452, "tone": "neutral"},
-                    "low":  {"text": "You don't have an emergency charge. You knew this. You check anyway. Nothing.", "cp": 45, "tokens": 62, "tone": "neutral"},
+                    "high": {"text": "Your emergency charge tops you up to full. The altitude sickness clears. You feel artificially excellent.", "cp": 252, "tokens": 788, "tone": "good"},
+                    "mid":  {"text": "The emergency charge helps. Not at full but functional.", "cp": 162, "tokens": 452, "tone": "neutral"},
+                    "low":  {"text": "You don't have an emergency charge. You knew this. You check anyway.", "cp": 45, "tokens": 62, "tone": "neutral"},
                 }
             },
             {
                 "label": "🏃 Push through it",
                 "trap": True,
                 "outcomes": {
-                    "high": {"text": "Pushing through altitude sickness is never the right call. Your systems redline and you lose significant output for the rest of the run.", "cp": 30, "tokens": 20, "tone": "bad"},
-                    "mid":  {"text": "You push through and your systems partially fail. What should have been a good outcome becomes a bad one.", "cp": 20, "tokens": 12, "tone": "bad"},
-                    "low":  {"text": "You collapse briefly. You wake up having lost ground. The altitude does not negotiate.", "cp": 8, "tokens": 0, "tone": "bad"},
+                    "high": {"text": "Pushing through altitude sickness locks your systems. What should have been a good beat becomes a bad one.", "cp": 30, "tokens": 20, "tone": "bad"},
+                    "mid":  {"text": "Your systems partially fail mid-push. You lose significant output.", "cp": 20, "tokens": 12, "tone": "bad"},
+                    "low":  {"text": "Full lockup. You recover but you've lost ground you won't get back.", "cp": 8, "tokens": 0, "tone": "bad"},
                 }
             },
         ]
@@ -2133,44 +2137,44 @@ ZONE5_EVENTS = [
         "title": "The Old Campsite",
         "image": "zone5_e12",
         "scene": (
-            "A long-abandoned campsite sits on a sheltered ledge near the summit. "
-            "Previous expedition teams left equipment here. "
-            "Most of it is still functional — they left in a hurry."
+            "A long-abandoned campsite on a sheltered ledge. "
+            "A meal was left half-eaten. Equipment sits open mid-use. "
+            "The navigation unit is still on — still displaying a route."
         ),
         "stat": "SPK",
         "trait_text": {
             "VLT": "The abandoned charging array still has power. Not much, but yours if you want it.",
-            "INS": "You can tell from the equipment condition exactly how long ago someone was here.",
-            "SPK": "The camp was left mid-meal. Whatever made them leave, it happened fast.",
+            "INS": "The equipment condition tells you exactly how long ago someone was here.",
+            "SPK": "Half-eaten meal, open equipment, nav unit still running. They didn't choose to leave.",
         },
         "question": {
-            "prompt": "The campsite was abandoned mid-meal. What's the most valuable thing a previous team would leave behind in a hasty exit?",
-            "answers": ["Navigation data still loaded in their equipment", "Food and water supplies", "Spare insulation components"],
+            "prompt": "The nav unit is still on and displaying a route. The meal is half-eaten. What's the most useful thing this camp offers?",
+            "answers": ["The nav unit's active route — someone plotted a course through this summit recently", "The food supplies — calories matter at altitude", "The charging array — power is always useful"],
             "correct": 0,
         },
         "choices": [
             {
-                "label": "📡 Check their equipment",
+                "label": "📡 Check the nav unit",
                 "outcomes": {
-                    "high": {"text": "Their nav system is still running. It has a complete map of the summit's current cache locations — updated more recently than anything you're carrying.", "cp": 255, "tokens": 800, "tone": "good"},
-                    "mid":  {"text": "Their equipment has partial data — enough to narrow your search area significantly.", "cp": 165, "tokens": 462, "tone": "good"},
-                    "low":  {"text": "The equipment is password locked. Standard security. You get nothing from it.", "cp": 48, "tokens": 65, "tone": "neutral"},
+                    "high": {"text": "The nav unit has a complete map of the summit's current cache locations — updated more recently than anything you're carrying.", "cp": 255, "tokens": 800, "tone": "good"},
+                    "mid":  {"text": "Partial data — enough to narrow your search area significantly.", "cp": 165, "tokens": 462, "tone": "good"},
+                    "low":  {"text": "The nav unit is password locked. You get nothing.", "cp": 48, "tokens": 65, "tone": "neutral"},
                 }
             },
             {
                 "label": "🎒 Take the supplies",
                 "outcomes": {
-                    "high": {"text": "The supplies are premium grade — expedition-class charge packs, top-tier insulation patches, and a field kit worth more than most runs. All yours.", "cp": 250, "tokens": 782, "tone": "good"},
-                    "mid":  {"text": "Good supplies. Charge packs and some useful tools. The team won't be coming back for them.", "cp": 158, "tokens": 440, "tone": "neutral"},
+                    "high": {"text": "Premium grade supplies — expedition-class charge packs, insulation patches, field kit worth more than most runs. All yours.", "cp": 250, "tokens": 782, "tone": "good"},
+                    "mid":  {"text": "Good supplies. Charge packs and useful tools.", "cp": 158, "tokens": 440, "tone": "neutral"},
                     "low":  {"text": "Most supplies are expired or spent. You find one useful item.", "cp": 55, "tokens": 78, "tone": "neutral"},
                 }
             },
             {
-                "label": "📓 Read their journal",
+                "label": "📓 Read the journal",
                 "outcomes": {
-                    "high": {"text": "The journal is a detailed run log of this team's approach. Their last entry describes a cache location they found but couldn't reach. You can reach it.", "cp": 262, "tokens": 818, "tone": "good"},
-                    "mid":  {"text": "The journal has useful observations about the summit's patterns. You take notes.", "cp": 162, "tokens": 452, "tone": "good"},
-                    "low":  {"text": "The journal is mostly weather complaints and morale notes. You feel sympathetic but learn nothing tactical.", "cp": 42, "tokens": 55, "tone": "neutral"},
+                    "high": {"text": "The last entry describes a cache location they found but couldn't reach. You can reach it.", "cp": 262, "tokens": 818, "tone": "good"},
+                    "mid":  {"text": "Useful observations about the summit's patterns. You take notes.", "cp": 162, "tokens": 452, "tone": "good"},
+                    "low":  {"text": "Mostly weather complaints and morale notes. Sympathetic but not tactical.", "cp": 42, "tokens": 55, "tone": "neutral"},
                 }
             },
         ]
@@ -2179,44 +2183,45 @@ ZONE5_EVENTS = [
         "title": "The Apex Monk",
         "image": "zone5_e13",
         "scene": (
-            "Seated cross-legged on a flat rock, completely unbothered by the storm above: "
-            "a Zappy in worn robes with a charge reading that makes your equipment stutter. "
-            "'You made it,' they say. 'Most don't. Sit with me or keep moving — both are correct.'"
+            "Seated on a flat rock, completely unbothered by the storm: "
+            "a Zappy in worn robes. "
+            "'You made it,' they say without turning. 'Most don't. Sit with me or keep moving — both are correct.' "
+            "They don't look at you when they say it."
         ),
         "stat": "SPK",
         "trait_text": {
             "VLT": "The monk's charge output dwarfs yours — and they're barely trying.",
-            "INS": "The monk notices your insulation and gives a small approving nod. Practical wisdom.",
-            "SPK": "You get the sense the monk already knows which choice you're about to make.",
+            "INS": "The monk notices your insulation and gives a small approving nod.",
+            "SPK": "They didn't turn around. They knew you were there before you arrived.",
         },
         "question": {
-            "prompt": "The Apex Monk says 'both are correct.' In Zappy expedition philosophy, what does this most likely mean?",
-            "answers": ["The value is in the decision made with intention, not the decision itself", "There's literally no difference between the two paths here", "The monk is testing whether you'll argue with them"],
+            "prompt": "The monk didn't turn around when you arrived. They said 'both are correct' before you asked anything. What does that tell you?",
+            "answers": ["They already knew what you were going to ask — listen carefully", "They're indifferent — the answer genuinely doesn't matter", "They're testing whether you'll push back on a vague answer"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "🧘 Sit with them",
                 "outcomes": {
-                    "high": {"text": "You sit. The monk says nothing for a while. Then: 'Third rock on the left face. No one checks there.' You do. They were right.", "cp": 268, "tokens": 838, "tone": "good"},
-                    "mid":  {"text": "You sit. The monk radiates calm competence. When you stand to leave, you feel steadier than you have all run.", "cp": 172, "tokens": 480, "tone": "good"},
-                    "low":  {"text": "You sit. The monk sits. Time passes. It's nice but nothing tangible happens.", "cp": 55, "tokens": 78, "tone": "neutral"},
+                    "high": {"text": "You sit. After a while the monk says one thing: 'Third rock on the left face. No one checks there.' You do. They're right.", "cp": 268, "tokens": 838, "tone": "good"},
+                    "mid":  {"text": "You sit. The monk radiates calm. When you leave you feel steadier than you have all run.", "cp": 172, "tokens": 480, "tone": "good"},
+                    "low":  {"text": "You sit. The monk sits. Time passes. It's peaceful but nothing tangible happens.", "cp": 55, "tokens": 78, "tone": "neutral"},
                 }
             },
             {
                 "label": "🏃 Keep moving",
                 "outcomes": {
-                    "high": {"text": "You press on. As you pass, the monk says one word: 'Left.' The left path has a cache you would have walked past.", "cp": 262, "tokens": 818, "tone": "good"},
-                    "mid":  {"text": "You move on. The monk watches you go. You feel like you made the right call for your particular run.", "cp": 162, "tokens": 452, "tone": "neutral"},
-                    "low":  {"text": "You move on. You second-guess it the whole next section. The monk probably expected that.", "cp": 48, "tokens": 65, "tone": "neutral"},
+                    "high": {"text": "As you pass, the monk says one word: 'Left.' The left path has a cache you would have walked past.", "cp": 262, "tokens": 818, "tone": "good"},
+                    "mid":  {"text": "You move on. The monk watches you go.", "cp": 162, "tokens": 452, "tone": "neutral"},
+                    "low":  {"text": "You second-guess it the whole next section.", "cp": 48, "tokens": 65, "tone": "neutral"},
                 }
             },
             {
                 "label": "❓ Ask them a question",
                 "outcomes": {
-                    "high": {"text": "You ask about the summit's hardest section. They tell you exactly what you need to know — information that would have taken three failed runs to learn.", "cp": 272, "tokens": 852, "tone": "good"},
-                    "mid":  {"text": "They answer. Obliquely, but answerable. You take something useful from it.", "cp": 168, "tokens": 470, "tone": "good"},
-                    "low":  {"text": "They answer your question with a question. You don't have a good answer. The monk waits. You leave.", "cp": 52, "tokens": 72, "tone": "neutral"},
+                    "high": {"text": "You ask about the hardest section. They tell you exactly what you need — information that would have taken three failed runs to learn.", "cp": 272, "tokens": 852, "tone": "good"},
+                    "mid":  {"text": "They answer obliquely but it's answerable. You take something useful from it.", "cp": 168, "tokens": 470, "tone": "good"},
+                    "low":  {"text": "They answer your question with a question. You don't have a good answer. You leave.", "cp": 52, "tokens": 72, "tone": "neutral"},
                 }
             },
         ]
@@ -2226,44 +2231,44 @@ ZONE5_EVENTS = [
         "image": "zone5_e14",
         "rival": True,
         "scene": (
-            "At the final gate before the summit cache network, a familiar situation: "
-            "another Zappy is already working the lock. "
-            "They've almost got it. You just arrived."
+            "At the final gate, another Zappy is already working the lock. "
+            "They're close — thirty seconds from opening it. "
+            "The lock glows brighter the more charge is applied to it."
         ),
         "stat": "VLT",
         "trait_text": {
-            "VLT": "Your charge could force the lock faster than they can pick it.",
-            "INS": "You could wait this out — your insulation means the gate's defense mechanisms don't bother you.",
-            "SPK": "You can tell they're close. Thirty seconds from now they have it. Unless you act now.",
+            "VLT": "The lock glows brighter with more charge. You have plenty.",
+            "INS": "You could wait them out — your insulation means the gate's defense field doesn't bother you.",
+            "SPK": "They're close. Thirty seconds. The lock glows brighter with charge input. You see where this is going.",
         },
         "question": {
-            "prompt": "The rival is 30 seconds from unlocking the gate. The lock responds to charge input. What's the optimal play?",
-            "answers": ["Add your charge to the lock — combine to open it faster together", "Interrupt their attempt and start your own", "Let them open it and go through together"],
-            "correct": 2,
+            "prompt": "The lock glows brighter the more charge is applied. The rival is close to opening it. What's the fastest resolution?",
+            "answers": ["Add your charge to theirs — more charge opens it faster", "Wait for them to finish and follow through", "Force the lock with a single high burst"],
+            "correct": 0,
         },
         "choices": [
             {
                 "label": "⚡ Force the lock",
                 "outcomes": {
-                    "high": {"text": "Your VLT blows the lock open before they finish. You're through. They blink. You're both in now — the gate stays open.", "cp": 270, "tokens": 848, "tone": "good"},
-                    "mid":  {"text": "You force it open. It takes both of you through together. Awkward but functional.", "cp": 175, "tokens": 488, "tone": "neutral"},
+                    "high": {"text": "Your VLT blows it open before they finish. You're through. The gate stays open — they follow.", "cp": 270, "tokens": 848, "tone": "good"},
+                    "mid":  {"text": "You force it open. Both of you go through together. Awkward but functional.", "cp": 175, "tokens": 488, "tone": "neutral"},
                     "low":  {"text": "Your force attempt resets the lock. Now neither of you can enter for another minute.", "cp": 45, "tokens": 60, "tone": "bad"},
                 }
             },
             {
                 "label": "🤝 Help them finish",
                 "outcomes": {
-                    "high": {"text": "You add your charge to theirs. The lock opens faster than either of you expected. Inside: enough for both of you, then some. Summit math.", "cp": 278, "tokens": 872, "tone": "good"},
-                    "mid":  {"text": "You help. They're surprised. You both enter and split fairly. Turns out cooperation has good stats.", "cp": 182, "tokens": 508, "tone": "good"},
-                    "low":  {"text": "You help and they take more than their share. You let it go. The summit sees everything.", "cp": 62, "tokens": 88, "tone": "neutral"},
+                    "high": {"text": "You add your charge. The lock opens faster than either expected. Inside: enough for both. Summit math.", "cp": 278, "tokens": 872, "tone": "good"},
+                    "mid":  {"text": "You help. They're surprised. You both enter and split fairly.", "cp": 182, "tokens": 508, "tone": "good"},
+                    "low":  {"text": "You help and they take more than their share. You let it go.", "cp": 62, "tokens": 88, "tone": "neutral"},
                 }
             },
             {
                 "label": "🕐 Wait for them to finish",
                 "outcomes": {
-                    "high": {"text": "You wait. They open it, turn around, and say 'after you' — they'd been hoping someone would show up. Inside, they know where the best cache is.", "cp": 268, "tokens": 835, "tone": "good"},
-                    "mid":  {"text": "You wait. They open it and you both enter. A civil resolution.", "cp": 170, "tokens": 475, "tone": "neutral"},
-                    "low":  {"text": "You wait. They go through and the gate closes behind them. You're back to picking the lock alone.", "cp": 42, "tokens": 58, "tone": "bad"},
+                    "high": {"text": "You wait. They open it, turn around, and say 'after you' — they'd been hoping someone would show up. They know where the best cache is.", "cp": 268, "tokens": 835, "tone": "good"},
+                    "mid":  {"text": "You wait. They open it. You both enter. A civil resolution.", "cp": 170, "tokens": 475, "tone": "neutral"},
+                    "low":  {"text": "You wait. They go through and the gate closes. You're back to picking it alone.", "cp": 42, "tokens": 58, "tone": "bad"},
                 }
             },
         ]
@@ -2272,19 +2277,19 @@ ZONE5_EVENTS = [
         "title": "The Lightning Harvester",
         "image": "zone5_e15",
         "scene": (
-            "Someone left a lightning harvester up here — a device that catches summit lightning "
-            "and stores it in a collection array. "
-            "It's full. The owner clearly isn't coming back."
+            "An abandoned lightning harvester sits fully charged — six months of summit lightning stored in its array. "
+            "The release port is live. "
+            "The intake valve on the side is labeled: *MAX DRAIN RATE: 10% per minute.*"
         ),
         "stat": "VLT",
         "trait_text": {
             "VLT": "The harvester is tuned to your charge type. You could drain it directly without conversion loss.",
-            "INS": "The harvester's output port is live. Your insulation lets you handle this safely.",
-            "SPK": "The harvester's log shows it's been running for six months. That's a lot of stored lightning.",
+            "INS": "The output port is live. Your insulation lets you handle this safely.",
+            "SPK": "The label says 10% per minute. Six months of storage. Do that math before touching anything.",
         },
         "question": {
-            "prompt": "The lightning harvester is full. What's the risk of draining a full harvester too quickly?",
-            "answers": ["Surge feedback — the stored energy rebounds if drained faster than absorption rate", "The device locks — safety mechanism triggers on rapid drain", "No risk — stored energy is stable once collected"],
+            "prompt": "The label says MAX DRAIN RATE: 10% per minute. What happens if you drain it faster than that?",
+            "answers": ["Surge feedback — stored energy rebounds beyond the drain rate limit", "Nothing — labels are conservative estimates", "The device locks — safety mechanism triggers"],
             "correct": 0,
         },
         "choices": [
@@ -2292,25 +2297,25 @@ ZONE5_EVENTS = [
                 "label": "⚡ Drain it all at once",
                 "trap": True,
                 "outcomes": {
-                    "high": {"text": "Surge feedback hits you before you finish. The harvester was tuned for slow release. You absorb maybe a quarter before the feedback knocks you back.", "cp": 65, "tokens": 90, "tone": "bad"},
-                    "mid":  {"text": "You take the full surge. It's too much. Your systems redline and you lose output for this beat.", "cp": 40, "tokens": 52, "tone": "bad"},
+                    "high": {"text": "The label said 10% per minute for a reason. Surge feedback hits you before you finish.", "cp": 65, "tokens": 90, "tone": "bad"},
+                    "mid":  {"text": "You take the full surge. Your systems redline.", "cp": 40, "tokens": 52, "tone": "bad"},
                     "low":  {"text": "Six months of stored lightning all at once. Physics objects. Loudly.", "cp": 12, "tokens": 15, "tone": "bad"},
                 }
             },
             {
-                "label": "📉 Drain it slowly",
+                "label": "📉 Drain it at 10% per minute",
                 "outcomes": {
-                    "high": {"text": "You drain it at the correct rate — measured, controlled. The full collection array transfers cleanly. This is an extraordinary find.", "cp": 285, "tokens": 925, "tone": "good"},
-                    "mid":  {"text": "You drain a good portion at a safe rate. You stop before it gets risky. Still significant.", "cp": 178, "tokens": 498, "tone": "good"},
-                    "low":  {"text": "Your control rate is too conservative. You get a portion before the summit weather shifts and you have to move.", "cp": 68, "tokens": 95, "tone": "neutral"},
+                    "high": {"text": "You drain at exactly the rated speed. The full array transfers cleanly. An extraordinary find.", "cp": 285, "tokens": 925, "tone": "good"},
+                    "mid":  {"text": "You drain a good portion at the safe rate before needing to move.", "cp": 178, "tokens": 498, "tone": "good"},
+                    "low":  {"text": "Your control rate is too conservative even for the limit. You get less than you should have.", "cp": 68, "tokens": 95, "tone": "neutral"},
                 }
             },
             {
                 "label": "🔧 Reprogram it to follow you",
                 "outcomes": {
-                    "high": {"text": "You reprogram the harvester to feed directly to your charge system passively. It powers you through the rest of the summit run.", "cp": 275, "tokens": 895, "tone": "good"},
-                    "mid":  {"text": "Partial reprogram. It follows you for a while before losing sync. Still got a good charge out of it.", "cp": 168, "tokens": 470, "tone": "neutral"},
-                    "low":  {"text": "Your reprogramming wipes its stored charge in the process. The array is now empty and not speaking to you.", "cp": 45, "tokens": 62, "tone": "bad"},
+                    "high": {"text": "You reprogram the harvester to feed your charge system passively. It powers you through the rest of the run.", "cp": 275, "tokens": 895, "tone": "good"},
+                    "mid":  {"text": "Partial reprogram. It follows you for a while before losing sync.", "cp": 168, "tokens": 470, "tone": "neutral"},
+                    "low":  {"text": "Your reprogramming wipes its stored charge. The array is empty and not speaking to you.", "cp": 45, "tokens": 62, "tone": "bad"},
                 }
             },
         ]
@@ -2319,43 +2324,43 @@ ZONE5_EVENTS = [
         "title": "The Summit Weather Station",
         "image": "zone5_e16",
         "scene": (
-            "A functioning weather station at the summit edge sends real-time data down to the expedition zones below. "
-            "You can see exactly where the storm is, where the charge surges will hit, and where they won't. "
-            "This is information most Zappies would give a lot for."
+            "A functioning weather station at the summit edge. Real-time data: "
+            "charge surge incoming from the northwest in 45 seconds. "
+            "The station map shows the surge follows the ridge line — northwest to southeast."
         ),
         "stat": "SPK",
         "trait_text": {
             "VLT": "The station tracks charge output across the whole expedition. Your reading shows up on the board.",
-            "INS": "The storm data shows exactly where an insulated Zappy has an advantage. You know this already.",
-            "SPK": "You can read the forecast and see three moves ahead. The summit is talking to you.",
+            "INS": "The surge data shows where insulation is an advantage. You already know this.",
+            "SPK": "Northwest to southeast along the ridge. The station just told you exactly where not to be.",
         },
         "question": {
-            "prompt": "The weather station shows a charge surge incoming from the northwest in 45 seconds. Where's the safest position?",
-            "answers": ["Southeast side of the summit — charge surges follow the ridge line northwest to southeast", "The highest point — surges ground themselves at the apex", "Inside any enclosed structure — surge doesn't penetrate"],
+            "prompt": "Surge incoming from the northwest, following the ridge line northwest to southeast. Where do you stand?",
+            "answers": ["Off the ridge entirely — the surge tracks the ridge, not open ground", "Southeast end — you'll see it coming", "Northwest — meet it head-on and absorb it"],
             "correct": 0,
         },
         "choices": [
             {
-                "label": "📊 Use the forecast data",
+                "label": "📊 Use the forecast",
                 "outcomes": {
-                    "high": {"text": "The forecast is precise. You position yourself for every charge surge, absorbing the ones you can, avoiding the ones you can't. Optimal run.", "cp": 265, "tokens": 830, "tone": "good"},
-                    "mid":  {"text": "You use the forecast to dodge the worst of the incoming weather. Still take one hit but avoided three.", "cp": 172, "tokens": 480, "tone": "good"},
-                    "low":  {"text": "The forecast data is harder to parse than it looks. You misread one key chart and walk into a surge.", "cp": 52, "tokens": 72, "tone": "neutral"},
+                    "high": {"text": "The forecast is precise. You position for every surge, absorbing what you can, avoiding what you can't. Optimal run.", "cp": 265, "tokens": 830, "tone": "good"},
+                    "mid":  {"text": "You dodge the worst incoming weather. Still take one hit but avoided three.", "cp": 172, "tokens": 480, "tone": "good"},
+                    "low":  {"text": "The data is harder to parse than it looks. You misread one chart and walk into a surge.", "cp": 52, "tokens": 72, "tone": "neutral"},
                 }
             },
             {
                 "label": "📡 Broadcast it to other runners",
                 "outcomes": {
-                    "high": {"text": "You broadcast the data on a shared channel. Three other Zappies hear it and send you a share of their cache finds as thanks. Generosity scales.", "cp": 258, "tokens": 808, "tone": "good"},
-                    "mid":  {"text": "You broadcast it. Someone acknowledges. They send you a small thank-you cache.", "cp": 162, "tokens": 452, "tone": "good"},
-                    "low":  {"text": "You broadcast it. No one responds. The data was useful to someone, somewhere. Probably.", "cp": 52, "tokens": 72, "tone": "neutral"},
+                    "high": {"text": "You broadcast the data. Three other Zappies hear it and send you a share of their finds as thanks.", "cp": 258, "tokens": 808, "tone": "good"},
+                    "mid":  {"text": "You broadcast it. Someone acknowledges with a small thank-you cache.", "cp": 162, "tokens": 452, "tone": "good"},
+                    "low":  {"text": "You broadcast it. No response. Useful to someone somewhere.", "cp": 52, "tokens": 72, "tone": "neutral"},
                 }
             },
             {
                 "label": "🔒 Keep it to yourself",
                 "outcomes": {
-                    "high": {"text": "You use every piece of data to optimize your own run. Purely tactical. The summit doesn't judge you for it. Your run total reflects it clearly.", "cp": 262, "tokens": 820, "tone": "good"},
-                    "mid":  {"text": "You use it well. Good run. You arrive at the next beat with a tangible edge.", "cp": 165, "tokens": 462, "tone": "neutral"},
+                    "high": {"text": "You use every piece to optimize your own run. The summit doesn't judge you. Your total reflects it.", "cp": 262, "tokens": 820, "tone": "good"},
+                    "mid":  {"text": "You use it well. Good run. Tangible edge on the next beat.", "cp": 165, "tokens": 462, "tone": "neutral"},
                     "low":  {"text": "You keep the data but don't use it efficiently. The advantage stays theoretical.", "cp": 50, "tokens": 68, "tone": "neutral"},
                 }
             },
@@ -2366,48 +2371,283 @@ ZONE5_EVENTS = [
         "image": "zone5_e17",
         "scene": (
             "A grandfather clock stands on the summit, fully exposed to the elements. "
-            "It is frozen at a specific time — 11:47. "
-            "It has been this way, according to the carved note at its base, for longer than anyone can remember."
+            "Frozen at 11:47. "
+            "The mechanism is still live — running on stored charge. "
+            "Something stopped it. The charge didn't."
         ),
         "stat": None,
         "trait_text": {
-            "VLT": "The clock's internal mechanism is still live — running on stored charge, frozen by something else.",
-            "INS": "The clock is unaffected by the summit weather. Something is protecting it.",
-            "SPK": "11:47 means something. You've seen this number in the expedition system before.",
+            "VLT": "The internal mechanism is still live — running on stored charge, frozen by something else.",
+            "INS": "Something is protecting this clock from the summit weather. It should be destroyed by now.",
+            "SPK": "The mechanism runs. The clock doesn't move. Those two facts together mean one thing.",
         },
         "question": {
-            "prompt": "The frozen clock reads 11:47 and a carved note says it has been this way for longer than anyone remembers. In Zappy lore, what time does 11:47 represent?",
-            "answers": ["The moment of the First Surge — the founding event of the expedition zones", "The last time the summit was ever empty of visitors", "The time of day the Apex Gatekeeper was first assigned"],
+            "prompt": "The mechanism is still live and running on stored charge — but the clock is frozen. What stopped it?",
+            "answers": ["Something external blocked the hands — the mechanism never failed", "The charge ran out and was recently restored but the time was lost", "It stopped itself — a failsafe triggered at 11:47"],
             "correct": 0,
         },
         "choices": [
             {
                 "label": "🕰️ Wind the clock",
                 "outcomes": {
-                    "high": {"text": "You wind it. It ticks forward from 11:47 for the first time in recorded history. The summit shudders slightly, then releases something it had been holding.", "cp": 280, "tokens": 910, "tone": "good"},
+                    "high": {"text": "You find what's blocking the hands and remove it. The clock ticks forward from 11:47 for the first time in recorded history. The summit shudders and releases something.", "cp": 280, "tokens": 910, "tone": "good"},
                     "mid":  {"text": "You wind it. It ticks once, then stops again. Something shifted but didn't fully release.", "cp": 175, "tokens": 490, "tone": "neutral"},
-                    "low":  {"text": "You wind it. Nothing happens. The clock stops at 11:47 again. Some things stay frozen.", "cp": 55, "tokens": 78, "tone": "neutral"},
+                    "low":  {"text": "You wind it. Nothing. The clock stops at 11:47 again.", "cp": 55, "tokens": 78, "tone": "neutral"},
                 }
             },
             {
-                "label": "🔍 Study the mechanism",
+                "label": "🔍 Find what's blocking it",
                 "outcomes": {
-                    "high": {"text": "The mechanism is extraordinary — it contains a map of the entire expedition network in its gearwork. Miniaturized, complete, current. You copy it.", "cp": 268, "tokens": 838, "tone": "good"},
-                    "mid":  {"text": "You find a hidden compartment in the clock's base. Old supplies, still good.", "cp": 170, "tokens": 475, "tone": "good"},
-                    "low":  {"text": "It's a clock. The mechanism is fascinating but ultimately just keeps non-time.", "cp": 50, "tokens": 68, "tone": "neutral"},
+                    "high": {"text": "You locate the obstruction — a small compartment jammed against the gears. Inside: a map of the entire expedition network, miniaturized in the gearwork.", "cp": 268, "tokens": 838, "tone": "good"},
+                    "mid":  {"text": "You find the obstruction and a hidden compartment in the base. Old supplies, still good.", "cp": 170, "tokens": 475, "tone": "good"},
+                    "low":  {"text": "You can't find what's blocking it. The mechanism is intricate beyond your tools.", "cp": 50, "tokens": 68, "tone": "neutral"},
                 }
             },
             {
                 "label": "🚶 Leave it alone",
                 "outcomes": {
-                    "high": {"text": "You leave it. Sometimes the right move at the summit is to recognize what isn't yours to change. The clock seems to understand and grants you passage through a section that was blocked.", "cp": 258, "tokens": 808, "tone": "good"},
-                    "mid":  {"text": "You leave it frozen at 11:47. Some things are meant to stay as they are. You feel good about this.", "cp": 160, "tokens": 448, "tone": "neutral"},
+                    "high": {"text": "You leave it frozen. The clock seems to understand — a path through a blocked section opens ahead of you.", "cp": 258, "tokens": 808, "tone": "good"},
+                    "mid":  {"text": "You leave it. Some things stay frozen for a reason.", "cp": 160, "tokens": 448, "tone": "neutral"},
                     "low":  {"text": "You leave it. You wonder for a long time whether you should have.", "cp": 48, "tokens": 65, "tone": "neutral"},
                 }
             },
         ]
     },
+    # ── 8 NEW EVENTS ──────────────────────────────────────────────
+    {
+        "title": "The Charge Siphon",
+        "image": "zone5_e18",
+        "scene": (
+            "A siphon device is embedded in the summit rock, slowly drawing charge from the surrounding area. "
+            "Your own charge level is dropping — slowly but measurably. "
+            "The siphon feeds into a sealed container nearby. The container is nearly full."
+        ),
+        "stat": "VLT",
+        "trait_text": {
+            "VLT": "You can feel your charge dropping about 1% per minute. Whoever built this was patient.",
+            "INS": "Your insulation is slowing the drain. Without it you'd already be at half capacity.",
+            "SPK": "Nearly full container, slow drain rate. This has been running a long time. Someone planned to come back.",
+        },
+        "question": {
+            "prompt": "Your charge is draining slowly into the siphon. The container is nearly full. What's the fastest way to stop the drain?",
+            "answers": ["Disconnect the siphon from the rock — cut the source, not the container", "Seal the container — when it's full the siphon stops", "Move away — the siphon has a limited range"],
+            "correct": 0,
+        },
+        "choices": [
+            {
+                "label": "🔌 Disconnect the siphon",
+                "outcomes": {
+                    "high": {"text": "You pull the siphon from the rock cleanly. The drain stops. The container — now yours — holds a significant charge collection.", "cp": 270, "tokens": 858, "tone": "good"},
+                    "mid":  {"text": "You disconnect it. Drain stops. You take the container, partially full.", "cp": 172, "tokens": 480, "tone": "good"},
+                    "low":  {"text": "Disconnecting it releases the stored charge in a burst. You absorb some but not all.", "cp": 65, "tokens": 90, "tone": "neutral"},
+                }
+            },
+            {
+                "label": "📦 Take the container",
+                "outcomes": {
+                    "high": {"text": "You take the full container before the siphon can drain more. Six months of collected summit charge. Extremely valuable.", "cp": 278, "tokens": 880, "tone": "good"},
+                    "mid":  {"text": "You grab it quickly. The siphon keeps running against open air while you move away.", "cp": 168, "tokens": 470, "tone": "neutral"},
+                    "low":  {"text": "The container is sealed and heavier than it looks. You fumble it and lose some in the transfer.", "cp": 58, "tokens": 78, "tone": "neutral"},
+                }
+            },
+            {
+                "label": "🏃 Just move away from it",
+                "trap": True,
+                "outcomes": {
+                    "high": {"text": "The siphon's range is the whole summit. Moving away accomplishes nothing. You lose more charge just walking.", "cp": 20, "tokens": 15, "tone": "bad"},
+                    "mid":  {"text": "You move. The drain slows slightly but doesn't stop. You've lost time and charge.", "cp": 15, "tokens": 10, "tone": "bad"},
+                    "low":  {"text": "There is no edge of the siphon range on the summit. You drain the entire way.", "cp": 8, "tokens": 0, "tone": "bad"},
+                }
+            },
+        ]
+    },
+    {
+        "title": "The Collapsed Bridge",
+        "image": "zone5_e19",
+        "scene": (
+            "The bridge across a summit gap has partially collapsed. "
+            "Two of the five support cables remain intact. "
+            "The gap is about twenty feet. The drop is significant."
+        ),
+        "stat": "INS",
+        "trait_text": {
+            "VLT": "You could arc-jump the gap entirely if your charge is high enough.",
+            "INS": "The remaining cables are still live. Your insulation means you can use them as handholds.",
+            "SPK": "Two cables out of five. The weight distribution shifts to those two. Don't stand in the middle.",
+        },
+        "question": {
+            "prompt": "Two of five support cables remain. The bridge can still hold weight — but not evenly distributed. Where do you walk?",
+            "answers": ["Close to the remaining cables — that's where the load is supported", "Dead center — traditional bridge weight distribution", "The edges — farthest from the point of failure"],
+            "correct": 0,
+        },
+        "choices": [
+            {
+                "label": "🌉 Cross carefully",
+                "outcomes": {
+                    "high": {"text": "You hug the cable lines perfectly. The bridge holds. You cross in twelve seconds without a creak.", "cp": 255, "tokens": 800, "tone": "good"},
+                    "mid":  {"text": "You cross near the cables. It sways but holds. You make it.", "cp": 162, "tokens": 452, "tone": "neutral"},
+                    "low":  {"text": "You drift toward center. The bridge protests loudly. You scramble across and make it.", "cp": 50, "tokens": 68, "tone": "bad"},
+                }
+            },
+            {
+                "label": "⚡ Arc-jump the gap",
+                "outcomes": {
+                    "high": {"text": "Your charge builds into an arc-jump and you clear the entire gap cleanly. The bridge collapses behind you as you land. Dramatic.", "cp": 268, "tokens": 838, "tone": "good"},
+                    "mid":  {"text": "Your arc gets you most of the way. You catch the far edge and pull yourself up.", "cp": 165, "tokens": 462, "tone": "neutral"},
+                    "low":  {"text": "Your charge isn't quite there. You fall short and have to find another way.", "cp": 45, "tokens": 60, "tone": "bad"},
+                }
+            },
+            {
+                "label": "🔧 Repair the cables first",
+                "outcomes": {
+                    "high": {"text": "You patch two more cables with summit wire you find nearby. The bridge is solid. While working you find a cache in the support structure.", "cp": 275, "tokens": 870, "tone": "good"},
+                    "mid":  {"text": "You patch one cable. Enough to cross safely.", "cp": 162, "tokens": 452, "tone": "neutral"},
+                    "low":  {"text": "Your repairs take longer than the bridge can wait. It shifts mid-patch.", "cp": 48, "tokens": 65, "tone": "bad"},
+                }
+            },
+        ]
+    },
+    {
+        "title": "The Charge Echo",
+        "image": "zone5_e20",
+        "scene": (
+            "Your charge output is bouncing off the summit rock at a specific frequency — "
+            "creating an echo that comes back slightly stronger than it left. "
+            "Each echo adds about 3% to your charge. But only if you pulse at exactly the right interval."
+        ),
+        "stat": "SPK",
+        "trait_text": {
+            "VLT": "The echo resonates with your natural output. Your body already wants to pulse at that frequency.",
+            "INS": "Your insulation won't interfere here — this is about timing, not protection.",
+            "SPK": "3% per pulse. You can hear the interval. It's about two seconds. Steady, not fast.",
+        },
+        "question": {
+            "prompt": "The echo returns stronger than it left, but only at the right pulse interval. You pulse too fast and the echoes start canceling each other. What's happening?",
+            "answers": ["Destructive interference — pulses overlapping before return", "The rock is absorbing the excess energy", "Your charge level is too high to sustain the resonance"],
+            "correct": 0,
+        },
+        "choices": [
+            {
+                "label": "🎵 Match the interval",
+                "outcomes": {
+                    "high": {"text": "You pulse at exactly two seconds. The echoes stack cleanly. Your charge climbs. You sustain it long enough to gain a significant boost.", "cp": 262, "tokens": 822, "tone": "good"},
+                    "mid":  {"text": "Your timing is mostly right. You gain a partial boost before losing the rhythm.", "cp": 165, "tokens": 462, "tone": "neutral"},
+                    "low":  {"text": "Your timing is off and the echoes cancel. You gain nothing and lose a small amount.", "cp": 45, "tokens": 60, "tone": "bad"},
+                }
+            },
+            {
+                "label": "⚡ Pulse as fast as possible",
+                "trap": True,
+                "outcomes": {
+                    "high": {"text": "Fast pulses destroy the resonance immediately. The echoes cancel each other on the second pulse.", "cp": 18, "tokens": 15, "tone": "bad"},
+                    "mid":  {"text": "Destructive interference. The charge you tried to gain cancels out immediately.", "cp": 12, "tokens": 8, "tone": "bad"},
+                    "low":  {"text": "You've been told what happens when you pulse too fast. This is that.", "cp": 5, "tokens": 0, "tone": "bad"},
+                }
+            },
+            {
+                "label": "🔍 Experiment to find the interval",
+                "outcomes": {
+                    "high": {"text": "You test several intervals methodically and lock in the correct one. You sustain the resonance longer than someone guessing would.", "cp": 270, "tokens": 845, "tone": "good"},
+                    "mid":  {"text": "You find a workable interval after a few tries. Not perfect but gains something.", "cp": 162, "tokens": 452, "tone": "neutral"},
+                    "low":  {"text": "Your experiments take too long. The resonance window closes before you find it.", "cp": 45, "tokens": 60, "tone": "neutral"},
+                }
+            },
+        ]
+    },
+    {
+        "title": "The Two Paths",
+        "image": "zone5_e21",
+        "scene": (
+            "The summit trail splits. Left path: wide, clear, no obstacles visible. "
+            "Right path: narrow, rocky, with a faint charge signature emanating from somewhere ahead. "
+            "A worn marker post at the fork has an arrow scratched into it pointing right — barely visible."
+        ),
+        "stat": "SPK",
+        "trait_text": {
+            "VLT": "The charge signature on the right path is faint but real. Something is powered over there.",
+            "INS": "The left path's clearness is suspicious. The summit doesn't offer easy routes without reason.",
+            "SPK": "Someone scratched that arrow. Carefully. That took effort. That means something.",
+        },
+        "question": {
+            "prompt": "The left path is clear and easy. The right path is rocky but has a faint charge signature and a barely-visible scratched arrow. Which do you take?",
+            "answers": ["Right — the charge signature and the arrow are both pointing there", "Left — clear paths exist for a reason", "Neither — the fork itself might be hiding something"],
+            "correct": 0,
+        },
+        "choices": [
+            {
+                "label": "➡️ Take the right path",
+                "outcomes": {
+                    "high": {"text": "The rocky path leads to a charge deposit the clear path completely bypasses. The arrow was left by someone who found it the hard way.", "cp": 268, "tokens": 835, "tone": "good"},
+                    "mid":  {"text": "The right path is harder but the charge signature leads to something useful.", "cp": 165, "tokens": 462, "tone": "neutral"},
+                    "low":  {"text": "The charge signature was residual — nothing active. Rocky path, no reward.", "cp": 50, "tokens": 68, "tone": "neutral"},
+                }
+            },
+            {
+                "label": "⬅️ Take the left path",
+                "outcomes": {
+                    "high": {"text": "The clear path is fast but you notice halfway through why it's clear — nothing worth having here. You arrive on time but empty-handed.", "cp": 45, "tokens": 60, "tone": "neutral"},
+                    "mid":  {"text": "Clean, fast, uneventful. You arrive having missed whatever was on the right.", "cp": 38, "tokens": 48, "tone": "neutral"},
+                    "low":  {"text": "The clear path loops slightly longer than it looked. Time lost, nothing gained.", "cp": 25, "tokens": 30, "tone": "bad"},
+                }
+            },
+            {
+                "label": "🔍 Check the fork itself",
+                "outcomes": {
+                    "high": {"text": "You check the marker post carefully and find a small hollow in its base. A cache has been here a long time.", "cp": 275, "tokens": 870, "tone": "good"},
+                    "mid":  {"text": "The post has more markings on the back — someone's notes about both paths. You choose better for it.", "cp": 170, "tokens": 475, "tone": "good"},
+                    "low":  {"text": "Just a post. You spent time on it and now need to choose anyway.", "cp": 40, "tokens": 55, "tone": "neutral"},
+                }
+            },
+        ]
+    },
+    {
+        "title": "The Overcharged Node",
+        "image": "zone5_e22",
+        "scene": (
+            "A charge node on the summit is running at well over capacity — sparking, shaking, visibly unstable. "
+            "It will either discharge harmlessly or explode within the next few minutes. "
+            "The difference is whether the pressure has somewhere to go."
+        ),
+        "stat": "VLT",
+        "trait_text": {
+            "VLT": "You could give it somewhere to go. You're rated for this if you're careful.",
+            "INS": "Your insulation protects you from the discharge but not the shockwave if it explodes.",
+            "SPK": "Sparking, shaking, visibly pressured. The node needs a path out. That's the whole situation.",
+        },
+        "question": {
+            "prompt": "The node will explode if the pressure has nowhere to go. What does it need?",
+            "answers": ["A grounded path to discharge through — give it a direction", "Insulation around it — contain the pressure until it stabilizes", "Distance — let it discharge on its own safely"],
+            "correct": 0,
+        },
+        "choices": [
+            {
+                "label": "⚡ Absorb the discharge",
+                "outcomes": {
+                    "high": {"text": "You plant yourself and absorb the full node discharge in a controlled burst. The node stabilizes. You're supercharged and the node rewards you with its stored reserves.", "cp": 285, "tokens": 928, "tone": "good"},
+                    "mid":  {"text": "You absorb most of it. Some goes wide. The node calms down and you're significantly more charged.", "cp": 178, "tokens": 498, "tone": "good"},
+                    "low":  {"text": "You absorb what you can but it's more than expected. The overshoot staggers you.", "cp": 58, "tokens": 78, "tone": "neutral"},
+                }
+            },
+            {
+                "label": "🔌 Ground it into the rock",
+                "outcomes": {
+                    "high": {"text": "You connect the node to a natural ground point in the summit rock. The discharge flows safely and the node opens its reserve panel in thanks.", "cp": 275, "tokens": 875, "tone": "good"},
+                    "mid":  {"text": "Partial ground. The node discharges most of its overload. Stable enough to pass safely.", "cp": 168, "tokens": 470, "tone": "neutral"},
+                    "low":  {"text": "Your grounding attempt is incomplete. The node discharges anyway — not at you, but close.", "cp": 55, "tokens": 75, "tone": "neutral"},
+                }
+            },
+            {
+                "label": "🏃 Back away fast",
+                "outcomes": {
+                    "high": {"text": "You get clear in time. The node explodes harmlessly with you at safe distance. The blast scatters cached items across the nearby ground.", "cp": 250, "tokens": 782, "tone": "good"},
+                    "mid":  {"text": "You back away. The explosion is smaller than feared. You avoid it completely.", "cp": 148, "tokens": 415, "tone": "neutral"},
+                    "low":  {"text": "You don't back away fast enough. The shockwave catches you.", "cp": 42, "tokens": 58, "tone": "bad"},
+                }
+            },
+        ]
+    },
 ]
+
 
 
 # ─────────────────────────────────────────────
