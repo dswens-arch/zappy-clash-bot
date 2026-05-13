@@ -2858,53 +2858,81 @@ async def cmd_expedition_test(interaction: discord.Interaction):
         )
         return
 
-    all_zappies = ownership["zappies"] + [
-        {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"}
-        for h in ownership["heroes"]
-    ]
-    zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
+    # Pre-load stats for all Zappies so the picker can show them
+    from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+    from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
+    from zappy_collection import ZAPPY_COLLECTION
+
+    enriched_zappies = []
+    for z in all_zappies:
+        aid = z["asset_id"]
+        if aid in HERO_ASSET_IDS:
+            hero_data = get_hero_stats(HERO_ASSET_IDS[aid])
+            stats     = {k: hero_data[k] for k in ("VLT","INS","SPK")} if hero_data else {}
+            image_url = ""
+        elif aid in COLLAB_ASSET_IDS:
+            collab_data = get_collab_stats(COLLAB_ASSET_IDS[aid])
+            stats       = {k: collab_data[k] for k in ("VLT","INS","SPK")} if collab_data else {}
+            image_url   = ""
+        else:
+            entry  = ZAPPY_COLLECTION.get(aid, {})
+            traits = {k: entry[k] for k in ("background","body","earring","eyes","eyewear","head","mouth","skin") if k in entry}
+            stats  = calculate_stats(traits) if traits else {}
+            image_url = entry.get("image_url", "")
+        if stats:
+            enriched_zappies.append({**z, "stats": stats, "image_url": image_url})
+
+    if not enriched_zappies:
+        await interaction.followup.send("❌ Couldn't load stats for any of your Zappies.", ephemeral=True)
+        return
 
     await interaction.followup.send(
-        "🏔️ **Apex Summit Test** — Zone 5 mechanics only.\n"
-        "No tokens will be sent. Pick your Zappy:",
+        "🏔️ **Apex Summit Test** — Zone 5 mechanics only. No tokens sent.\n"
+        "Pick your Zappy — higher stats mean better odds on bold choices and encounters:",
         ephemeral=True,
     )
 
     async def on_zappy_selected(inter: discord.Interaction, asset_id: int):
-        zappy_data = next((z for z in all_zappies if z["asset_id"] == asset_id), None)
+        zappy_data = next((z for z in enriched_zappies if z["asset_id"] == asset_id), None)
         if not zappy_data:
             await inter.followup.send("Couldn't find that Zappy.", ephemeral=True)
             return
-
-        # Load stats the same way the real expedition does
-        from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
-        from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
-
-        if asset_id in HERO_ASSET_IDS:
-            hero_data = get_hero_stats(HERO_ASSET_IDS[asset_id])
-            stats     = {k: hero_data[k] for k in ("VLT", "INS", "SPK")} if hero_data else {}
-            image_url = ""
-        elif asset_id in COLLAB_ASSET_IDS:
-            collab_data = get_collab_stats(COLLAB_ASSET_IDS[asset_id])
-            stats       = {k: collab_data[k] for k in ("VLT", "INS", "SPK")} if collab_data else {}
-            image_url   = ""
-        else:
-            from zappy_collection import ZAPPY_COLLECTION
-            entry     = ZAPPY_COLLECTION.get(asset_id, {})
-            traits    = {k: entry[k] for k in ("background","body","earring","eyes","eyewear","head","mouth","skin") if k in entry}
-            stats     = calculate_stats(traits) if traits else {}
-            image_url = entry.get("image_url", "")
-
-        if not stats:
-            await inter.followup.send("Couldn't load stats for that Zappy.", ephemeral=True)
-            return
-
-        zappy_data = {**zappy_data, "stats": stats, "image_url": image_url}
         await _run_apex_test_beat(inter, user_id, zappy_data, zappy_count)
 
     await interaction.followup.send(
-        view=ZappySelectView(all_zappies, on_zappy_selected), ephemeral=True
+        view=ApexZappySelectView(enriched_zappies, on_zappy_selected), ephemeral=True
     )
+
+
+class ApexZappySelectView(discord.ui.View):
+    """Zappy picker for the apex test — shows VLT/INS/SPK on each button."""
+    def __init__(self, zappies: list, on_zappy_callback):
+        super().__init__(timeout=120)
+        self.callback = on_zappy_callback
+        self.chosen   = False
+        for z in zappies[:5]:
+            name  = z.get("name", z.get("unit_name", f"ASA {z['asset_id']}"))
+            stats = z.get("stats", {})
+            vlt   = stats.get("VLT", "?")
+            ins   = stats.get("INS", "?")
+            spk   = stats.get("SPK", "?")
+            label = f"{name}  ⚡{vlt} 🛡{ins} 💡{spk}"
+            btn   = discord.ui.Button(
+                label     = label[:80],
+                style     = discord.ButtonStyle.secondary,
+                custom_id = f"apex_zappy_{z['asset_id']}",
+            )
+            btn.callback = self._make_cb(z["asset_id"])
+            self.add_item(btn)
+
+    def _make_cb(self, asset_id):
+        async def cb(interaction: discord.Interaction):
+            if self.chosen: return
+            await interaction.response.defer(ephemeral=True)
+            self.chosen = True
+            for item in self.children: item.disabled = True
+            await self.callback(interaction, asset_id)
+        return cb
 
 
 async def _run_apex_test_beat(
