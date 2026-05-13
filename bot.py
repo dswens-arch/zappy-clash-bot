@@ -2842,20 +2842,27 @@ async def cmd_expedition_test(interaction: discord.Interaction):
         )
         return
 
-    try:
-        from database import get_all_zappies_for_wallet
-        all_zappies = await asyncio.to_thread(get_all_zappies_for_wallet, wallet)
-    except Exception as e:
-        all_zappies = []
-        print(f"⚠️ apex_test get_all_zappies: {e}")
+    # Mirror the real /expedition wallet verification — uses indexer cache
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+    import time as _t
+    now = _t.monotonic()
+    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+        ownership = _wallet_cache[wallet]
+    else:
+        ownership = await verify_wallet(user_id, wallet)
 
-    if not all_zappies:
+    if not ownership["owns"]:
         await interaction.followup.send(
-            "❌ No Zappies found in your wallet.", ephemeral=True
+            "❌ No Zappies found. If you just linked your wallet, wait a moment and try again.",
+            ephemeral=True,
         )
         return
 
-    zappy_count = len(all_zappies)
+    all_zappies = ownership["zappies"] + [
+        {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"}
+        for h in ownership["heroes"]
+    ]
+    zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
 
     await interaction.followup.send(
         "🏔️ **Apex Summit Test** — Zone 5 mechanics only.\n"
