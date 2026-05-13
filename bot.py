@@ -42,6 +42,12 @@ from expedition_engine import (
     start_run, get_run, end_run, advance_beat, check_nft_drop,
     build_scene_embed, build_outcome_embed, build_run_complete_embed,
     ExpeditionView, ZoneSelectView, ZappySelectView, get_collection_bonus,
+    # Zone 5 Apex Summit mechanics
+    advance_momentum_beat, start_encounter, advance_encounter_round,
+    advance_resource_beat, advance_press_luck,
+    MomentumView, EncounterView, ResourceView, PressLuckView,
+    build_momentum_scene_embed, build_encounter_intro_embed,
+    build_encounter_round_embed, build_resource_bet_embed, build_press_luck_embed,
 )
 from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from nft_rewards       import award_nft_prize, claim_nft_prize
@@ -70,6 +76,7 @@ GUILD_ID        = int(os.environ["DISCORD_GUILD_ID"])
 CLASH_CHANNEL      = int(os.environ["CLASH_CHANNEL_ID"])    # #zappy-clash channel ID
 ANNOUNCE_CHANNEL   = int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
 EXPEDITION_CHANNEL = int(os.environ["EXPEDITION_CHANNEL_ID"]) if os.environ.get("EXPEDITION_CHANNEL_ID") else None   # Optional - if not set, works anywhere
+APEX_TEST_CHANNEL  = int(os.environ["APEX_TEST_CHANNEL_ID"])  if os.environ.get("APEX_TEST_CHANNEL_ID")  else None   # Optional - test channel for /expedition_test
 
 # Session timing (UTC)
 MORNING_OPEN    = dtime(14,  0, tzinfo=timezone.utc)
@@ -2768,6 +2775,247 @@ def _load_extra_zappies():
             print(f"✅ Loaded {loaded} extra Zappies from Supabase")
     except Exception as e:
         print(f"⚠️ Could not load extra Zappies from Supabase: {e}")
+
+
+# ---------------------------------------------
+# /expedition_test — Apex Summit Zone 5 test
+# No daily lock, no token payout, no leaderboard impact.
+# Logs to apex_test_runs table in Supabase (non-fatal if missing).
+# Set APEX_TEST_CHANNEL_ID env var to restrict to a channel, or leave
+# unset to allow the command anywhere.
+# ---------------------------------------------
+
+def check_apex_test_channel(interaction: discord.Interaction) -> bool:
+    if APEX_TEST_CHANNEL is None:
+        return True
+    return interaction.channel_id == APEX_TEST_CHANNEL
+
+
+def save_apex_test_run(discord_user_id: str, run: dict):
+    try:
+        db.table("apex_test_runs").insert({
+            "discord_user_id":    discord_user_id,
+            "zone_num":           run["zone_num"],
+            "total_cp":           run["total_cp"],
+            "total_tokens":       run["total_tokens"],
+            "momentum_end":       run.get("momentum"),
+            "press_luck_gambled": run.get("press_luck_gambled", False),
+            "press_luck_won":     run.get("press_luck_won", False),
+            "nft_simulated":      run.get("nft_eligible", False),
+            "beat_types":         [e.get("beat_type", "narrative") for e in run["events"]],
+            "zappy_name":         run["zappy"].get("name", "unknown"),
+        }).execute()
+    except Exception as e:
+        print(f"⚠️ apex_test_runs insert failed (non-fatal): {e}")
+
+
+@tree.command(name="expedition_test", description="[TEST] Run the new Apex Summit mechanics — no tokens sent")
+async def cmd_expedition_test(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+
+    if not check_apex_test_channel(interaction):
+        ch_mention = f"<#{APEX_TEST_CHANNEL}>" if APEX_TEST_CHANNEL else "the test channel"
+        await interaction.followup.send(
+            f"❌ Apex test runs in {ch_mention} only.", ephemeral=True
+        )
+        return
+
+    user_id = str(interaction.user.id)
+
+    existing = get_run(user_id)
+    if existing:
+        await interaction.followup.send(
+            "⚠️ You have a run in progress. It will time out after 5 minutes of inactivity.",
+            ephemeral=True,
+        )
+        return
+
+    try:
+        wallet = await asyncio.to_thread(get_wallet, user_id)
+    except Exception as e:
+        wallet = None
+        print(f"⚠️ apex_test get_wallet: {e}")
+
+    if not wallet:
+        await interaction.followup.send(
+            "❌ No wallet linked. Use `/linkwallet` first.", ephemeral=True
+        )
+        return
+
+    try:
+        from database import get_all_zappies_for_wallet
+        all_zappies = await asyncio.to_thread(get_all_zappies_for_wallet, wallet)
+    except Exception as e:
+        all_zappies = []
+        print(f"⚠️ apex_test get_all_zappies: {e}")
+
+    if not all_zappies:
+        await interaction.followup.send(
+            "❌ No Zappies found in your wallet.", ephemeral=True
+        )
+        return
+
+    zappy_count = len(all_zappies)
+
+    await interaction.followup.send(
+        "🏔️ **Apex Summit Test** — Zone 5 mechanics only.\n"
+        "No tokens will be sent. Pick your Zappy:",
+        ephemeral=True,
+    )
+
+    async def on_zappy_selected(inter: discord.Interaction, asset_id: int):
+        zappy_data = next((z for z in all_zappies if z["asset_id"] == asset_id), None)
+        if not zappy_data:
+            await inter.followup.send("Couldn't find that Zappy.", ephemeral=True)
+            return
+        await _run_apex_test_beat(inter, user_id, zappy_data, zappy_count)
+
+    await interaction.followup.send(
+        view=ZappySelectView(all_zappies, on_zappy_selected), ephemeral=True
+    )
+
+
+async def _run_apex_test_beat(
+    interaction: discord.Interaction,
+    user_id: str,
+    zappy_data: dict,
+    zappy_count: int,
+):
+    run = start_run(user_id, 5, zappy_data, zappy_count)
+
+    async def send_next_beat(inter: discord.Interaction, run: dict):
+        if run["complete"]:
+            await finish_run(inter, run)
+            return
+
+        event      = run["events"][run["beat"]]
+        beat_type  = event.get("beat_type", "narrative")
+        image_path = f"./images/{event.get('image', '')}.png"
+        files      = [discord.File(image_path)] if os.path.exists(image_path) else []
+
+        if beat_type == "narrative":
+            embed = build_scene_embed(run)
+            view  = ExpeditionView(run, on_narrative_choice)
+            await inter.followup.send(embed=embed, view=view, files=files, ephemeral=True)
+
+        elif beat_type == "momentum":
+            embed = build_momentum_scene_embed(run)
+            view  = MomentumView(run, on_momentum_choice)
+            await inter.followup.send(embed=embed, view=view, files=files, ephemeral=True)
+
+        elif beat_type == "encounter":
+            start_encounter(user_id)
+            embed = build_encounter_intro_embed(run)
+            await inter.followup.send(embed=embed, files=files, ephemeral=True)
+            await send_encounter_round(inter, run)
+
+        elif beat_type == "resource":
+            embed = build_resource_bet_embed(run)
+            view  = ResourceView(run, on_resource_decision)
+            await inter.followup.send(embed=embed, view=view, files=files, ephemeral=True)
+
+        elif beat_type == "press_luck":
+            embed = build_press_luck_embed(run)
+            view  = PressLuckView(run, on_press_luck_decision)
+            await inter.followup.send(embed=embed, view=view, files=files, ephemeral=True)
+
+    async def send_encounter_round(inter: discord.Interaction, run: dict):
+        event  = run["events"][run["beat"]]
+        estate = run["encounter_state"]
+        rnd    = estate["round"]
+
+        round_embed = discord.Embed(
+            title       = f"⚔️ Round {rnd + 1} of 3  —  {event['guardian_name']}",
+            description = event["round_prompts"][rnd],
+            color       = 0xD85A30,
+        )
+        round_embed.add_field(
+            name  = "Score",
+            value = f"Wins: {estate['wins']}  ·  Losses: {rnd - estate['wins']}",
+            inline=False,
+        )
+        round_embed.set_footer(text="Pick which stat to use this round.")
+        await inter.followup.send(
+            embed=round_embed, view=EncounterView(run, on_encounter_round), ephemeral=True
+        )
+
+    async def finish_run(inter: discord.Interaction, run: dict):
+        nft_simulated = check_nft_drop(run)
+        save_apex_test_run(user_id, run)
+
+        final_embed = build_run_complete_embed(run, nft_drop=False)
+        final_embed.set_footer(
+            text=(
+                f"[TEST — no tokens sent] · "
+                f"Would have paid: {run['total_tokens']} tokens · "
+                f"NFT roll: {'🎉 WOULD HAVE TRIGGERED' if nft_simulated else 'did not trigger'}"
+            )
+        )
+        await inter.followup.send(embed=final_embed, ephemeral=True)
+
+        beat_order = " → ".join(e.get("beat_type", "?") for e in run["events"])
+        await inter.followup.send(
+            f"**Test summary:**\n"
+            f"`{beat_order}`\n"
+            f"Tokens: **{run['total_tokens']}** · CP: **{run['total_cp']}** · "
+            f"Momentum: **{run.get('momentum', 'N/A')}**\n"
+            f"Gambled: {run.get('press_luck_gambled')} · "
+            f"Won: {run.get('press_luck_won')} · "
+            f"NFT sim: {nft_simulated}",
+            ephemeral=True,
+        )
+        end_run(user_id)
+
+    # ── Beat callbacks ──────────────────────────────────────────────
+
+    async def on_narrative_choice(inter: discord.Interaction, choice_index: int):
+        updated = advance_beat(user_id, choice_index)
+        if not updated:
+            await inter.followup.send("Something went wrong.", ephemeral=True); return
+        await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+        await send_next_beat(inter, updated)
+
+    async def on_momentum_choice(inter: discord.Interaction, choice_index: int):
+        updated = advance_momentum_beat(user_id, choice_index)
+        if not updated:
+            await inter.followup.send("Something went wrong.", ephemeral=True); return
+        await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+        await send_next_beat(inter, updated)
+
+    async def on_encounter_round(inter: discord.Interaction, stat_choice: str):
+        updated = advance_encounter_round(user_id, stat_choice)
+        if not updated:
+            await inter.followup.send("Something went wrong.", ephemeral=True); return
+
+        last_log  = updated["encounter_state"]["log"][-1]
+        round_num = last_log["round"]
+        result_embed = build_encounter_round_embed(
+            updated, round_num, last_log["won"], last_log["flavor"]
+        )
+        await inter.followup.send(embed=result_embed, ephemeral=True)
+
+        if updated["encounter_state"]["complete"]:
+            await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+            await send_next_beat(inter, updated)
+        else:
+            await send_encounter_round(inter, updated)
+
+    async def on_resource_decision(inter: discord.Interaction, accept: bool):
+        updated = advance_resource_beat(user_id, accept)
+        if not updated:
+            await inter.followup.send("Something went wrong.", ephemeral=True); return
+        await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+        await send_next_beat(inter, updated)
+
+    async def on_press_luck_decision(inter: discord.Interaction, gamble: bool):
+        updated = advance_press_luck(user_id, gamble)
+        if not updated:
+            await inter.followup.send("Something went wrong.", ephemeral=True); return
+        await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+        await finish_run(inter, updated)
+
+    # ── Start the run ───────────────────────────────────────────────
+    await send_next_beat(interaction, run)
 
 
 # ---------------------------------------------
