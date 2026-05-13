@@ -2875,6 +2875,31 @@ async def cmd_expedition_test(interaction: discord.Interaction):
         if not zappy_data:
             await inter.followup.send("Couldn't find that Zappy.", ephemeral=True)
             return
+
+        # Load stats the same way the real expedition does
+        from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+        from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
+
+        if asset_id in HERO_ASSET_IDS:
+            hero_data = get_hero_stats(HERO_ASSET_IDS[asset_id])
+            stats     = {k: hero_data[k] for k in ("VLT", "INS", "SPK")} if hero_data else {}
+            image_url = ""
+        elif asset_id in COLLAB_ASSET_IDS:
+            collab_data = get_collab_stats(COLLAB_ASSET_IDS[asset_id])
+            stats       = {k: collab_data[k] for k in ("VLT", "INS", "SPK")} if collab_data else {}
+            image_url   = ""
+        else:
+            from zappy_collection import ZAPPY_COLLECTION
+            entry     = ZAPPY_COLLECTION.get(asset_id, {})
+            traits    = {k: entry[k] for k in ("background","body","earring","eyes","eyewear","head","mouth","skin") if k in entry}
+            stats     = calculate_stats(traits) if traits else {}
+            image_url = entry.get("image_url", "")
+
+        if not stats:
+            await inter.followup.send("Couldn't load stats for that Zappy.", ephemeral=True)
+            return
+
+        zappy_data = {**zappy_data, "stats": stats, "image_url": image_url}
         await _run_apex_test_beat(inter, user_id, zappy_data, zappy_count)
 
     await interaction.followup.send(
