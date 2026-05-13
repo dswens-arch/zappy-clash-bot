@@ -2863,6 +2863,12 @@ async def cmd_expedition_test(interaction: discord.Interaction):
     from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
     from zappy_collection import ZAPPY_COLLECTION
 
+    all_zappies = ownership["zappies"] + [
+        {"asset_id": h["asset_id"], "name": h["name"], "unit_name": "Hero"}
+        for h in ownership["heroes"]
+    ]
+    zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
+
     enriched_zappies = []
     for z in all_zappies:
         aid = z["asset_id"]
