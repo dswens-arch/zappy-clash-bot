@@ -863,7 +863,7 @@ ZONE5_MOMENTUM = [
             "It simply hums with the energy of everything."
         ),
         "stat": "VLT",
-        "base_tokens": 420,   # base reward before momentum multiplier applies at run end
+        "base_tokens": 550,   # base reward before momentum multiplier applies at run end
         "base_cp": 160,
         "momentum_choices": [
             {
@@ -908,7 +908,7 @@ ZONE5_MOMENTUM = [
             "You could add something to the broadcast."
         ),
         "stat": "SPK",
-        "base_tokens": 400,
+        "base_tokens": 530,
         "base_cp": 155,
         "momentum_choices": [
             {
@@ -951,7 +951,7 @@ ZONE5_MOMENTUM = [
             "You can feel it building."
         ),
         "stat": "INS",
-        "base_tokens": 390,
+        "base_tokens": 520,
         "base_cp": 150,
         "momentum_choices": [
             {
@@ -1027,7 +1027,7 @@ ZONE5_ENCOUNTER = [
             1: "The Gatekeeper tilts their head. 'Barely. But barely counts.' The gate creaks open.",
             0: "The Gatekeeper sighs. 'You made it here. That matters more than this.' They step aside.",
         },
-        "base_tokens": 300,
+        "base_tokens": 380,
         "base_cp": 120,
     },
     {
@@ -1062,7 +1062,7 @@ ZONE5_ENCOUNTER = [
             1: "The Construct dissipates slowly, like it's not sure you deserved that. You did.",
             0: "The Construct stands down — not because you won, but because the generator decides you've endured enough.",
         },
-        "base_tokens": 300,
+        "base_tokens": 380,
         "base_cp": 120,
     },
     {
@@ -1097,7 +1097,7 @@ ZONE5_ENCOUNTER = [
             1: "The Sentinel considers for a moment. 'Close enough. Go.'",
             0: "'You're here,' the Sentinel says quietly. 'That alone is the credential.' They move.",
         },
-        "base_tokens": 300,
+        "base_tokens": 380,
         "base_cp": 120,
     },
 ]
