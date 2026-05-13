@@ -766,7 +766,484 @@ ZONE4_EVENTS = [
 # NFT drop possible here
 # ═══════════════════════════════════════════
 
-ZONE5_EVENTS = [
+# ═══════════════════════════════════════════════════════════════════
+# ZONE 5 — APEX SUMMIT  (typed pools for structured run draw)
+#
+# Beat types: narrative · momentum · encounter · resource · press_luck
+# draw_run_zone5() always draws exactly one of each, press_luck last.
+# Momentum (0-100, starts 50) is tracked on run state — not per-beat.
+# ═══════════════════════════════════════════════════════════════════
+
+# ── NARRATIVE ── standard story choices, stat-influenced outcome ────
+# Images: zone5_e1, zone5_e2
+ZONE5_NARRATIVE = [
+    {
+        "beat_type": "narrative",
+        "title": "The Storm Crown",
+        "image": "zone5_e1",
+        "scene": (
+            "The summit is ringed by a permanent storm that only the worthy can pass. "
+            "Lightning strikes the peak every few seconds. "
+            "You are either very brave or very stubborn."
+        ),
+        "stat": "INS",
+        "choices": [
+            {
+                "label": "🛡️ Absorb every bolt",
+                "outcomes": {
+                    "high": {"text": "You stand with your arms open and absorb the full storm crown. Lightning fills you completely. You glow for several minutes. The peak opens.", "cp": 200, "tokens": 630, "tone": "good"},
+                    "mid":  {"text": "You absorb most of it, staggering under the weight of the current. You make it through crackling and triumphant.", "cp": 140, "tokens": 385, "tone": "neutral"},
+                    "low":  {"text": "The storm is too much. You make it through but barely, arriving on the other side fundamentally reassembled.", "cp": 30, "tokens": 50, "tone": "bad"},
+                }
+            },
+            {
+                "label": "⚡ Match its frequency",
+                "outcomes": {
+                    "high": {"text": "You resonate at exactly the storm's frequency. It parts for you like a curtain. You walk through in silence while lightning crackles on either side.", "cp": 210, "tokens": 665, "tone": "good"},
+                    "mid":  {"text": "Your frequency is close enough. The storm thins where you walk. A few bolts still find you but nothing you can't handle.", "cp": 145, "tokens": 402, "tone": "neutral"},
+                    "low":  {"text": "Wrong frequency. The storm doubles down on you specifically. You survive and that is enough.", "cp": 25, "tokens": 50, "tone": "bad"},
+                }
+            },
+        ]
+    },
+    {
+        "beat_type": "narrative",
+        "title": "The Apex Gatekeeper",
+        "image": "zone5_e2",
+        "scene": (
+            "A massive, ancient Zappy stands at the final gate. "
+            "They have seen everyone who has ever made it this far. "
+            "'Only one question,' they say. 'Why does your Zappy deserve to stand here?'"
+        ),
+        "stat": None,
+        "choices": [
+            {
+                "label": "⚔️ Speak of strength",
+                "outcomes": {
+                    "high": {"text": "You speak of the battles won, the odds beaten, the Clashes survived. The Gatekeeper nods slowly. 'Then enter as a warrior.' The gate opens wide.", "cp": 195, "tokens": 612, "tone": "good"},
+                    "mid":  {"text": "Your answer is honest if not poetic. The Gatekeeper considers it. 'Good enough,' they say. Not the warmest welcome, but a welcome.", "cp": 130, "tokens": 350, "tone": "neutral"},
+                    "low":  {"text": "You stumble over the words. The Gatekeeper sighs gently and steps aside. 'You made it here. That's the answer.'", "cp": 50, "tokens": 70, "tone": "neutral"},
+                }
+            },
+            {
+                "label": "❤️ Speak of loyalty",
+                "outcomes": {
+                    "high": {"text": "You speak of your holder. Of being chosen, carried, brought this far. The Gatekeeper's expression softens completely. 'The bond is real. Enter.'", "cp": 220, "tokens": 700, "tone": "good"},
+                    "mid":  {"text": "Your words are genuine. The Gatekeeper hears it. They open the gate without ceremony but with warmth.", "cp": 145, "tokens": 413, "tone": "good"},
+                    "low":  {"text": "The words feel true but come out tangled. The Gatekeeper pats your shoulder. 'It's okay. Go on.'", "cp": 55, "tokens": 77, "tone": "neutral"},
+                }
+            },
+            {
+                "label": "🌟 Speak of the journey",
+                "outcomes": {
+                    "high": {"text": "You recount every zone, every choice, every moment. The Gatekeeper listens to all of it. When you finish they are quiet for a long time. 'That,' they say, 'is why.'", "cp": 230, "tokens": 735, "tone": "good"},
+                    "mid":  {"text": "You tell your story. It's a good one. The Gatekeeper opens the gate and says nothing more — none is needed.", "cp": 150, "tokens": 420, "tone": "good"},
+                    "low":  {"text": "Your story is shorter than you expected. The Gatekeeper nods. 'More will come. Go add to it.'", "cp": 60, "tokens": 87, "tone": "neutral"},
+                }
+            },
+        ]
+    },
+]
+
+
+# ── MOMENTUM ── bold/safe choices that shift the momentum meter ─────
+# Image: zone5_e3
+# Each momentum choice has a "delta" dict: how momentum changes per outcome tier.
+# "safe" choices use "find_gap" key — always gives small fixed gain.
+# Final token reward gets a multiplier based on end-of-run momentum:
+#   0-30 → 0.75×  |  31-60 → 1.0×  |  61-85 → 1.35×  |  86-100 → 1.75×
+ZONE5_MOMENTUM = [
+    {
+        "beat_type": "momentum",
+        "title": "The Infinite Generator",
+        "image": "zone5_e3",
+        "scene": (
+            "At the peak: a generator the size of a building, spinning silently, generating more power than anything should. "
+            "It has no off switch. It has no purpose listed. "
+            "It simply hums with the energy of everything."
+        ),
+        "stat": "VLT",
+        "base_tokens": 420,   # base reward before momentum multiplier applies at run end
+        "base_cp": 160,
+        "momentum_choices": [
+            {
+                "label": "⚡ Interface with it",
+                "style": "bold",
+                # Bold: high stat = big momentum gain + full reward. Low stat = momentum hit + reduced reward.
+                "flavor": {
+                    "high": "You plug in and become briefly part of the circuit. You feel every watt of it. The connection is perfect — you ride it.",
+                    "mid":  "The interface is overwhelming but you hold long enough to absorb a significant charge before the surge pushes you out.",
+                    "low":  "The generator rejects your interface attempt hard. You're thrown back. The charge burns through your systems briefly.",
+                },
+                "delta": {"high": +20, "mid": +8, "low": -18},
+            },
+            {
+                "label": "🧩 Study its design",
+                "style": "bold",
+                "flavor": {
+                    "high": "You understand it. Not completely — no one ever will — but enough to extract its rhythm and sync your own frequency to it.",
+                    "mid":  "You study it and come away with partial insight. The design is brilliant even half-understood.",
+                    "low":  "You study it for a long time and understand very little. The generator is indifferent to your confusion.",
+                },
+                "delta": {"high": +15, "mid": +5, "low": -12},
+            },
+            {
+                "label": "🙏 Respect it from afar",
+                "style": "safe",
+                # Safe: always small positive momentum gain, never loses.
+                "flavor": {
+                    "any": "You stand before it and do not take. The generator notices. It gifts you something small, offered without being asked.",
+                },
+                "delta": {"high": +6, "mid": +6, "low": +6},
+            },
+        ]
+    },
+    {
+        "beat_type": "momentum",
+        "title": "The Last Broadcast",
+        "image": "zone5_e4",
+        "scene": (
+            "A single antenna at the summit is transmitting a signal — not to anyone nearby, but out, far. "
+            "The control panel is still warm. "
+            "You could add something to the broadcast."
+        ),
+        "stat": "SPK",
+        "base_tokens": 400,
+        "base_cp": 155,
+        "momentum_choices": [
+            {
+                "label": "📡 Add your signal",
+                "style": "bold",
+                "flavor": {
+                    "high": "Your signal is clear and strong. It joins the broadcast and travels outward. Something — somewhere — receives it. A reply comes back fast.",
+                    "mid":  "Your signal goes out. Whether it reaches anyone, you don't know. The act feels important.",
+                    "low":  "Your signal is weak. It joins the broadcast but gets lost quickly. Static where your voice should be.",
+                },
+                "delta": {"high": +18, "mid": +6, "low": -15},
+            },
+            {
+                "label": "🔍 Decode what's there",
+                "style": "bold",
+                "flavor": {
+                    "high": "You decode the existing broadcast — it's been running for years, a map of the entire expedition path. You copy it all.",
+                    "mid":  "You decode fragments. Enough to find one cache that wasn't on any map you had.",
+                    "low":  "The encoding is beyond you. The broadcast continues, mysterious and ancient, unchanged.",
+                },
+                "delta": {"high": +14, "mid": +4, "low": -10},
+            },
+            {
+                "label": "📴 Shut it down",
+                "style": "safe",
+                "flavor": {
+                    "any": "You shut it down. The quiet feels significant. Something in the area shifts — a small, steady reward settles at your feet.",
+                },
+                "delta": {"high": +6, "mid": +6, "low": +6},
+            },
+        ]
+    },
+    {
+        "beat_type": "momentum",
+        "title": "The Storm Crown",
+        "image": "zone5_e1",
+        "scene": (
+            "The storm at the summit has a rhythm. Some Zappies fight it. "
+            "But there's a gap in the pattern — a window every few seconds where the lightning holds its breath. "
+            "You can feel it building."
+        ),
+        "stat": "INS",
+        "base_tokens": 390,
+        "base_cp": 150,
+        "momentum_choices": [
+            {
+                "label": "🌩️ Sprint through the gap",
+                "style": "bold",
+                "flavor": {
+                    "high": "You time it perfectly. The gap opens and you're already moving. You clear the storm crown like it wasn't there.",
+                    "mid":  "You read the rhythm correctly but your timing is slightly off. You clip the edge of the storm — stinging, not fatal.",
+                    "low":  "You misread the gap. The storm closed while you were mid-sprint. You made it through but only barely.",
+                },
+                "delta": {"high": +22, "mid": +7, "low": -20},
+            },
+            {
+                "label": "🛡️ Absorb and push",
+                "style": "bold",
+                "flavor": {
+                    "high": "You lean into the storm and take every bolt. Your INS handles it all. You walk out the other side glowing.",
+                    "mid":  "You absorb most of it — staggering, triumphant, sparking a little.",
+                    "low":  "The storm is too much. You survive but your systems are rattled. You're through, that's what matters.",
+                },
+                "delta": {"high": +16, "mid": +5, "low": -14},
+            },
+            {
+                "label": "⏳ Wait for a clear path",
+                "style": "safe",
+                "flavor": {
+                    "any": "You're patient. The storm has to ease eventually, and when it does you walk through clean. Slow but steady.",
+                },
+                "delta": {"high": +6, "mid": +6, "low": +6},
+            },
+        ]
+    },
+]
+
+
+# ── ENCOUNTER ── 3-round guardian fight ────────────────────────────
+# Image: zone5_e2
+# Player picks which stat to use each round (VLT / INS / SPK).
+# Win condition per round: random.randint(0, 100) + stat * 0.3 > threshold + 50
+# At stat=80, threshold=55: ~64% win rate. At stat=50: ~45%.
+# Wins earned: 0 → no bonus | 1 → 1.25× | 2 → 1.5× | 3 → 2.0×
+# Encounter also nudges momentum: +8 per win, -5 per loss.
+ZONE5_ENCOUNTER = [
+    {
+        "beat_type": "encounter",
+        "title": "The Apex Gatekeeper",
+        "image": "zone5_e2",
+        "scene": (
+            "A massive, ancient Zappy stands at the final gate — arms crossed, energy crackling. "
+            "They have turned back stronger Zappies than you. "
+            "'Prove it,' they say. 'Three tests. No shortcuts.'"
+        ),
+        "guardian_name": "The Apex Gatekeeper",
+        "thresholds": {"VLT": 52, "INS": 55, "SPK": 50},
+        "round_prompts": [
+            "The Gatekeeper sends a pulse of raw voltage. Which of your stats meets it?",
+            "They shift tactics — a precise, reading strike. How do you respond?",
+            "The final test: raw will. Everything you have, all at once.",
+        ],
+        "win_lines": [
+            "The pulse bounces off you. The Gatekeeper raises an eyebrow.",
+            "You read the strike and answer it perfectly. They nod.",
+            "Pure will meets pure will. You don't flinch first.",
+        ],
+        "lose_lines": [
+            "The pulse finds a gap. You stagger but stay standing.",
+            "The strike lands. You absorb it, barely.",
+            "Their will is stronger this round. You feel it.",
+        ],
+        "outcome_flavor": {
+            3: "The Gatekeeper steps aside and bows — a small, deliberate bow. 'Enter as a champion.'",
+            2: "The Gatekeeper gives a satisfied nod. 'You've proven enough. The gate is open.'",
+            1: "The Gatekeeper tilts their head. 'Barely. But barely counts.' The gate creaks open.",
+            0: "The Gatekeeper sighs. 'You made it here. That matters more than this.' They step aside.",
+        },
+        "base_tokens": 300,
+        "base_cp": 120,
+    },
+    {
+        "beat_type": "encounter",
+        "title": "The Surge Construct",
+        "image": "zone5_e3",
+        "scene": (
+            "The generator's defense system activates. "
+            "A Construct of pure voltage assembles itself from the ambient charge and turns toward you. "
+            "It doesn't speak. It just crackles."
+        ),
+        "guardian_name": "The Surge Construct",
+        "thresholds": {"VLT": 58, "INS": 48, "SPK": 53},
+        "round_prompts": [
+            "The Construct fires a concentrated voltage spike. Pick your counter.",
+            "It shifts form — now insulation-testing pressure instead of raw voltage.",
+            "Final form: a focused signal disruption aimed straight at you.",
+        ],
+        "win_lines": [
+            "Your counter hits. The voltage spike scatters.",
+            "The pressure finds nothing to grip. You hold your form.",
+            "Your signal is too clean. The disruption slides off.",
+        ],
+        "lose_lines": [
+            "The spike gets through. Your systems flicker.",
+            "The pressure finds a weak point. You feel it.",
+            "Your signal stutters. The Construct pushes its advantage.",
+        ],
+        "outcome_flavor": {
+            3: "The Construct stutters, sparks, and dissolves back into ambient charge. The generator hums approvingly.",
+            2: "The Construct retreats into the generator framework. You've proven you belong here.",
+            1: "The Construct dissipates slowly, like it's not sure you deserved that. You did.",
+            0: "The Construct stands down — not because you won, but because the generator decides you've endured enough.",
+        },
+        "base_tokens": 300,
+        "base_cp": 120,
+    },
+    {
+        "beat_type": "encounter",
+        "title": "The Summit Sentinel",
+        "image": "zone5_e5",
+        "scene": (
+            "At the very top, a Sentinel waits — not hostile, not welcoming. "
+            "They guard the apex itself. Every Zappy who reaches this point must pass through them. "
+            "'One way through,' the Sentinel says. 'You already know it.'"
+        ),
+        "guardian_name": "The Summit Sentinel",
+        "thresholds": {"VLT": 50, "INS": 57, "SPK": 54},
+        "round_prompts": [
+            "The Sentinel opens with a voltage reading — measuring, not attacking. How do you respond?",
+            "They test your insulation with a sustained press. Pick your defense.",
+            "Final: a signal challenge. They broadcast. Can you match it?",
+        ],
+        "win_lines": [
+            "Your reading matches theirs. The Sentinel takes note.",
+            "The press finds nothing. You're solid.",
+            "Your signal answers theirs cleanly. They pause.",
+        ],
+        "lose_lines": [
+            "Your reading is off. The Sentinel notes it without comment.",
+            "The press finds a soft spot. You adjust.",
+            "Your signal drifts. The Sentinel holds their broadcast steady.",
+        ],
+        "outcome_flavor": {
+            3: "The Sentinel steps back and gestures to the view behind them. 'It's yours.' Full access.",
+            2: "The Sentinel nods once. 'You've earned this.' They stand aside.",
+            1: "The Sentinel considers for a moment. 'Close enough. Go.'",
+            0: "'You're here,' the Sentinel says quietly. 'That alone is the credential.' They move.",
+        },
+        "base_tokens": 300,
+        "base_cp": 120,
+    },
+]
+
+
+# ── RESOURCE ── wager tokens already earned for a 50/50 flip ────────
+# Image: zone5_e4
+# Wager = 20% of current run tokens.
+# Win: get wager × 2.2 back  (net +120% of wager)
+# Lose: forfeit wager entirely
+# Decline: skip the gamble, earn a small flat CP reward instead
+ZONE5_RESOURCE = [
+    {
+        "beat_type": "resource",
+        "title": "The Last Broadcast",
+        "image": "zone5_e4",
+        "scene": (
+            "A single antenna at the summit is transmitting a signal — not to anyone nearby, but out, far. "
+            "The control panel is still warm. Someone left something here. "
+            "A cache terminal blinks beside it: *INSERT — DOUBLE OR NOTHING.*"
+        ),
+        "wager_text": "The terminal will broadcast a 20% stake of your current tokens into the void. Signal comes back doubled — or it doesn't come back at all.",
+        "accept_label":  "📡 Stake the signal",
+        "decline_label": "📴 Leave it running",
+        "win_text":   "The signal returns. Twice what you sent, plus interest. Something out there was listening.",
+        "lose_text":  "The signal goes out and doesn't come back. Silence. The broadcast continues, indifferent.",
+        "decline_text": "You leave the terminal alone. A small cached reward activates on your way out — no risk, no drama.",
+        "decline_cp":   55,
+    },
+    {
+        "beat_type": "resource",
+        "title": "The Infinite Generator",
+        "image": "zone5_e3",
+        "scene": (
+            "The generator has a secondary port — small, easy to miss. "
+            "A sign above it says: *DRAW FROM RESERVE.* "
+            "What's in the reserve, exactly, is unclear. What's the worst that could happen."
+        ),
+        "wager_text": "Tap 20% of your tokens into the reserve port. If the generator is having a good cycle, it returns the draw amplified. If not — the reserve takes it.",
+        "accept_label":  "⚡ Tap the reserve",
+        "decline_label": "🙏 Leave it alone",
+        "win_text":   "The reserve cycle is running hot. Your draw comes back with extra charge attached. The generator didn't even notice.",
+        "lose_text":  "The reserve was empty. Your draw gets absorbed into the system. The generator hums, unbothered.",
+        "decline_text": "You step back. The generator seems fine with this. A small ambient reward settles into your systems as you leave.",
+        "decline_cp":   55,
+    },
+    {
+        "beat_type": "resource",
+        "title": "The Apex Gatekeeper",
+        "image": "zone5_e2",
+        "scene": (
+            "The Gatekeeper holds out a hand — palm up. "
+            "'There is one more test for those who want more than entry,' they say. "
+            "'Stake something. If you're worthy, it returns with interest.'"
+        ),
+        "wager_text": "The Gatekeeper asks for 20% of what you've earned so far. A worthy Zappy gets it back doubled. An unworthy one — it's a toll.",
+        "accept_label":  "🤝 Accept the test",
+        "decline_label": "🚪 Pass through quietly",
+        "win_text":   "The Gatekeeper nods slowly. 'Worthy.' Your stake comes back with extra. They step aside without another word.",
+        "lose_text":  "The Gatekeeper meets your eyes. 'Not today.' Your stake disappears. 'Come back stronger.'",
+        "decline_text": "You walk through without taking the test. The Gatekeeper lets you pass — and quietly slides a small reward your way. 'Smart,' they say.",
+        "decline_cp":   55,
+    },
+]
+
+
+# ── PRESS YOUR LUCK ── always the final beat ────────────────────────
+# Image: zone5_e5
+# Bank: apply momentum multiplier to full token total and end the run.
+# Gamble: 40% → NFT roll eligible + 1.5× token bonus. 60% → -15% penalty.
+# NFT roll only fires if player gambled AND won (run["nft_eligible"] stays True only then).
+ZONE5_PRESS_LUCK = [
+    {
+        "beat_type": "press_luck",
+        "title": "The Apex Itself",
+        "image": "zone5_e5",
+        "scene": (
+            "You are at the very top. "
+            "The whole world spreads out below you — the Fields, the Bay, the Circuit, the Null Space, all of it. "
+            "You have earned this view. Now: what do you do with it?"
+        ),
+        "bank_label":   "🏴 Plant your flag and bank it",
+        "gamble_label": "🌟 Push for something legendary",
+        "bank_text":    "You plant your flag at the apex and the expedition record updates. Momentum tallied. Rewards locked in. A solid run.",
+        "gamble_win_text":  "You reach past the summit itself — into whatever exists above it. The apex cracks open something rare. This is what the climb was for.",
+        "gamble_lose_text": "You overreach. The summit gives back what it took, minus the tax for asking too much. Still standing. Still Zappy.",
+    },
+    {
+        "beat_type": "press_luck",
+        "title": "The Apex Itself",
+        "image": "zone5_e5",
+        "scene": (
+            "The descent waits. Your run is complete — almost. "
+            "The summit hums quietly under your feet. "
+            "You can feel something more here, just past the edge of what you've already earned."
+        ),
+        "bank_label":   "🔄 Begin the descent",
+        "gamble_label": "✨ One more push",
+        "bank_text":    "You head back down with purpose. Momentum carried forward. Everything tallied. A clean, complete run.",
+        "gamble_win_text":  "The extra push finds something the safe path never would. A cache activates. The summit rewards the greedy, occasionally.",
+        "gamble_lose_text": "The push finds nothing. Or rather, it finds a cost. You descend a little lighter than you planned.",
+    },
+    {
+        "beat_type": "press_luck",
+        "title": "The Apex Itself",
+        "image": "zone5_e5",
+        "scene": (
+            "The summit is quiet now. Storm's passed, generator's humming, Sentinel's gone. "
+            "Just you and the view and a choice that only matters because you're here. "
+            "Take what you have, or bet it on what you could have."
+        ),
+        "bank_label":   "🌅 Take it all in and leave",
+        "gamble_label": "🎲 One last roll",
+        "bank_text":    "You stand there for a long moment. The view fills you. Momentum tallied, rewards locked. You come down changed.",
+        "gamble_win_text":  "The last roll comes up. Something rare shakes loose from the summit's highest cache. Not everyone gets this far. Not everyone pushes past it.",
+        "gamble_lose_text": "The roll doesn't land. The summit shrugs — it doesn't owe you the rare drop. You head down. There's always next time.",
+    },
+]
+
+
+# Combined pool kept for ZONES registry compatibility
+ZONE5_EVENTS = ZONE5_NARRATIVE + ZONE5_MOMENTUM + ZONE5_ENCOUNTER + ZONE5_RESOURCE + ZONE5_PRESS_LUCK
+
+
+def draw_run_zone5() -> list:
+    """
+    Zone 5 structured draw: one event from each typed pool.
+    Beats 1-4 are shuffled. Press luck is always beat 5.
+    Returns a list of 5 events.
+    """
+    narrative = random.choice(ZONE5_NARRATIVE)
+    momentum  = random.choice(ZONE5_MOMENTUM)
+    encounter = random.choice(ZONE5_ENCOUNTER)
+    resource  = random.choice(ZONE5_RESOURCE)
+    press     = random.choice(ZONE5_PRESS_LUCK)
+
+    first_four = [narrative, momentum, encounter, resource]
+    random.shuffle(first_four)
+    return first_four + [press]
+
+
+# ─────────────────────────────────────────────
+# Original ZONE5_EVENTS list (5 events, kept for reference)
+# These have been refactored into typed pools above.
+# ─────────────────────────────────────────────
+_ZONE5_LEGACY = [
     {
         "title": "The Storm Crown",
         "image": "zone5_e1",
@@ -939,7 +1416,7 @@ ZONE5_EVENTS = [
             },
         ]
     },
-]
+]   # end _ZONE5_LEGACY
 
 
 # ─────────────────────────────────────────────
@@ -997,9 +1474,40 @@ def get_highest_zone(cp_total: int) -> int:
 
 
 def draw_run(zone_num: int) -> list:
-    """Draw 5 random events for a run in the given zone."""
+    """
+    Draw 5 events for a run in the given zone.
+    Zone 5 uses draw_run_zone5() for structured typed-pool draw.
+    All other zones pull randomly from their event pool.
+    """
+    if zone_num == 5:
+        return draw_run_zone5()
     pool = ZONES[zone_num]["events"]
     return random.sample(pool, min(5, len(pool)))
+
+
+# ─────────────────────────────────────────────
+# MOMENTUM HELPERS
+# ─────────────────────────────────────────────
+MOMENTUM_START = 50
+
+def momentum_multiplier(momentum: int) -> float:
+    """Return the final token multiplier for a given momentum value."""
+    if momentum >= 86: return 1.75
+    if momentum >= 61: return 1.35
+    if momentum >= 31: return 1.00
+    return 0.75
+
+def momentum_label(momentum: int) -> str:
+    """Return a display label for the current momentum tier."""
+    if momentum >= 86: return "🔥 Peak Charge"
+    if momentum >= 61: return "⚡ Building"
+    if momentum >= 31: return "〰️ Steady"
+    return "❄️ Fading"
+
+def momentum_bar(momentum: int) -> str:
+    """Return a visual bar string for momentum (10 chars wide)."""
+    filled = round(momentum / 10)
+    return "█" * filled + "░" * (10 - filled) + f"  {momentum}/100"
 
 
 def resolve_outcome(event: dict, choice_index: int, stats: dict) -> dict:
