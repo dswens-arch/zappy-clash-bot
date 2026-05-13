@@ -1226,8 +1226,8 @@ def draw_run_zone5() -> list:
     """
     Zone 5 structured draw: one event from each typed pool.
     Beats 1-4 are shuffled. Press luck is always beat 5.
-    Guarantees no title repeats across the five drawn events —
-    re-rolls any pool that would duplicate a title already in the run.
+    Guarantees no title repeats across the five drawn events.
+    Guarantees resource is never beat 1 (nothing to wager yet).
     """
     MAX_ATTEMPTS = 20
 
@@ -1240,15 +1240,23 @@ def draw_run_zone5() -> list:
 
         titles = [narrative["title"], momentum["title"], encounter["title"],
                   resource["title"], press["title"]]
-        if len(set(titles)) == 5:
-            first_four = [narrative, momentum, encounter, resource]
-            random.shuffle(first_four)
-            return first_four + [press]
+        if len(set(titles)) != 5:
+            continue  # title collision — redraw
 
-    # Fallback: return whatever we have even if one title repeats
-    # (shouldn't happen with current pool sizes but avoids infinite loop)
+        first_four = [narrative, momentum, encounter, resource]
+        random.shuffle(first_four)
+
+        # Resource can't be beat 1 — player has 0 tokens to wager
+        if first_four[0]["beat_type"] == "resource":
+            continue
+
+        return first_four + [press]
+
+    # Fallback: guarantee resource isn't first even if we couldn't satisfy all constraints
     first_four = [narrative, momentum, encounter, resource]
     random.shuffle(first_four)
+    while first_four[0]["beat_type"] == "resource":
+        random.shuffle(first_four)
     return first_four + [press]
 
 
@@ -1470,7 +1478,7 @@ ZONES = {
         "events":      ZONE5_EVENTS,
         "color":       0xD85A30,   # coral
         "emoji":       "🏔️",
-        "nft_drop_chance": 0.02,   # 2% per run
+        "nft_drop_chance": 0.05,   # 5% per run
     },
 }
 
