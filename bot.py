@@ -1257,7 +1257,7 @@ def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
     primary, secondary, tertiary = priority
 
     from zappy_collection import ZAPPY_COLLECTION
-    from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
+    from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS, HERO_IMAGES, COLLAB_IMAGES
     from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
 
     ranked = []
@@ -1274,7 +1274,7 @@ def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
             if hero_data:
                 stats     = {k: hero_data[k] for k in ("VLT", "INS", "SPK")}
                 traits    = {"hero_type": hero_type}
-                image_url = ""
+                image_url = HERO_IMAGES.get(hero_type, "")
 
         # Collab
         elif asset_id in COLLAB_ASSET_IDS:
@@ -1283,7 +1283,7 @@ def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
             if collab_data:
                 stats     = {k: collab_data[k] for k in ("VLT", "INS", "SPK")}
                 traits    = {"collab_type": collab_type}
-                image_url = ""
+                image_url = COLLAB_IMAGES.get(collab_type, "")
 
         # Regular Zappy
         else:
