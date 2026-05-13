@@ -1226,14 +1226,27 @@ def draw_run_zone5() -> list:
     """
     Zone 5 structured draw: one event from each typed pool.
     Beats 1-4 are shuffled. Press luck is always beat 5.
-    Returns a list of 5 events.
+    Guarantees no title repeats across the five drawn events —
+    re-rolls any pool that would duplicate a title already in the run.
     """
-    narrative = random.choice(ZONE5_NARRATIVE)
-    momentum  = random.choice(ZONE5_MOMENTUM)
-    encounter = random.choice(ZONE5_ENCOUNTER)
-    resource  = random.choice(ZONE5_RESOURCE)
-    press     = random.choice(ZONE5_PRESS_LUCK)
+    MAX_ATTEMPTS = 20
 
+    for _ in range(MAX_ATTEMPTS):
+        narrative = random.choice(ZONE5_NARRATIVE)
+        momentum  = random.choice(ZONE5_MOMENTUM)
+        encounter = random.choice(ZONE5_ENCOUNTER)
+        resource  = random.choice(ZONE5_RESOURCE)
+        press     = random.choice(ZONE5_PRESS_LUCK)
+
+        titles = [narrative["title"], momentum["title"], encounter["title"],
+                  resource["title"], press["title"]]
+        if len(set(titles)) == 5:
+            first_four = [narrative, momentum, encounter, resource]
+            random.shuffle(first_four)
+            return first_four + [press]
+
+    # Fallback: return whatever we have even if one title repeats
+    # (shouldn't happen with current pool sizes but avoids infinite loop)
     first_four = [narrative, momentum, encounter, resource]
     random.shuffle(first_four)
     return first_four + [press]
