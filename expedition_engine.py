@@ -416,15 +416,18 @@ class ExpeditionView(discord.ui.View):
 
 
 class MomentumView(discord.ui.View):
-    """Momentum beat buttons (bold + safe choices)."""
+    """Momentum beat buttons — bold choices are red (risky), safe is green (consistent)."""
     def __init__(self, run: dict, on_choice_callback):
         super().__init__(timeout=300)
         self.run = run; self.callback = on_choice_callback; self.chosen = False
         event   = run["events"][run["beat"]]
         choices = event.get("momentum_choices", [])
         for i, choice in enumerate(choices):
-            style = discord.ButtonStyle.danger if choice.get("style") == "bold" else discord.ButtonStyle.secondary
-            btn   = discord.ui.Button(
+            if choice.get("style") == "safe":
+                style = discord.ButtonStyle.success   # green — safe, consistent
+            else:
+                style = discord.ButtonStyle.danger    # red — bold, high risk/reward
+            btn = discord.ui.Button(
                 label=choice["label"], style=style, custom_id=f"mom_choice_{i}"
             )
             btn.callback = self._make_cb(i)
@@ -625,8 +628,9 @@ def build_momentum_scene_embed(run: dict) -> discord.Embed:
     zone     = ZONES[run["zone_num"]]
     beat_num = run["beat"] + 1
     zappy    = run["zappy"]
-    choices  = event.get("momentum_choices", [])
     stat_key = event.get("stat", "?")
+    stats    = run["stats"]
+    stat_val = stats.get(stat_key, "?")
 
     embed = discord.Embed(
         title       = f"{zone['emoji']} {event['title']}",
@@ -635,16 +639,20 @@ def build_momentum_scene_embed(run: dict) -> discord.Embed:
     )
     embed.set_author(name=f"{zone['name']} · Beat {beat_num} of 5  ·  ⚡ Momentum")
     embed.add_field(name="Momentum", value=_mbar(run["momentum"]), inline=False)
-
-    # Show the risk framing
-    bold_note = "**Bold choices** swing momentum hard — high stat = big gain, low stat = big loss.\n**Safe choice** always gives a small consistent gain."
-    embed.add_field(name=f"Stat checked: {stat_key}", value=bold_note, inline=False)
-
+    embed.add_field(
+        name  = f"Stat checked: {stat_key}  ({stat_val})",
+        value = (
+            "🔴 **Bold choices** — risky. High stat = big momentum gain + bigger reward. "
+            "Low stat = momentum loss + reduced reward.\n"
+            "🟢 **Safe choice** — always gains a little momentum. Smaller but guaranteed reward."
+        ),
+        inline=False,
+    )
     embed.set_footer(text=(
         f"{zappy.get('name','Your Zappy')} · "
-        f"VLT {run['stats'].get('VLT','?')} · "
-        f"INS {run['stats'].get('INS','?')} · "
-        f"SPK {run['stats'].get('SPK','?')} · "
+        f"VLT {stats.get('VLT','?')} · "
+        f"INS {stats.get('INS','?')} · "
+        f"SPK {stats.get('SPK','?')} · "
         f"{run['collection_bonus']['label']}"
     ))
     return embed
@@ -738,7 +746,10 @@ def build_press_luck_embed(run: dict) -> discord.Embed:
     zappy    = run["zappy"]
     m        = run.get("momentum", MOMENTUM_START)
     mult     = momentum_multiplier(m)
-    banked   = int(run["total_tokens"] * mult)
+    tokens   = run["total_tokens"]
+    banked   = int(tokens * mult)
+    gamble_win  = int(tokens * 1.50)
+    gamble_lose = int(tokens * 0.85)
 
     embed = discord.Embed(
         title       = f"{zone['emoji']} {event['title']}",
@@ -748,15 +759,20 @@ def build_press_luck_embed(run: dict) -> discord.Embed:
     embed.set_author(name=f"{zone['name']} · Beat {beat_num} of 5  ·  🏆 Final Call")
     embed.add_field(name="Momentum", value=_mbar(m), inline=False)
     embed.add_field(
-        name  = "Your choice",
+        name  = "🏦 Bank  (green button)",
+        value = f"Lock in **{banked} tokens** with your momentum bonus ({mult:.2f}×). Safe. Done.",
+        inline=False,
+    )
+    embed.add_field(
+        name  = "🎲 Gamble  (red button)",
         value = (
-            f"**🏦 Bank** → momentum {mult:.2f}× applied → **{banked} tokens** locked in\n"
-            f"**🎲 Gamble** → 40% chance: NFT roll + 50% bonus · 60% chance: −15% penalty\n\n"
-            f"*Banking skips the NFT roll entirely.*"
+            f"**40% chance** → NFT roll activates + **{gamble_win} tokens** (+50%)\n"
+            f"**60% chance** → **{gamble_lose} tokens** (−15% penalty)\n"
+            f"*NFT and buddy drops only available if you gamble and win.*"
         ),
         inline=False,
     )
-    embed.set_footer(text=f"{zappy.get('name','Your Zappy')} · Current total: {run['total_tokens']} tokens")
+    embed.set_footer(text=f"{zappy.get('name','Your Zappy')} · Current total: {tokens} tokens")
     return embed
 
 
