@@ -1448,113 +1448,195 @@ async def _run_expedition_beat(
     zappy_count: int,
     entry_fee: int = 0,
 ):
-    """Start or continue an expedition beat."""
-    # Start fresh run
+    """Start or continue an expedition beat.
+    Zone 5 (Apex Summit) routes through typed beat handlers.
+    All other zones use the standard narrative flow.
+    """
     run = start_run(user_id, zone_num, zappy, zappy_count)
     run['entry_fee'] = entry_fee
 
+    # ── Shared finish logic ────────────────────────────────────────────
+    async def finish_run(inter: discord.Interaction, updated_run: dict):
+        nft_drop   = check_nft_drop(updated_run)
+        buddy_drop = check_buddy_drop(zone_num)
+
+        nft_prize_result   = None
+        buddy_prize_result = None
+
+        wallet = get_wallet(user_id)
+
+        if buddy_drop:
+            buddy_prize_result = await award_buddy(user_id, wallet, zone_num)
+        if nft_drop:
+            nft_prize_result = await award_nft_prize(user_id, wallet)
+
+        has_any_drop = nft_drop or buddy_drop
+        final_embed  = build_run_complete_embed(updated_run, has_any_drop)
+
+        save_expedition_run(
+            discord_user_id = user_id,
+            zone_num        = zone_num,
+            cp              = updated_run["total_cp"],
+            tokens          = updated_run["total_tokens"],
+            nft             = nft_drop,
+        )
+
+        from database import get_player_rank
+        exp_cp_total = get_player_rank(user_id).get("cp_total", 0)
+        await assign_cp_role(user_id, exp_cp_total)
+
+        entry_fee  = updated_run.get("entry_fee", 0)
+        net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
+        if wallet and net_tokens > 0:
+            from token_rewards import check_opted_in, send_token_reward, REWARD_TOKEN_ID
+            import asyncio
+            if await check_opted_in(wallet, REWARD_TOKEN_ID):
+                note = f"Zappy Expedition reward - Zone {zone_num}"
+                await asyncio.to_thread(send_token_reward, wallet, net_tokens, note)
+
+        exp_channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
+        if exp_channel:
+            token_line = f"🪙 +{net_tokens} tokens"
+            momentum_line = ""
+            if updated_run.get("momentum") is not None:
+                from expedition_events import momentum_label
+                momentum_line = f" · {momentum_label(updated_run['momentum'])}"
+            public_embed = discord.Embed(
+                title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
+                description = (
+                    f"<@{user_id}> completed a **{ZONES[zone_num]['name']}** run "
+                    f"with **{zappy.get('name', 'their Zappy')}**!\n"
+                    f"⚡ +{updated_run['total_cp']} Exp CP · "
+                    + token_line
+                    + momentum_line
+                    + (" · 🐾 **ZAPPY BUDDY FOUND!**" if buddy_drop else "")
+                    + (" · 🎉 **NFT DROP!**" if nft_drop else "")
+                ),
+                color = ZONES[zone_num]["color"],
+            )
+            if zappy.get("image_url"):
+                public_embed.set_image(url=zappy["image_url"])
+            await exp_channel.send(embed=public_embed)
+
+        final_embed.description = (
+            f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
+            f"🪙 **{net_tokens} tokens** sent to your wallet\n"
+            f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
+        )
+
+        await inter.followup.send(embed=final_embed, ephemeral=True)
+        if buddy_prize_result and buddy_prize_result.get("success"):
+            await inter.followup.send(buddy_prize_result["message"], ephemeral=True)
+            await assign_buddy_finder_role(user_id)
+        if nft_prize_result and nft_prize_result.get("success"):
+            await inter.followup.send(nft_prize_result["message"], ephemeral=True)
+        end_run(user_id)
+
+    # ── Zone 5: typed beat routing ─────────────────────────────────────
+    if zone_num == 5:
+        async def send_next_beat(inter: discord.Interaction, run: dict):
+            if run["complete"]:
+                await finish_run(inter, run)
+                return
+            event      = run["events"][run["beat"]]
+            beat_type  = event.get("beat_type", "narrative")
+            image_path = f"./images/{event.get('image', '')}.png"
+            files      = [discord.File(image_path)] if os.path.exists(image_path) else []
+
+            if beat_type == "narrative":
+                await inter.followup.send(embed=build_scene_embed(run),
+                    view=ExpeditionView(run, on_narrative_choice), files=files, ephemeral=True)
+            elif beat_type == "momentum":
+                await inter.followup.send(embed=build_momentum_scene_embed(run),
+                    view=MomentumView(run, on_momentum_choice), files=files, ephemeral=True)
+            elif beat_type == "encounter":
+                start_encounter(user_id)
+                await inter.followup.send(embed=build_encounter_intro_embed(run), files=files, ephemeral=True)
+                await send_encounter_round(inter, run)
+            elif beat_type == "resource":
+                await inter.followup.send(embed=build_resource_bet_embed(run),
+                    view=ResourceView(run, on_resource_decision), files=files, ephemeral=True)
+            elif beat_type == "press_luck":
+                await inter.followup.send(embed=build_press_luck_embed(run),
+                    view=PressLuckView(run, on_press_luck_decision), files=files, ephemeral=True)
+
+        async def send_encounter_round(inter: discord.Interaction, run: dict):
+            event  = run["events"][run["beat"]]
+            estate = run["encounter_state"]
+            rnd    = estate["round"]
+            round_embed = discord.Embed(
+                title       = f"⚔️ Round {rnd + 1} of 3  —  {event['guardian_name']}",
+                description = event["round_prompts"][rnd],
+                color       = 0xD85A30,
+            )
+            round_embed.add_field(name="Score",
+                value=f"Wins: {estate['wins']}  ·  Losses: {rnd - estate['wins']}", inline=False)
+            round_embed.set_footer(text="Pick which stat to use this round.")
+            await inter.followup.send(embed=round_embed,
+                view=EncounterView(run, on_encounter_round), ephemeral=True)
+
+        async def on_narrative_choice(inter: discord.Interaction, choice_index: int):
+            updated = advance_beat(user_id, choice_index)
+            if not updated:
+                await inter.followup.send("Something went wrong.", ephemeral=True); return
+            await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+            await send_next_beat(inter, updated)
+
+        async def on_momentum_choice(inter: discord.Interaction, choice_index: int):
+            updated = advance_momentum_beat(user_id, choice_index)
+            if not updated:
+                await inter.followup.send("Something went wrong.", ephemeral=True); return
+            await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+            await send_next_beat(inter, updated)
+
+        async def on_encounter_round(inter: discord.Interaction, stat_choice: str):
+            updated = advance_encounter_round(user_id, stat_choice)
+            if not updated:
+                await inter.followup.send("Something went wrong.", ephemeral=True); return
+            last_log  = updated["encounter_state"]["log"][-1]
+            round_num = last_log["round"]
+            await inter.followup.send(embed=build_encounter_round_embed(
+                updated, round_num, last_log["won"], last_log["flavor"]), ephemeral=True)
+            if updated["encounter_state"]["complete"]:
+                await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+                await send_next_beat(inter, updated)
+            else:
+                await send_encounter_round(inter, updated)
+
+        async def on_resource_decision(inter: discord.Interaction, accept: bool):
+            updated = advance_resource_beat(user_id, accept)
+            if not updated:
+                await inter.followup.send("Something went wrong.", ephemeral=True); return
+            await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+            await send_next_beat(inter, updated)
+
+        async def on_press_luck_decision(inter: discord.Interaction, gamble: bool):
+            updated = advance_press_luck(user_id, gamble)
+            if not updated:
+                await inter.followup.send("Something went wrong.", ephemeral=True); return
+            await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
+            await finish_run(inter, updated)
+
+        await send_next_beat(interaction, run)
+        return
+
+    # ── Zones 1-4: standard narrative flow (unchanged) ─────────────────
     async def on_choice(inter: discord.Interaction, choice_index: int):
         updated_run = advance_beat(user_id, choice_index)
         if not updated_run:
             await inter.followup.send("Something went wrong with your run.", ephemeral=True)
             return
 
-        # Post outcome
         outcome_embed = build_outcome_embed(updated_run)
         await inter.followup.send(embed=outcome_embed, ephemeral=True)
 
         if updated_run["complete"]:
-            # Run is done
-            nft_drop   = check_nft_drop(updated_run)
-            buddy_drop = check_buddy_drop(zone_num)
-
-            nft_prize_result   = None
-            buddy_prize_result = None
-
-            # Fetch wallet early — needed for drop rewards and token payout
-            wallet = get_wallet(user_id)
-
-            if buddy_drop:
-                buddy_prize_result = await award_buddy(user_id, wallet, zone_num)
-            if nft_drop:
-                nft_prize_result = await award_nft_prize(user_id, wallet)
-
-            has_any_drop = nft_drop or buddy_drop
-            final_embed = build_run_complete_embed(updated_run, has_any_drop)
-
-            # Save to DB
-            save_expedition_run(
-                discord_user_id = user_id,
-                zone_num        = zone_num,
-                cp              = updated_run["total_cp"],
-                tokens          = updated_run["total_tokens"],
-                nft             = nft_drop,
-            )
-
-            # Check CP milestone after expedition
-            from database import get_player_rank
-            exp_cp_total = get_player_rank(user_id).get("cp_total", 0)
-            await assign_cp_role(user_id, exp_cp_total)
-
-            # Send token rewards minus entry fee
-            entry_fee = updated_run.get("entry_fee", 0)
-            net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
-            if wallet and net_tokens > 0:
-                from token_rewards import check_opted_in, send_token_reward, REWARD_TOKEN_ID
-                import asyncio
-                if await check_opted_in(wallet, REWARD_TOKEN_ID):
-                    note = f"Zappy Expedition reward - Zone {zone_num}"
-                    await asyncio.to_thread(
-                        send_token_reward, wallet, net_tokens, note
-                    )
-            elif wallet and entry_fee > 0 and updated_run["total_tokens"] == 0:
-                # Bad run - no tokens earned, fee already notified, nothing to send
-                pass
-
-            # Post to expedition channel
-            exp_channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
-            if exp_channel:
-                token_line = f"🪙 +{net_tokens} tokens"
-                public_embed = discord.Embed(
-                    title       = f"{ZONES[zone_num]['emoji']} Expedition Complete!",
-                    description = (
-                        f"<@{user_id}> completed a **{ZONES[zone_num]['name']}** run "
-                        f"with **{zappy.get('name', 'their Zappy')}**!\n"
-                        f"⚡ +{updated_run['total_cp']} Exp CP · "
-                        + token_line
-                        + (" · 🐾 **ZAPPY BUDDY FOUND!**" if buddy_drop else "")
-                        + (" · 🎉 **NFT DROP!**" if nft_drop else "")
-                    ),
-                    color = ZONES[zone_num]["color"],
-                )
-                if zappy.get("image_url"):
-                    public_embed.set_image(url=zappy["image_url"])
-                await exp_channel.send(embed=public_embed)
-
-            # Final summary
-            final_embed.description = (
-                f"⚡ **{updated_run['total_cp']} Expedition CP** earned\n"
-                f"🪙 **{net_tokens} tokens** sent to your wallet\n"
-                f"📦 Collection bonus: {updated_run['collection_bonus']['label']}"
-            )
-
-            await inter.followup.send(embed=final_embed, ephemeral=True)
-            if buddy_prize_result and buddy_prize_result.get("success"):
-                await inter.followup.send(buddy_prize_result["message"], ephemeral=True)
-                await assign_buddy_finder_role(user_id)
-            if nft_prize_result and nft_prize_result.get("success"):
-                await inter.followup.send(nft_prize_result["message"], ephemeral=True)
-            end_run(user_id)
+            await finish_run(inter, updated_run)
         else:
-            # Next beat
             scene_embed = build_scene_embed(updated_run)
             image_path  = f"./images/{updated_run['events'][updated_run['beat']].get('image', '')}.png"
             view        = ExpeditionView(updated_run, on_choice)
-
-            files = []
-            if os.path.exists(image_path):
-                files.append(discord.File(image_path))
-
+            files = [discord.File(image_path)] if os.path.exists(image_path) else []
             if files:
                 await inter.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
             else:
@@ -1564,18 +1646,13 @@ async def _run_expedition_beat(
     scene_embed = build_scene_embed(run)
     image_path  = f"./images/{run['events'][0].get('image', '')}.png"
     view        = ExpeditionView(run, on_choice)
-
-    files = []
-    if os.path.exists(image_path):
-        files.append(discord.File(image_path))
-
+    files = [discord.File(image_path)] if os.path.exists(image_path) else []
     if files:
         await interaction.followup.send(embed=scene_embed, view=view, files=files, ephemeral=True)
     else:
         await interaction.followup.send(embed=scene_embed, view=view, ephemeral=True)
 
 
-@tree.command(name="claimnft", description="Claim your pending NFT prize from a Zone 5 expedition")
 async def cmd_claimnft(interaction: discord.Interaction):
     """Claim a pending NFT prize once you have opted in to the asset."""
     if not check_expedition_channel(interaction):
