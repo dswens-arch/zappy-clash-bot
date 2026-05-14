@@ -53,6 +53,7 @@ from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from nft_rewards       import award_nft_prize, claim_nft_prize
 from buddy_rewards     import check_buddy_drop, award_buddy, claim_buddy
 from clash_chaos_modifiers import apply_all_modifiers, freaky_friday_reveal
+from clash_entry_card import render_entry_card
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -401,10 +402,13 @@ async def cmd_clash(interaction: discord.Interaction):
 
         clash_ch = bot.get_channel(CLASH_CHANNEL)
         if clash_ch:
-            await clash_ch.send(
-                f"⚡ **{inter.user.display_name}** enters the bracket with "
-                f"**{name}** — VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
+            card_buf = await render_entry_card(
+                display_name=inter.user.display_name,
+                zappy_name=name,
+                stats=stats,
+                image_url=zappy.get("image_url", ""),
             )
+            await clash_ch.send(file=discord.File(card_buf, filename="entry.png"))
 
     # ── Confirm/Cancel view shown after ASA lookup ────────────────────────────
     class ConfirmAsaView(discord.ui.View):
@@ -813,7 +817,10 @@ async def cmd_testbracket(interaction: discord.Interaction):
         "⚡ **ZAPPY CLASH - TEST BRACKET**\n"
         "\n"
         "Registration is open for **2 minutes**.\n"
-        "Use `/clash` to enter your Zappy!"
+        "Use `/clash` to enter your Zappy!\n"
+        "\n"
+        "🎁 The bracket champion has a **5% chance** to win a random NFT from the prize wallet.\n"
+        "Winners use `/claimnft` to collect."
     )
 
     # Wait 2 minutes
@@ -869,8 +876,11 @@ async def cmd_startbracket(interaction: discord.Interaction, session: str = "eve
         f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
         f"\n"
         f"Registration is open for **30 minutes**.\n"
-        f"Use `/clash` to enter your Zappy!"
-        f"{cp_note}"
+        f"Use `/clash` to enter your Zappy!\n"
+        f"{cp_note}\n"
+        f"\n"
+        f"🎁 The bracket champion has a **5% chance** to win a random NFT from the prize wallet.\n"
+        f"Winners use `/claimnft` to collect."
     )
 
     # Full 30-minute window
