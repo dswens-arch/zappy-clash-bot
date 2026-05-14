@@ -53,7 +53,6 @@ from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from nft_rewards       import award_nft_prize, claim_nft_prize
 from buddy_rewards     import check_buddy_drop, award_buddy, claim_buddy
 from clash_chaos_modifiers import apply_all_modifiers, freaky_friday_reveal
-from clash_entry_card import render_entry_card
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -402,13 +401,10 @@ async def cmd_clash(interaction: discord.Interaction):
 
         clash_ch = bot.get_channel(CLASH_CHANNEL)
         if clash_ch:
-            card_buf = await render_entry_card(
-                display_name=inter.user.display_name,
-                zappy_name=name,
-                stats=stats,
-                image_url=zappy.get("image_url", ""),
+            await clash_ch.send(
+                f"⚡ **{inter.user.display_name}** enters the bracket with "
+                f"**{name}** — VLT {stats.get('VLT')} · INS {stats.get('INS')} · SPK {stats.get('SPK')}"
             )
-            await clash_ch.send(file=discord.File(card_buf, filename="entry.png"))
 
     # ── Confirm/Cancel view shown after ASA lookup ────────────────────────────
     class ConfirmAsaView(discord.ui.View):
@@ -817,10 +813,7 @@ async def cmd_testbracket(interaction: discord.Interaction):
         "⚡ **ZAPPY CLASH - TEST BRACKET**\n"
         "\n"
         "Registration is open for **2 minutes**.\n"
-        "Use `/clash` to enter your Zappy!\n"
-        "\n"
-        "🎁 The bracket champion has a **5% chance** to win a random NFT from the prize wallet.\n"
-        "Winners use `/claimnft` to collect."
+        "Use `/clash` to enter your Zappy!"
     )
 
     # Wait 2 minutes
@@ -876,11 +869,8 @@ async def cmd_startbracket(interaction: discord.Interaction, session: str = "eve
         f"⚡ **ZAPPY CLASH - {session_name} Bracket is OPEN!**\n"
         f"\n"
         f"Registration is open for **30 minutes**.\n"
-        f"Use `/clash` to enter your Zappy!\n"
-        f"{cp_note}\n"
-        f"\n"
-        f"🎁 The bracket champion has a **5% chance** to win a random NFT from the prize wallet.\n"
-        f"Winners use `/claimnft` to collect."
+        f"Use `/clash` to enter your Zappy!"
+        f"{cp_note}"
     )
 
     # Full 30-minute window
@@ -943,7 +933,7 @@ def expedition_already_ran_today(discord_user_id: str) -> bool:
     return len(result.data) > 0
 
 
-def save_expedition_run(discord_user_id: str, zone_num: int, cp: int, tokens: int, nft: bool):
+def save_expedition_run(discord_user_id: str, zone_num: int, cp: int, tokens: int, nft: bool, buddy: bool = False):
     """Save completed expedition run and update leaderboard."""
     from database import get_supabase, award_cp
     from datetime import date, timezone
@@ -957,6 +947,7 @@ def save_expedition_run(discord_user_id: str, zone_num: int, cp: int, tokens: in
         "cp_earned":       cp,
         "tokens_earned":   tokens,
         "nft_dropped":     nft,
+        "buddy_dropped":   buddy,
         "run_date":        today,
         "completed_at":    datetime.now(timezone.utc).isoformat(),
     }).execute()
@@ -1476,7 +1467,13 @@ async def _run_expedition_beat(
         wallet = get_wallet(user_id)
 
         if buddy_drop:
-            buddy_prize_result = await award_buddy(user_id, wallet, zone_num)
+            try:
+                buddy_prize_result = await award_buddy(user_id, wallet, zone_num)
+                if not buddy_prize_result or not buddy_prize_result.get("success"):
+                    print(f"⚠️ award_buddy failed for {user_id} zone {zone_num}: {buddy_prize_result}")
+            except Exception as e:
+                print(f"❌ award_buddy exception for {user_id} zone {zone_num}: {e}")
+                buddy_prize_result = None
         if nft_drop:
             nft_prize_result = await award_nft_prize(user_id, wallet)
 
@@ -1489,6 +1486,7 @@ async def _run_expedition_beat(
             cp              = updated_run["total_cp"],
             tokens          = updated_run["total_tokens"],
             nft             = nft_drop,
+            buddy           = buddy_drop,
         )
 
         from database import get_player_rank
