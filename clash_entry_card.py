@@ -62,10 +62,10 @@ def _font(name: str, size: int) -> ImageFont.FreeTypeFont:
             return ImageFont.truetype(path, size)
     return ImageFont.load_default()
 
-_FONT_BOLD  = _font("Poppins-Bold.ttf",    15)
-_FONT_MED   = _font("Poppins-Medium.ttf",  15)
-_FONT_SM    = _font("Poppins-Regular.ttf", 13)
-_FONT_LABEL = _font("Poppins-Bold.ttf",    12)
+_FONT_BOLD  = _font("Poppins-Bold.ttf",    13)
+_FONT_MED   = _font("Poppins-Medium.ttf",  12)
+_FONT_SM    = _font("Poppins-Regular.ttf", 11)
+_FONT_LABEL = _font("Poppins-Bold.ttf",    10)
 
 
 # ─────────────────────────────────────────────
@@ -90,30 +90,52 @@ def _paste_rounded(canvas: Image.Image, thumb: Image.Image, x: int, y: int, size
     canvas.paste(thumb, (x, y), mask)
 
 
+def _normalize_ipfs_url(url: str) -> str:
+    """Rewrite any IPFS gateway URL to the fast Pera gateway."""
+    if not url:
+        return url
+    cid = None
+    if "/ipfs/" in url:
+        cid = url.split("/ipfs/")[-1].split("?")[0].strip()
+    if cid:
+        return f"https://ipfs-pera.algonode.dev/ipfs/{cid}?optimizer=image&width=256&quality=80"
+    return url
+
+
 async def _fetch_image(url: str, size: int) -> Image.Image | None:
     """Fetch a remote image and return as RGBA PIL Image, or None on failure."""
+    url = _normalize_ipfs_url(url)
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=8)) as resp:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status != 200:
+                    print(f"[clash_entry_card] image fetch {resp.status}: {url}")
                     return None
                 data = await resp.read()
                 img  = Image.open(io.BytesIO(data)).convert("RGBA")
                 return img
     except Exception as e:
-        print(f"[clash_entry_card] image fetch failed: {e}")
+        print(f"[clash_entry_card] image fetch failed: {e} — {url}")
         return None
 
 
 def _draw_lightning_fallback(canvas: Image.Image, x: int, y: int, size: int):
-    """Draw a dark rounded square with a gold ⚡ as fallback thumbnail."""
+    """Draw a dark rounded square with a gold lightning bolt polygon as fallback thumbnail."""
     draw = ImageDraw.Draw(canvas)
     _rounded_rect(draw, (x, y, x + size, y + size), radius=THUMB_R, fill=(50, 52, 68, 255))
-    # Gold accent border
     draw.rounded_rectangle([x, y, x + size, y + size], radius=THUMB_R, outline=(*ACCENT[:3], 160), width=2)
-    # Lightning bolt text centred
-    fb = _font("Poppins-Bold.ttf", 28)
-    draw.text((x + size // 2, y + size // 2), "⚡", font=fb, fill=ACCENT, anchor="mm")
+    # Draw a simple lightning bolt polygon centred in the box
+    cx, cy = x + size // 2, y + size // 2
+    s = size * 0.28
+    bolt = [
+        (cx - s * 0.2, cy - s * 1.0),
+        (cx + s * 0.5, cy - s * 0.1),
+        (cx + s * 0.05, cy - s * 0.05),
+        (cx + s * 0.2, cy + s * 1.0),
+        (cx - s * 0.5, cy + s * 0.1),
+        (cx - s * 0.05, cy + s * 0.05),
+    ]
+    draw.polygon(bolt, fill=ACCENT)
 
 
 def _draw_stat_pill(draw: ImageDraw.ImageDraw, x: int, y: int, label: str, value: str):
