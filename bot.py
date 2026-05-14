@@ -1661,8 +1661,8 @@ async def _run_expedition_beat(
         await interaction.followup.send(embed=scene_embed, view=view, ephemeral=True)
 
 
+@tree.command(name="claimnft", description="Claim a pending Zappy Buddy or NFT prize")
 async def cmd_claimnft(interaction: discord.Interaction):
-    """Claim a pending NFT prize once you have opted in to the asset."""
     if not check_expedition_channel(interaction):
         await interaction.response.send_message(
             f"❌ Use <#{EXPEDITION_CHANNEL}> for Expedition commands." if EXPEDITION_CHANNEL else "❌ Expedition commands are restricted.",
