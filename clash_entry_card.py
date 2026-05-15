@@ -36,9 +36,9 @@ MUTED   = (140, 150, 175, 255)
 
 # pill: (background, label colour)
 STAT_COLORS = {
-    "VLT": ((240, 178,  50, 40),  (240, 178,  50, 255)),
-    "INS": (( 87, 242, 135, 40),  ( 87, 242, 135, 255)),
-    "SPK": ((  0, 176, 244, 40),  (  0, 176, 244, 255)),
+    "VLT": ((240, 178,  50, 255), (28, 30, 42, 255)),   # bg=gold, text=dark
+    "INS": (( 87, 242, 135, 255), (28, 30, 42, 255)),   # bg=green, text=dark  
+    "SPK": ((  0, 176, 244, 255), (28, 30, 42, 255)),   # bg=blue, text=dark
 }
 
 # ─────────────────────────────────────────────
@@ -106,33 +106,27 @@ def _draw_fallback(canvas, x, y, size):
     ], fill=ACCENT)
 
 def _draw_pill(draw, x, y, label, value):
-    """Draw a stat pill: dark bg, thin left bar, label + value. Returns right edge x."""
-    pill_bg, label_color = STAT_COLORS.get(label, ((100,100,100,40), WHITE))
+    """Solid colored pill: [LABEL  VALUE] on colored background. Returns right edge x."""
+    pill_bg, text_color = STAT_COLORS.get(label, ((100,100,100,255), (0,0,0,255)))
 
     lw  = draw.textlength(label, font=_FL)
     vw  = draw.textlength(value, font=_FV)
 
-    BAR  = 3  * SCALE
-    PADL = 7  * SCALE
-    GAP  = 6  * SCALE
-    PADR = 8  * SCALE
-    ph   = 20 * SCALE
-    pr   = 4  * SCALE
-    pw   = int(BAR + PADL + lw + GAP + vw + PADR)
-    my   = y + ph // 2
+    PAD = 8  * SCALE
+    GAP = 6  * SCALE
+    ph  = 20 * SCALE
+    pr  = 4  * SCALE
+    pw  = int(PAD + lw + GAP + vw + PAD)
+    my  = y + ph // 2
 
-    # 1. Dark pill background
+    # Solid colored background
     _rr(draw, [x, y, x+pw, y+ph], r=pr, fill=pill_bg)
 
-    # 2. Thin left bar: draw full-height rect, then re-draw pill bg
-    #    over the right portion so only a thin sliver remains colored
-    draw.rectangle([x, y, x+BAR, y+ph], fill=label_color)
+    # Label — dark text on colored bg
+    draw.text((x + PAD, my), label, font=_FL, fill=text_color, anchor="lm")
 
-    # 3. Label in accent color
-    draw.text((x + BAR + PADL, my), label, font=_FL, fill=label_color, anchor="lm")
-
-    # 4. Value in white
-    draw.text((x + BAR + PADL + lw + GAP, my), value, font=_FV, fill=WHITE, anchor="lm")
+    # Value — dark text on colored bg
+    draw.text((x + PAD + lw + GAP, my), value, font=_FV, fill=text_color, anchor="lm")
 
     return x + pw
 
