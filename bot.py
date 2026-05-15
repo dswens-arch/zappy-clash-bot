@@ -95,6 +95,14 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
+def _ipfs_url(url: str) -> str:
+    """Rewrite any IPFS gateway URL to the reliable Pera gateway."""
+    if url and "/ipfs/" in url:
+        cid = url.split("/ipfs/")[-1].split("?")[0].strip()
+        return f"https://ipfs-pera.algonode.dev/ipfs/{cid}?optimizer=image&width=512&quality=80"
+    return url
+
+
 bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
 
@@ -396,7 +404,7 @@ async def cmd_clash(interaction: discord.Interaction):
             ab = stats["ability"]
             confirm.add_field(name=f"⚡ {ab.get('name','Ability')}", value=ab.get("desc",""), inline=False)
         if zappy.get("image_url"):
-            confirm.set_thumbnail(url=zappy["image_url"])
+            confirm.set_thumbnail(url=_ipfs_url(zappy["image_url"]))
         confirm.set_footer(text=f"Fights start when registration closes · Watch <#{CLASH_CHANNEL}>")
         await inter.followup.send(embed=confirm, ephemeral=True)
 
@@ -508,7 +516,7 @@ async def cmd_clash(interaction: discord.Interaction):
                     inline=False,
                 )
             if zappy.get("image_url"):
-                preview.set_thumbnail(url=zappy["image_url"])
+                preview.set_thumbnail(url=_ipfs_url(zappy["image_url"]))
             preview.set_footer(text=f"ASA {entered_id} · Is this the one?")
 
             await inter.response.send_message(
@@ -637,7 +645,7 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
 
     image_url = zappy.get("image_url", "")
     if image_url:
-        embed.set_thumbnail(url=image_url)
+        embed.set_thumbnail(url=_ipfs_url(image_url))
 
     embed.set_footer(text=f"ASA {chosen_id}")
     await interaction.followup.send(embed=embed, ephemeral=True)
@@ -1460,7 +1468,7 @@ async def _show_smart_zappy_select(
 
     # Show image of top Zappy
     if ranked[0].get("image_url"):
-        embed.set_thumbnail(url=ranked[0]["image_url"])
+        embed.set_thumbnail(url=_ipfs_url(ranked[0]["image_url"]))
 
     async def on_zappy_chosen(chosen_inter: discord.Interaction, asset_id: int):
         chosen = next((z for z in ranked if z["asset_id"] == asset_id), None)
@@ -1566,7 +1574,7 @@ async def _run_expedition_beat(
                 color = ZONES[zone_num]["color"],
             )
             if zappy.get("image_url"):
-                public_embed.set_image(url=zappy["image_url"])
+                public_embed.set_image(url=_ipfs_url(zappy["image_url"]))
             await exp_channel.send(embed=public_embed)
 
         final_embed.description = (
@@ -2632,9 +2640,9 @@ async def close_and_resolve(channel: discord.TextChannel):
             )
             # Show both images - A as thumbnail, B as image
             if fighter_a.image_url:
-                pre_embed.set_thumbnail(url=fighter_a.image_url)
+                pre_embed.set_thumbnail(url=_ipfs_url(fighter_a.image_url))
             if fighter_b.image_url:
-                pre_embed.set_image(url=fighter_b.image_url)
+                pre_embed.set_image(url=_ipfs_url(fighter_b.image_url))
             await channel.send(embed=pre_embed)
             await asyncio.sleep(2)
 
@@ -2744,7 +2752,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                 color=0xF5E642,
             )
             if winner.image_url:
-                win_embed.set_image(url=winner.image_url)
+                win_embed.set_image(url=_ipfs_url(winner.image_url))
             win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
             await channel.send(embed=win_embed)
 
@@ -3028,7 +3036,7 @@ async def cmd_expedition_test(interaction: discord.Interaction):
         )
     embed.set_footer(text=f"You have {zappy_count} Zappies · Showing best 5 for Apex Summit")
     if ranked[0].get("image_url"):
-        embed.set_thumbnail(url=ranked[0]["image_url"])
+        embed.set_thumbnail(url=_ipfs_url(ranked[0]["image_url"]))
 
     async def on_zappy_selected(inter: discord.Interaction, asset_id: int):
         chosen = next((z for z in ranked if z["asset_id"] == asset_id), None)
