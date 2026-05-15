@@ -106,34 +106,32 @@ def _draw_fallback(canvas, x, y, size):
     ], fill=ACCENT)
 
 def _draw_pill(draw, x, y, label, value):
-    """Draw a stat pill: [▌ LABEL  value]. Returns right edge x."""
+    """Draw a stat pill: dark bg, thin left bar, label + value. Returns right edge x."""
     pill_bg, label_color = STAT_COLORS.get(label, ((100,100,100,40), WHITE))
 
     lw  = draw.textlength(label, font=_FL)
     vw  = draw.textlength(value, font=_FV)
 
-    BAR  = 4  * SCALE   # thin accent bar on left edge only
-    PADL = 8  * SCALE   # padding after bar before label
-    GAP  = 6  * SCALE   # gap between label and value
-    PADR = 10 * SCALE   # right padding
-    ph   = 22 * SCALE
-    pr   = 5  * SCALE
+    BAR  = 3  * SCALE
+    PADL = 7  * SCALE
+    GAP  = 6  * SCALE
+    PADR = 8  * SCALE
+    ph   = 20 * SCALE
+    pr   = 4  * SCALE
     pw   = int(BAR + PADL + lw + GAP + vw + PADR)
+    my   = y + ph // 2
 
-    my = y + ph // 2
-
-    # Full pill background
+    # 1. Dark pill background
     _rr(draw, [x, y, x+pw, y+ph], r=pr, fill=pill_bg)
 
-    # Thin left bar — just 4px wide, drawn as a rectangle with left corners rounded
+    # 2. Thin left bar: draw full-height rect, then re-draw pill bg
+    #    over the right portion so only a thin sliver remains colored
     draw.rectangle([x, y, x+BAR, y+ph], fill=label_color)
-    # Round only the left corners by overdrawing a rounded rect clipped to bar width
-    _rr(draw, [x, y, x+BAR*3, y+ph], r=pr, fill=label_color)
-    draw.rectangle([x+BAR, y, x+BAR*3, y+ph], fill=pill_bg)
 
-    # Label text starts after bar + padding
+    # 3. Label in accent color
     draw.text((x + BAR + PADL, my), label, font=_FL, fill=label_color, anchor="lm")
-    # Value text
+
+    # 4. Value in white
     draw.text((x + BAR + PADL + lw + GAP, my), value, font=_FV, fill=WHITE, anchor="lm")
 
     return x + pw
