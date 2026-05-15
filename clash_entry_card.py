@@ -106,33 +106,37 @@ def _draw_fallback(canvas, x, y, size):
     ], fill=ACCENT)
 
 def _draw_pill(draw, x, y, label, value):
-    """Draw a stat pill with left accent bar. Label left, value right. Returns right edge x."""
+    """Draw a stat pill: [▌ LABEL  value]. Returns right edge x."""
     pill_bg, label_color = STAT_COLORS.get(label, ((100,100,100,40), WHITE))
 
-    lw   = draw.textlength(label, font=_FL)
-    vw   = draw.textlength(value, font=_FV)
+    lw  = draw.textlength(label, font=_FL)
+    vw  = draw.textlength(value, font=_FV)
 
-    PAD  = 10 * SCALE   # horizontal padding inside pill
-    GAP  = 8  * SCALE   # gap between label and value
-    BAR  = 4  * SCALE   # left accent bar width
-    ph   = 22 * SCALE   # pill height
-    pr   = 5  * SCALE   # pill corner radius
-    pw   = int(BAR + PAD + lw + GAP + vw + PAD)
+    BAR  = 4  * SCALE   # thin accent bar on left edge only
+    PADL = 8  * SCALE   # padding after bar before label
+    GAP  = 6  * SCALE   # gap between label and value
+    PADR = 10 * SCALE   # right padding
+    ph   = 22 * SCALE
+    pr   = 5  * SCALE
+    pw   = int(BAR + PADL + lw + GAP + vw + PADR)
 
     my = y + ph // 2
 
-    # Background
+    # Full pill background
     _rr(draw, [x, y, x+pw, y+ph], r=pr, fill=pill_bg)
-    # Left accent bar (same radius so it looks flush)
-    _rr(draw, [x, y, x+BAR+pr, y+ph], r=pr, fill=label_color)
-    draw.rectangle([x+pr, y, x+BAR+pr, y+ph], fill=label_color)
 
-    # Label (after bar + padding)
-    draw.text((x + BAR + PAD, my), label, font=_FL, fill=label_color, anchor="lm")
-    # Value
-    draw.text((x + BAR + PAD + lw + GAP, my), value, font=_FV, fill=WHITE, anchor="lm")
+    # Thin left bar — just 4px wide, drawn as a rectangle with left corners rounded
+    draw.rectangle([x, y, x+BAR, y+ph], fill=label_color)
+    # Round only the left corners by overdrawing a rounded rect clipped to bar width
+    _rr(draw, [x, y, x+BAR*3, y+ph], r=pr, fill=label_color)
+    draw.rectangle([x+BAR, y, x+BAR*3, y+ph], fill=pill_bg)
 
-    return x + pw   # right edge
+    # Label text starts after bar + padding
+    draw.text((x + BAR + PADL, my), label, font=_FL, fill=label_color, anchor="lm")
+    # Value text
+    draw.text((x + BAR + PADL + lw + GAP, my), value, font=_FV, fill=WHITE, anchor="lm")
+
+    return x + pw
 
 # ─────────────────────────────────────────────
 # Main renderer
