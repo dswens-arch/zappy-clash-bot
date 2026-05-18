@@ -53,7 +53,7 @@ from expedition_events import ZONES, get_eligible_zones, get_highest_zone
 from nft_rewards       import award_nft_prize, claim_nft_prize
 from buddy_rewards     import check_buddy_drop, award_buddy, claim_buddy
 from clash_chaos_modifiers import apply_all_modifiers, freaky_friday_reveal
-from clash_entry_card import render_entry_card, get_zappy_record
+from clash_entry_card import render_entry_card
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -65,6 +65,7 @@ from database        import (
     award_cp, get_leaderboard, get_player_rank,
     update_streak, get_streak,
     seed_bracket,
+    get_zappy_record,
     CP_WIN, CP_LOSS, CP_UPSET_BONUS, CP_BRACKET_WIN,
 )
 
@@ -410,7 +411,8 @@ async def cmd_clash(interaction: discord.Interaction):
 
         clash_ch = bot.get_channel(CLASH_CHANNEL)
         if clash_ch:
-            zappy_record = await get_zappy_record(zappy.get("asset_id", 0))
+            from database import get_zappy_record as _get_record
+            zappy_record = await asyncio.to_thread(_get_record, zappy.get("asset_id", 0))
             card_buf = await render_entry_card(
                 display_name=inter.user.display_name,
                 zappy_name=name,
