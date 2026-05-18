@@ -806,6 +806,114 @@ async def cmd_debug(interaction: discord.Interaction, asset_id: int):
     await interaction.followup.send("\n".join(lines), embed=embed, ephemeral=True)
 
 
+@tree.command(name="testcard", description="ADMIN ONLY - preview the clash entry card renderer")
+@app_commands.describe(asset_id="The Zappy ASA ID to preview (default: 2644039660)")
+async def cmd_testcard(interaction: discord.Interaction, asset_id: int = 2644039660):
+    """Render and post a test entry card. Owner only."""
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    zappy = await fetch_zappy_traits(asset_id)
+    if not zappy:
+        await interaction.followup.send(f"❌ Could not fetch Zappy ASA {asset_id}.", ephemeral=True)
+        return
+
+    stats     = zappy.get("stats", {})
+    name      = zappy.get("name", f"Zappy #{asset_id}")
+    image_url = zappy.get("image_url", "")
+    record    = await asyncio.to_thread(get_zappy_record, asset_id)
+
+    card_buf = await render_entry_card(
+        display_name=interaction.user.display_name,
+        zappy_name=name,
+        stats=stats,
+        image_url=image_url,
+        record=record,
+    )
+
+    await interaction.followup.send(
+        content=f"🎨 Entry card preview for **{name}** (ASA `{asset_id}`)",
+        file=discord.File(card_buf, filename="entry_preview.png"),
+        ephemeral=True,
+    )
+
+
+@tree.command(name="seedzappyrecords", description="ADMIN ONLY - seed zappy_records table from battles history")
+async def cmd_seedzappyrecords(interaction: discord.Interaction):
+    """One-time seed of zappy_records from battles history. Owner only."""
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    try:
+        from database import get_supabase
+        from collections import defaultdict
+        from datetime import datetime, timezone
+
+        db = get_supabase()
+
+        all_battles = []
+        offset = 0
+        while True:
+            rows = await asyncio.to_thread(
+                lambda o=offset: db.table("battles").select("*").range(o, o + 999).execute()
+            )
+            if not rows.data:
+                break
+            all_battles.extend(rows.data)
+            if len(rows.data) < 1000:
+                break
+            offset += 1000
+
+        wins   = defaultdict(int)
+        losses = defaultdict(int)
+        for row in all_battles:
+            wins[row["winner_asset_id"]]  += 1
+            losses[row["loser_asset_id"]] += 1
+
+        champ_wins = defaultdict(int)
+        brackets   = defaultdict(list)
+        for row in all_battles:
+            brackets[row["bracket_id"]].append(row)
+        for bracket_id, rows in brackets.items():
+            final_round = max(r["bracket_round"] for r in rows)
+            for r in rows:
+                if r["bracket_round"] == final_round:
+                    champ_wins[r["winner_asset_id"]] += 1
+
+        now     = datetime.now(timezone.utc).isoformat()
+        all_ids = set(wins.keys()) | set(losses.keys())
+        records = [
+            {
+                "asset_id":   aid,
+                "wins":       wins[aid],
+                "losses":     losses[aid],
+                "champ_wins": champ_wins[aid],
+                "updated_at": now,
+            }
+            for aid in all_ids
+        ]
+
+        for i in range(0, len(records), 100):
+            batch = records[i:i + 100]
+            await asyncio.to_thread(
+                lambda b=batch: db.table("zappy_records").upsert(b, on_conflict="asset_id").execute()
+            )
+
+        await interaction.followup.send(
+            f"✅ Seeded **{len(records)}** Zappy records from **{len(all_battles)}** battles across **{len(brackets)}** brackets.",
+            ephemeral=True,
+        )
+
+    except Exception as e:
+        await interaction.followup.send(f"❌ Seed failed: {e}", ephemeral=True)
+
+
 @tree.command(name="testbracket", description="ADMIN ONLY - trigger a test bracket right now")
 async def cmd_testbracket(interaction: discord.Interaction):
     """Manually trigger a bracket for testing. Only works for the server owner."""
