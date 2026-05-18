@@ -190,7 +190,7 @@ async def render_entry_card(
         champs = record.get("champ_wins", 0)
         rec_text = f"{wins}W  {losses}L"
         if champs > 0:
-            rec_text += f"   ★ {champs} champ"
+            rec_text += f"   {champs}x Bracket Champion"
         draw.text((TEXT_X, L3), rec_text, font=_FM, fill=MUTED, anchor="lm")
 
     # Downscale 2x → 1x
