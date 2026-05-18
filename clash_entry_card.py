@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 # ─────────────────────────────────────────────
 # Output dimensions
 # ─────────────────────────────────────────────
-OUT_W, OUT_H = 420, 76
+OUT_W, OUT_H = 420, 88
 SCALE        = 2
 W            = OUT_W * SCALE
 H            = OUT_H * SCALE
@@ -131,6 +131,20 @@ def _draw_pill(draw, x, y, label, value):
     return x + pw
 
 # ─────────────────────────────────────────────
+# Zappy record lookup
+# ─────────────────────────────────────────────
+async def get_zappy_record(asset_id: int) -> dict:
+    """Single-row lookup from zappy_records table."""
+    try:
+        from database import get_zappy_record as _db_get_record
+        import asyncio
+        return await asyncio.to_thread(_db_get_record, asset_id)
+    except Exception as e:
+        print(f"[entry_card] record lookup failed: {e}")
+        return {"wins": 0, "losses": 0, "champ_wins": 0}
+
+
+# ─────────────────────────────────────────────
 # Main renderer
 # ─────────────────────────────────────────────
 async def render_entry_card(
@@ -138,6 +152,7 @@ async def render_entry_card(
     zappy_name:   str,
     stats:        dict,
     image_url:    str = "",
+    record:       dict | None = None,
 ) -> io.BytesIO:
 
     canvas = Image.new("RGBA", (W, H), BG)
@@ -192,6 +207,17 @@ async def render_entry_card(
     px = TEXT_X
     for key in ("VLT", "INS", "SPK"):
         px = _draw_pill(draw, px, L2 - 11*SCALE, key, str(stats.get(key, "?"))) + 8*SCALE
+
+    # ── Record line (if available) ──────────
+    if record and (record["wins"] + record["losses"]) > 0:
+        FR = _font("Poppins-Medium.ttf", 10 * SCALE)
+        wins   = record["wins"]
+        losses = record["losses"]
+        champs = record["champ_wins"]
+        rec_text   = f"{wins}W  {losses}L"
+        champ_text = f"  👑 {champs}" if champs > 0 else ""
+        full_text  = rec_text + champ_text
+        draw.text((TEXT_X, L2 + 14 * SCALE), full_text, font=FR, fill=MUTED, anchor="lm")
 
     # Downscale 2x → 1x
     out = canvas.resize((OUT_W, OUT_H), Image.LANCZOS)
