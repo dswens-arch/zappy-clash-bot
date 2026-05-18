@@ -54,10 +54,16 @@ def _font(name, size):
             return ImageFont.truetype(path, size)
     return ImageFont.load_default()
 
-_FB = _font("Poppins-Bold.ttf",    14 * SCALE)   # bold — name, number
-_FM = _font("Poppins-Medium.ttf",  13 * SCALE)   # medium — "enters with"
-_FL = _font("Poppins-Bold.ttf",    10 * SCALE)   # pill label
-_FV = _font("Poppins-Bold.ttf",    12 * SCALE)   # pill value
+# Fonts loaded lazily on first render to avoid startup hangs
+_FB = _FM = _FL = _FV = None
+
+def _load_fonts():
+    global _FB, _FM, _FL, _FV
+    if _FB is None:
+        _FB = _font("Poppins-Bold.ttf",   14 * SCALE)
+        _FM = _font("Poppins-Medium.ttf", 13 * SCALE)
+        _FL = _font("Poppins-Bold.ttf",   10 * SCALE)
+        _FV = _font("Poppins-Bold.ttf",   12 * SCALE)
 
 # ─────────────────────────────────────────────
 # Gateway fetch with fallbacks
@@ -155,6 +161,7 @@ async def render_entry_card(
     record:       dict | None = None,
 ) -> io.BytesIO:
 
+    _load_fonts()
     canvas = Image.new("RGBA", (W, H), BG)
     draw   = ImageDraw.Draw(canvas)
 
