@@ -119,7 +119,8 @@ def save_battle_result(
     winner_asset_id: int,
     loser_asset_id: int,
     is_upset: bool,
-    round_num: int,  # Which round of the bracket (R16, QF, SF, Final)
+    round_num: int,
+    is_champion: bool = False,
 ) -> dict:
     """Save a battle result to the database."""
     db = get_supabase()
@@ -134,7 +135,66 @@ def save_battle_result(
         "played_at":         datetime.now(timezone.utc).isoformat(),
     }
     result = db.table("battles").insert(data).execute()
+
+    # Keep zappy_records in sync
+    update_zappy_record(winner_asset_id, loser_asset_id, is_champion=is_champion, champion_asset_id=winner_asset_id)
+
     return result.data
+
+
+def update_zappy_record(
+    winner_asset_id: int,
+    loser_asset_id: int,
+    is_champion: bool = False,
+    champion_asset_id: int | None = None,
+    champ_only: bool = False,
+) -> None:
+    """
+    Upsert win/loss counts in zappy_records.
+    - champ_only=True: only increment champ_wins for winner_asset_id, no win/loss changes.
+    - is_champion=True: also increment champ_wins alongside win/loss update.
+    """
+    db = get_supabase()
+    now = datetime.now(timezone.utc).isoformat()
+
+    def _increment(asset_id: int, win: bool = False, loss: bool = False, champ: bool = False):
+        existing = db.table("zappy_records").select("*").eq("asset_id", asset_id).execute()
+        if existing.data:
+            row = existing.data[0]
+            db.table("zappy_records").update({
+                "wins":       row["wins"]       + (1 if win   else 0),
+                "losses":     row["losses"]     + (1 if loss  else 0),
+                "champ_wins": row["champ_wins"] + (1 if champ else 0),
+                "updated_at": now,
+            }).eq("asset_id", asset_id).execute()
+        else:
+            db.table("zappy_records").insert({
+                "asset_id":   asset_id,
+                "wins":       1 if win   else 0,
+                "losses":     1 if loss  else 0,
+                "champ_wins": 1 if champ else 0,
+                "updated_at": now,
+            }).execute()
+
+    if champ_only:
+        # Just add champion win — wins/losses already recorded from the battle
+        _increment(winner_asset_id, champ=True)
+        return
+
+    _increment(winner_asset_id, win=True,  champ=is_champion)
+    _increment(loser_asset_id,  loss=True, champ=False)
+
+
+def get_zappy_record(asset_id: int) -> dict:
+    """Single lookup for a Zappy's record. Returns wins, losses, champ_wins."""
+    try:
+        db = get_supabase()
+        result = db.table("zappy_records").select("wins,losses,champ_wins").eq("asset_id", asset_id).execute()
+        if result.data:
+            return result.data[0]
+    except Exception as e:
+        print(f"[db] get_zappy_record failed: {e}")
+    return {"wins": 0, "losses": 0, "champ_wins": 0}
 
 
 # ─────────────────────────────────────────────
