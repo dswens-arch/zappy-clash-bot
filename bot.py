@@ -65,6 +65,7 @@ from database        import (
     award_cp, get_leaderboard, get_player_rank,
     update_streak, get_streak,
     seed_bracket,
+    get_zappy_record,
     CP_WIN, CP_LOSS, CP_UPSET_BONUS, CP_BRACKET_WIN,
 )
 
@@ -410,11 +411,14 @@ async def cmd_clash(interaction: discord.Interaction):
 
         clash_ch = bot.get_channel(CLASH_CHANNEL)
         if clash_ch:
+            from database import get_zappy_record as _get_record
+            zappy_record = await asyncio.to_thread(_get_record, zappy.get("asset_id", 0))
             card_buf = await render_entry_card(
                 display_name=inter.user.display_name,
                 zappy_name=name,
                 stats=stats,
                 image_url=zappy.get("image_url", ""),
+                record=zappy_record,
             )
             await clash_ch.send(file=discord.File(card_buf, filename="entry.png"))
 
@@ -769,40 +773,6 @@ async def cmd_myzappies(interaction: discord.Interaction):
     await interaction.followup.send(embed=embed, ephemeral=True)
 
 
-@tree.command(name="debug", description="ADMIN ONLY - debug a Zappy's image URL")
-@app_commands.describe(asset_id="The Zappy ASA ID to debug")
-async def cmd_debug(interaction: discord.Interaction, asset_id: int):
-    """Show raw image URL for debugging. Owner only."""
-    if interaction.user.id != interaction.guild.owner_id:
-        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
-        return
-
-    await interaction.response.defer(ephemeral=True)
-    zappy = await fetch_zappy_traits(asset_id)
-
-    if not zappy:
-        await interaction.followup.send("❌ Could not fetch Zappy.", ephemeral=True)
-        return
-
-    image_url = zappy.get("image_url", "NONE")
-    traits    = zappy.get("traits", {})
-
-    lines = [
-        f"**Name:** {zappy.get('name')}",
-        f"**Image URL:** `{image_url}`",
-        f"**Raw image from metadata:** `{traits.get('image_url', 'not in traits')}`",
-        f"**Traits loaded:** {bool(traits)}",
-    ]
-
-    # Also try posting the image directly
-    embed = discord.Embed(title="Image test", color=0xF5E642)
-    if image_url and image_url != "NONE":
-        embed.set_image(url=image_url)
-        lines.append("*(image embed attempted below)*")
-
-    await interaction.followup.send("\n".join(lines), embed=embed, ephemeral=True)
-
-
 @tree.command(name="testcard", description="ADMIN ONLY - preview the clash entry card renderer")
 @app_commands.describe(asset_id="The Zappy ASA ID to preview (default: 88)")
 async def cmd_testcard(interaction: discord.Interaction, asset_id: int = 88):
@@ -834,6 +804,86 @@ async def cmd_testcard(interaction: discord.Interaction, asset_id: int = 88):
         file=discord.File(card_buf, filename="entry_preview.png"),
         ephemeral=True,
     )
+
+
+@tree.command(name="seedzappyrecords", description="ADMIN ONLY - seed zappy_records table from battles history")
+async def cmd_seedzappyrecords(interaction: discord.Interaction):
+    """One-time seed of zappy_records from battles history. Owner only."""
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    try:
+        from database import get_supabase
+        from collections import defaultdict
+
+        db = get_supabase()
+        await interaction.followup.send("⏳ Fetching battles...", ephemeral=True)
+
+        # Pull all battles
+        all_battles = []
+        offset = 0
+        while True:
+            rows = await asyncio.to_thread(
+                lambda o=offset: db.table("battles").select("*").range(o, o + 999).execute()
+            )
+            if not rows.data:
+                break
+            all_battles.extend(rows.data)
+            if len(rows.data) < 1000:
+                break
+            offset += 1000
+
+        # Tally wins/losses
+        wins   = defaultdict(int)
+        losses = defaultdict(int)
+        for row in all_battles:
+            wins[row["winner_asset_id"]]  += 1
+            losses[row["loser_asset_id"]] += 1
+
+        # Find champions (winner of highest round per bracket)
+        champ_wins = defaultdict(int)
+        brackets   = defaultdict(list)
+        for row in all_battles:
+            brackets[row["bracket_id"]].append(row)
+        for bracket_id, rows in brackets.items():
+            final_round = max(r["bracket_round"] for r in rows)
+            for r in rows:
+                if r["bracket_round"] == final_round:
+                    champ_wins[r["winner_asset_id"]] += 1
+
+        # Build records
+        from datetime import datetime, timezone
+        now     = datetime.now(timezone.utc).isoformat()
+        all_ids = set(wins.keys()) | set(losses.keys())
+        records = [
+            {
+                "asset_id":   aid,
+                "wins":       wins[aid],
+                "losses":     losses[aid],
+                "champ_wins": champ_wins[aid],
+                "updated_at": now,
+            }
+            for aid in all_ids
+        ]
+
+        # Upsert in batches
+        batch_size = 100
+        for i in range(0, len(records), batch_size):
+            batch = records[i:i + batch_size]
+            await asyncio.to_thread(
+                lambda b=batch: db.table("zappy_records").upsert(b, on_conflict="asset_id").execute()
+            )
+
+        await interaction.followup.send(
+            f"✅ Seeded **{len(records)}** Zappy records from **{len(all_battles)}** battles across **{len(brackets)}** brackets.",
+            ephemeral=True,
+        )
+
+    except Exception as e:
+        await interaction.followup.send(f"❌ Seed failed: {e}", ephemeral=True)
 
 
 @tree.command(name="testbracket", description="ADMIN ONLY - trigger a test bracket right now")
@@ -2089,83 +2139,6 @@ async def _addzappies_dummy():
 
 
 
-@tree.command(name="settraits", description="ADMIN - manually set traits for a Zappy")
-@app_commands.describe(
-    asset_id   = "The ASA ID",
-    background = "Background trait",
-    body       = "Body trait",
-    earring    = "Earring trait (or None)",
-    eyes       = "Eyes trait",
-    eyewear    = "Eyewear trait (or None)",
-    head       = "Head trait",
-    mouth      = "Mouth trait",
-    skin       = "Skin trait",
-    image_url  = "Full IPFS image URL (optional)"
-)
-async def cmd_settraits(
-    interaction: discord.Interaction,
-    asset_id:    int,
-    background:  str,
-    body:        str,
-    eyes:        str,
-    head:        str,
-    mouth:       str,
-    skin:        str,
-    earring:     str = "None",
-    eyewear:     str = "None",
-    image_url:   str = "",
-):
-    """Manually set traits for a Zappy — bypasses IPFS."""
-    if interaction.user.id != interaction.guild.owner_id:
-        await interaction.response.send_message("Admin only.", ephemeral=True)
-        return
-
-    await interaction.response.defer(ephemeral=True)
-
-    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
-    from database import get_supabase
-
-    # Get name from indexer if not already known
-    name = ZAPPY_COLLECTION.get(asset_id, {}).get("name", f"Zappy #{asset_id}")
-    unit_name = ZAPPY_COLLECTION.get(asset_id, {}).get("unit_name", "")
-
-    entry = {
-        "name":       name,
-        "unit_name":  unit_name,
-        "image_url":  image_url,
-        "background": background,
-        "body":       body,
-        "earring":    earring,
-        "eyes":       eyes,
-        "eyewear":    eyewear,
-        "head":       head,
-        "mouth":      mouth,
-        "skin":       skin,
-    }
-
-    # Update live collection
-    ZAPPY_COLLECTION[asset_id] = entry
-    ZAPPY_ASSET_IDS.add(asset_id)
-
-    # Persist to Supabase
-    try:
-        db = get_supabase()
-        db.table("extra_zappies").upsert({
-            "asset_id": asset_id,
-            **entry,
-        }).execute()
-        await interaction.followup.send(
-            f"✅ Traits set for **{name}** (`{asset_id}`)\n"
-            f"Background: {background} | Body: {body} | Skin: {skin}\n"
-            f"Eyes: {eyes} | Head: {head} | Mouth: {mouth}\n"
-            f"Earring: {earring} | Eyewear: {eyewear}",
-            ephemeral=True
-        )
-    except Exception as e:
-        await interaction.followup.send(f"Live cache updated but Supabase failed: {e}", ephemeral=True)
-
-
-
 @tree.command(name="exprank", description="View the Expedition leaderboard")
 async def cmd_exprank(interaction: discord.Interaction):
     """Show top expedition players."""
@@ -2707,7 +2680,8 @@ async def close_and_resolve(channel: discord.TextChannel):
                                 f"{streak_token['message']}"
                             )
 
-            # Save result
+            # Save result — is_champion determined after next_round is built below
+            _is_champion = len([p for p in next_round if p]) == 1 if "next_round" in dir() else False
             await asyncio.to_thread(save_battle_result,
                 bracket_id=bracket_id,
                 winner_discord_id=winner_id,
@@ -2716,6 +2690,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                 loser_asset_id=result["loser"].asset_id,
                 is_upset=result["is_upset"],
                 round_num=round_num,
+                is_champion=False,  # updated post-battle by champion block below
             )
 
             # -- Token rewards --
@@ -2793,6 +2768,13 @@ async def close_and_resolve(channel: discord.TextChannel):
             champion_id = next_round[0]["discord_user_id"]
             champ_asset = await fetch_zappy_traits(next_round[0]["asset_id"])
             champ_name = champ_asset["name"] if champ_asset else f"ASA {next_round[0]['asset_id']}"
+
+            # Record champion win in zappy_records
+            try:
+                from database import update_zappy_record as _urec
+                await asyncio.to_thread(_urec, next_round[0]["asset_id"], 0, champ_only=True)
+            except Exception as _e:
+                print(f"[WARN] zappy_records champ update failed: {_e}")
 
             bonus_cp = int(CP_BRACKET_WIN * cp_multiplier)
             try:
@@ -2925,285 +2907,3 @@ def check_apex_test_channel(interaction: discord.Interaction) -> bool:
     if APEX_TEST_CHANNEL is None:
         return True
     return interaction.channel_id == APEX_TEST_CHANNEL
-
-
-def save_apex_test_run(discord_user_id: str, run: dict):
-    try:
-        db.table("apex_test_runs").insert({
-            "discord_user_id":    discord_user_id,
-            "zone_num":           run["zone_num"],
-            "total_cp":           run["total_cp"],
-            "total_tokens":       run["total_tokens"],
-            "momentum_end":       run.get("momentum"),
-            "press_luck_gambled": run.get("press_luck_gambled", False),
-            "press_luck_won":     run.get("press_luck_won", False),
-            "nft_simulated":      run.get("nft_eligible", False),
-            "beat_types":         [e.get("beat_type", "narrative") for e in run["events"]],
-            "zappy_name":         run["zappy"].get("name", "unknown"),
-        }).execute()
-    except Exception as e:
-        print(f"⚠️ apex_test_runs insert failed (non-fatal): {e}")
-
-
-@tree.command(name="expedition_test", description="[TEST] Run the new Apex Summit mechanics — no tokens sent")
-async def cmd_expedition_test(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True)
-
-    if not check_apex_test_channel(interaction):
-        ch_mention = f"<#{APEX_TEST_CHANNEL}>" if APEX_TEST_CHANNEL else "the test channel"
-        await interaction.followup.send(
-            f"❌ Apex test runs in {ch_mention} only.", ephemeral=True
-        )
-        return
-
-    user_id = str(interaction.user.id)
-
-    existing = get_run(user_id)
-    if existing:
-        await interaction.followup.send(
-            "⚠️ You have a run in progress. It will time out after 5 minutes of inactivity.",
-            ephemeral=True,
-        )
-        return
-
-    try:
-        wallet = await asyncio.to_thread(get_wallet, user_id)
-    except Exception as e:
-        wallet = None
-        print(f"⚠️ apex_test get_wallet: {e}")
-
-    if not wallet:
-        await interaction.followup.send(
-            "❌ No wallet linked. Use `/linkwallet` first.", ephemeral=True
-        )
-        return
-
-    # Mirror the real /expedition wallet verification — uses indexer cache
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    now = _t.monotonic()
-    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        ownership = await verify_wallet(user_id, wallet)
-
-    if not ownership["owns"]:
-        await interaction.followup.send(
-            "❌ No Zappies found. If you just linked your wallet, wait a moment and try again.",
-            ephemeral=True,
-        )
-        return
-
-    # Pre-load stats for all Zappies so the picker can show them
-    from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
-    from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
-    from zappy_collection import ZAPPY_COLLECTION
-
-    all_zappies = (
-        ownership["zappies"] +
-        [{"asset_id": h["asset_id"], "name": h.get("name", h.get("hero_type", "Hero")), "unit_name": "Hero"}
-         for h in ownership["heroes"]] +
-        [{"asset_id": c["asset_id"], "name": c.get("name", "Collab"), "unit_name": "Collab"}
-         for c in ownership["collabs"]]
-    )
-    zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
-
-    # Use the same ranked picker the real /expedition uses — zone 5, no entry fee
-    ranked = rank_zappies_for_zone(all_zappies, 5)
-    if not ranked:
-        await interaction.followup.send("❌ Couldn't load Zappy stats.", ephemeral=True)
-        return
-
-    zone        = ZONES[5]
-    priority    = ZONE_STAT_PRIORITY.get(5, ("INS", "VLT", "SPK"))
-    stat_labels = {"VLT": "Voltage (attack)", "INS": "Insulation (defense)", "SPK": "Spark (luck)"}
-
-    embed = discord.Embed(
-        title       = f"{zone['emoji']} Apex Summit Test — Pick your Zappy",
-        description = (
-            f"**Key stat for this zone: {stat_labels.get(priority[0], priority[0])}**\n"
-            f"Top 5 Zappies ranked for Zone 5. No tokens sent — this is a test run."
-        ),
-        color = zone["color"],
-    )
-    for i, z in enumerate(ranked):
-        medal  = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"][i]
-        reason = build_zappy_reason(z, 5)
-        embed.add_field(
-            name   = f"{medal} {z.get('name', z.get('unit_name', 'Zappy'))}",
-            value  = reason,
-            inline = False,
-        )
-    embed.set_footer(text=f"You have {zappy_count} Zappies · Showing best 5 for Apex Summit")
-    if ranked[0].get("image_url"):
-        embed.set_thumbnail(url=_ipfs_url(ranked[0]["image_url"]))
-
-    async def on_zappy_selected(inter: discord.Interaction, asset_id: int):
-        chosen = next((z for z in ranked if z["asset_id"] == asset_id), None)
-        if not chosen:
-            await inter.followup.send("Couldn't find that Zappy.", ephemeral=True)
-            return
-        zappy_data = {
-            "asset_id":  chosen["asset_id"],
-            "name":      chosen.get("name", chosen.get("unit_name", "")),
-            "unit_name": chosen.get("unit_name", ""),
-            "traits":    chosen.get("traits", {}),
-            "stats":     chosen["stats"],
-            "image_url": chosen.get("image_url", ""),
-        }
-        await _run_apex_test_beat(inter, user_id, zappy_data, zappy_count)
-
-    await interaction.followup.send(
-        embed=embed, view=SmartZappyView(ranked, 5, on_zappy_selected), ephemeral=True
-    )
-
-
-
-async def _run_apex_test_beat(
-    interaction: discord.Interaction,
-    user_id: str,
-    zappy_data: dict,
-    zappy_count: int,
-):
-    run = start_run(user_id, 5, zappy_data, zappy_count)
-
-    async def send_next_beat(inter: discord.Interaction, run: dict):
-        if run["complete"]:
-            await finish_run(inter, run)
-            return
-
-        event      = run["events"][run["beat"]]
-        beat_type  = event.get("beat_type", "narrative")
-        image_path = f"./images/{event.get('image', '')}.png"
-        files      = [discord.File(image_path)] if os.path.exists(image_path) else []
-
-        if beat_type == "narrative":
-            embed = build_scene_embed(run)
-            view  = ExpeditionView(run, on_narrative_choice)
-            await inter.followup.send(embed=embed, view=view, files=files, ephemeral=True)
-
-        elif beat_type == "momentum":
-            embed = build_momentum_scene_embed(run)
-            view  = MomentumView(run, on_momentum_choice)
-            await inter.followup.send(embed=embed, view=view, files=files, ephemeral=True)
-
-        elif beat_type == "encounter":
-            start_encounter(user_id)
-            embed = build_encounter_intro_embed(run)
-            await inter.followup.send(embed=embed, files=files, ephemeral=True)
-            await send_encounter_round(inter, run)
-
-        elif beat_type == "resource":
-            embed = build_resource_bet_embed(run)
-            view  = ResourceView(run, on_resource_decision)
-            await inter.followup.send(embed=embed, view=view, files=files, ephemeral=True)
-
-        elif beat_type == "press_luck":
-            embed = build_press_luck_embed(run)
-            view  = PressLuckView(run, on_press_luck_decision)
-            await inter.followup.send(embed=embed, view=view, files=files, ephemeral=True)
-
-    async def send_encounter_round(inter: discord.Interaction, run: dict):
-        event  = run["events"][run["beat"]]
-        estate = run["encounter_state"]
-        rnd    = estate["round"]
-
-        round_embed = discord.Embed(
-            title       = f"⚔️ Round {rnd + 1} of 3  —  {event['guardian_name']}",
-            description = event["round_prompts"][rnd],
-            color       = 0xD85A30,
-        )
-        round_embed.add_field(
-            name  = "Score",
-            value = f"Wins: {estate['wins']}  ·  Losses: {rnd - estate['wins']}",
-            inline=False,
-        )
-        round_embed.set_footer(text="Pick which stat to use this round.")
-        await inter.followup.send(
-            embed=round_embed, view=EncounterView(run, on_encounter_round), ephemeral=True
-        )
-
-    async def finish_run(inter: discord.Interaction, run: dict):
-        nft_simulated = check_nft_drop(run)
-        save_apex_test_run(user_id, run)
-
-        final_embed = build_run_complete_embed(run, nft_drop=False)
-        final_embed.set_footer(
-            text=(
-                f"[TEST — no tokens sent] · "
-                f"Would have paid: {run['total_tokens']} tokens · "
-                f"NFT roll: {'🎉 WOULD HAVE TRIGGERED' if nft_simulated else 'did not trigger'}"
-            )
-        )
-        await inter.followup.send(embed=final_embed, ephemeral=True)
-
-        beat_order = " → ".join(e.get("beat_type", "?") for e in run["events"])
-        await inter.followup.send(
-            f"**Test summary:**\n"
-            f"`{beat_order}`\n"
-            f"Tokens: **{run['total_tokens']}** · CP: **{run['total_cp']}** · "
-            f"Momentum: **{run.get('momentum', 'N/A')}**\n"
-            f"Gambled: {run.get('press_luck_gambled')} · "
-            f"Won: {run.get('press_luck_won')} · "
-            f"NFT sim: {nft_simulated}",
-            ephemeral=True,
-        )
-        end_run(user_id)
-
-    # ── Beat callbacks ──────────────────────────────────────────────
-
-    async def on_narrative_choice(inter: discord.Interaction, choice_index: int):
-        updated = advance_beat(user_id, choice_index)
-        if not updated:
-            await inter.followup.send("Something went wrong.", ephemeral=True); return
-        await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
-        await send_next_beat(inter, updated)
-
-    async def on_momentum_choice(inter: discord.Interaction, choice_index: int):
-        updated = advance_momentum_beat(user_id, choice_index)
-        if not updated:
-            await inter.followup.send("Something went wrong.", ephemeral=True); return
-        await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
-        await send_next_beat(inter, updated)
-
-    async def on_encounter_round(inter: discord.Interaction, stat_choice: str):
-        updated = advance_encounter_round(user_id, stat_choice)
-        if not updated:
-            await inter.followup.send("Something went wrong.", ephemeral=True); return
-
-        last_log  = updated["encounter_state"]["log"][-1]
-        round_num = last_log["round"]
-        result_embed = build_encounter_round_embed(
-            updated, round_num, last_log["won"], last_log["flavor"]
-        )
-        await inter.followup.send(embed=result_embed, ephemeral=True)
-
-        if updated["encounter_state"]["complete"]:
-            await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
-            await send_next_beat(inter, updated)
-        else:
-            await send_encounter_round(inter, updated)
-
-    async def on_resource_decision(inter: discord.Interaction, accept: bool):
-        updated = advance_resource_beat(user_id, accept)
-        if not updated:
-            await inter.followup.send("Something went wrong.", ephemeral=True); return
-        await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
-        await send_next_beat(inter, updated)
-
-    async def on_press_luck_decision(inter: discord.Interaction, gamble: bool):
-        updated = advance_press_luck(user_id, gamble)
-        if not updated:
-            await inter.followup.send("Something went wrong.", ephemeral=True); return
-        await inter.followup.send(embed=build_outcome_embed(updated), ephemeral=True)
-        await finish_run(inter, updated)
-
-    # ── Start the run ───────────────────────────────────────────────
-    await send_next_beat(interaction, run)
-
-
-# ---------------------------------------------
-# Run the bot
-# ---------------------------------------------
-if __name__ == "__main__":
-    bot.run(BOT_TOKEN)
