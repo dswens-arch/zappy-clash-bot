@@ -137,20 +137,6 @@ def _draw_pill(draw, x, y, label, value):
     return x + pw
 
 # ─────────────────────────────────────────────
-# Zappy record lookup
-# ─────────────────────────────────────────────
-async def get_zappy_record(asset_id: int) -> dict:
-    """Single-row lookup from zappy_records table."""
-    try:
-        from database import get_zappy_record as _db_get_record
-        import asyncio
-        return await asyncio.to_thread(_db_get_record, asset_id)
-    except Exception as e:
-        print(f"[entry_card] record lookup failed: {e}")
-        return {"wins": 0, "losses": 0, "champ_wins": 0}
-
-
-# ─────────────────────────────────────────────
 # Main renderer
 # ─────────────────────────────────────────────
 async def render_entry_card(
