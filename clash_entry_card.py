@@ -20,7 +20,7 @@ H            = OUT_H * SCALE
 
 THUMB_OUT    = 52
 THUMB_SIZE   = THUMB_OUT * SCALE
-THUMB_PAD    = 16 * SCALE          # left padding for thumbnail
+THUMB_PAD    = 16 * SCALE
 THUMB_Y      = (H - THUMB_SIZE) // 2
 THUMB_R      = 8 * SCALE
 TEXT_X       = THUMB_PAD + THUMB_SIZE + 16 * SCALE
@@ -30,15 +30,14 @@ TEXT_X       = THUMB_PAD + THUMB_SIZE + 16 * SCALE
 # ─────────────────────────────────────────────
 BG      = (28,  30,  42)
 CARD_BG = (40,  42,  56)
-ACCENT  = (240, 178,  50, 255)   # gold
+ACCENT  = (240, 178,  50, 255)
 WHITE   = (240, 245, 255, 255)
 MUTED   = (140, 150, 175, 255)
 
-# pill: (background, label colour)
 STAT_COLORS = {
-    "VLT": ((240, 178,  50, 255), (28, 30, 42, 255)),   # bg=gold, text=dark
-    "INS": (( 87, 242, 135, 255), (28, 30, 42, 255)),   # bg=green, text=dark  
-    "SPK": ((  0, 176, 244, 255), (28, 30, 42, 255)),   # bg=blue, text=dark
+    "VLT": ((240, 178,  50, 255), (28, 30, 42, 255)),
+    "INS": (( 87, 242, 135, 255), (28, 30, 42, 255)),
+    "SPK": ((  0, 176, 244, 255), (28, 30, 42, 255)),
 }
 
 # ─────────────────────────────────────────────
@@ -54,16 +53,11 @@ def _font(name, size):
             return ImageFont.truetype(path, size)
     return ImageFont.load_default()
 
-# Fonts loaded lazily on first render to avoid startup hangs
-_FB = _FM = _FL = _FV = None
-
-def _load_fonts():
-    global _FB, _FM, _FL, _FV
-    if _FB is None:
-        _FB = _font("Poppins-Bold.ttf",   14 * SCALE)
-        _FM = _font("Poppins-Medium.ttf", 13 * SCALE)
-        _FL = _font("Poppins-Bold.ttf",   10 * SCALE)
-        _FV = _font("Poppins-Bold.ttf",   12 * SCALE)
+_FB = _font("Poppins-Bold.ttf",    14 * SCALE)
+_FM = _font("Poppins-Medium.ttf",  13 * SCALE)
+_FL = _font("Poppins-Bold.ttf",    10 * SCALE)
+_FV = _font("Poppins-Bold.ttf",    12 * SCALE)
+_FR = _font("Poppins-Medium.ttf",  10 * SCALE)   # record line
 
 # ─────────────────────────────────────────────
 # Gateway fetch with fallbacks
@@ -112,28 +106,18 @@ def _draw_fallback(canvas, x, y, size):
     ], fill=ACCENT)
 
 def _draw_pill(draw, x, y, label, value):
-    """Solid colored pill: [LABEL  VALUE] on colored background. Returns right edge x."""
     pill_bg, text_color = STAT_COLORS.get(label, ((100,100,100,255), (0,0,0,255)))
-
     lw  = draw.textlength(label, font=_FL)
     vw  = draw.textlength(value, font=_FV)
-
     PAD = 8  * SCALE
     GAP = 6  * SCALE
     ph  = 20 * SCALE
     pr  = 4  * SCALE
     pw  = int(PAD + lw + GAP + vw + PAD)
     my  = y + ph // 2
-
-    # Solid colored background
     _rr(draw, [x, y, x+pw, y+ph], r=pr, fill=pill_bg)
-
-    # Label — dark text on colored bg
     draw.text((x + PAD, my), label, font=_FL, fill=text_color, anchor="lm")
-
-    # Value — dark text on colored bg
     draw.text((x + PAD + lw + GAP, my), value, font=_FV, fill=text_color, anchor="lm")
-
     return x + pw
 
 # ─────────────────────────────────────────────
@@ -147,11 +131,9 @@ async def render_entry_card(
     record:       dict | None = None,
 ) -> io.BytesIO:
 
-    _load_fonts()
     canvas = Image.new("RGBA", (W, H), BG)
     draw   = ImageDraw.Draw(canvas)
 
-    # Card background + gold left bar
     I = 4 * SCALE
     _rr(draw, [I, I, W-I, H-I], r=10*SCALE, fill=CARD_BG)
     _rr(draw, [I, I, I+5*SCALE, H-I], r=3*SCALE, fill=ACCENT)
@@ -168,24 +150,25 @@ async def render_entry_card(
     else:
         _draw_fallback(canvas, THUMB_PAD, THUMB_Y, THUMB_SIZE)
 
-    # ── Line 1: "displayname  enters with  Zappy #1474" ──
-    L1 = int(H * 0.30)
-    L2 = int(H * 0.67)
+    # Line positions
+    L1 = int(H * 0.26)
+    L2 = int(H * 0.55)
+    L3 = int(H * 0.80)
 
     x = TEXT_X
 
-    # Username bold white
+    # Username
     nw = int(draw.textlength(display_name, font=_FB))
     draw.text((x, L1), display_name, font=_FB, fill=WHITE, anchor="lm")
     x += nw
 
-    # "  enters with  " muted
+    # "  enters with  "
     mid = "  enters with  "
     mw  = int(draw.textlength(mid, font=_FM))
     draw.text((x, L1), mid, font=_FM, fill=MUTED, anchor="lm")
     x += mw
 
-    # "Zappy " gold, "#number" bold gold
+    # Zappy name in gold
     if "#" in zappy_name:
         prefix, num = zappy_name.rsplit("#", 1)
         prefix_str  = prefix.strip() + " " if prefix.strip() else "Zappy "
@@ -196,21 +179,20 @@ async def render_entry_card(
     else:
         draw.text((x, L1), zappy_name, font=_FB, fill=ACCENT, anchor="lm")
 
-    # ── Line 2: stat pills ──
+    # Stat pills
     px = TEXT_X
     for key in ("VLT", "INS", "SPK"):
-        px = _draw_pill(draw, px, L2 - 11*SCALE, key, str(stats.get(key, "?"))) + 8*SCALE
+        px = _draw_pill(draw, px, L2 - 10*SCALE, key, str(stats.get(key, "?"))) + 8*SCALE
 
-    # ── Record line (if available) ──────────
-    if record and (record["wins"] + record["losses"]) > 0:
-        FR = _font("Poppins-Medium.ttf", 10 * SCALE)
+    # Record line
+    if record and (record.get("wins", 0) + record.get("losses", 0)) > 0:
         wins   = record["wins"]
         losses = record["losses"]
-        champs = record["champ_wins"]
-        rec_text   = f"{wins}W  {losses}L"
-        champ_text = f"  👑 {champs}" if champs > 0 else ""
-        full_text  = rec_text + champ_text
-        draw.text((TEXT_X, L2 + 14 * SCALE), full_text, font=FR, fill=MUTED, anchor="lm")
+        champs = record.get("champ_wins", 0)
+        rec_text = f"{wins}W  {losses}L"
+        if champs > 0:
+            rec_text += f"   👑 {champs}"
+        draw.text((TEXT_X, L3), rec_text, font=_FR, fill=MUTED, anchor="lm")
 
     # Downscale 2x → 1x
     out = canvas.resize((OUT_W, OUT_H), Image.LANCZOS)
