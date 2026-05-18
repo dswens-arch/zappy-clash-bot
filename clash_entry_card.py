@@ -57,7 +57,6 @@ _FB = _font("Poppins-Bold.ttf",    14 * SCALE)
 _FM = _font("Poppins-Medium.ttf",  13 * SCALE)
 _FL = _font("Poppins-Bold.ttf",    10 * SCALE)
 _FV = _font("Poppins-Bold.ttf",    12 * SCALE)
-_FR = _font("Poppins-Medium.ttf",  10 * SCALE)   # record line
 
 # ─────────────────────────────────────────────
 # Gateway fetch with fallbacks
@@ -192,7 +191,7 @@ async def render_entry_card(
         rec_text = f"{wins}W  {losses}L"
         if champs > 0:
             rec_text += f"   👑 {champs}"
-        draw.text((TEXT_X, L3), rec_text, font=_FR, fill=MUTED, anchor="lm")
+        draw.text((TEXT_X, L3), rec_text, font=_FM, fill=MUTED, anchor="lm")
 
     # Downscale 2x → 1x
     out = canvas.resize((OUT_W, OUT_H), Image.LANCZOS)
