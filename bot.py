@@ -54,6 +54,7 @@ from nft_rewards       import award_nft_prize, claim_nft_prize
 from buddy_rewards     import check_buddy_drop, award_buddy, claim_buddy
 from clash_chaos_modifiers import apply_all_modifiers, freaky_friday_reveal
 from clash_entry_card import render_entry_card
+from clash_winner_card import render_winner_card
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -313,25 +314,23 @@ async def cmd_clash(interaction: discord.Interaction):
             hero_type = HERO_ASSET_IDS[asset_id]
             data = get_hero_stats(hero_type)
             if data:
-                from algorand_lookup import HERO_IMAGES
                 scored.append({
                     "asset_id":  asset_id,
                     "name":      f"Hero — {hero_type}",
                     "stats":     data,
                     "score":     data["VLT"] + data["INS"] + data["SPK"],
-                    "image_url": HERO_IMAGES.get(hero_type, ""),
+                    "image_url": "",
                 })
         elif asset_id in COLLAB_ASSET_IDS:
             collab_type = COLLAB_ASSET_IDS[asset_id]
             data = get_collab_stats(collab_type)
             if data:
-                from algorand_lookup import COLLAB_IMAGES
                 scored.append({
                     "asset_id":  asset_id,
                     "name":      collab_type,
                     "stats":     data,
                     "score":     data["VLT"] + data["INS"] + data["SPK"],
-                    "image_url": COLLAB_IMAGES.get(collab_type, ""),
+                    "image_url": "",
                 })
         else:
             entry = ZAPPY_COLLECTION.get(asset_id)
@@ -914,6 +913,37 @@ async def cmd_seedzappyrecords(interaction: discord.Interaction):
 
     except Exception as e:
         await interaction.followup.send(f"❌ Seed failed: {e}", ephemeral=True)
+
+
+@tree.command(name="testwinner", description="ADMIN ONLY - preview the bracket champion winner card")
+@app_commands.describe(asset_id="The Zappy ASA ID to preview (default: 2644039660)")
+async def cmd_testwinner(interaction: discord.Interaction, asset_id: int = 2644039660):
+    """Render and post a test winner card. Owner only."""
+    if interaction.user.id != interaction.guild.owner_id:
+        await interaction.response.send_message("❌ Admin only.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    zappy = await fetch_zappy_traits(asset_id)
+    if not zappy:
+        await interaction.followup.send(f"❌ Could not fetch Zappy ASA {asset_id}.", ephemeral=True)
+        return
+
+    record = await asyncio.to_thread(get_zappy_record, asset_id)
+
+    card_buf = await render_winner_card(
+        zappy_name=zappy.get("name", f"Zappy #{asset_id}"),
+        display_name=interaction.user.display_name,
+        record=record,
+        image_url=zappy.get("image_url", ""),
+    )
+
+    await interaction.followup.send(
+        content=f"🏆 Winner card preview for **{zappy.get('name')}** (ASA `{asset_id}`)",
+        file=discord.File(card_buf, filename="winner_preview.png"),
+        ephemeral=True,
+    )
 
 
 @tree.command(name="testbracket", description="ADMIN ONLY - trigger a test bracket right now")
@@ -2919,15 +2949,37 @@ async def close_and_resolve(channel: discord.TextChannel):
                         f"Use `/claimnft` to collect your prize. ⚡"
                     )
 
-            await channel.send(
-                f"\n🏆 **BRACKET CHAMPION!**\n"
-                f"<@{champion_id}> wins it all with **{champ_name}**!\n"
-                f"💰 **+{bonus_cp} CP** bracket champion bonus!"
-                f"{champ_token_msg}"
-                f"{nft_drop_msg}\n"
-                f"\n"
-                f"⚡ Use `/top` to see the updated leaderboard."
-            )
+            try:
+                champ_member  = channel.guild.get_member(int(champion_id))
+                champ_display = champ_member.display_name if champ_member else champion_id
+                champ_record  = await asyncio.to_thread(get_zappy_record, next_round[0]["asset_id"])
+                champ_card_buf = await render_winner_card(
+                    zappy_name=champ_name,
+                    display_name=champ_display,
+                    record=champ_record,
+                    image_url=champ_asset.get("image_url", "") if champ_asset else "",
+                )
+                await channel.send(
+                    content=(
+                        f"🏆 **BRACKET CHAMPION!**\n"
+                        f"<@{champion_id}> wins it all with **{champ_name}**!\n"
+                        f"💰 **+{bonus_cp} CP** bracket champion bonus!"
+                        f"{champ_token_msg}"
+                        f"{nft_drop_msg}\n"
+                        f"⚡ Use `/top` to see the updated leaderboard."
+                    ),
+                    file=discord.File(champ_card_buf, filename="champion.png"),
+                )
+            except Exception as _ce:
+                print(f"[winner_card] render failed: {_ce}")
+                await channel.send(
+                    f"🏆 **BRACKET CHAMPION!**\n"
+                    f"<@{champion_id}> wins it all with **{champ_name}**!\n"
+                    f"💰 **+{bonus_cp} CP** bracket champion bonus!"
+                    f"{champ_token_msg}"
+                    f"{nft_drop_msg}\n"
+                    f"⚡ Use `/top` to see the updated leaderboard."
+                )
             break
 
     active_bracket_id = None
