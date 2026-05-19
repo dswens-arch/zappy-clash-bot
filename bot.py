@@ -313,23 +313,25 @@ async def cmd_clash(interaction: discord.Interaction):
             hero_type = HERO_ASSET_IDS[asset_id]
             data = get_hero_stats(hero_type)
             if data:
+                from algorand_lookup import HERO_IMAGES
                 scored.append({
                     "asset_id":  asset_id,
                     "name":      f"Hero — {hero_type}",
                     "stats":     data,
                     "score":     data["VLT"] + data["INS"] + data["SPK"],
-                    "image_url": "",
+                    "image_url": HERO_IMAGES.get(hero_type, ""),
                 })
         elif asset_id in COLLAB_ASSET_IDS:
             collab_type = COLLAB_ASSET_IDS[asset_id]
             data = get_collab_stats(collab_type)
             if data:
+                from algorand_lookup import COLLAB_IMAGES
                 scored.append({
                     "asset_id":  asset_id,
                     "name":      collab_type,
                     "stats":     data,
                     "score":     data["VLT"] + data["INS"] + data["SPK"],
-                    "image_url": "",
+                    "image_url": COLLAB_IMAGES.get(collab_type, ""),
                 })
         else:
             entry = ZAPPY_COLLECTION.get(asset_id)
