@@ -314,23 +314,25 @@ async def cmd_clash(interaction: discord.Interaction):
             hero_type = HERO_ASSET_IDS[asset_id]
             data = get_hero_stats(hero_type)
             if data:
+                from algorand_lookup import HERO_IMAGES
                 scored.append({
                     "asset_id":  asset_id,
                     "name":      f"Hero — {hero_type}",
                     "stats":     data,
                     "score":     data["VLT"] + data["INS"] + data["SPK"],
-                    "image_url": "",
+                    "image_url": HERO_IMAGES.get(hero_type, ""),
                 })
         elif asset_id in COLLAB_ASSET_IDS:
             collab_type = COLLAB_ASSET_IDS[asset_id]
             data = get_collab_stats(collab_type)
             if data:
+                from algorand_lookup import COLLAB_IMAGES
                 scored.append({
                     "asset_id":  asset_id,
                     "name":      collab_type,
                     "stats":     data,
                     "score":     data["VLT"] + data["INS"] + data["SPK"],
-                    "image_url": "",
+                    "image_url": COLLAB_IMAGES.get(collab_type, ""),
                 })
         else:
             entry = ZAPPY_COLLECTION.get(asset_id)
@@ -2652,9 +2654,25 @@ async def close_and_resolve(channel: discord.TextChannel):
             # Fetch Zappy data — use collection table for consistent stats
             from zappy_collection import ZAPPY_COLLECTION
             from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS, HERO_IMAGES, COLLAB_IMAGES
-            from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
+            from stats_engine import calculate_stats, get_hero_stats, get_collab_stats, get_king_stats
+
+            KING_ASA = 3562991430
 
             def _get_fighter_data(asset_id):
+                # ── King Zappy #1200 — boosted stats + Royal Decree ──
+                if asset_id == KING_ASA:
+                    king_data = get_king_stats(asset_id)
+                    if king_data:
+                        entry = ZAPPY_COLLECTION.get(asset_id, {})
+                        return {
+                            "asset_id":  asset_id,
+                            "name":      entry.get("name", "Zappy #1200"),
+                            "unit_name": entry.get("unit_name", "ZAPP1200"),
+                            "image_url": entry.get("image_url", ""),
+                            "stats":     king_data,
+                            "traits":    entry,
+                        }
+
                 # ── Heroes — hardcoded stats, not in ZAPPY_COLLECTION ──
                 if asset_id in HERO_ASSET_IDS:
                     hero_type = HERO_ASSET_IDS[asset_id]
