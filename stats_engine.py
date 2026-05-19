@@ -515,9 +515,9 @@ def get_ability(traits: dict) -> dict | None:
             "trigger_round": 1,
         },
         "Crown": {
-            "name": "Royal Surge",
-            "desc": "VLT doubles for round 1. Momentum starts strong.",
-            "trigger_round": 1,
+            "name": "Royal Decree",
+            "desc": "Forces opponent to skip their round 2 attack. The King decides who swings.",
+            "trigger_round": 2,
         },
     }
 
@@ -556,6 +556,22 @@ def get_ability(traits: dict) -> dict | None:
 
     return None
 
+
+KING_STATS = {
+    3562991430: {
+        "VLT": 75, "INS": 75, "SPK": 75,
+        "ability": {
+            "name": "Royal Decree",
+            "desc": "Forces opponent to skip their round 2 attack. The King decides who swings.",
+            "trigger_round": 2,
+        },
+        "combo": "👑 Royal Command",
+    }
+}
+
+def get_king_stats(asset_id: int) -> dict | None:
+    """Returns boosted stats for the #1 King Zappy by ASA ID."""
+    return KING_STATS.get(asset_id)
 
 def get_hero_stats(hero_type: str) -> dict:
     """Returns stats for a Zappy Hero token."""
