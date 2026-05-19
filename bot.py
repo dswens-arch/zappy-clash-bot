@@ -2874,15 +2874,18 @@ async def close_and_resolve(channel: discord.TextChannel):
                 win_desc += token_msg
 
             winner_name = name_a if result["winner"].asset_id == player_a["asset_id"] else name_b
-            win_embed = discord.Embed(
-                title=f"🏆 {winner.display_name} wins! ({winner_name})",
-                description=win_desc,
-                color=0xF5E642,
-            )
-            if winner.image_url:
-                win_embed.set_image(url=_ipfs_url(winner.image_url))
-            win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
-            await channel.send(embed=win_embed)
+            # Skip win embed for final round — champion card handles it
+            is_final_round = len(next_round) == 1
+            if not is_final_round:
+                win_embed = discord.Embed(
+                    title=f"🏆 {winner.display_name} wins! ({winner_name})",
+                    description=win_desc,
+                    color=0xF5E642,
+                )
+                if winner.image_url:
+                    win_embed.set_image(url=_ipfs_url(winner.image_url))
+                win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
+                await channel.send(embed=win_embed)
 
             # Determine who advances
             if result["winner"].asset_id == player_a["asset_id"]:
