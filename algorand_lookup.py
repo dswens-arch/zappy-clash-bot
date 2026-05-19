@@ -11,7 +11,9 @@ Everything else is instant from the local lookup table.
 import aiohttp
 import asyncio
 from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
-from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
+from stats_engine import calculate_stats, get_hero_stats, get_collab_stats, get_king_stats
+
+KING_ASA = 3562991430
 
 # ─────────────────────────────────────────────
 # Config
@@ -67,6 +69,24 @@ async def fetch_zappy_traits(asset_id: int) -> dict | None:
     """
     if asset_id in _zappy_cache:
         return _zappy_cache[asset_id]
+
+    # King Zappy #1200 — boosted stats + Royal Decree override
+    if asset_id == KING_ASA:
+        king_data = get_king_stats(asset_id)
+        entry = ZAPPY_COLLECTION.get(asset_id, {})
+        if king_data and entry:
+            result = {
+                "asset_id":  asset_id,
+                "name":      entry.get("name", "Zappy #1200"),
+                "unit_name": entry.get("unit_name", "ZAPP1200"),
+                "is_hero":   False,
+                "is_collab": False,
+                "traits":    entry,
+                "stats":     king_data,
+                "image_url": entry.get("image_url", ""),
+            }
+            _zappy_cache[asset_id] = result
+            return result
 
     # Heroes
     if asset_id in HERO_ASSET_IDS:
