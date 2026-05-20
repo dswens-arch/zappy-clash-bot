@@ -203,6 +203,15 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
     elif name == "See-Through":
         return True, f"🩻 **SEE-THROUGH** (passive) — {fighter.display_name}'s stats were revealed to the channel first."
 
+    elif name == "Talon Strike":
+        import random as _rand
+        if _rand.random() < 0.5:
+            bonus = int(opponent.hp * 0.8)
+            opponent.hp -= bonus
+            return True, f"🦅 **TALON STRIKE!** {fighter.display_name} dives — {bonus} bonus damage! {opponent.display_name} is reeling!"
+        else:
+            return True, f"🦅 **TALON STRIKE MISSES!** {fighter.display_name} overcommits — {opponent.display_name} sidesteps the dive!"
+
     elif name == "Zappy Spirit":
         fighter.VLT += 5
         fighter.INS += 5
