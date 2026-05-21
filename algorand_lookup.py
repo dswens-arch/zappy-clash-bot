@@ -18,7 +18,8 @@ KING_ASA = 3562991430
 # ─────────────────────────────────────────────
 # Config
 # ─────────────────────────────────────────────
-INDEXER_URL = "https://mainnet-idx.algonode.cloud"
+INDEXER_URL  = "https://mainnet-idx.algonode.cloud"
+INDEXER_URL2 = "https://mainnet-idx.4160.nodely.io"   # fallback
 
 HERO_ASSET_IDS = {
     2742429215: "Bear",
@@ -194,8 +195,19 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
                 async with session.get(url, params=params,
                                        timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status != 200:
-                        result["error"] = f"Indexer returned {resp.status}"
-                        return result
+                        # Try fallback indexer
+                        fallback_url = f"{INDEXER_URL2}/v2/accounts/{wallet_address}/assets"
+                        async with session.get(fallback_url, params=params,
+                                               timeout=aiohttp.ClientTimeout(total=15)) as resp2:
+                            if resp2.status != 200:
+                                result["error"] = f"Both indexers failed: {resp.status}, {resp2.status}"
+                                return result
+                            data = await resp2.json()
+                            assets.extend(data.get("assets", []))
+                            next_token = data.get("next-token")
+                            if not next_token:
+                                break
+                            continue
                     data = await resp.json()
                     assets.extend(data.get("assets", []))
                     next_token = data.get("next-token")
@@ -237,9 +249,12 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
     except Exception as e:
         result["error"] = f"Error: {e}"
 
-    # Cache the result (even errors, to avoid hammering on failures)
-    _wallet_cache[wallet_address]    = result
-    _wallet_cache_ts[wallet_address] = _time.monotonic()
+    # Only cache successful results — don't cache errors so retries work
+    if not result["error"]:
+        _wallet_cache[wallet_address]    = result
+        _wallet_cache_ts[wallet_address] = _time.monotonic()
+    else:
+        print(f"[algorand_lookup] wallet check error for {wallet_address[:8]}...: {result['error']}")
     return result
 
 
