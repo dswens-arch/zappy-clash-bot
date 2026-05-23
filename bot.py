@@ -2774,11 +2774,14 @@ async def close_and_resolve(channel: discord.TextChannel):
             await channel.send(embed=pre_embed)
             await asyncio.sleep(2)
 
-            # -- Play-by-play text (skip header lines and final win line) --
+            # -- Play-by-play text (skip header shown in embed, use sentinel marker) --
             log_lines = result["log"]
-            # Skip first 6 lines (stat header shown in embed)
-            # Skip last line (win announcement shown in embed)
-            play_lines = log_lines[6:-1]
+            # Find sentinel inserted by battle_engine after the header block
+            try:
+                start_idx = log_lines.index("---PLAY_BY_PLAY_START---") + 1
+            except ValueError:
+                start_idx = 6   # fallback for older battle results
+            play_lines = log_lines[start_idx:-1]
             play_by_play = "\n".join(play_lines)
             chunks = [play_by_play[i:i+1800] for i in range(0, len(play_by_play), 1800)]
             for chunk in chunks:
