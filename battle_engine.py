@@ -288,6 +288,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
     if fighter_b.combo:
         log.append(f"  ↳ {fighter_b.combo}")
     log.append("")
+    log.append("---PLAY_BY_PLAY_START---")
 
     # Track if it's an upset (lower total stats wins)
     a_total = fighter_a.VLT + fighter_a.INS + fighter_a.SPK
