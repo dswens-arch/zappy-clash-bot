@@ -55,6 +55,7 @@ from buddy_rewards     import check_buddy_drop, award_buddy, claim_buddy
 from clash_chaos_modifiers import apply_all_modifiers, freaky_friday_reveal
 from clash_entry_card import render_entry_card
 from clash_winner_card import render_winner_card
+from recap_generator import generate_champion_recap
 from database        import (
     link_wallet as db_link_wallet,
     get_wallet,
@@ -2994,6 +2995,25 @@ async def close_and_resolve(channel: discord.TextChannel):
                     ),
                     file=discord.File(champ_card_buf, filename="champion.png"),
                 )
+
+                # AI-generated champion recap based on NFT image
+                recap_image_url = champ_asset.get("image_url", "") if champ_asset else ""
+                if recap_image_url:
+                    try:
+                        recap_text = await generate_champion_recap(
+                            zappy_name=champ_name,
+                            display_name=champ_display,
+                            image_url=recap_image_url,
+                            wins=champ_record.get("wins", 0),
+                            losses=champ_record.get("losses", 0),
+                            champ_count=champ_record.get("champ_wins", 0),
+                            cp_earned=bonus_cp,
+                        )
+                        if recap_text:
+                            await channel.send(f"📜 {recap_text}")
+                    except Exception as recap_err:
+                        print(f"[recap] failed: {recap_err}")
+
             except Exception as _ce:
                 print(f"[winner_card] render failed: {_ce}")
                 await channel.send(
