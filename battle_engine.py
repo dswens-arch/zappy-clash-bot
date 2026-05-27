@@ -44,6 +44,7 @@ class Fighter:
     survived_zero:   bool  = field(default=False, init=False)   # Nine Lives tracker
     iron_shell_used:    bool  = field(default=False, init=False)   # Iron Shell one-time shield tracker
     skip_next_attack:   bool  = field(default=False, init=False)   # Royal Decree skip flag
+    shield_active:      bool  = field(default=False, init=False)   # Divine Shield block flag
 
     @property
     def display_name(self) -> str:
@@ -134,7 +135,7 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         return True, f"🔥 **INFERNO SURGE!** {fighter.display_name}'s VLT doubles this round!"
 
     elif name == "Divine Shield":
-        opponent.INS = min(100, opponent.INS - 30)
+        fighter.shield_active = True
         return True, f"😇 **DIVINE SHIELD!** {fighter.display_name} blocks all incoming damage this round!"
 
     elif name == "Soul Deal":
@@ -311,6 +312,10 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             fighter_a.skip_next_attack = False
             round_msg.append(f"  👑 **{fighter_a.display_name}** is forbidden from attacking this round!")
             dmg_a, crit_a = 0, False
+        elif fighter_b.shield_active:
+            fighter_b.shield_active = False
+            round_msg.append(f"  😇 **{fighter_b.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
+            dmg_a, crit_a = 0, False
         else:
             dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
 
@@ -333,6 +338,10 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         if fighter_b.skip_next_attack:
             fighter_b.skip_next_attack = False
             round_msg.append(f"  👑 **{fighter_b.display_name}** is forbidden from attacking this round!")
+            dmg_b, crit_b = 0, False
+        elif fighter_a.shield_active:
+            fighter_a.shield_active = False
+            round_msg.append(f"  😇 **{fighter_a.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
             dmg_b, crit_b = 0, False
         else:
             dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
