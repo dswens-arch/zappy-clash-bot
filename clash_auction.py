@@ -251,16 +251,20 @@ _bot_ref = None  # set during setup
 @tasks.loop(seconds=60)
 async def auction_checker():
     """Poll every 60s for auctions that have expired and close them."""
+    import asyncio
     try:
         db = get_db()
         now = datetime.now(timezone.utc).isoformat()
 
-        # Find all open auctions whose end time has passed
-        result = db.table("clash_auctions") \
-            .select("*") \
-            .eq("status", "open") \
-            .lte("ends_at", now) \
-            .execute()
+        # Wrap blocking Supabase call to avoid blocking the async event loop
+        def fetch_expired():
+            return db.table("clash_auctions") \
+                .select("*") \
+                .eq("status", "open") \
+                .lte("ends_at", now) \
+                .execute()
+
+        result = await asyncio.to_thread(fetch_expired)
 
         for auction in (result.data or []):
             print(f"[Auction] Auto-closing auction {auction['id']} — {auction['nft_name']}")
@@ -507,6 +511,9 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
             f"✅ Auction for **{auction['nft_name']}** has been closed.", ephemeral=True
         )
 
-    # Register the group
-    tree.add_command(auction_group, guild=guild)
-    print("✅ Auction commands registered")
+    # Guard against duplicate registration on bot reconnect
+    if tree.get_command("auction", guild=guild) is None:
+        tree.add_command(auction_group, guild=guild)
+        print("✅ Auction commands registered")
+    else:
+        print("⚡ Auction commands already registered — skipping")
