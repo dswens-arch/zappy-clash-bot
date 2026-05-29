@@ -341,6 +341,7 @@ HERO_STATS = {
     "Wolf":       {"VLT": 92, "INS": 85, "SPK": 70, "ability": {"name": "Pack Hunt",  "desc": "VLT increases by 10 each round. The longer the fight, the worse it gets for you.",  "trigger_round": "random"}},
     "Frog":       {"VLT": 75, "INS": 68, "SPK": 94, "ability": {"name": "Patience",   "desc": "Sits out round 1 entirely, then crits are guaranteed in round 2.", "trigger_round": 1}},
     "Eagle":      {"VLT": 82, "INS": 58, "SPK": 100, "ability": {"name": "Talon Strike", "desc": "50% chance at the start of round 1 to deal 80% of opponent's current HP as bonus damage. Miss and you're exposed.", "trigger_round": 1}},
+    "Buck":       {"VLT": 88, "INS": 82, "SPK": 65, "ability": {"name": "Antler Clash", "desc": "Reduces opponent's VLT by 15 starting round 2. The longer the fight, the less damage they can deal.", "trigger_round": 2}},
 }
 
 COLLAB_STATS = {
