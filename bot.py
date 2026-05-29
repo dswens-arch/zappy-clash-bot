@@ -79,6 +79,7 @@ BOT_TOKEN       = os.environ["DISCORD_BOT_TOKEN"]
 GUILD_ID        = int(os.environ["DISCORD_GUILD_ID"])
 CLASH_CHANNEL      = int(os.environ["CLASH_CHANNEL_ID"])    # #zappy-clash channel ID
 ANNOUNCE_CHANNEL   = int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
+ADMIN_NOTIFY_ID    = int(os.environ["ADMIN_NOTIFY_USER_ID"]) if os.environ.get("ADMIN_NOTIFY_USER_ID") else None  # e.g. dano's Discord user ID
 EXPEDITION_CHANNEL = int(os.environ["EXPEDITION_CHANNEL_ID"]) if os.environ.get("EXPEDITION_CHANNEL_ID") else None   # Optional - if not set, works anywhere
 APEX_TEST_CHANNEL  = int(os.environ["APEX_TEST_CHANNEL_ID"])  if os.environ.get("APEX_TEST_CHANNEL_ID")  else None   # Optional - test channel for /expedition_test
 
@@ -845,6 +846,63 @@ async def cmd_testcard(interaction: discord.Interaction, asset_id: int = 2644039
     )
 
 
+
+async def cmd_seedzappyrecords_internal():
+    """Recalculate and upsert all zappy_records from battles history. Called after every bracket."""
+    from database import get_supabase
+    from collections import defaultdict
+
+    db = get_supabase()
+
+    all_battles = []
+    offset = 0
+    while True:
+        rows = await asyncio.to_thread(
+            lambda o=offset: db.table("battles").select("*").range(o, o + 999).execute()
+        )
+        if not rows.data:
+            break
+        all_battles.extend(rows.data)
+        if len(rows.data) < 1000:
+            break
+        offset += 1000
+
+    wins   = defaultdict(int)
+    losses = defaultdict(int)
+    for row in all_battles:
+        wins[row["winner_asset_id"]]  += 1
+        losses[row["loser_asset_id"]] += 1
+
+    champ_wins = defaultdict(int)
+    brackets   = defaultdict(list)
+    for row in all_battles:
+        brackets[row["bracket_id"]].append(row)
+    for bid, rows in brackets.items():
+        final_round = max(r["bracket_round"] for r in rows)
+        for r in rows:
+            if r["bracket_round"] == final_round:
+                champ_wins[r["winner_asset_id"]] += 1
+
+    now     = datetime.now(timezone.utc).isoformat()
+    all_ids = set(wins.keys()) | set(losses.keys())
+    records = [
+        {
+            "asset_id":   aid,
+            "wins":       wins[aid],
+            "losses":     losses[aid],
+            "champ_wins": champ_wins[aid],
+            "updated_at": now,
+        }
+        for aid in all_ids
+    ]
+    for i in range(0, len(records), 100):
+        batch = records[i:i + 100]
+        await asyncio.to_thread(
+            lambda b=batch: db.table("zappy_records").upsert(b, on_conflict="asset_id").execute()
+        )
+    print(f"[records] rebuilt {len(records)} records across {len(brackets)} brackets")
+
+
 @tree.command(name="seedzappyrecords", description="ADMIN ONLY - seed zappy_records table from battles history")
 async def cmd_seedzappyrecords(interaction: discord.Interaction):
     """One-time seed of zappy_records from battles history. Owner only."""
@@ -853,69 +911,11 @@ async def cmd_seedzappyrecords(interaction: discord.Interaction):
         return
 
     await interaction.response.defer(ephemeral=True)
-
     try:
-        from database import get_supabase
-        from collections import defaultdict
-        from datetime import datetime, timezone
-
-        db = get_supabase()
-
-        all_battles = []
-        offset = 0
-        while True:
-            rows = await asyncio.to_thread(
-                lambda o=offset: db.table("battles").select("*").range(o, o + 999).execute()
-            )
-            if not rows.data:
-                break
-            all_battles.extend(rows.data)
-            if len(rows.data) < 1000:
-                break
-            offset += 1000
-
-        wins   = defaultdict(int)
-        losses = defaultdict(int)
-        for row in all_battles:
-            wins[row["winner_asset_id"]]  += 1
-            losses[row["loser_asset_id"]] += 1
-
-        champ_wins = defaultdict(int)
-        brackets   = defaultdict(list)
-        for row in all_battles:
-            brackets[row["bracket_id"]].append(row)
-        for bracket_id, rows in brackets.items():
-            final_round = max(r["bracket_round"] for r in rows)
-            for r in rows:
-                if r["bracket_round"] == final_round:
-                    champ_wins[r["winner_asset_id"]] += 1
-
-        now     = datetime.now(timezone.utc).isoformat()
-        all_ids = set(wins.keys()) | set(losses.keys())
-        records = [
-            {
-                "asset_id":   aid,
-                "wins":       wins[aid],
-                "losses":     losses[aid],
-                "champ_wins": champ_wins[aid],
-                "updated_at": now,
-            }
-            for aid in all_ids
-        ]
-
-        for i in range(0, len(records), 100):
-            batch = records[i:i + 100]
-            await asyncio.to_thread(
-                lambda b=batch: db.table("zappy_records").upsert(b, on_conflict="asset_id").execute()
-            )
-
-        await interaction.followup.send(
-            f"✅ Seeded **{len(records)}** Zappy records from **{len(all_battles)}** battles across **{len(brackets)}** brackets.",
-            ephemeral=True,
-        )
-
+        await cmd_seedzappyrecords_internal()
+        await interaction.followup.send("✅ Zappy records rebuilt from battles history.", ephemeral=True)
     except Exception as e:
-        await interaction.followup.send(f"❌ Seed failed: {e}", ephemeral=True)
+        await interaction.followup.send(f"❌ Rebuild failed: {e}", ephemeral=True)
 
 
 @tree.command(name="testwinner", description="ADMIN ONLY - preview the bracket champion winner card")
@@ -2772,6 +2772,25 @@ async def close_and_resolve(channel: discord.TextChannel):
                 pre_embed.set_thumbnail(url=_ipfs_url(fighter_a.image_url))
             if fighter_b.image_url:
                 pre_embed.set_image(url=_ipfs_url(fighter_b.image_url))
+
+            # Show See-Through passive in pre-battle embed if either fighter has it
+            for f, opp in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
+                ab = f.ability
+                if ab and isinstance(ab, dict) and ab.get("name") == "See-Through":
+                    opp_stats = {"VLT": opp.VLT, "INS": opp.INS, "SPK": opp.SPK}
+                    dominant  = max(opp_stats, key=opp_stats.get)
+                    bonus     = int(opp_stats[dominant] * 0.18)
+                    counter   = "INS" if dominant == "VLT" else "VLT"
+                    pre_embed.add_field(
+                        name="🩻 See-Through",
+                        value=(
+                            f"**{f.display_name}** reads {opp.display_name}'s dominant stat "
+                            f"(**{dominant} {opp_stats[dominant]}**) — "
+                            f"+{bonus} {counter} applied before round 1."
+                        ),
+                        inline=False,
+                    )
+
             await channel.send(embed=pre_embed)
             await asyncio.sleep(2)
 
@@ -2881,15 +2900,21 @@ async def close_and_resolve(channel: discord.TextChannel):
             # Skip win embed for final round — champion card handles it
             is_final_round = len(next_round) == 1
             if not is_final_round:
-                win_embed = discord.Embed(
-                    title=f"🏆 {winner.display_name} wins! ({winner_name})",
-                    description=win_desc,
-                    color=0xF5E642,
-                )
-                if winner.image_url:
-                    win_embed.set_image(url=_ipfs_url(winner.image_url))
-                win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
-                await channel.send(embed=win_embed)
+                try:
+                    win_embed = discord.Embed(
+                        title=f"🏆 {winner.display_name} wins! ({winner_name})",
+                        description=win_desc,
+                        color=0xF5E642,
+                    )
+                    if winner.image_url:
+                        win_embed.set_image(url=_ipfs_url(winner.image_url))
+                    win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
+                    await channel.send(embed=win_embed)
+                except Exception as embed_err:
+                    print(f"[battle] win embed failed: {embed_err}")
+                    await channel.send(
+                        f"🏆 **{winner.display_name}** ({winner_name}) wins!\n{win_desc}"
+                    )
 
             # Determine who advances
             if result["winner"].asset_id == player_a["asset_id"]:
@@ -2937,6 +2962,12 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             # Set 48-hour cooldown on champion Zappy
             await asyncio.to_thread(set_champion_cooldown, next_round[0]["asset_id"])
+
+            # Recalculate zappy_records so champ_wins stays current
+            try:
+                await cmd_seedzappyrecords_internal()
+            except Exception as rec_err:
+                print(f"[records] post-bracket recalc failed: {rec_err}")
 
             # Assign Clash Champion role
             await assign_champion_role(champion_id)
