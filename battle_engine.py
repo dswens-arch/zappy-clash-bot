@@ -202,7 +202,8 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         return True, f"🎵 **SIREN CALL!** {opponent.display_name} is confused — INS halved this round!"
 
     elif name == "See-Through":
-        return True, f"🩻 **SEE-THROUGH** (passive) — {fighter.display_name}'s stats were revealed to the channel first."
+        # Passive: handled pre-battle in resolve_battle(), skip here
+        return False, ""
 
     elif name == "Talon Strike":
         import random as _rand
@@ -289,6 +290,38 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
     if fighter_b.combo:
         log.append(f"  ↳ {fighter_b.combo}")
     log.append("")
+    # ── See-Through passive: pre-battle counter-read ──
+    for fighter, opponent in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
+        ability = fighter.ability
+        if ability and isinstance(ability, dict) and ability.get("name") == "See-Through":
+            opp_stats = {"VLT": opponent.VLT, "INS": opponent.INS, "SPK": opponent.SPK}
+            dominant = max(opp_stats, key=opp_stats.get)
+            dominant_val = opp_stats[dominant]
+
+            # Counter map: VLT → +INS, INS → +VLT, SPK → +VLT (aggression)
+            BONUS_PCT = 0.18  # 18% of opponent's dominant stat
+            bonus = int(dominant_val * BONUS_PCT)
+
+            if dominant == "VLT":
+                counter_stat = "INS"
+                fighter.INS = min(100, fighter.INS + bonus)
+                counter_label = "braces for the assault"
+            elif dominant == "INS":
+                counter_stat = "VLT"
+                fighter.VLT = min(100, fighter.VLT + bonus)
+                counter_label = "targets the soft spots"
+            else:  # SPK
+                counter_stat = "VLT"
+                fighter.VLT = min(100, fighter.VLT + bonus)
+                counter_label = "stays aggressive"
+
+            log.append(
+                f"🩻 **SEE-THROUGH** — {fighter.display_name} reads {opponent.display_name}'s dominant stat "
+                f"(**{dominant} {dominant_val}**) and {counter_label}. "
+                f"+{bonus} {counter_stat} applied before the battle begins."
+            )
+            fighter.ability_used = True
+
     log.append("---PLAY_BY_PLAY_START---")
 
     # Track if it's an upset (lower total stats wins)
@@ -424,9 +457,9 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
     # Simulate a battle with two test fighters
-    a = Fighter(asset_id=1001, name="Zappy #1474", unit_name="ZAPP1474",
+    a = Fighter(asset_id=340, name="Zappy #340", unit_name="ZAPP0340",
                 VLT=55, INS=48, SPK=62,
-                ability={"name": "Inferno Surge", "desc": "...", "trigger_round": 2})
+                ability={"name": "See-Through", "desc": "Reads opponent dominant stat", "trigger_round": "passive"})
     b = Fighter(asset_id=1002, name="Zappy #241", unit_name="ZAPP0241",
                 VLT=72, INS=65, SPK=45,
                 combo="⚡ Storm Caller")
