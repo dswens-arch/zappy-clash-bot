@@ -43,7 +43,7 @@ class Fighter:
     ability_used:    bool  = field(default=False, init=False)
     survived_zero:   bool  = field(default=False, init=False)   # Nine Lives tracker
     iron_shell_used:    bool  = field(default=False, init=False)   # Iron Shell one-time shield tracker
-    skip_next_attack:   bool  = field(default=False, init=False)   # Royal Decree skip flag
+    skip_next_attack:   bool  = field(default=False, init=False)   # Royal Decree weakened-attack flag
     shield_active:      bool  = field(default=False, init=False)   # Divine Shield block flag
 
     @property
@@ -187,7 +187,7 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
 
     elif name == "Royal Decree":
         opponent.skip_next_attack = True
-        return True, f"👑 **ROYAL DECREE!** {fighter.display_name} raises a hand. {opponent.display_name} is forbidden from attacking this round!"
+        return True, f"👑 **ROYAL DECREE!** {fighter.display_name} raises a hand. {opponent.display_name}'s next attack is weakened — 60% damage reduction!"
 
     elif name == "Magic Burst":
         fighter.crit_multiplier = 3.0
@@ -343,8 +343,10 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # ── Fighter A attacks Fighter B ──
         if fighter_a.skip_next_attack:
             fighter_a.skip_next_attack = False
-            round_msg.append(f"  👑 **{fighter_a.display_name}** is forbidden from attacking this round!")
-            dmg_a, crit_a = 0, False
+            dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
+            dmg_a = int(dmg_a * 0.40)
+            round_msg.append(f"  👑 **{fighter_a.display_name}** swings weakly under the decree — {dmg_a} damage.")
+            crit_a = False
         elif fighter_b.shield_active:
             fighter_b.shield_active = False
             round_msg.append(f"  😇 **{fighter_b.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
@@ -370,8 +372,10 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # ── Fighter B attacks Fighter A ──
         if fighter_b.skip_next_attack:
             fighter_b.skip_next_attack = False
-            round_msg.append(f"  👑 **{fighter_b.display_name}** is forbidden from attacking this round!")
-            dmg_b, crit_b = 0, False
+            dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
+            dmg_b = int(dmg_b * 0.40)
+            round_msg.append(f"  👑 **{fighter_b.display_name}** swings weakly under the decree — {dmg_b} damage.")
+            crit_b = False
         elif fighter_a.shield_active:
             fighter_a.shield_active = False
             round_msg.append(f"  😇 **{fighter_a.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
