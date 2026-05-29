@@ -29,6 +29,7 @@ HERO_ASSET_IDS = {
     3509675278: "Wolf",
     3509678849: "Frog",
     3565577964: "Eagle",
+    3575335199: "Buck",
 }
 
 COLLAB_ASSET_IDS = {
@@ -44,6 +45,7 @@ HERO_IMAGES = {
     "Wolf":       "https://ipfs-pera.algonode.dev/ipfs/bafybeiez2pgydvo5bza6egakwxciqww6q62c4jeatd7agrwxsyut2lhqbm?optimizer=image&width=1152&quality=70",
     "Frog":       "https://ipfs-pera.algonode.dev/ipfs/bafybeiap4ffb5ywlaifxz5lmj3wkqwsej6xwqdhwo3nll2nmww27rpashi?optimizer=image&width=1152&quality=70",
     "Eagle":      "https://ipfs-pera.algonode.dev/ipfs/bafybeifg2ksv46ad7uwhtasjtkbqnbqvvbo64adbwczh24unjrtgjxp44q?optimizer=image&width=1152&quality=70",
+    "Buck":       "https://ipfs-pera.algonode.dev/ipfs/bafybeihumzywdl3eogvon3c7dwtmmcfxyi2in7a2ibfnkjekkfdxq6ydwq?optimizer=image&width=1152&quality=70",
 }
 
 COLLAB_IMAGES = {
