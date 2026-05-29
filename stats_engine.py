@@ -543,7 +543,7 @@ def get_ability(traits: dict) -> dict | None:
     if skin == "X-ray":
         return {
             "name": "See-Through",
-            "desc": "Stats are revealed to the channel before opponent's — strategic pre-knowledge for the crowd.",
+            "desc": "Reads the opponent's dominant stat before battle and counters it — gains +18% of that stat in the opposing defense or attack.",
             "trigger_round": "passive",
         }
 
