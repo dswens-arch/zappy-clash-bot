@@ -185,6 +185,11 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         opponent.SPK = 5
         return True, f"😇 **HOLY GROUND!** {opponent.display_name}'s crits are blocked. {fighter.display_name}'s Spark fires guaranteed!"
 
+    elif name == "Antler Clash":
+        debuff = 15
+        opponent.VLT = max(10, opponent.VLT - debuff)
+        return True, f"🦌 **ANTLER CLASH!** {fighter.display_name} locks antlers — {opponent.display_name}'s VLT drops by {debuff} for the rest of the battle!"
+
     elif name == "Royal Decree":
         opponent.skip_next_attack = True
         return True, f"👑 **ROYAL DECREE!** {fighter.display_name} raises a hand. {opponent.display_name}'s next attack is weakened — 60% damage reduction!"
