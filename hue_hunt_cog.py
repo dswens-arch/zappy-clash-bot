@@ -138,23 +138,19 @@ def round_spread(round_num: int) -> float:
 def generate_round_colors(round_num: int) -> list:
     """
     Returns [correct_hex, d1_hex, d2_hex, d3_hex] — index 0 is always correct.
-    All values are hex strings.
+    All values are hex strings. Target color is always random.
     """
     spread = round_spread(round_num)
 
-    if round_num <= len(NAMED_COLORS):
-        nc = NAMED_COLORS[round_num - 1]
-        correct_hue = nc[2]
-        correct_hex = nc[1]
-    else:
-        correct_hue = random.uniform(0, 360)
-        correct_hex = hue_to_hex(correct_hue)
+    # Always pick a random named color (no fixed order)
+    nc = random.choice(NAMED_COLORS)
+    correct_hue = nc[2]
+    correct_hex = nc[1]
 
     offsets = [spread, -spread, spread * 1.55]
     distractors = []
     for offset in offsets:
         d_hue = (correct_hue + offset) % 360
-        # Vary sat/lit slightly so colors don't look machine-generated
         d_hex = hue_to_hex(d_hue,
                             sat=random.uniform(0.65, 0.88),
                             lit=random.uniform(0.45, 0.62))
