@@ -40,6 +40,47 @@ import time
 from datetime import datetime, timezone
 from PIL import Image, ImageDraw, ImageFont
 
+# ── Font loader ────────────────────────────────────────────────────────────────
+
+def _get_font(size: int) -> ImageFont.ImageFont:
+    """Load a bold font, downloading it if not found locally."""
+    search_paths = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+        "/app/DejaVuSans-Bold.ttf",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "DejaVuSans-Bold.ttf"),
+    ]
+    for path in search_paths:
+        if os.path.exists(path):
+            try:
+                return ImageFont.truetype(path, size)
+            except Exception:
+                pass
+
+    # Not found — download at runtime
+    font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "DejaVuSans-Bold.ttf")
+    if not os.path.exists(font_path):
+        try:
+            import urllib.request
+            urllib.request.urlretrieve(
+                "https://github.com/python-pillow/Pillow/raw/main/Tests/fonts/DejaVuSans.ttf",
+                font_path
+            )
+            print(f"[sudoku] Downloaded font to {font_path}")
+        except Exception as e:
+            print(f"[sudoku] Font download failed: {e}")
+
+    if os.path.exists(font_path):
+        try:
+            return ImageFont.truetype(font_path, size)
+        except Exception:
+            pass
+
+    print(f"[sudoku] WARNING: falling back to default font — text will be tiny!")
+    return ImageFont.load_default()
+
+
 # ── Config ─────────────────────────────────────────────────────────────────────
 SCORES_CHANNEL_ID = int(os.environ.get("SCORES_CHANNEL_ID", 0))
 
@@ -166,12 +207,8 @@ def render_sudoku(puzzle, player_entries, solution, complete=False):
     img  = Image.new("RGB", (IMG_W, IMG_H), BG)
     draw = ImageDraw.Draw(img)
 
-    try:
-        font_num   = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 38)
-        font_label = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 26)
-    except Exception:
-        font_num   = ImageFont.load_default()
-        font_label = font_num
+    font_num   = _get_font(38)
+    font_label = _get_font(26)
 
     ox = PADDING + LABEL
     oy = PADDING + LABEL
