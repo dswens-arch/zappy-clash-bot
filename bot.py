@@ -3079,6 +3079,16 @@ async def on_ready():
     bot.add_view(grand_prix_cog.JoinZapView())
     print("⚡ Grand Prix cog loaded")
 
+    # Games
+    from hue_hunt_cog import HueHuntCog
+    from zap_word_cog import ZapWordCog
+    from games_panel_cog import GamesPanelCog
+
+    await bot.add_cog(HueHuntCog(bot, bot.supabase))
+    await bot.add_cog(ZapWordCog(bot, bot.supabase))
+    await bot.add_cog(GamesPanelCog(bot))
+    print("⚡ Games cogs loaded")
+
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
     await tree.sync()
