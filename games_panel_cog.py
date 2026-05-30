@@ -8,11 +8,9 @@ Usage:
   The panel message persists with buttons for each available game.
   Buttons trigger ephemeral game sessions — the panel itself never goes away.
 
-Adding new games later:
-  Add a new button to GamesPanelView and wire it to the relevant cog.
-
 Current games:
   🎨 Hue Hunt — solo color-matching puzzle
+  ⚡ Zap Word  — Wordle-style word game
 """
 
 import discord
@@ -46,38 +44,24 @@ class GamesPanelView(discord.ui.View):
                 ephemeral=True
             )
             return
-
-        embed, view = cog.start_new_game(interaction.user.id)
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-
-    # ── Placeholder buttons for future games ──────────────────────────────────
-    # Uncomment and wire these up when Zap Word and Spark Chain are built.
+        embed, view, file = await cog.build_round(1, interaction.user.id, new_game=True)
+        await interaction.response.send_message(embed=embed, view=view, file=file, ephemeral=True)
 
     @discord.ui.button(
         label="⚡ Zap Word",
-        style=discord.ButtonStyle.secondary,
+        style=discord.ButtonStyle.primary,
         custom_id="games_panel:zap_word"
     )
     async def zap_word_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         cog = self.bot.cogs.get("ZapWordCog")
         if not cog:
-            await interaction.response.send_message("Coming soon!", ephemeral=True)
+            await interaction.response.send_message(
+                "Zap Word isn't available right now. Try again later.",
+                ephemeral=True
+            )
             return
-        state, embed, view = cog.new_game(interaction.user.id)
+        _state, embed, view = cog.new_game(interaction.user.id)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-
-    # @discord.ui.button(
-    #     label="🧩 Spark Chain",
-    #     style=discord.ButtonStyle.secondary,
-    #     custom_id="games_panel:spark_chain"
-    # )
-    # async def spark_chain_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-    #     cog = self.bot.cogs.get("SparkChainCog")
-    #     if not cog:
-    #         await interaction.response.send_message("Coming soon!", ephemeral=True)
-    #         return
-    #     embed, view = cog.start_new_game(interaction.user.id)
-    #     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
 class GamesPanelCog(commands.Cog):
