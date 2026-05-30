@@ -38,6 +38,46 @@ import os
 from datetime import datetime, timezone
 from PIL import Image, ImageDraw, ImageFont
 
+# ── Font loader ────────────────────────────────────────────────────────────────
+
+def _get_font(size: int) -> ImageFont.ImageFont:
+    """Load a bold font, downloading it if not found locally."""
+    search_paths = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+        "/app/DejaVuSans-Bold.ttf",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "DejaVuSans-Bold.ttf"),
+    ]
+    for path in search_paths:
+        if os.path.exists(path):
+            try:
+                return ImageFont.truetype(path, size)
+            except Exception:
+                pass
+
+    font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "DejaVuSans-Bold.ttf")
+    if not os.path.exists(font_path):
+        try:
+            import urllib.request
+            urllib.request.urlretrieve(
+                "https://github.com/python-pillow/Pillow/raw/main/Tests/fonts/DejaVuSans.ttf",
+                font_path
+            )
+            print(f"[hue_hunt] Downloaded font to {font_path}")
+        except Exception as e:
+            print(f"[hue_hunt] Font download failed: {e}")
+
+    if os.path.exists(font_path):
+        try:
+            return ImageFont.truetype(font_path, size)
+        except Exception:
+            pass
+
+    print(f"[hue_hunt] WARNING: falling back to default font — text will be tiny!")
+    return ImageFont.load_default()
+
+
 # ── Config ─────────────────────────────────────────────────────────────────────
 GAMES_CHANNEL_ID  = int(os.environ.get("GAMES_CHANNEL_ID", 0))
 SCORES_CHANNEL_ID = int(os.environ.get("SCORES_CHANNEL_ID", 0))
@@ -155,13 +195,8 @@ def render_hue_image(target_hex: str, choice_hexes: list, correct_index: int) ->
     img  = Image.new("RGB", (IMG_W, IMG_H), BG_COLOR)
     draw = ImageDraw.Draw(img)
 
-    try:
-        # Try to load a font — fall back to default if not available
-        font_label  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 15)
-        font_number = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 22)
-    except Exception:
-        font_label  = ImageFont.load_default()
-        font_number = font_label
+    font_label  = _get_font(15)
+    font_number = _get_font(22)
 
     swatch_top    = PADDING
     swatch_bottom = IMG_H - PADDING - LABEL_H - 6
