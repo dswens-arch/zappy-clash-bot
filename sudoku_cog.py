@@ -46,9 +46,9 @@ SCORES_CHANNEL_ID = int(os.environ.get("SCORES_CHANNEL_ID", 0))
 ZAPP_REWARDS = [25, 15, 8, 3]  # clean, 1-2 mistakes, 3-5, 6+
 
 # ── Image config ───────────────────────────────────────────────────────────────
-CELL         = 56
-LABEL        = 36
-PADDING      = 20
+CELL         = 80
+LABEL        = 52
+PADDING      = 24
 GRID_SIZE    = CELL * 9
 IMG_W        = PADDING + LABEL + GRID_SIZE + PADDING
 IMG_H        = PADDING + LABEL + GRID_SIZE + PADDING
@@ -167,8 +167,8 @@ def render_sudoku(puzzle, player_entries, solution, complete=False):
     draw = ImageDraw.Draw(img)
 
     try:
-        font_num   = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 26)
-        font_label = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 19)
+        font_num   = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 38)
+        font_label = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 26)
     except Exception:
         font_num   = ImageFont.load_default()
         font_label = font_num
@@ -228,8 +228,8 @@ def render_sudoku(puzzle, player_entries, solution, complete=False):
     for i in range(4):
         x = ox + i * 3 * CELL
         y = oy + i * 3 * CELL
-        draw.line([(x, oy), (x, oy + GRID_SIZE)], fill=BOX_BORDER, width=3)
-        draw.line([(ox, y), (ox + GRID_SIZE, y)], fill=BOX_BORDER, width=3)
+        draw.line([(x, oy), (x, oy + GRID_SIZE)], fill=BOX_BORDER, width=4)
+        draw.line([(ox, y), (ox + GRID_SIZE, y)], fill=BOX_BORDER, width=4)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)
