@@ -87,22 +87,17 @@ SCORES_CHANNEL_ID = int(os.environ.get("SCORES_CHANNEL_ID", 0))
 ZAPP_REWARDS = [25, 15, 8, 3]  # clean, 1-2 mistakes, 3-5, 6+
 
 # ── Image config ───────────────────────────────────────────────────────────────
-CELL         = 80
-LABEL        = 52
-PADDING      = 24
-GRID_SIZE    = CELL * 9
-IMG_W        = PADDING + LABEL + GRID_SIZE + PADDING
-IMG_H        = PADDING + LABEL + GRID_SIZE + PADDING
+# Board image: sudoku_board.png sits next to this cog file
+# Cell centers measured from the custom illustrated board
+CELL_CX     = [125, 227, 329, 433, 534, 635, 738, 840, 942]
+CELL_CY     = [123, 221, 319, 419, 518, 617, 719, 818, 918]
+BOARD_SIZE  = (1024, 1024)
+OUTPUT_SIZE = (800, 800)   # resize before sending to Discord
 
-BG           = (30, 31, 34)
-BOX_BORDER   = (220, 222, 226)
-CELL_BORDER  = (80, 84, 92)
-LABEL_COLOR  = (160, 164, 172)
-GIVEN_COLOR  = (220, 222, 226)
-PLAYER_COLOR = (255, 214, 10)
-ERROR_COLOR  = (255, 64, 64)
-SHADE_COLOR  = (50, 52, 58)
-DONE_COLOR   = (87, 204, 153)   # green when complete
+GIVEN_COLOR  = (50,  20,  100)   # dark purple — matches board labels
+PLAYER_COLOR = (20,  20,   20)   # near black for player entries
+ERROR_COLOR  = (200, 30,   30)   # red for conflicts
+DONE_COLOR   = (30,  120,  30)   # dark green when complete
 
 COLS = "ABCDEFGHI"
 
