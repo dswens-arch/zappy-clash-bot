@@ -192,8 +192,8 @@ def render_hue_image(target_hex: str, choice_hexes: list, correct_index: int) ->
     img  = Image.new("RGB", (IMG_W, IMG_H), BG_COLOR)
     draw = ImageDraw.Draw(img)
 
-    font_label  = _get_font(15)
-    font_number = _get_font(22)
+    font_label  = _get_font(24)
+    font_number = _get_font(28)
 
     swatch_top    = PADDING
     swatch_bottom = IMG_H - PADDING - LABEL_H - 6
