@@ -259,7 +259,7 @@ active_games: dict[int, dict] = {}
 class ZapzeeRollView(discord.ui.View):
     """View during rolling phase — toggle keep buttons + roll button."""
     def __init__(self, cog, user_id: int):
-        super().__init__(timeout=600)
+        super().__init__(timeout=None)
         self.cog     = cog
         self.user_id = user_id
         state = active_games.get(user_id, {})
