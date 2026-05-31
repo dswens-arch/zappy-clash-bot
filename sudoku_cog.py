@@ -95,7 +95,7 @@ BOARD_SIZE  = (1024, 1024)
 OUTPUT_SIZE = (800, 800)   # resize before sending to Discord
 
 GIVEN_COLOR  = (50,  20,  100)   # dark purple — matches board labels
-PLAYER_COLOR = (20,  20,   20)   # near black for player entries
+PLAYER_COLOR = (100, 100, 100)   # gray for player entries — distinct from givens
 ERROR_COLOR  = (200, 30,   30)   # red for conflicts
 DONE_COLOR   = (30,  120,  30)   # dark green when complete
 
@@ -205,8 +205,9 @@ def render_sudoku(puzzle, player_entries, solution, complete=False):
     else:
         img = Image.new("RGB", BOARD_SIZE, (30, 31, 34))
 
-    draw     = ImageDraw.Draw(img)
-    font     = _get_font(60)
+    draw      = ImageDraw.Draw(img)
+    font_bold = _get_font(60, bold=True)
+    font_reg  = _get_font(60, bold=False)
     conflicts = set() if complete else find_conflicts(puzzle, player_entries)
 
     for r in range(9):
@@ -217,7 +218,7 @@ def render_sudoku(puzzle, player_entries, solution, complete=False):
             entry = player_entries.get((r, c))
 
             if given:
-                draw.text((cx, cy), str(given), fill=GIVEN_COLOR, font=font, anchor="mm")
+                draw.text((cx, cy), str(given), fill=GIVEN_COLOR, font=font_bold, anchor="mm")
             elif entry:
                 if complete:
                     color = DONE_COLOR
@@ -225,7 +226,7 @@ def render_sudoku(puzzle, player_entries, solution, complete=False):
                     color = ERROR_COLOR
                 else:
                     color = PLAYER_COLOR
-                draw.text((cx, cy), str(entry), fill=color, font=font, anchor="mm")
+                draw.text((cx, cy), str(entry), fill=color, font=font_reg, anchor="mm")
 
     img = img.resize(OUTPUT_SIZE, Image.LANCZOS)
     buf = io.BytesIO()
