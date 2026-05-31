@@ -42,14 +42,23 @@ from PIL import Image, ImageDraw, ImageFont
 
 # ── Font loader ────────────────────────────────────────────────────────────────
 
-def _get_font(size: int) -> "ImageFont.ImageFont":
-    """Load a bold font, downloading it if not found locally."""
-    search_paths = [
+def _get_font(size: int, bold: bool = True) -> "ImageFont.ImageFont":
+    """Load a bold or regular font, downloading if not found locally."""
+    filename = "Ubuntu-Bold.ttf" if bold else "Ubuntu-Regular.ttf"
+    url      = f"https://github.com/google/fonts/raw/main/ufl/ubuntu/{filename}"
+
+    bold_paths = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
         "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
-        "/app/Ubuntu-Bold.ttf",
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "Ubuntu-Bold.ttf"),
+    ]
+    reg_paths = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    ]
+    search_paths = (bold_paths if bold else reg_paths) + [
+        f"/app/{filename}",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), filename),
     ]
     for path in search_paths:
         if os.path.exists(path):
@@ -58,18 +67,16 @@ def _get_font(size: int) -> "ImageFont.ImageFont":
             except Exception:
                 pass
 
-    # Download at runtime
-    font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Ubuntu-Bold.ttf")
+    font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
     if not os.path.exists(font_path):
         try:
             import urllib.request
-            url = "https://github.com/google/fonts/raw/main/ufl/ubuntu/Ubuntu-Bold.ttf"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req) as resp, open(font_path, "wb") as f:
                 f.write(resp.read())
-            print(f"[font] Downloaded Ubuntu-Bold to {font_path}")
+            print(f"[sudoku] Downloaded {filename} to {font_path}")
         except Exception as e:
-            print(f"[font] Font download failed: {e}")
+            print(f"[sudoku] Font download failed: {e}")
 
     if os.path.exists(font_path):
         try:
@@ -77,7 +84,7 @@ def _get_font(size: int) -> "ImageFont.ImageFont":
         except Exception:
             pass
 
-    print(f"[font] WARNING: falling back to default font — text will be tiny!")
+    print(f"[sudoku] WARNING: falling back to default font")
     return ImageFont.load_default()
 
 
