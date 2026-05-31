@@ -485,6 +485,125 @@ class SudokuGameView(discord.ui.View):
             return
         await interaction.response.send_modal(SudokuEraseModal(self.cog, self.user_id))
 
+    @discord.ui.button(label="✅ Check Puzzle", style=discord.ButtonStyle.success)
+    async def check_puzzle(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message("This isn't your game!", ephemeral=True)
+            return
+        state = active_games.get(self.user_id)
+        if not state:
+            await interaction.response.send_message("No active game.", ephemeral=True)
+            return
+
+        puzzle  = state["puzzle"]
+        entries = state["entries"]
+        solution = state["solution"]
+
+        # Count unfilled cells
+        empty = [(r,c) for r in range(9) for c in range(9)
+                 if puzzle[r][c] == 0 and not entries.get((r,c))]
+        conflicts = find_conflicts(puzzle, entries)
+
+        if empty:
+            await interaction.response.send_message(
+                f"Not done yet — **{len(empty)} cell{'s' if len(empty) != 1 else ''}** still empty.",
+                ephemeral=True
+            )
+            return
+
+        if conflicts:
+            await interaction.response.send_message(
+                f"Almost! You have **{len(conflicts)} conflict{'s' if len(conflicts) != 1 else ''}** — check the red cells.",
+                ephemeral=True
+            )
+            return
+
+        # Board is complete and correct — trigger win
+        import time as _time
+        elapsed  = int(_time.time() - state["start_time"])
+        mistakes = state["mistakes"]
+        mins, secs = divmod(elapsed, 60)
+        time_str = f"{mins}m {secs}s" if mins else f"{secs}s"
+
+        if mistakes == 0:       zapp = ZAPP_REWARDS[0]
+        elif mistakes <= 2:     zapp = ZAPP_REWARDS[1]
+        elif mistakes <= 5:     zapp = ZAPP_REWARDS[2]
+        else:                   zapp = ZAPP_REWARDS[3]
+
+        zapp_credited = False
+        try:
+            racer = await asyncio.to_thread(
+                lambda: self.cog.db.table("zappy_racers")
+                .select("discord_user_id, zapp_balance")
+                .eq("discord_user_id", str(self.user_id))
+                .order("registered_at")
+                .limit(1)
+                .execute()
+            )
+            if racer.data:
+                current = racer.data[0].get("zapp_balance", 0) or 0
+                await asyncio.to_thread(
+                    lambda: self.cog.db.table("zappy_racers")
+                    .update({"zapp_balance": current + zapp})
+                    .eq("discord_user_id", str(self.user_id))
+                    .execute()
+                )
+                zapp_credited = True
+        except Exception as e:
+            print(f"[sudoku] ZAPP credit error: {e}")
+
+        is_best = False
+        try:
+            existing = await asyncio.to_thread(
+                lambda: self.cog.db.table("sudoku_scores")
+                .select("mistakes, elapsed")
+                .eq("discord_user_id", str(self.user_id))
+                .order("mistakes")
+                .order("elapsed")
+                .limit(1)
+                .execute()
+            )
+            prev = existing.data[0] if existing.data else None
+            if not prev or mistakes < prev["mistakes"] or (mistakes == prev["mistakes"] and elapsed < prev["elapsed"]):
+                is_best = True
+                await asyncio.to_thread(
+                    lambda: self.cog.db.table("sudoku_scores").insert({
+                        "discord_user_id": str(self.user_id),
+                        "username":        interaction.user.display_name,
+                        "mistakes":        mistakes,
+                        "elapsed":         elapsed,
+                        "achieved_at":     datetime.now(timezone.utc).isoformat()
+                    }).execute()
+                )
+        except Exception as e:
+            print(f"[sudoku] score save error: {e}")
+
+        del active_games[self.user_id]
+
+        buf  = await asyncio.to_thread(render_sudoku, puzzle, entries, solution, complete=True)
+        file = discord.File(buf, filename="sudoku.png")
+
+        embed = discord.Embed(title="🔢 Sudoku — Solved! 🎉", color=0x57CC99)
+        embed.add_field(name="Time",     value=time_str,      inline=True)
+        embed.add_field(name="Mistakes", value=str(mistakes), inline=True)
+        if zapp_credited:
+            embed.add_field(name="Reward", value=f"🪙 **+{zapp} ZAPP**", inline=True)
+        else:
+            embed.add_field(
+                name="🪙 Earn ZAPP",
+                value="Use `/link` and `/gpregister` to earn ZAPP from games.",
+                inline=False
+            )
+        if is_best:
+            embed.add_field(name="🏆 Personal Best!", value="New record!", inline=False)
+        embed.set_image(url="attachment://sudoku.png")
+
+        view = SudokuEndView(self.user_id, interaction.user, mistakes, time_str, zapp, is_best, self.cog)
+        await interaction.response.edit_message(embed=embed, view=view, attachments=[file])
+
+        if is_best:
+            await self.cog.post_high_score(interaction, mistakes, time_str)
+
     @discord.ui.button(label="🚫 Abandon", style=discord.ButtonStyle.danger)
     async def abandon(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
