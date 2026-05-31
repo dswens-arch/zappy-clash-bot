@@ -316,6 +316,16 @@ class ZapzeeRollView(discord.ui.View):
         score_btn.callback = self._score_callback
         self.add_item(score_btn)
 
+        # Scorecard button
+        card_btn = discord.ui.Button(
+            label="📊 Scorecard",
+            style=discord.ButtonStyle.secondary,
+            custom_id="zapzee_scorecard",
+            row=1
+        )
+        card_btn.callback = self._scorecard_callback
+        self.add_item(card_btn)
+
     async def _roll_callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.user_id:
             await interaction.response.send_message("Not your game!", ephemeral=True)
@@ -337,6 +347,69 @@ class ZapzeeRollView(discord.ui.View):
         await interaction.response.edit_message(
             embed=embed, view=ZapzeeRollView(self.cog, self.user_id), attachments=[file]
         )
+
+    async def _scorecard_callback(self, interaction: discord.Interaction):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message("Not your game!", ephemeral=True)
+            return
+        s = active_games.get(self.user_id)
+        if not s:
+            await interaction.response.send_message("No active game.", ephemeral=True)
+            return
+
+        scorecard = s["scorecard"]
+        current_scores = score_roll(s["dice"])
+        upper_keys = ["ones","twos","threes","fours","fives","sixes"]
+
+        # Upper section
+        upper_lines = []
+        upper_total = 0
+        for k in upper_keys:
+            val = scorecard.get(k)
+            if val is not None:
+                upper_lines.append(f"~~{CAT_NAMES[k]}~~  **{val}** ✓")
+                upper_total += val
+            else:
+                potential = current_scores[k]
+                hint = f"  *(roll: {potential})*" if potential > 0 else ""
+                upper_lines.append(f"{CAT_NAMES[k]}{hint}")
+
+        bonus = 35 if upper_total >= 63 else 0
+        needed = max(0, 63 - upper_total)
+        bonus_line = f"Bonus: **+35** ✓" if bonus else f"Bonus: {needed} more needed"
+
+        # Lower section
+        lower_keys = [k for k in CAT_KEYS if k not in upper_keys]
+        lower_lines = []
+        for k in lower_keys:
+            val = scorecard.get(k)
+            if val is not None:
+                lower_lines.append(f"~~{CAT_NAMES[k]}~~  **{val}** ✓")
+            else:
+                potential = current_scores[k]
+                hint = f"  *(roll: {potential})*" if potential > 0 else ""
+                lower_lines.append(f"{CAT_NAMES[k]}{hint}")
+
+        _, _, grand = calc_total(scorecard)
+        rounds_done = sum(1 for v in scorecard.values() if v is not None)
+
+        embed = discord.Embed(title="📊 Zapzee — Your Scorecard", color=0xFFD60A)
+        embed.add_field(
+            name="Upper Section",
+            value="\n".join(upper_lines) + f"\n{bonus_line}",
+            inline=True
+        )
+        embed.add_field(
+            name="Lower Section",
+            value="\n".join(lower_lines),
+            inline=True
+        )
+        embed.add_field(
+            name="Progress",
+            value=f"Round {s['round']}/13 · **{grand} pts** so far\n*(numbers in italic = potential score for this roll)*",
+            inline=False
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def _score_callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.user_id:
