@@ -597,20 +597,21 @@ class ZapzeeCog(commands.Cog):
             except Exception as e:
                 print(f"[zapzee] ZAPP credit error: {e}")
 
-            # Save score
+            # Save score — check against server-wide all-time high
             is_best = False
             try:
-                existing = await asyncio.to_thread(
+                # Get current server-wide high score
+                server_high = await asyncio.to_thread(
                     lambda: self.db.table("zapzee_scores")
                     .select("total")
-                    .eq("discord_user_id", str(user_id))
                     .order("total", desc=True)
                     .limit(1)
                     .execute()
                 )
-                prev_best = existing.data[0]["total"] if existing.data else 0
-                if grand > prev_best:
+                prev_server_best = server_high.data[0]["total"] if server_high.data else 0
+                if grand > prev_server_best:
                     is_best = True
+
                 await asyncio.to_thread(
                     lambda: self.db.table("zapzee_scores").insert({
                         "discord_user_id": str(user_id),
@@ -671,9 +672,9 @@ class ZapzeeCog(commands.Cog):
             channel = interaction.guild.get_channel(SCORES_CHANNEL_ID)
             if channel:
                 embed = discord.Embed(
-                    title="🏆 New Zapzee Personal Best!",
+                    title="🏆 New Zapzee Server Record!",
                     description=(
-                        f"**{interaction.user.display_name}** just set a new record!\n\n"
+                        f"**{interaction.user.display_name}** just set a new all-time high score!\n\n"
                         f"🎲 **{total} points**\n\n"
                         "Think you can beat it? Hit **🎲 Zapzee** to try."
                     ),
