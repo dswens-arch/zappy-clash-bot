@@ -435,7 +435,7 @@ class SudokuModal(discord.ui.Modal, title="🔢 Sudoku — Enter a number"):
 
 class SudokuGameView(discord.ui.View):
     def __init__(self, cog, user_id: int):
-        super().__init__(timeout=3600)  # 1 hour timeout
+        super().__init__(timeout=None)
         self.cog     = cog
         self.user_id = user_id
 
