@@ -286,6 +286,8 @@ class HueChoiceButton(discord.ui.Button):
                 embed=embed, view=view,
                 attachments=[file]
             )
+            # Reset view timeout to prevent expiry on long runs
+            view.message = interaction.message
         else:
             score       = state["round"] - 1
             zapp_earned = score * ZAPP_PER_ROUND
@@ -385,7 +387,7 @@ class HueChoiceButton(discord.ui.Button):
 
 class HueGameView(discord.ui.View):
     def __init__(self, correct_index: int, cog):
-        super().__init__(timeout=300)
+        super().__init__(timeout=None)
         for i in range(4):
             self.add_item(HueChoiceButton(i, i == correct_index, cog))
 
