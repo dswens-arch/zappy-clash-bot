@@ -134,13 +134,14 @@ BG      = (30, 31, 34)
 
 def render_dice(dice: list[int], kept: list[bool], rolls_left: int) -> io.BytesIO:
     """Render 5 dice with keep/reroll states."""
-    label_h = 36
+    label_h = 50
     img_w   = PADDING*2 + DICE_W*5 + GAP*4
     img_h   = PADDING*2 + DICE_H + label_h + 20
 
     img  = Image.new("RGB", (img_w, img_h), BG)
     draw = ImageDraw.Draw(img)
-    font = _get_font(15)
+    font    = _get_font(24)
+    rl_font = _get_font(22)
 
     for i, (val, keep) in enumerate(zip(dice, kept)):
         x = PADDING + i * (DICE_W + GAP)
@@ -162,17 +163,16 @@ def render_dice(dice: list[int], kept: list[bool], rolls_left: int) -> io.BytesI
             img.paste(face, (x, y))
 
         lx    = x + DICE_W // 2
-        ly    = y + DICE_H + 8
-        label = "KEEP ✓" if keep else "reroll"
+        ly    = y + DICE_H + 10
+        label = "KEEP" if keep else "reroll"
         color = (87, 204, 153) if keep else (128, 132, 142)
         draw.text((lx, ly), label, fill=color, font=font, anchor="mt")
 
     # Rolls left indicator
-    rl_font = _get_font(13)
     draw.text(
         (img_w - PADDING, img_h - 10),
         f"{rolls_left} roll{'s' if rolls_left != 1 else ''} left",
-        fill=(100, 104, 112),
+        fill=(160, 164, 172),
         font=rl_font,
         anchor="rb"
     )
