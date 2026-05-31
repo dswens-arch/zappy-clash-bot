@@ -79,6 +79,22 @@ class GamesPanelView(discord.ui.View):
         embed, view, file = await cog.start_game(interaction.user.id)
         await interaction.response.send_message(embed=embed, view=view, file=file, ephemeral=True)
 
+    @discord.ui.button(
+        label="🎲 Zapzee",
+        style=discord.ButtonStyle.primary,
+        custom_id="games_panel:zapzee"
+    )
+    async def zapzee_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        cog = self.bot.cogs.get("ZapzeeCog")
+        if not cog:
+            await interaction.response.send_message(
+                "Zapzee isn't available right now. Try again later.",
+                ephemeral=True
+            )
+            return
+        embed, view, file = await cog.start_game(interaction.user.id)
+        await interaction.response.send_message(embed=embed, view=view, file=file, ephemeral=True)
+
 
 class GamesPanelCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -104,6 +120,7 @@ class GamesPanelCog(commands.Cog):
                 "⚡ **Zap Word** — Guess the hidden 5-letter word in 6 tries. "
                 "Earn ZAPP for solving it fast.\n\n"
                 "🔢 **Sudoku** — Solve a 9x9 puzzle. Earn ZAPP for clean solves.\n\n"
+                "🎲 **Zapzee** — Roll 5 dice, build the best scorecard over 13 rounds. Earn ZAPP for high scores.\n\n"
                 "More games coming soon."
             ),
             color=0x3A86FF
