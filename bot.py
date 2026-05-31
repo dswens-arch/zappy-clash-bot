@@ -3084,10 +3084,12 @@ async def on_ready():
     from zap_word_cog import ZapWordCog
     from games_panel_cog import GamesPanelCog
     from sudoku_cog import SudokuCog
+    from zapzee_cog import ZapzeeCog
 
     await bot.add_cog(HueHuntCog(bot, bot.supabase))
     await bot.add_cog(ZapWordCog(bot, bot.supabase))
     await bot.add_cog(SudokuCog(bot, bot.supabase))
+    await bot.add_cog(ZapzeeCog(bot, bot.supabase))
     await bot.add_cog(GamesPanelCog(bot))
     print("⚡ Games cogs loaded")
 
