@@ -198,48 +198,26 @@ def is_complete(puzzle, player_entries, solution):
 # ── Image renderer ─────────────────────────────────────────────────────────────
 
 def render_sudoku(puzzle, player_entries, solution, complete=False):
-    """Render the Sudoku grid as a PNG BytesIO."""
-    img  = Image.new("RGB", (IMG_W, IMG_H), BG)
-    draw = ImageDraw.Draw(img)
+    """Render numbers onto the custom illustrated board."""
+    board_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sudoku_board.png")
+    if os.path.exists(board_path):
+        img = Image.open(board_path).convert("RGB")
+    else:
+        img = Image.new("RGB", BOARD_SIZE, (30, 31, 34))
 
-    font_num   = _get_font(38)
-    font_label = _get_font(26)
-
-    ox = PADDING + LABEL
-    oy = PADDING + LABEL
-
+    draw     = ImageDraw.Draw(img)
+    font     = _get_font(60)
     conflicts = set() if complete else find_conflicts(puzzle, player_entries)
 
-    # Shade alternating 3x3 boxes
-    for box_row in range(3):
-        for box_col in range(3):
-            if (box_row + box_col) % 2 == 0:
-                x0 = ox + box_col * 3 * CELL
-                y0 = oy + box_row * 3 * CELL
-                draw.rectangle([x0, y0, x0 + 3*CELL, y0 + 3*CELL], fill=SHADE_COLOR)
-
-    # Column labels A-I
-    for c in range(9):
-        cx = ox + c * CELL + CELL // 2
-        cy = PADDING + LABEL // 2
-        draw.text((cx, cy), COLS[c], fill=LABEL_COLOR, font=font_label, anchor="mm")
-
-    # Row labels 1-9
-    for r in range(9):
-        rx = PADDING + LABEL // 2
-        ry = oy + r * CELL + CELL // 2
-        draw.text((rx, ry), str(r + 1), fill=LABEL_COLOR, font=font_label, anchor="mm")
-
-    # Numbers
     for r in range(9):
         for c in range(9):
-            cx = ox + c * CELL + CELL // 2
-            cy = oy + r * CELL + CELL // 2
+            cx    = CELL_CX[c]
+            cy    = CELL_CY[r]
             given = puzzle[r][c]
             entry = player_entries.get((r, c))
 
             if given:
-                draw.text((cx, cy), str(given), fill=GIVEN_COLOR, font=font_num, anchor="mm")
+                draw.text((cx, cy), str(given), fill=GIVEN_COLOR, font=font, anchor="mm")
             elif entry:
                 if complete:
                     color = DONE_COLOR
@@ -247,22 +225,9 @@ def render_sudoku(puzzle, player_entries, solution, complete=False):
                     color = ERROR_COLOR
                 else:
                     color = PLAYER_COLOR
-                draw.text((cx, cy), str(entry), fill=color, font=font_num, anchor="mm")
+                draw.text((cx, cy), str(entry), fill=color, font=font, anchor="mm")
 
-    # Thin cell lines
-    for i in range(10):
-        x = ox + i * CELL
-        y = oy + i * CELL
-        draw.line([(x, oy), (x, oy + GRID_SIZE)], fill=CELL_BORDER, width=1)
-        draw.line([(ox, y), (ox + GRID_SIZE, y)], fill=CELL_BORDER, width=1)
-
-    # Thick 3x3 box lines
-    for i in range(4):
-        x = ox + i * 3 * CELL
-        y = oy + i * 3 * CELL
-        draw.line([(x, oy), (x, oy + GRID_SIZE)], fill=BOX_BORDER, width=4)
-        draw.line([(ox, y), (ox + GRID_SIZE, y)], fill=BOX_BORDER, width=4)
-
+    img = img.resize(OUTPUT_SIZE, Image.LANCZOS)
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)
     buf.seek(0)
