@@ -20,8 +20,8 @@ from algosdk import account, mnemonic
 from algosdk.v2client import algod
 from algosdk import transaction
 
-ALGOD_URL   = "https://mainnet-api.algonode.cloud"
-ALGOD_TOKEN = ""
+ALGOD_URL   = os.getenv("ALGOD_URL", "https://mainnet-api.algonode.cloud")
+ALGOD_TOKEN = os.getenv("ALGOD_TOKEN", "")
 
 BUDDY_DROP_CHANCES = {
     3: 0.02,   # Molten Circuit
@@ -31,7 +31,7 @@ BUDDY_DROP_CHANCES = {
 
 
 def get_algod_client():
-    return algod.AlgodClient(ALGOD_TOKEN, ALGOD_URL)
+    return algod.AlgodClient(ALGOD_TOKEN, ALGOD_URL, headers={"X-Algo-API-Token": ALGOD_TOKEN})
 
 
 def get_bot_account():
