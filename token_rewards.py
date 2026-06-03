@@ -20,9 +20,9 @@ from algosdk import transaction
 # ─────────────────────────────────────────────
 # Config
 # ─────────────────────────────────────────────
-ALGOD_URL     = "https://mainnet-api.algonode.cloud"
-ALGOD_TOKEN   = ""   # Not required for algonode public endpoint
-INDEXER_URL   = "https://mainnet-idx.algonode.cloud"
+ALGOD_URL     = os.getenv("ALGOD_URL", "https://mainnet-api.algonode.cloud")
+ALGOD_TOKEN   = os.getenv("ALGOD_TOKEN", "")
+INDEXER_URL   = os.getenv("INDEXER_URL", "https://mainnet-idx.algonode.cloud")
 
 REWARD_TOKEN_ID = int(os.environ.get("REWARD_TOKEN_ID", "2572874483"))
 
@@ -41,7 +41,7 @@ EVENING_MULTIPLIER   = 1.25
 
 def get_algod_client():
     """Return an Algorand algod client."""
-    return algod.AlgodClient(ALGOD_TOKEN, ALGOD_URL)
+    return algod.AlgodClient(ALGOD_TOKEN, ALGOD_URL, headers={"X-Algo-API-Token": ALGOD_TOKEN})
 
 
 def get_bot_account():
