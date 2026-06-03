@@ -21,9 +21,9 @@ from algosdk import account, mnemonic
 from algosdk.v2client import algod
 from algosdk import transaction
 
-ALGOD_URL   = "https://mainnet-api.algonode.cloud"
-ALGOD_TOKEN = ""
-INDEXER_URL = "https://mainnet-idx.algonode.cloud"
+ALGOD_URL   = os.getenv("ALGOD_URL", "https://mainnet-api.algonode.cloud")
+ALGOD_TOKEN = os.getenv("ALGOD_TOKEN", "")
+INDEXER_URL = os.getenv("INDEXER_URL", "https://mainnet-idx.algonode.cloud")
 
 # ASAs to exclude from the prize pool — token and known non-prize assets
 EXCLUDED_ASSET_IDS = {
@@ -33,7 +33,7 @@ EXCLUDED_ASSET_IDS = {
 
 
 def get_algod_client():
-    return algod.AlgodClient(ALGOD_TOKEN, ALGOD_URL)
+    return algod.AlgodClient(ALGOD_TOKEN, ALGOD_URL, headers={"X-Algo-API-Token": ALGOD_TOKEN})
 
 
 def get_bot_account():
