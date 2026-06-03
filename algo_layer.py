@@ -41,6 +41,7 @@ def get_algod_client() -> algod.AlgodClient:
     return algod.AlgodClient(
         algod_token=os.getenv("ALGOD_TOKEN", ""),
         algod_address=os.getenv("ALGOD_URL", "https://mainnet-api.algonode.cloud"),
+        headers={"X-Algo-API-Token": os.getenv("ALGOD_TOKEN", "")},
     )
 
 
@@ -48,6 +49,7 @@ def get_indexer_client() -> indexer.IndexerClient:
     return indexer.IndexerClient(
         indexer_token=os.getenv("INDEXER_TOKEN", ""),
         indexer_address=os.getenv("INDEXER_URL", "https://mainnet-idx.algonode.cloud"),
+        headers={"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")},
     )
 
 
