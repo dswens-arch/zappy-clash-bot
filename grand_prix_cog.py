@@ -198,7 +198,7 @@ from race_engine import simulate_race, narrate_race, seed_stats, get_stats
 # Constants
 # ---------------------------------------------------------------------------
 ALGO_ENTRY   = 5_000_000   # microALGO
-DEPOSIT_POLL_INTERVAL = 15  # seconds between indexer polls — keep low to save API quota
+DEPOSIT_POLL_INTERVAL = 30  # seconds between indexer polls
 ALGO_PAYOUT  = 9_000_000
 ALGO_RAKE    = 1_000_000
 STAT_CAP_MAX = 11
@@ -1360,7 +1360,7 @@ class GrandPrixCog(commands.Cog):
             f"Open Pera Wallet and send any amount of ALGO to the address below.\n"
             f"Long press the next message to copy it.\n\n"
             f"Current balance: **{current_bal:.4f} ALGO**\n"
-            f"⏳ Watching for your deposit for 5 minutes...",
+            f"⏳ Watching for your deposit for 3 minutes...",
             ephemeral=True,
         )
         await interaction.followup.send(bot_address, ephemeral=True)
@@ -1374,7 +1374,7 @@ class GrandPrixCog(commands.Cog):
                                    after_round, zappy_id, interaction):
         import time
         from algo_layer import get_indexer_client as _gic
-        deadline = time.monotonic() + 300
+        deadline = time.monotonic() + 180
         idx      = _gic()
         credited: set[str] = set()
 
@@ -1542,7 +1542,7 @@ class GrandPrixCog(commands.Cog):
             f"Open Pera Wallet and send ZAPP (ASA `{ZAPP_ASA_ID}`) to the address below.\n"
             f"Long press the next message to copy it.\n\n"
             f"Current balance: **{int(current_bal):,} ZAPP**\n"
-            f"⏳ Watching for your deposit for 5 minutes...",
+            f"⏳ Watching for your deposit for 3 minutes...",
             ephemeral=True,
         )
         await interaction.followup.send(bot_address, ephemeral=True)
@@ -1557,7 +1557,7 @@ class GrandPrixCog(commands.Cog):
         import time
         from algo_layer import get_indexer_client as _gic
         from zap_layer import ZAPP_ASA_ID
-        deadline = time.monotonic() + 300
+        deadline = time.monotonic() + 180
         idx      = _gic()
         credited: set[str] = set()
 
