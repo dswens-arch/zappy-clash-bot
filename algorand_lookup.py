@@ -61,7 +61,7 @@ _zappy_cache: dict = {}
 import time as _time
 _wallet_cache: dict = {}
 _wallet_cache_ts: dict = {}
-WALLET_CACHE_TTL = 300   # seconds
+WALLET_CACHE_TTL = 43200  # 12 hours in seconds
 
 
 # ─────────────────────────────────────────────
