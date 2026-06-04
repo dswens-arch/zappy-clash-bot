@@ -1,3 +1,4 @@
+import os
 """
 algorand_lookup.py
 ------------------
@@ -18,8 +19,8 @@ KING_ASA = 3562991430
 # ─────────────────────────────────────────────
 # Config
 # ─────────────────────────────────────────────
-INDEXER_URL  = "https://mainnet-idx.algonode.cloud"
-INDEXER_URL2 = "https://mainnet-idx.4160.nodely.io"   # fallback
+INDEXER_URL  = os.getenv("INDEXER_URL", "https://mainnet-idx.algonode.cloud")
+INDEXER_URL2 = os.getenv("INDEXER_URL2", "https://mainnet-idx.4160.nodely.io")
 
 HERO_ASSET_IDS = {
     2742429215: "Bear",
@@ -194,12 +195,13 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
                 if next_token:
                     params["next"] = next_token
 
-                async with session.get(url, params=params,
+                headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")}
+                async with session.get(url, params=params, headers=headers,
                                        timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status != 200:
                         # Try fallback indexer
                         fallback_url = f"{INDEXER_URL2}/v2/accounts/{wallet_address}/assets"
-                        async with session.get(fallback_url, params=params,
+                        async with session.get(fallback_url, params=params, headers=headers,
                                                timeout=aiohttp.ClientTimeout(total=15)) as resp2:
                             if resp2.status != 200:
                                 result["error"] = f"Both indexers failed: {resp.status}, {resp2.status}"
