@@ -1,4 +1,3 @@
-import os
 """
 algorand_lookup.py
 ------------------
@@ -9,6 +8,7 @@ Only network call: Algorand indexer to verify wallet holdings (once per /link).
 Everything else is instant from the local lookup table.
 """
 
+import os
 import aiohttp
 import asyncio
 from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
