@@ -194,6 +194,11 @@ async def cmd_link(interaction: discord.Interaction, wallet: str):
         )
         return
 
+    # Clear cache so /link always does a fresh on-chain check
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts
+    _wallet_cache.pop(wallet, None)
+    _wallet_cache_ts.pop(wallet, None)
+
     # Verify wallet on-chain
     await interaction.followup.send("🔍 Checking your wallet on Algorand...", ephemeral=True)
     result = await verify_wallet(user_id, wallet)
@@ -713,6 +718,39 @@ async def cmd_top(interaction: discord.Interaction):
         lines.append(f"{medals[i]} **{name}** - {cp:,} CP")
 
     await interaction.response.send_message("\n".join(lines), ephemeral=False)
+
+
+@tree.command(name="refreshwallet", description="Force a fresh check of your wallet holdings.")
+async def refreshwallet(interaction: discord.Interaction):
+    """Clear the wallet cache and re-verify Zappy ownership."""
+    await interaction.response.defer(ephemeral=True)
+    user_id = str(interaction.user.id)
+
+    db     = get_supabase()
+    result = db.table("zappy_players").select("wallet_address").eq("discord_user_id", user_id).single().execute()
+    if not result.data:
+        await interaction.followup.send("❌ You haven't linked a wallet yet. Use `/link` first.", ephemeral=True)
+        return
+
+    wallet = result.data["wallet_address"]
+
+    # Force clear cache
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts
+    _wallet_cache.pop(wallet, None)
+    _wallet_cache_ts.pop(wallet, None)
+
+    await interaction.followup.send("🔍 Refreshing your wallet...", ephemeral=True)
+    fresh = await verify_wallet(user_id, wallet)
+
+    if fresh.get("error"):
+        await interaction.followup.send(f"❌ Couldn't reach Algorand: {fresh['error']}", ephemeral=True)
+        return
+
+    total = len(fresh.get("zappies", [])) + len(fresh.get("heroes", [])) + len(fresh.get("collabs", []))
+    await interaction.followup.send(
+        f"✅ Wallet refreshed! Found **{total} Zappy(s)** in your wallet.",
+        ephemeral=True
+    )
 
 
 @tree.command(name="myzappies", description="List all your Zappies with names and ASA IDs")
@@ -1660,11 +1698,10 @@ async def _run_expedition_beat(
         entry_fee  = updated_run.get("entry_fee", 0)
         net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
         if wallet and net_tokens > 0:
-            from token_rewards import check_opted_in, send_token_reward, REWARD_TOKEN_ID
+            from token_rewards import send_token_reward
             import asyncio
-            if await check_opted_in(wallet, REWARD_TOKEN_ID):
-                note = f"Zappy Expedition reward - Zone {zone_num}"
-                await asyncio.to_thread(send_token_reward, wallet, net_tokens, note)
+            note = f"Zappy Expedition reward - Zone {zone_num}"
+            await asyncio.to_thread(send_token_reward, wallet, net_tokens, note)
 
         exp_channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
         if exp_channel:
