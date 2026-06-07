@@ -726,6 +726,7 @@ async def refreshwallet(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
     user_id = str(interaction.user.id)
 
+    from database import get_supabase
     db     = get_supabase()
     result = db.table("zappy_players").select("wallet_address").eq("discord_user_id", user_id).single().execute()
     if not result.data:
