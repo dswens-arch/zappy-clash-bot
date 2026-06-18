@@ -1447,65 +1447,26 @@ ZONE_STAT_REASON = {
 }
 
 
-def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
+async def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
     """
     Rank a list of Zappies by their suitability for a specific zone.
     Returns top 5 with scores and explanations.
-    Handles regular Zappies, Heroes, and Collabs.
+    Uses fetch_zappy_traits() — the same single source of truth used by
+    /stats and /clash — so Heroes, Collabs, regular Zappies, and any
+    Zappy merged in from extra_zappies all resolve identically.
     """
     priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
     primary, secondary, tertiary = priority
 
-    from zappy_collection import ZAPPY_COLLECTION
-    from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS, HERO_IMAGES, COLLAB_IMAGES
-    from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
-
     ranked = []
     for z in zappies:
         asset_id = z["asset_id"]
-        stats    = None
-        traits   = {}
-        image_url = ""
 
-        # Hero
-        if asset_id in HERO_ASSET_IDS:
-            hero_type = HERO_ASSET_IDS[asset_id]
-            hero_data = get_hero_stats(hero_type)
-            if hero_data:
-                stats     = {k: hero_data[k] for k in ("VLT", "INS", "SPK")}
-                traits    = {"hero_type": hero_type}
-                image_url = HERO_IMAGES.get(hero_type, "")
-
-        # Collab
-        elif asset_id in COLLAB_ASSET_IDS:
-            collab_type = COLLAB_ASSET_IDS[asset_id]
-            collab_data = get_collab_stats(collab_type)
-            if collab_data:
-                stats     = {k: collab_data[k] for k in ("VLT", "INS", "SPK")}
-                traits    = {"collab_type": collab_type}
-                image_url = COLLAB_IMAGES.get(collab_type, "")
-
-        # Regular Zappy
-        else:
-            entry = ZAPPY_COLLECTION.get(asset_id)
-            if not entry:
-                continue
-            traits = {
-                "background": entry["background"],
-                "body":       entry["body"],
-                "earring":    entry["earring"],
-                "eyes":       entry["eyes"],
-                "eyewear":    entry["eyewear"],
-                "head":       entry["head"],
-                "mouth":      entry["mouth"],
-                "skin":       entry["skin"],
-            }
-            stats     = calculate_stats(traits)
-            image_url = entry.get("image_url", "")
-
-        if not stats:
+        zappy_data = await fetch_zappy_traits(asset_id)
+        if not zappy_data or not zappy_data.get("stats"):
             continue
 
+        stats = zappy_data["stats"]
         score = (
             stats[primary]   * 3 +
             stats[secondary] * 2 +
@@ -1515,8 +1476,9 @@ def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
             **z,
             "stats":     stats,
             "score":     score,
-            "traits":    traits,
-            "image_url": image_url,
+            "traits":    zappy_data.get("traits", {}),
+            "image_url": zappy_data.get("image_url", ""),
+            "name":      zappy_data.get("name", z.get("name", f"Zappy #{asset_id}")),
         })
 
     ranked.sort(key=lambda x: x["score"], reverse=True)
@@ -1587,7 +1549,7 @@ async def _show_smart_zappy_select(
     stat_labels = {"VLT": "Voltage (attack)", "INS": "Insulation (defense)", "SPK": "Spark (luck)"}
 
     # Rank Zappies
-    ranked = rank_zappies_for_zone(all_zappies, zone_num)
+    ranked = await rank_zappies_for_zone(all_zappies, zone_num)
     if not ranked:
         await inter.followup.send("❌ Couldn't load Zappy stats.", ephemeral=True)
         return
@@ -3264,7 +3226,7 @@ async def cmd_expedition_test(interaction: discord.Interaction):
     zappy_count = len(ownership["zappies"]) + len(ownership["heroes"]) + len(ownership["collabs"])
 
     # Use the same ranked picker the real /expedition uses — zone 5, no entry fee
-    ranked = rank_zappies_for_zone(all_zappies, 5)
+    ranked = await rank_zappies_for_zone(all_zappies, 5)
     if not ranked:
         await interaction.followup.send("❌ Couldn't load Zappy stats.", ephemeral=True)
         return
