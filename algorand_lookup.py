@@ -245,6 +245,7 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
                     "asset_id":  asset_id,
                     "unit_name": entry["unit_name"],
                     "name":      entry["name"],
+                    "image_url": entry.get("image_url", ""),
                 })
                 result["owns"] = True
 
