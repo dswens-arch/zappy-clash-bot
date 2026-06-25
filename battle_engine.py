@@ -45,6 +45,9 @@ class Fighter:
     iron_shell_used:    bool  = field(default=False, init=False)   # Iron Shell one-time shield tracker
     skip_next_attack:   bool  = field(default=False, init=False)   # Royal Decree weakened-attack flag
     shield_active:      bool  = field(default=False, init=False)   # Divine Shield block flag
+    rot_poisoned:       bool  = field(default=False, init=False)   # Rot Touch poison flag
+    sweet_spot_active:  bool  = field(default=False, init=False)   # Pastel Sweet Spot heal-on-crit flag
+    pure_signal_ready:  bool  = field(default=False, init=False)   # Clean Zappy no-variance first strike
 
     @property
     def display_name(self) -> str:
@@ -82,7 +85,12 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     Returns: (damage, is_crit, flavor_note)
     """
     # Base damage: VLT * roll modifier (0.8 - 1.2) - defender INS reduction
-    roll = random.uniform(0.8, 1.2)
+    # Pure Signal: no roll variance on first attack
+    if getattr(attacker, 'pure_signal_ready', False) and round_num == 1:
+        roll = 1.0
+        attacker.pure_signal_ready = False
+    else:
+        roll = random.uniform(0.8, 1.2)
     raw_damage = attacker.VLT * roll
     ins_reduction = defender.INS * 0.3   # INS reduces ~30% of damage
     damage = max(1, raw_damage - ins_reduction)
@@ -225,6 +233,43 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         fighter.SPK += 5
         return True, f"⚡ **ZAPPY SPIRIT** — Brand loyalty pays off. All stats +5."
 
+    # ── New skin abilities ──────────────────────────────────────────────────
+
+    elif name == "Rot Touch":
+        # Mark the opponent as poisoned — drain handled post-round in resolve_battle()
+        opponent.rot_poisoned = True
+        return True, f"🧟 **ROT TOUCH!** {fighter.display_name} infects {opponent.display_name} — 5 HP poison drain at end of rounds 2 and 3!"
+
+    elif name == "Static Veil":
+        debuff = int(opponent.VLT * 0.20)
+        opponent.VLT = max(10, opponent.VLT - debuff)
+        return True, f"☁️ **STATIC VEIL!** {opponent.display_name}'s signal scrambles — VLT drops by {debuff} this round!"
+
+    elif name == "Viral Spread":
+        steal = 15
+        opponent.SPK = max(10, opponent.SPK - steal)
+        fighter.SPK = min(100, fighter.SPK + steal)
+        return True, f"🦠 **VIRAL SPREAD!** {fighter.display_name} absorbs {steal} SPK from {opponent.display_name}. The mutation spreads."
+
+    elif name == "Battle Ink":
+        fighter.VLT = min(100, fighter.VLT + 12)
+        return True, f"🎨 **BATTLE INK!** {fighter.display_name}'s scars sharpen — VLT +12 for the rest of the battle!"
+
+    elif name == "Sweet Spot":
+        # Flag for post-crit heal — handled in resolve_battle() crit branch
+        fighter.sweet_spot_active = True
+        return True, f"🍬 **SWEET SPOT** locked in — next crit heals {fighter.display_name} for 5 HP!"
+
+    elif name == "Ice Frame":
+        debuff = 15
+        opponent.SPK = max(10, opponent.SPK - debuff)
+        return True, f"🔵 **ICE FRAME!** {fighter.display_name} freezes the window — {opponent.display_name}'s SPK drops by {debuff} this round!"
+
+    elif name == "Pure Signal":
+        # Handled in calculate_damage via fighter.pure_signal_ready flag
+        fighter.pure_signal_ready = True
+        return True, f"📡 **PURE SIGNAL** — {fighter.display_name} locks in. First strike hits at full VLT, no variance."
+
     return False, ""
 
 
@@ -327,6 +372,41 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             )
             fighter.ability_used = True
 
+    # ── Zebra passive: randomize opponent's crit multiplier ──
+    for fighter, opponent in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
+        ability = fighter.ability
+        if ability and isinstance(ability, dict) and ability.get("name") == "Pattern Break":
+            new_mult = round(random.uniform(1.5, 3.0), 1)
+            opponent.crit_multiplier = new_mult
+            log.append(
+                f"🦓 **PATTERN BREAK** — {fighter.display_name}'s chaos bleeds into {opponent.display_name}. "
+                f"Their crit multiplier is now {new_mult}x — they don't know if that's good or bad."
+            )
+            fighter.ability_used = True
+
+    # ── Vitiligo passive: balance finder ──
+    for fighter, opponent in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
+        ability = fighter.ability
+        if ability and isinstance(ability, dict) and ability.get("name") == "Split Focus":
+            f_stats  = {"VLT": fighter.VLT, "INS": fighter.INS, "SPK": fighter.SPK}
+            o_stats  = {"VLT": opponent.VLT, "INS": opponent.INS, "SPK": opponent.SPK}
+            opp_sorted = sorted(o_stats, key=o_stats.get)
+            low1, low2 = opp_sorted[0], opp_sorted[1]
+            gap = abs(o_stats[low1] - o_stats[low2])
+            bonus = max(1, gap // 2)
+            weakest_self = min(f_stats, key=f_stats.get)
+            if weakest_self == "VLT":
+                fighter.VLT = min(100, fighter.VLT + bonus)
+            elif weakest_self == "INS":
+                fighter.INS = min(100, fighter.INS + bonus)
+            else:
+                fighter.SPK = min(100, fighter.SPK + bonus)
+            log.append(
+                f"🌸 **SPLIT FOCUS** — {fighter.display_name} reads the gaps. "
+                f"+{bonus} {weakest_self} applied before battle starts."
+            )
+            fighter.ability_used = True
+
     log.append("---PLAY_BY_PLAY_START---")
 
     # Track if it's an upset (lower total stats wins)
@@ -368,6 +448,11 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         else:
             if crit_a:
                 round_msg.append(f"  {random.choice(CRIT_LINES)}! **{fighter_a.display_name}** — {dmg_a} damage!")
+                # Sweet Spot: heal on crit
+                if getattr(fighter_a, 'sweet_spot_active', False):
+                    fighter_a.hp = min(STARTING_HP, fighter_a.hp + 5)
+                    fighter_a.sweet_spot_active = False
+                    round_msg.append(f"  🍬 **SWEET SPOT** — {fighter_a.display_name} heals 5 HP from the crit!")
             elif dmg_a > fighter_a.VLT * 0.8:
                 round_msg.append(f"  **{fighter_a.display_name}** {random.choice(NORMAL_HIT)} — {dmg_a} damage.")
             else:
@@ -397,6 +482,11 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         else:
             if crit_b:
                 round_msg.append(f"  {random.choice(CRIT_LINES)}! **{fighter_b.display_name}** — {dmg_b} damage!")
+                # Sweet Spot: heal on crit
+                if getattr(fighter_b, 'sweet_spot_active', False):
+                    fighter_b.hp = min(STARTING_HP, fighter_b.hp + 5)
+                    fighter_b.sweet_spot_active = False
+                    round_msg.append(f"  🍬 **SWEET SPOT** — {fighter_b.display_name} heals 5 HP from the crit!")
             elif dmg_b > fighter_b.VLT * 0.8:
                 round_msg.append(f"  **{fighter_b.display_name}** {random.choice(NORMAL_HIT)} — {dmg_b} damage.")
             else:
@@ -409,6 +499,18 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 f.hp = 1
                 f._nine_lives_used = True
                 round_msg.append(f"  😼 **NINE LIVES activates!** {f.display_name} survives on 1 HP!")
+
+        # Rot Touch poison drain (rounds 2 and 3 only)
+        if round_num >= 2:
+            for poisoned, attacker_name in [(fighter_a, fighter_b.display_name), (fighter_b, fighter_a.display_name)]:
+                if getattr(poisoned, 'rot_poisoned', False):
+                    poisoned.hp = max(0, poisoned.hp - 5)
+                    round_msg.append(f"  🧟 **ROT TOUCH** — {poisoned.display_name} takes 5 poison damage!")
+            # Also check Nothing Left to Lose combo — double drain
+            for poisoned, src in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
+                if getattr(poisoned, 'rot_poisoned', False) and src.combo == "💀 Nothing Left to Lose":
+                    poisoned.hp = max(0, poisoned.hp - 5)
+                    round_msg.append(f"  💀 **NOTHING LEFT TO LOSE** — extra 5 poison from {src.display_name}!")
 
         # Clamp HP
         fighter_a.hp = max(0, fighter_a.hp)
