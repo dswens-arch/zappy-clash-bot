@@ -404,16 +404,8 @@ async def cmd_clash(interaction: discord.Interaction):
                 item.disabled = True
 
         # ── Check for Sparks in wallet ────────────────────────────────────────
-        from supabase import create_client
-        import os as _os
-        _sb = create_client(_os.environ["SUPABASE_URL"], _os.environ["SUPABASE_SERVICE_KEY"])
-        spark_res = await asyncio.to_thread(
-            lambda: _sb.table("spark_holdings")
-            .select("asset_id, name, spark_type, tier, xp")
-            .eq("wallet", wallet)
-            .execute()
-        )
-        sparks = spark_res.data or []
+        from database import get_sparks_for_wallet
+        sparks = await asyncio.to_thread(get_sparks_for_wallet, wallet)
 
         if sparks:
             # Show Spark selection UI
