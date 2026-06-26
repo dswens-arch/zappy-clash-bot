@@ -122,22 +122,46 @@ def _draw_pill(draw, x, y, label, value):
 # ─────────────────────────────────────────────
 # Main renderer
 # ─────────────────────────────────────────────
+SPARK_COLORS_PIL = {
+    "zolt":   (200, 255,   0),
+    "scorch": (255,  90,  31),
+    "jinx":   (167, 139, 250),
+    "moss":   ( 61, 255, 154),
+    "glitch": (255,  45, 120),
+    "null":   (148, 163, 184),
+}
+
+# Card height expands when a Spark is equipped
+OUT_H_SPARK  = 116
+H_SPARK      = OUT_H_SPARK * SCALE
+SPARK_THUMB  = 36 * SCALE   # smaller than Zappy thumb
+SPARK_PAD    = 16 * SCALE
+SPARK_ROW_Y  = int((OUT_H + 4) * SCALE)   # row below the main card
+
+
 async def render_entry_card(
     display_name: str,
     zappy_name:   str,
     stats:        dict,
     image_url:    str = "",
     record:       dict | None = None,
+    spark_type:   str | None = None,
+    spark_tier:   int = 0,
+    spark_image_url: str = "",
 ) -> io.BytesIO:
 
-    canvas = Image.new("RGBA", (W, H), BG)
+    has_spark = bool(spark_type and spark_tier > 0)
+    card_h    = H_SPARK if has_spark else H
+    out_h     = OUT_H_SPARK if has_spark else OUT_H
+
+    canvas = Image.new("RGBA", (W, card_h), BG)
     draw   = ImageDraw.Draw(canvas)
 
     I = 4 * SCALE
     _rr(draw, [I, I, W-I, H-I], r=10*SCALE, fill=CARD_BG)
     _rr(draw, [I, I, I+5*SCALE, H-I], r=3*SCALE, fill=ACCENT)
 
-    # Thumbnail
+    # Thumbnail — Zappy
     thumb_img = await _fetch_image(image_url)
     if thumb_img:
         thumb = thumb_img.resize((THUMB_SIZE, THUMB_SIZE), Image.LANCZOS)
@@ -193,8 +217,37 @@ async def render_entry_card(
             rec_text += f"   {champs}x Bracket Champion"
         draw.text((TEXT_X, L3), rec_text, font=_FM, fill=MUTED, anchor="lm")
 
+    # ── Spark row (only if equipped) ────────────────────────────────────
+    if has_spark:
+        spark_color = SPARK_COLORS_PIL.get(spark_type, (148, 163, 184))
+        spark_rgba  = (*spark_color, 255)
+
+        # Spark row background
+        row_y = H - 2 * SCALE
+        _rr(draw, [I, row_y, W-I, card_h - I], r=6*SCALE,
+            fill=(32, 34, 48), outline=(*spark_color, 80), width=2)
+
+        # Spark image thumbnail
+        spark_thumb_y = row_y + (card_h - I - row_y - SPARK_THUMB) // 2
+        spark_img = await _fetch_image(spark_image_url) if spark_image_url else None
+        if spark_img:
+            sp = spark_img.resize((SPARK_THUMB, SPARK_THUMB), Image.LANCZOS)
+            mask = Image.new("L", (SPARK_THUMB, SPARK_THUMB), 0)
+            ImageDraw.Draw(mask).rounded_rectangle(
+                [0, 0, SPARK_THUMB-1, SPARK_THUMB-1], radius=6*SCALE, fill=255
+            )
+            canvas.paste(sp, (SPARK_PAD, spark_thumb_y), mask)
+
+        # Spark text
+        spark_text_x = SPARK_PAD + SPARK_THUMB + 12 * SCALE
+        spark_text_y = row_y + (card_h - I - row_y) // 2
+        tier_names   = {1: "Spark", 2: "Flare", 3: "Blaze"}
+        spark_label  = f"🌟  {spark_type.upper()}  ·  T{spark_tier} {tier_names.get(spark_tier, '')}"
+        draw.text((spark_text_x, spark_text_y), spark_label,
+                  font=_FB, fill=spark_rgba, anchor="lm")
+
     # Downscale 2x → 1x
-    out = canvas.resize((OUT_W, OUT_H), Image.LANCZOS)
+    out = canvas.resize((OUT_W, out_h), Image.LANCZOS)
     buf = io.BytesIO()
     out.convert("RGB").save(buf, format="PNG", optimize=True)
     buf.seek(0)
