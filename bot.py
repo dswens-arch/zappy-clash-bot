@@ -3528,51 +3528,24 @@ async def award_spark_xp(spark_asset_id: int, won: bool, clash_channel: discord.
     if not spark_asset_id:
         return
 
-    xp_gain = 50 + (50 if won else 0)
-
-    from supabase import create_client
-    _sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
-
-    # Fetch current state
-    res = await asyncio.to_thread(
-        lambda: _sb.table("spark_holdings")
-        .select("asset_id, name, spark_type, tier, xp, wallet, discord_user_id")
-        .eq("asset_id", spark_asset_id)
-        .single()
-        .execute()
-    )
-    if not res.data:
+    from database import award_spark_xp as db_award_spark_xp, push_spark_arc19_upgrade
+    result = await asyncio.to_thread(db_award_spark_xp, spark_asset_id, won)
+    if not result:
         return
 
-    spark = res.data
-    new_xp = spark["xp"] + xp_gain
-
-    await asyncio.to_thread(
-        lambda: _sb.table("spark_holdings")
-        .update({"xp": new_xp})
-        .eq("asset_id", spark_asset_id)
-        .execute()
-    )
-
-    # Check tier upgrade thresholds
-    thresholds = {1: 1000, 2: 5000}
-    current_tier = spark["tier"]
-    if current_tier < 3 and new_xp >= thresholds.get(current_tier, 999999):
-        new_tier = current_tier + 1
-        await asyncio.to_thread(
-            lambda: _sb.table("spark_holdings")
-            .update({"tier": new_tier})
-            .eq("asset_id", spark_asset_id)
-            .execute()
+    # Announce upgrade if tier changed
+    if result.get("upgraded") and clash_channel and result.get("discord_user_id"):
+        new_tier = result["tier_after"]
+        tier_names = {2: "Flare", 3: "Blaze"}
+        await clash_channel.send(
+            f"🌟 **SPARK UPGRADE!** <@{result['discord_user_id']}>'s "
+            f"**{result['name']}** has evolved to **T{new_tier} {tier_names[new_tier]}**! "
+            f"({result['new_xp']} XP total)"
         )
-        # Notify in clash channel
-        if clash_channel and spark.get("discord_user_id"):
-            tier_names = {2: "Flare", 3: "Blaze"}
-            await clash_channel.send(
-                f"🌟 **SPARK UPGRADE!** <@{spark['discord_user_id']}>'s "
-                f"**{spark['name']}** has evolved to **T{new_tier} {tier_names[new_tier]}**! "
-                f"({new_xp} XP total)"
-            )
+        # Push ARC-19 on-chain update
+        await asyncio.to_thread(
+            push_spark_arc19_upgrade, spark_asset_id, result["spark_type"], new_tier
+        )
 
 
 # ---------------------------------------------
