@@ -63,10 +63,18 @@ def unlink_wallet(discord_user_id: str) -> bool:
 # BRACKET MANAGEMENT
 # ─────────────────────────────────────────────
 
-def register_for_bracket(discord_user_id: str, asset_id: int, bracket_id: str) -> dict:
+def register_for_bracket(
+    discord_user_id: str,
+    asset_id: int,
+    bracket_id: str,
+    spark_asa: int | None = None,
+    spark_type: str | None = None,
+    spark_tier: int = 0,
+) -> dict:
     """
     Register a player for the current bracket session.
     bracket_id = "morning_YYYY-MM-DD" or "evening_YYYY-MM-DD"
+    Optionally stores the Spark companion equipped for this entry.
     """
     db = get_supabase()
     data = {
@@ -75,6 +83,9 @@ def register_for_bracket(discord_user_id: str, asset_id: int, bracket_id: str) -
         "bracket_id":      bracket_id,
         "registered_at":   datetime.now(timezone.utc).isoformat(),
         "status":          "registered",
+        "spark_asa":       spark_asa,
+        "spark_type":      spark_type,
+        "spark_tier":      spark_tier,
     }
     result = db.table("bracket_entries").upsert(
         data, on_conflict="discord_user_id,bracket_id"
@@ -423,3 +434,167 @@ def seed_bracket(entries: list) -> list:
         matchups.append((player, None))
 
     return matchups
+
+
+# ─────────────────────────────────────────────
+# SPARK XP + TIER UPGRADES
+# ─────────────────────────────────────────────
+
+SPARK_XP_PARTICIPATE = 50
+SPARK_XP_WIN         = 50   # Bonus on top of participation XP
+SPARK_TIER_THRESHOLDS = {1: 1000, 2: 5000}
+SPARK_TIER_NAMES      = {1: "Spark", 2: "Flare", 3: "Blaze"}
+
+# T2 and T3 image CIDs per type — fill in after uploading to Pinata
+# Format: { "zolt": {"2": "bafk...", "3": "bafk..."}, ... }
+SPARK_UPGRADE_CIDS: dict = {
+    "zolt":   {"2": "bafybeia37zmaybuc6tiwy2ji22ub7fmuub6khdkjdl65s34inp5lzzwxae",  "3": "bafybeigephla6nmi65gn46stp7dbz72p5or5rfeww4tvdpp2sv2cf5b3ou"},
+    "scorch": {"2": "bafybeieksknm2nt4akeiht6ezu3jnv3bkv3gvh5p42mrvinivldrkh663m", "3": "bafybeiemybyw7g3h655mf6ikqdnvse6cx3uze7stkqzsmyqhh42v6lqjoa"},
+    "jinx":   {"2": "bafybeicixawcaxwmzlegcylavymtv3flxanpoo35gljwbbqbt3jfx4ywtm", "3": "bafybeibziy5smed5hbfphrwoha4w2nbytrzulxvqgfrp3jyvblpmi2ng3i"},
+    "moss":   {"2": "bafybeifqz2ffykrpsjxmt4ktp7zzob3nkxdeaxh5ht7l62ysoyvwux6wfm","3": "bafybeicdmpnisqaldipjyfhxqukpk6xeo6rvoknomfvkxpeec63edpadnq"},
+    "glitch": {"2": "bafybeiayhxvs72ceoygrpuirwuworkbrvuhdeuvqi3cvhn5grbc44k6lje",  "3": "bafybeid4s6immn5o7sl62eyqydfsq4cyou3kxv6i42szz4ryjqtxhwwhzi"},
+    "null":   {"2": "bafkreiayd2s5tw3eo676ofwuw47p5lcslsisbjdh4bsgm5krokw6a4uwoy",  "3": "bafybeihtecxwqvlknjwwtcq42emldzm6s3ohkof6vcziikzsyr5m62jjte"},
+}
+
+
+def get_spark(asset_id: int) -> dict | None:
+    """Fetch a single Spark record by ASA ID."""
+    db = get_supabase()
+    result = db.table("spark_holdings").select("*").eq("asset_id", asset_id).execute()
+    return result.data[0] if result.data else None
+
+
+def get_sparks_for_wallet(wallet: str) -> list:
+    """Return all Sparks owned by a wallet."""
+    db = get_supabase()
+    result = (
+        db.table("spark_holdings")
+        .select("asset_id, name, spark_type, tier, xp")
+        .eq("wallet", wallet)
+        .execute()
+    )
+    return result.data or []
+
+
+def award_spark_xp(asset_id: int, won: bool) -> dict:
+    """
+    Award XP to a Spark after a Clash event.
+    Returns dict with xp_gained, new_xp, tier_before, tier_after, upgraded.
+    """
+    db   = get_supabase()
+    spark = get_spark(asset_id)
+    if not spark:
+        return {}
+
+    xp_gain  = SPARK_XP_PARTICIPATE + (SPARK_XP_WIN if won else 0)
+    new_xp   = spark["xp"] + xp_gain
+    old_tier = spark["tier"]
+    new_tier = old_tier
+
+    # Check for tier upgrade
+    if old_tier < 3 and new_xp >= SPARK_TIER_THRESHOLDS.get(old_tier, 999999):
+        new_tier = old_tier + 1
+
+    update_data = {"xp": new_xp}
+    if new_tier != old_tier:
+        update_data["tier"]        = new_tier
+        update_data["upgraded_at"] = datetime.now(timezone.utc).isoformat()
+
+    db.table("spark_holdings").update(update_data).eq("asset_id", asset_id).execute()
+
+    return {
+        "asset_id":   asset_id,
+        "spark_type": spark["spark_type"],
+        "name":       spark["name"],
+        "xp_gained":  xp_gain,
+        "new_xp":     new_xp,
+        "tier_before": old_tier,
+        "tier_after":  new_tier,
+        "upgraded":    new_tier != old_tier,
+        "wallet":      spark.get("wallet"),
+        "discord_user_id": spark.get("discord_user_id"),
+    }
+
+
+def push_spark_arc19_upgrade(asset_id: int, spark_type: str, new_tier: int) -> bool:
+    """
+    Push an ARC-19 metadata update to upgrade a Spark NFT on-chain.
+    Updates the reserve address to the new tier's metadata CID.
+    Returns True on success, False on failure.
+
+    Requires env vars:
+        SPARK_MANAGER_MNEMONIC — mnemonic for the Spark creator/manager wallet
+        ALGOD_TOKEN            — AlgoNode API token (X-Algo-API-Token header)
+    """
+    try:
+        from algosdk import mnemonic, account
+        from algosdk.v2client import algod
+        from algosdk.transaction import AssetConfigTxn, wait_for_confirmation
+        import base64
+
+        # ── Get new image CID ──────────────────────────────────────────────
+        cid = SPARK_UPGRADE_CIDS.get(spark_type, {}).get(str(new_tier), "")
+        if not cid:
+            print(f"[SPARK] No upgrade CID configured for {spark_type} T{new_tier}")
+            return False
+
+        # ── Derive reserve address from CID ──────────────────────────────
+        # ARC-19: reserve address encodes the IPFS CID as an Algorand address
+        # For CIDv1 base32 sha2-256 (standard Pinata output):
+        # The reserve is the 32-byte multihash digest encoded as an Algorand address
+        import hashlib, base64 as b64
+
+        # Decode base32 CID to bytes, strip multicodec prefix (2 bytes)
+        # CIDv1 base32: starts with 'b', strip it, decode base32
+        cid_stripped = cid.lstrip("b")
+        cid_bytes    = base64.b32decode(cid_stripped.upper() + "=" * (-len(cid_stripped) % 8))
+        # CIDv1 layout: version(1) + codec(1) + multihash
+        # multihash layout: hash_func(1) + length(1) + digest(32)
+        digest = cid_bytes[4:]  # skip version, codec, hash_func, length bytes
+        if len(digest) > 32:
+            digest = digest[:32]
+        digest = digest.ljust(32, b"\x00")
+        new_reserve = account.address_from_public_key(digest)
+
+        # ── Connect to Algorand ───────────────────────────────────────────
+        algod_token   = os.environ.get("ALGOD_TOKEN", "")
+        algod_address = "https://mainnet-api.algonode.cloud"
+        headers       = {"X-Algo-API-Token": algod_token} if algod_token else {}
+        algod_client  = algod.AlgodClient(algod_token, algod_address, headers=headers)
+
+        # ── Sign with manager wallet ──────────────────────────────────────
+        manager_mnemonic = os.environ["SPARK_MANAGER_MNEMONIC"]
+        private_key      = mnemonic.to_private_key(manager_mnemonic)
+        manager_address  = account.address_from_private_key(private_key)
+
+        # Fetch current asset params to preserve manager/freeze/clawback
+        asset_info = algod_client.asset_info(asset_id)
+        params     = asset_info["params"]
+
+        sp  = algod_client.suggested_params()
+        txn = AssetConfigTxn(
+            sender   = manager_address,
+            sp       = sp,
+            index    = asset_id,
+            manager  = manager_address,
+            reserve  = new_reserve,
+            freeze   = params.get("freeze"),
+            clawback = params.get("clawback"),
+            strict_empty_address_check = False,
+        )
+        signed = txn.sign(private_key)
+        tx_id  = algod_client.send_transaction(signed)
+        wait_for_confirmation(algod_client, tx_id, 4)
+
+        # Update reserve in Supabase to reflect new on-chain state
+        db = get_supabase()
+        db.table("spark_holdings").update({
+            "reserve_address": new_reserve
+        }).eq("asset_id", asset_id).execute()
+
+        print(f"[SPARK] ARC-19 upgrade complete — ASA {asset_id} → T{new_tier} | tx {tx_id}")
+        return True
+
+    except Exception as e:
+        print(f"[SPARK] ARC-19 upgrade failed for ASA {asset_id}: {e}")
+        return False
