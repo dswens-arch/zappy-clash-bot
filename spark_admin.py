@@ -181,9 +181,43 @@ class SparkAdminCog(commands.Cog):
             if not spark:
                 return await interaction.followup.send(f"❌ Spark ASA {asset_id} not found in DB.", ephemeral=True)
 
+            T1_CIDS = {
+                "zolt":   "bafkreign5ydt5zj4mltsays47lsp7d6stdzje756zvzehzx7tryqxmqv6q",
+                "scorch": "bafkreihpdkwbg6gvn4zutkohrmig67zalqtprg4wln624zkukw5nlo4f3q",
+                "jinx":   "bafkreierm7ti75i2hdpngztupgqpr5w7lbjull262outivdaanz4lshd7u",
+                "moss":   "bafkreib2iprbja2zhfdxflulcgqyav2m5i4z5behc3n6kt4qglus36dqqm",
+                "glitch": "bafkreidtjpiu4k44u5soltmqsfo6oyykef2p7mytw4jte6tn47dedrwhye",
+                "null":   "bafkreif7otb4ifgcgkqqsvxu3jgxe62yrvdwrgnbe37b5vwr4l5ypnmnpe",
+            }
+            T2_CIDS = {
+                "zolt":   "bafybeia37zmaybuc6tiwy2ji22ub7fmuub6khdkjdl65s34inp5lzzwxae",
+                "scorch": "bafybeieksknm2nt4akeiht6ezu3jnv3bkv3gvh5p42mrvinivldrkh663m",
+                "jinx":   "bafybeicixawcaxwmzlegcylavymtv3flxanpoo35gljwbbqbt3jfx4ywtm",
+                "moss":   "bafybeifqz2ffykrpsjxmt4ktp7zzob3nkxdeaxh5ht7l62ysoyvwux6wfm",
+                "glitch": "bafybeiayhxvs72ceoygrpuirwuworkbrvuhdeuvqi3cvhn5grbc44k6lje",
+                "null":   "bafkreiayd2s5tw3eo676ofwuw47p5lcslsisbjdh4bsgm5krokw6a4uwoy",
+            }
+            T3_CIDS = {
+                "zolt":   "bafybeigephla6nmi65gn46stp7dbz72p5or5rfeww4tvdpp2sv2cf5b3ou",
+                "scorch": "bafybeiemybyw7g3h655mf6ikqdnvse6cx3uze7stkqzsmyqhh42v6lqjoa",
+                "jinx":   "bafybeibziy5smed5hbfphrwoha4w2nbytrzulxvqgfrp3jyvblpmi2ng3i",
+                "moss":   "bafybeicdmpnisqaldipjyfhxqukpk6xeo6rvoknomfvkxpeec63edpadnq",
+                "glitch": "bafybeid4s6immn5o7sl62eyqydfsq4cyou3kxv6i42szz4ryjqtxhwwhzi",
+                "null":   "bafybeihtecxwqvlknjwwtcq42emldzm6s3ohkof6vcziikzsyr5m62jjte",
+            }
+            cid_map = {1: T1_CIDS, 2: T2_CIDS, 3: T3_CIDS}
+            cid = cid_map.get(spark["tier"], T1_CIDS).get(spark["spark_type"], "")
+            img_url = f"https://scarlet-written-scallop-153.mypinata.cloud/ipfs/{cid}" if cid else ""
+
+            SPARK_COLORS = {
+                "zolt": 0xc8ff00, "scorch": 0xff5a1f, "jinx": 0xa78bfa,
+                "moss": 0x3dff9a, "glitch": 0xff2d78, "null": 0x94a3b8,
+            }
+            color = SPARK_COLORS.get(spark["spark_type"], 0x60a5fa)
+
             embed = discord.Embed(
                 title=f"🔍 Spark Status — {spark['name']}",
-                color=0x60a5fa,
+                color=color,
             )
             embed.add_field(name="ASA ID",      value=str(spark["asset_id"]),  inline=True)
             embed.add_field(name="Type",         value=spark["spark_type"].capitalize(), inline=True)
@@ -192,6 +226,9 @@ class SparkAdminCog(commands.Cog):
             embed.add_field(name="Wallet",       value=spark.get("wallet") or "unclaimed", inline=True)
             embed.add_field(name="Discord User", value=spark.get("discord_user_id") or "—", inline=True)
             embed.add_field(name="Reserve",      value=f"`{spark.get('reserve_address', '—')[:30]}...`", inline=False)
+
+            if img_url:
+                embed.set_thumbnail(url=img_url)
 
             # XP progress bar
             thresholds = {1: 1000, 2: 5000}
@@ -287,7 +324,62 @@ class SparkAdminCog(commands.Cog):
     # ──────────────────────────────────────────
     # /spark-rollback
     # ──────────────────────────────────────────
-    @app_commands.command(name="spark-rollback", description="[Admin] Push T1 metadata back to a Spark ASA on-chain")
+    @app_commands.command(name="spark-force-upgrade", description="[Admin] Force trigger XP award and upgrade check on a Spark")
+    @app_commands.describe(asset_id="The Spark ASA ID to force upgrade check on")
+    async def spark_force_upgrade(self, interaction: discord.Interaction, asset_id: int):
+        if not await admin_check(interaction):
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            from database import award_spark_xp, push_spark_arc19_upgrade, get_spark
+
+            # Show state before
+            spark = await asyncio.to_thread(get_spark, asset_id)
+            if not spark:
+                return await interaction.followup.send(f"❌ Spark ASA {asset_id} not found.", ephemeral=True)
+
+            ch = self._test_channel()
+            if ch:
+                await ch.send(
+                    f"🔧 **[TEST]** Force upgrade check on `{spark['name']}` "
+                    f"(T{spark['tier']} · {spark['xp']} XP)"
+                )
+
+            # Award XP as a win
+            result = await asyncio.to_thread(award_spark_xp, asset_id, True)
+
+            if not result:
+                return await interaction.followup.send("❌ award_spark_xp returned nothing.", ephemeral=True)
+
+            if ch:
+                await ch.send(
+                    f"  XP: {result['new_xp']} (+{result['xp_gained']}) · "
+                    f"Tier: T{result['tier_before']} → T{result['tier_after']} · "
+                    f"Upgraded: {'✅' if result['upgraded'] else '❌'}"
+                )
+
+            # If upgraded, push ARC-19 on-chain
+            if result["upgraded"]:
+                if ch:
+                    await ch.send(f"  🔗 Pushing ARC-19 update on-chain...")
+                success = await asyncio.to_thread(
+                    push_spark_arc19_upgrade, asset_id, result["spark_type"], result["tier_after"]
+                )
+                if ch:
+                    if success:
+                        await ch.send(f"  ✅ On-chain update confirmed. Check Rand Gallery to verify.")
+                    else:
+                        await ch.send(f"  ❌ On-chain update failed — check Railway logs.")
+            else:
+                if ch:
+                    await ch.send(f"  No tier change — XP updated but threshold not reached.")
+
+            await interaction.followup.send("✅ Done — check test channel.", ephemeral=True)
+
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error: {e}", ephemeral=True)
+            raise
     @app_commands.describe(asset_id="The Spark ASA ID to roll back to T1")
     async def spark_rollback(self, interaction: discord.Interaction, asset_id: int):
         if not await admin_check(interaction):
