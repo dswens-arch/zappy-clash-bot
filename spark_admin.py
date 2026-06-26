@@ -441,7 +441,7 @@ def _push_arc19_to_cid(asset_id: int, cid: str) -> bool:
     """
     try:
         import base64
-        from algosdk import mnemonic, account
+        from algosdk import mnemonic, account, encoding as algo_encoding
         from algosdk.v2client import algod
         from algosdk.transaction import AssetConfigTxn, wait_for_confirmation
 
@@ -451,7 +451,7 @@ def _push_arc19_to_cid(asset_id: int, cid: str) -> bool:
             cid_stripped.upper() + "=" * (-len(cid_stripped) % 8)
         )
         digest = cid_bytes[4:][:32].ljust(32, b"\x00")
-        new_reserve = account.address_from_public_key(digest)
+        new_reserve = algo_encoding.encode_address(digest)
 
         # Connect
         algod_token   = os.environ.get("ALGOD_TOKEN", "")
