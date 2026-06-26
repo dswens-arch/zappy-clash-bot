@@ -146,7 +146,7 @@ class SparkAdminCog(commands.Cog):
             )
             embed.add_field(
                 name="Result",
-                value=f"🏆 **{winner['name']}** wins\nSpark triggered: {'✅' if result.get('spark_a_triggered') else '❌'}",
+                value=f"🏆 **{winner.name}** wins\nSpark triggered: {'✅' if result.get('spark_a_triggered') else '❌'}",
                 inline=False,
             )
             embed.add_field(name="Battle Log", value=log[:1000] if len(log) > 1000 else log, inline=False)
