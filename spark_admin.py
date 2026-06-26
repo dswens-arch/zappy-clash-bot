@@ -231,8 +231,8 @@ class SparkAdminCog(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         try:
-            from supabase import create_client
-            db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
+            from database import get_supabase
+            db = get_supabase()
 
             result = await asyncio.to_thread(
                 lambda: db.table("spark_holdings")
@@ -263,8 +263,8 @@ class SparkAdminCog(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         try:
-            from supabase import create_client
-            db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
+            from database import get_supabase
+            db = get_supabase()
 
             result = await asyncio.to_thread(
                 lambda: db.table("spark_holdings")
@@ -317,7 +317,8 @@ class SparkAdminCog(commands.Cog):
             )
 
             # Reset DB to T1
-            db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
+            from database import get_supabase
+            db = get_supabase()
             await asyncio.to_thread(
                 lambda: db.table("spark_holdings")
                 .update({"tier": 1, "xp": 0, "upgraded_at": None})
