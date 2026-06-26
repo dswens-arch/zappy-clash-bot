@@ -101,8 +101,8 @@ class SparkAdminCog(commands.Cog):
             from battle_engine import build_fighter, resolve_battle
 
             # Fetch both Zappies
-            zappy_a = await asyncio.to_thread(get_zappy_for_battle, zappy_a_asa)
-            zappy_b = await asyncio.to_thread(get_zappy_for_battle, zappy_b_asa)
+            zappy_a = await get_zappy_for_battle(zappy_a_asa)
+            zappy_b = await get_zappy_for_battle(zappy_b_asa)
 
             if not zappy_a:
                 return await interaction.followup.send(f"❌ Zappy A ({zappy_a_asa}) not found.", ephemeral=True)
