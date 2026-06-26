@@ -448,12 +448,12 @@ SPARK_TIER_NAMES      = {1: "Spark", 2: "Flare", 3: "Blaze"}
 # T2 and T3 image CIDs per type — fill in after uploading to Pinata
 # Format: { "zolt": {"2": "bafk...", "3": "bafk..."}, ... }
 SPARK_UPGRADE_CIDS: dict = {
-    "zolt":   {"2": "bafybeia37zmaybuc6tiwy2ji22ub7fmuub6khdkjdl65s34inp5lzzwxae",  "3": "bafybeigephla6nmi65gn46stp7dbz72p5or5rfeww4tvdpp2sv2cf5b3ou"},
-    "scorch": {"2": "bafybeieksknm2nt4akeiht6ezu3jnv3bkv3gvh5p42mrvinivldrkh663m", "3": "bafybeiemybyw7g3h655mf6ikqdnvse6cx3uze7stkqzsmyqhh42v6lqjoa"},
-    "jinx":   {"2": "bafybeicixawcaxwmzlegcylavymtv3flxanpoo35gljwbbqbt3jfx4ywtm", "3": "bafybeibziy5smed5hbfphrwoha4w2nbytrzulxvqgfrp3jyvblpmi2ng3i"},
-    "moss":   {"2": "bafybeifqz2ffykrpsjxmt4ktp7zzob3nkxdeaxh5ht7l62ysoyvwux6wfm","3": "bafybeicdmpnisqaldipjyfhxqukpk6xeo6rvoknomfvkxpeec63edpadnq"},
-    "glitch": {"2": "bafybeiayhxvs72ceoygrpuirwuworkbrvuhdeuvqi3cvhn5grbc44k6lje",  "3": "bafybeid4s6immn5o7sl62eyqydfsq4cyou3kxv6i42szz4ryjqtxhwwhzi"},
-    "null":   {"2": "bafkreiayd2s5tw3eo676ofwuw47p5lcslsisbjdh4bsgm5krokw6a4uwoy",  "3": "bafybeihtecxwqvlknjwwtcq42emldzm6s3ohkof6vcziikzsyr5m62jjte"},
+    "zolt":   {"2": "", "3": ""},
+    "scorch": {"2": "", "3": ""},
+    "jinx":   {"2": "", "3": ""},
+    "moss":   {"2": "", "3": ""},
+    "glitch": {"2": "", "3": ""},
+    "null":   {"2": "", "3": ""},
 }
 
 
@@ -527,7 +527,7 @@ def push_spark_arc19_upgrade(asset_id: int, spark_type: str, new_tier: int) -> b
         ALGOD_TOKEN            — AlgoNode API token (X-Algo-API-Token header)
     """
     try:
-        from algosdk import mnemonic, account
+        from algosdk import mnemonic, account, encoding as algo_encoding
         from algosdk.v2client import algod
         from algosdk.transaction import AssetConfigTxn, wait_for_confirmation
         import base64
@@ -554,7 +554,7 @@ def push_spark_arc19_upgrade(asset_id: int, spark_type: str, new_tier: int) -> b
         if len(digest) > 32:
             digest = digest[:32]
         digest = digest.ljust(32, b"\x00")
-        new_reserve = account.address_from_public_key(digest)
+        new_reserve = algo_encoding.encode_address(digest)
 
         # ── Connect to Algorand ───────────────────────────────────────────
         algod_token   = os.environ.get("ALGOD_TOKEN", "")
