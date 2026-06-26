@@ -37,6 +37,11 @@ class Fighter:
     hero_type:   Optional[str]  = None
     collab_type: Optional[str]  = None
 
+    # Spark companion
+    spark_type:        Optional[str]   = None   # zolt / scorch / jinx / moss / glitch / null
+    spark_tier:        int             = 0      # 0 = no spark equipped
+    spark_asset_id:    Optional[int]   = None   # ASA ID of the equipped Spark
+
     # Battle state
     hp:              int   = field(default=STARTING_HP, init=False)
     crit_multiplier: float = field(default=CRIT_MULTIPLIER, init=False)
@@ -48,6 +53,11 @@ class Fighter:
     rot_poisoned:       bool  = field(default=False, init=False)   # Rot Touch poison flag
     sweet_spot_active:  bool  = field(default=False, init=False)   # Pastel Sweet Spot heal-on-crit flag
     pure_signal_ready:  bool  = field(default=False, init=False)   # Clean Zappy no-variance first strike
+
+    # Spark battle state
+    spark_triggered:    bool  = field(default=False, init=False)   # Spark ability fired this battle
+    spark_vlt_debuff:   int   = field(default=0,     init=False)   # Scorch: VLT reduction applied to opponent
+    glitch_roll_range:  Optional[tuple] = field(default=None, init=False)  # Glitch: widened variance range
 
     @property
     def display_name(self) -> str:
@@ -89,6 +99,8 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     if getattr(attacker, 'pure_signal_ready', False) and round_num == 1:
         roll = 1.0
         attacker.pure_signal_ready = False
+    elif attacker.glitch_roll_range:
+        roll = random.uniform(*attacker.glitch_roll_range)
     else:
         roll = random.uniform(0.8, 1.2)
     raw_damage = attacker.VLT * roll
@@ -273,6 +285,72 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
     return False, ""
 
 
+def apply_spark(fighter: Fighter, opponent: Fighter, is_crit: bool, dmg: int, round_num: int) -> tuple[int, str]:
+    """
+    Check and apply Spark companion ability if trigger condition is met.
+    Called after damage is calculated each round.
+    Returns (modified_dmg, message). One trigger per battle max.
+    """
+    if not fighter.spark_type or fighter.spark_tier == 0 or fighter.spark_triggered:
+        return dmg, ""
+
+    t = fighter.spark_tier
+
+    # ── Zolt: crit → flat damage bonus ──────────────────────────────────────
+    if fighter.spark_type == "zolt" and is_crit:
+        bonus = {1: 15, 2: 25, 3: 35}[t]
+        if t == 3:
+            fighter.crit_multiplier = 2.5
+        fighter.spark_triggered = True
+        return dmg + bonus, (
+            f"⚡ **ZOLT** crackles — {fighter.display_name}'s Spark surges on the crit! "
+            f"+{bonus} damage added."
+        )
+
+    # ── Scorch: opponent ability fires → VLT debuff ──────────────────────────
+    if fighter.spark_type == "scorch" and opponent.ability_used and not fighter.spark_triggered:
+        debuff = {1: 10, 2: 15, 3: 20}[t]
+        spk_debuff = 10 if t == 3 else 0
+        opponent.VLT = max(10, opponent.VLT - debuff)
+        if spk_debuff:
+            opponent.SPK = max(10, opponent.SPK - spk_debuff)
+        fighter.spark_triggered = True
+        msg = f"🔥 **SCORCH** retaliates — {opponent.display_name} paid a price for that ability. VLT -{debuff}"
+        if spk_debuff:
+            msg += f", SPK -{spk_debuff}"
+        return dmg, msg + " for the rest of the battle."
+
+    # ── Glitch: either fighter low HP → widen damage variance ───────────────
+    if fighter.spark_type == "glitch" and not fighter.spark_triggered:
+        threshold = {1: 25, 2: 35, 3: 40}[t]
+        if fighter.hp <= threshold or opponent.hp <= threshold:
+            low, high = {1: (0.5, 2.0), 2: (0.4, 2.2), 3: (0.3, 2.5)}[t]
+            fighter.glitch_roll_range   = (low, high)
+            opponent.glitch_roll_range  = (low, high)
+            fighter.spark_triggered = True
+            return dmg, (
+                f"💀 **GLITCH** corrupts the field — {fighter.display_name}'s companion short-circuits. "
+                f"Damage rolls go wild for remaining rounds!"
+            )
+
+    # ── Moss: passive — applied pre-battle in resolve_battle(), nothing here ─
+    # ── Jinx: sudden death only — handled in tiebreaker block ────────────────
+    # ── Null: opponent ability fires → cancel + SPK boost ───────────────────
+    if fighter.spark_type == "null" and opponent.ability_used and not fighter.spark_triggered:
+        cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[t]
+        if random.random() < cancel_chance:
+            spk_bonus = 15 if t == 3 else 0
+            if spk_bonus:
+                fighter.SPK = min(100, fighter.SPK + spk_bonus)
+            fighter.spark_triggered = True
+            msg = f"🌑 **NULL** absorbs it — {opponent.display_name}'s ability is cancelled!"
+            if spk_bonus:
+                msg += f" {fighter.display_name} absorbs the energy. SPK +{spk_bonus}."
+            return dmg, msg
+
+    return dmg, ""
+
+
 # ─────────────────────────────────────────────
 # Flavor text generators
 # ─────────────────────────────────────────────
@@ -336,10 +414,28 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
     log.append(f"**{fighter_a.display_name}** — VLT {fighter_a.VLT} · INS {fighter_a.INS} · SPK {fighter_a.SPK}")
     if fighter_a.combo:
         log.append(f"  ↳ {fighter_a.combo}")
+    if fighter_a.spark_type and fighter_a.spark_tier > 0:
+        log.append(f"  🌟 Spark: **{fighter_a.spark_type.capitalize()}** T{fighter_a.spark_tier}")
     log.append(f"vs. **{fighter_b.display_name}** — VLT {fighter_b.VLT} · INS {fighter_b.INS} · SPK {fighter_b.SPK}")
     if fighter_b.combo:
         log.append(f"  ↳ {fighter_b.combo}")
+    if fighter_b.spark_type and fighter_b.spark_tier > 0:
+        log.append(f"  🌟 Spark: **{fighter_b.spark_type.capitalize()}** T{fighter_b.spark_tier}")
     log.append("")
+
+    # ── Moss passive: INS boost before round 1 ──
+    for fighter in [fighter_a, fighter_b]:
+        if fighter.spark_type == "moss" and fighter.spark_tier > 0:
+            ins_bonus = {1: 8, 2: 14, 3: 20}[fighter.spark_tier]
+            vlt_bonus = 8 if fighter.spark_tier == 3 else 0
+            fighter.INS = min(100, fighter.INS + ins_bonus)
+            if vlt_bonus:
+                fighter.VLT = min(100, fighter.VLT + vlt_bonus)
+            msg = f"🌿 **MOSS** stirs — {fighter.display_name}'s companion settles in. INS +{ins_bonus} before battle."
+            if vlt_bonus:
+                msg += f" VLT +{vlt_bonus}."
+            log.append(msg)
+            fighter.spark_triggered = True  # Moss is passive, mark as used
     # ── See-Through passive: pre-battle counter-read ──
     for fighter, opponent in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
         ability = fighter.ability
@@ -438,6 +534,9 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             dmg_a, crit_a = 0, False
         else:
             dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
+            dmg_a, spark_msg_a = apply_spark(fighter_a, fighter_b, crit_a, dmg_a, round_num)
+            if spark_msg_a:
+                round_msg.append(spark_msg_a)
 
         # Iron Shell: one-time full absorb, only if fighter_b has the combo
         if fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
@@ -472,6 +571,9 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             dmg_b, crit_b = 0, False
         else:
             dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
+            dmg_b, spark_msg_b = apply_spark(fighter_b, fighter_a, crit_b, dmg_b, round_num)
+            if spark_msg_b:
+                round_msg.append(spark_msg_b)
 
         # Iron Shell: one-time full absorb, only if fighter_a has the combo
         if fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
@@ -536,6 +638,19 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # Tie — weighted random roll based on total stats
         total_a = fighter_a.VLT + fighter_a.INS + fighter_a.SPK
         total_b = fighter_b.VLT + fighter_b.INS + fighter_b.SPK
+
+        # Jinx: cap opponent's roll pool
+        if fighter_a.spark_type == "jinx" and fighter_a.spark_tier > 0 and not fighter_a.spark_triggered:
+            cap = {1: 0.75, 2: 0.50, 3: 0.30}[fighter_a.spark_tier]
+            total_b = max(1, int(total_b * cap))
+            fighter_a.spark_triggered = True
+            log.append(f"🎲 **JINX** — {fighter_a.display_name}'s companion grins. {fighter_b.display_name}'s roll pool shrinks to {total_b}!")
+        elif fighter_b.spark_type == "jinx" and fighter_b.spark_tier > 0 and not fighter_b.spark_triggered:
+            cap = {1: 0.75, 2: 0.50, 3: 0.30}[fighter_b.spark_tier]
+            total_a = max(1, int(total_a * cap))
+            fighter_b.spark_triggered = True
+            log.append(f"🎲 **JINX** — {fighter_b.display_name}'s companion grins. {fighter_a.display_name}'s roll pool shrinks to {total_a}!")
+
         roll_a  = random.randint(1, total_a)
         roll_b  = random.randint(1, total_b)
         log.append(
@@ -560,6 +675,10 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         "log_text": "\n".join(log),
         "fighter_a_final_hp": fighter_a.hp,
         "fighter_b_final_hp": fighter_b.hp,
+        "spark_a_triggered": fighter_a.spark_triggered,
+        "spark_b_triggered": fighter_b.spark_triggered,
+        "spark_a_asset_id":  fighter_a.spark_asset_id,
+        "spark_b_asset_id":  fighter_b.spark_asset_id,
     }
 
 
