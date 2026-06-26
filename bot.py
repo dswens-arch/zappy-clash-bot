@@ -33,6 +33,7 @@ from dotenv import load_dotenv
 from clash_auction import setup_auction_commands, auction_checker
 import grand_prix_cog
 from grand_prix_cog import GrandPrixCog
+from spark_admin import SparkAdminCog
 
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
@@ -402,13 +403,117 @@ async def cmd_clash(interaction: discord.Interaction):
             for item in pick_view.children:
                 item.disabled = True
 
-        await asyncio.to_thread(register_for_bracket, user_id, asset_id, active_bracket_id)
+        # ── Check for Sparks in wallet ────────────────────────────────────────
+        from supabase import create_client
+        import os as _os
+        _sb = create_client(_os.environ["SUPABASE_URL"], _os.environ["SUPABASE_SERVICE_KEY"])
+        spark_res = await asyncio.to_thread(
+            lambda: _sb.table("spark_holdings")
+            .select("asset_id, name, spark_type, tier, xp")
+            .eq("wallet", wallet)
+            .execute()
+        )
+        sparks = spark_res.data or []
+
+        if sparks:
+            # Show Spark selection UI
+            spark_embed = discord.Embed(
+                title="🌟 Equip a Spark companion?",
+                description=(
+                    f"**{name}** is ready for battle.\n\n"
+                    "You have Sparks available. Equip one to gain a battle ability, or skip to enter without one."
+                ),
+                color=0xA855F7,
+            )
+            for s in sparks:
+                spark_embed.add_field(
+                    name=f"{s['name']} · T{s['tier']}",
+                    value=f"Type: **{s['spark_type'].capitalize()}** · XP: {s['xp']}",
+                    inline=True,
+                )
+
+            class SparkSelectView(discord.ui.View):
+                def __init__(self):
+                    super().__init__(timeout=60)
+                    self.chosen_spark = None
+                    self.resolved     = False
+
+                    # Add one button per Spark (max 5 for Discord UI)
+                    for s in sparks[:4]:
+                        btn = discord.ui.Button(
+                            label=f"{s['spark_type'].capitalize()} T{s['tier']}",
+                            style=discord.ButtonStyle.primary,
+                            custom_id=str(s["asset_id"]),
+                        )
+                        btn.callback = self._make_callback(s)
+                        self.add_item(btn)
+
+                    # Skip button
+                    skip_btn = discord.ui.Button(label="⚡ No Spark", style=discord.ButtonStyle.secondary)
+                    skip_btn.callback = self._skip
+                    self.add_item(skip_btn)
+
+                def _make_callback(self, spark_data):
+                    async def callback(inter: discord.Interaction):
+                        if self.resolved:
+                            await inter.response.send_message("Already selected!", ephemeral=True)
+                            return
+                        try:
+                            await inter.response.defer(ephemeral=True)
+                        except discord.errors.NotFound:
+                            return
+                        self.resolved     = True
+                        self.chosen_spark = spark_data
+                        for item in self.children:
+                            item.disabled = True
+                        await _finalize_register(inter, zappy, spark_data)
+                    return callback
+
+                async def _skip(self, inter: discord.Interaction):
+                    if self.resolved:
+                        await inter.response.send_message("Already selected!", ephemeral=True)
+                        return
+                    try:
+                        await inter.response.defer(ephemeral=True)
+                    except discord.errors.NotFound:
+                        return
+                    self.resolved = True
+                    for item in self.children:
+                        item.disabled = True
+                    await _finalize_register(inter, zappy, None)
+
+            await inter.followup.send(embed=spark_embed, view=SparkSelectView(), ephemeral=True)
+        else:
+            # No Sparks — register directly
+            await _finalize_register(inter, zappy, None)
+
+    async def _finalize_register(inter: discord.Interaction, zappy: dict, spark: dict | None):
+        """Complete registration with optional Spark."""
+        asset_id = zappy["asset_id"]
+        stats    = zappy["stats"]
+        name     = zappy["name"]
+
+        # Store spark choice alongside bracket entry
+        spark_asa  = spark["asset_id"]  if spark else None
+        spark_type = spark["spark_type"] if spark else None
+        spark_tier = spark["tier"]       if spark else 0
+
+        await asyncio.to_thread(
+            register_for_bracket, user_id, asset_id, active_bracket_id,
+            spark_asa=spark_asa, spark_type=spark_type, spark_tier=spark_tier
+        )
 
         confirm = discord.Embed(
             title=f"✅ {name} is in the bracket!",
             description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
             color=0xF5E642,
         )
+        if spark:
+            confirm.add_field(
+                name=f"🌟 Spark Equipped",
+                value=f"**{spark['spark_type'].capitalize()}** T{spark['tier']} — ability ready for battle.",
+                inline=False,
+            )
         if stats.get("combo"):
             confirm.add_field(name="Combo", value=stats["combo"], inline=False)
         if stats.get("ability") and isinstance(stats["ability"], dict):
@@ -3075,6 +3180,9 @@ async def on_ready():
     bot.add_view(grand_prix_cog.JoinZapView())
     print("⚡ Grand Prix cog loaded")
 
+    await bot.add_cog(SparkAdminCog(bot))
+    print("⚡ Spark admin cog loaded")
+
     # Games
     from hue_hunt_cog import HueHuntCog
     from zap_word_cog import ZapWordCog
@@ -3417,6 +3525,62 @@ async def _run_apex_test_beat(
 
     # ── Start the run ───────────────────────────────────────────────
     await send_next_beat(interaction, run)
+
+
+# ─────────────────────────────────────────────
+# Spark XP + Upgrade
+# ─────────────────────────────────────────────
+
+async def award_spark_xp(spark_asset_id: int, won: bool, clash_channel: discord.TextChannel = None):
+    """Award XP to a Spark after a Clash event and check for tier upgrade."""
+    if not spark_asset_id:
+        return
+
+    xp_gain = 50 + (50 if won else 0)
+
+    from supabase import create_client
+    _sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
+
+    # Fetch current state
+    res = await asyncio.to_thread(
+        lambda: _sb.table("spark_holdings")
+        .select("asset_id, name, spark_type, tier, xp, wallet, discord_user_id")
+        .eq("asset_id", spark_asset_id)
+        .single()
+        .execute()
+    )
+    if not res.data:
+        return
+
+    spark = res.data
+    new_xp = spark["xp"] + xp_gain
+
+    await asyncio.to_thread(
+        lambda: _sb.table("spark_holdings")
+        .update({"xp": new_xp})
+        .eq("asset_id", spark_asset_id)
+        .execute()
+    )
+
+    # Check tier upgrade thresholds
+    thresholds = {1: 1000, 2: 5000}
+    current_tier = spark["tier"]
+    if current_tier < 3 and new_xp >= thresholds.get(current_tier, 999999):
+        new_tier = current_tier + 1
+        await asyncio.to_thread(
+            lambda: _sb.table("spark_holdings")
+            .update({"tier": new_tier})
+            .eq("asset_id", spark_asset_id)
+            .execute()
+        )
+        # Notify in clash channel
+        if clash_channel and spark.get("discord_user_id"):
+            tier_names = {2: "Flare", 3: "Blaze"}
+            await clash_channel.send(
+                f"🌟 **SPARK UPGRADE!** <@{spark['discord_user_id']}>'s "
+                f"**{spark['name']}** has evolved to **T{new_tier} {tier_names[new_tier]}**! "
+                f"({new_xp} XP total)"
+            )
 
 
 # ---------------------------------------------
