@@ -519,12 +519,31 @@ async def cmd_clash(interaction: discord.Interaction):
         clash_ch = bot.get_channel(CLASH_CHANNEL)
         if clash_ch:
             zappy_record = await asyncio.to_thread(get_zappy_record, zappy.get("asset_id", 0))
+
+            # Build Spark image URL for entry card
+            _T1_CIDS = {
+                "zolt":"bafkreign5ydt5zj4mltsays47lsp7d6stdzje756zvzehzx7tryqxmqv6q",
+                "scorch":"bafkreihpdkwbg6gvn4zutkohrmig67zalqtprg4wln624zkukw5nlo4f3q",
+                "jinx":"bafkreierm7ti75i2hdpngztupgqpr5w7lbjull262outivdaanz4lshd7u",
+                "moss":"bafkreib2iprbja2zhfdxflulcgqyav2m5i4z5behc3n6kt4qglus36dqqm",
+                "glitch":"bafkreidtjpiu4k44u5soltmqsfo6oyykef2p7mytw4jte6tn47dedrwhye",
+                "null":"bafkreif7otb4ifgcgkqqsvxu3jgxe62yrvdwrgnbe37b5vwr4l5ypnmnpe",
+            }
+            spark_img_url = ""
+            if spark and spark.get("spark_type"):
+                cid = _T1_CIDS.get(spark["spark_type"], "")
+                if cid:
+                    spark_img_url = f"https://scarlet-written-scallop-153.mypinata.cloud/ipfs/{cid}"
+
             card_buf = await render_entry_card(
                 display_name=inter.user.display_name,
                 zappy_name=name,
                 stats=stats,
                 image_url=zappy.get("image_url", ""),
                 record=zappy_record,
+                spark_type=spark["spark_type"] if spark else None,
+                spark_tier=spark["tier"] if spark else 0,
+                spark_image_url=spark_img_url,
             )
             await clash_ch.send(file=discord.File(card_buf, filename="entry.png"))
 
@@ -2842,29 +2861,38 @@ async def close_and_resolve(channel: discord.TextChannel):
             name_a = get_display_name(player_a["discord_user_id"])
             name_b = get_display_name(player_b["discord_user_id"])
 
-            # -- Pre-fight embed: both Zappies side by side --
+            # -- Pre-fight embed: both Zappies same size as inline thumbnails --
+            def _spark_line(fighter):
+                if fighter.spark_type and fighter.spark_tier > 0:
+                    return f"\n🌟 Spark: **{fighter.spark_type.capitalize()}** T{fighter.spark_tier}"
+                return ""
+
             pre_embed = discord.Embed(
                 title="⚡ BRACKET MATCH",
                 color=0xF5E642,
             )
             pre_embed.add_field(
                 name=f"{fighter_a.display_name} · {name_a}",
-                value=f"⚡ VLT {fighter_a.VLT} · 🛡️ INS {fighter_a.INS} · 🎲 SPK {fighter_a.SPK}"
-                      + (f"\n✨ {fighter_a.combo}" if fighter_a.combo else ""),
+                value=(
+                    f"⚡ VLT {fighter_a.VLT} · 🛡️ INS {fighter_a.INS} · 🎲 SPK {fighter_a.SPK}"
+                    + (f"\n✨ {fighter_a.combo}" if fighter_a.combo else "")
+                    + _spark_line(fighter_a)
+                ),
                 inline=True,
             )
             pre_embed.add_field(name="vs.", value="⚡", inline=True)
             pre_embed.add_field(
                 name=f"{fighter_b.display_name} · {name_b}",
-                value=f"⚡ VLT {fighter_b.VLT} · 🛡️ INS {fighter_b.INS} · 🎲 SPK {fighter_b.SPK}"
-                      + (f"\n✨ {fighter_b.combo}" if fighter_b.combo else ""),
+                value=(
+                    f"⚡ VLT {fighter_b.VLT} · 🛡️ INS {fighter_b.INS} · 🎲 SPK {fighter_b.SPK}"
+                    + (f"\n✨ {fighter_b.combo}" if fighter_b.combo else "")
+                    + _spark_line(fighter_b)
+                ),
                 inline=True,
             )
-            # Show both images - A as thumbnail, B as image
+            # Both Zappies same size — A as thumbnail only, B posted separately after
             if fighter_a.image_url:
                 pre_embed.set_thumbnail(url=_ipfs_url(fighter_a.image_url))
-            if fighter_b.image_url:
-                pre_embed.set_image(url=_ipfs_url(fighter_b.image_url))
 
             # Show See-Through passive in pre-battle embed if either fighter has it
             for f, opp in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
@@ -2885,15 +2913,22 @@ async def close_and_resolve(channel: discord.TextChannel):
                     )
 
             await channel.send(embed=pre_embed)
+
+            # Fighter B image — same thumbnail size as A
+            if fighter_b.image_url:
+                b_embed = discord.Embed(color=0xF5E642)
+                b_embed.set_thumbnail(url=_ipfs_url(fighter_b.image_url))
+                b_embed.description = f"**{fighter_b.display_name}** · {name_b}"
+                await channel.send(embed=b_embed)
+
             await asyncio.sleep(2)
 
-            # -- Play-by-play text (skip header shown in embed, use sentinel marker) --
+            # -- Play-by-play text --
             log_lines = result["log"]
-            # Find sentinel inserted by battle_engine after the header block
             try:
                 start_idx = log_lines.index("---PLAY_BY_PLAY_START---") + 1
             except ValueError:
-                start_idx = 6   # fallback for older battle results
+                start_idx = 6
             play_lines = log_lines[start_idx:-1]
             play_by_play = "\n".join(play_lines)
             chunks = [play_by_play[i:i+1800] for i in range(0, len(play_by_play), 1800)]
@@ -2901,6 +2936,68 @@ async def close_and_resolve(channel: discord.TextChannel):
                 if chunk.strip():
                     await channel.send(chunk)
                     await asyncio.sleep(1)
+
+            # -- Spark trigger embed (fires if a Spark triggered this battle) --
+            SPARK_ABILITY_DESC = {
+                "zolt":   {1: "+15 flat damage added to crit", 2: "+25 flat damage added to crit", 3: "+35 damage + crit multiplier 2.5×"},
+                "scorch": {1: "Opponent's VLT −10 for remaining rounds", 2: "Opponent's VLT −15 for remaining rounds", 3: "Opponent's VLT −20 + SPK −10"},
+                "jinx":   {1: "Opponent's sudden death roll capped at 75%", 2: "Opponent's roll capped at 50%", 3: "Opponent's roll capped at 30%"},
+                "moss":   {1: "Your INS +8 at battle start", 2: "Your INS +14 at battle start", 3: "Your INS +20 + VLT +8"},
+                "glitch": {1: "Damage rolls destabilize (0.5–2.0 range)", 2: "Damage rolls destabilize (0.4–2.2 range)", 3: "Damage rolls destabilize (0.3–2.5 range)"},
+                "null":   {1: "50% chance to cancel opponent's ability", 2: "75% chance to cancel", 3: "100% cancel + your SPK +15"},
+            }
+            SPARK_COLORS = {
+                "zolt": 0xc8ff00, "scorch": 0xff5a1f, "jinx": 0xa78bfa,
+                "moss": 0x3dff9a, "glitch": 0xff2d78, "null": 0x94a3b8,
+            }
+            SPARK_T1_CIDS = {
+                "zolt":   "bafkreign5ydt5zj4mltsays47lsp7d6stdzje756zvzehzx7tryqxmqv6q",
+                "scorch": "bafkreihpdkwbg6gvn4zutkohrmig67zalqtprg4wln624zkukw5nlo4f3q",
+                "jinx":   "bafkreierm7ti75i2hdpngztupgqpr5w7lbjull262outivdaanz4lshd7u",
+                "moss":   "bafkreib2iprbja2zhfdxflulcgqyav2m5i4z5behc3n6kt4qglus36dqqm",
+                "glitch": "bafkreidtjpiu4k44u5soltmqsfo6oyykef2p7mytw4jte6tn47dedrwhye",
+                "null":   "bafkreif7otb4ifgcgkqqsvxu3jgxe62yrvdwrgnbe37b5vwr4l5ypnmnpe",
+            }
+            SPARK_T2_CIDS = {
+                "zolt":   "bafybeia37zmaybuc6tiwy2ji22ub7fmuub6khdkjdl65s34inp5lzzwxae",
+                "scorch": "bafybeieksknm2nt4akeiht6ezu3jnv3bkv3gvh5p42mrvinivldrkh663m",
+                "jinx":   "bafybeicixawcaxwmzlegcylavymtv3flxanpoo35gljwbbqbt3jfx4ywtm",
+                "moss":   "bafybeifqz2ffykrpsjxmt4ktp7zzob3nkxdeaxh5ht7l62ysoyvwux6wfm",
+                "glitch": "bafybeiayhxvs72ceoygrpuirwuworkbrvuhdeuvqi3cvhn5grbc44k6lje",
+                "null":   "bafkreiayd2s5tw3eo676ofwuw47p5lcslsisbjdh4bsgm5krokw6a4uwoy",
+            }
+            SPARK_T3_CIDS = {
+                "zolt":   "bafybeigephla6nmi65gn46stp7dbz72p5or5rfeww4tvdpp2sv2cf5b3ou",
+                "scorch": "bafybeiemybyw7g3h655mf6ikqdnvse6cx3uze7stkqzsmyqhh42v6lqjoa",
+                "jinx":   "bafybeibziy5smed5hbfphrwoha4w2nbytrzulxvqgfrp3jyvblpmi2ng3i",
+                "moss":   "bafybeicdmpnisqaldipjyfhxqukpk6xeo6rvoknomfvkxpeec63edpadnq",
+                "glitch": "bafybeid4s6immn5o7sl62eyqydfsq4cyou3kxv6i42szz4ryjqtxhwwhzi",
+                "null":   "bafybeihtecxwqvlknjwwtcq42emldzm6s3ohkof6vcziikzsyr5m62jjte",
+            }
+
+            async def _post_spark_trigger(fighter, fighter_name):
+                if not fighter.spark_type or not fighter.spark_triggered:
+                    return
+                stype = fighter.spark_type
+                stier = fighter.spark_tier
+                cid_map = {1: SPARK_T1_CIDS, 2: SPARK_T2_CIDS, 3: SPARK_T3_CIDS}
+                cid = cid_map.get(stier, SPARK_T1_CIDS).get(stype, "")
+                img_url = f"https://scarlet-written-scallop-153.mypinata.cloud/ipfs/{cid}" if cid else ""
+                desc = SPARK_ABILITY_DESC.get(stype, {}).get(stier, "")
+                color = SPARK_COLORS.get(stype, 0xffffff)
+                spark_embed = discord.Embed(
+                    title=f"🌟 {stype.upper()} SPARK TRIGGERS — {fighter_name}",
+                    description=desc,
+                    color=color,
+                )
+                if img_url:
+                    spark_embed.set_thumbnail(url=img_url)
+                await channel.send(embed=spark_embed)
+
+            if result.get("spark_a_triggered"):
+                await _post_spark_trigger(fighter_a, name_a)
+            if result.get("spark_b_triggered"):
+                await _post_spark_trigger(fighter_b, name_b)
 
             # Award CP
             winner_id = player_a["discord_user_id"] if result["winner"].asset_id == player_a["asset_id"] else player_b["discord_user_id"]
@@ -2962,6 +3059,13 @@ async def close_and_resolve(channel: discord.TextChannel):
                 round_num=round_num,
             )
 
+            # -- Award Spark XP --
+            winner_is_a = result["winner"].asset_id == player_a["asset_id"]
+            if result.get("spark_a_asset_id"):
+                await award_spark_xp(result["spark_a_asset_id"], won=winner_is_a, clash_channel=channel)
+            if result.get("spark_b_asset_id"):
+                await award_spark_xp(result["spark_b_asset_id"], won=not winner_is_a, clash_channel=channel)
+
             # -- Token rewards --
             loser_wallet  = await asyncio.to_thread(get_wallet, loser_id)
             is_evening    = "evening" in bracket_id
@@ -2980,7 +3084,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                 elif token_result.get("reason") == "not_opted_in":
                     token_msg = f"\n⚠️ <@{winner_id}>: {token_result['message']}"
 
-            # -- Winner embed with image --
+            # -- Winner embed — large image of winner --
             winner   = result["winner"]
             win_desc = f"💰 **+{win_cp + upset_cp} CP** → <@{winner_id}>"
             if result["is_upset"]:
