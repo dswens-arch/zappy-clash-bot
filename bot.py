@@ -866,6 +866,101 @@ async def refreshwallet(interaction: discord.Interaction):
     )
 
 
+@tree.command(name="spark-register", description="Register any Sparks in your wallet to your account")
+async def cmd_spark_register(interaction: discord.Interaction):
+    """Scan wallet for Spark ASAs and claim any unclaimed ones in the DB."""
+    await interaction.response.defer(ephemeral=True)
+
+    user_id = str(interaction.user.id)
+    wallet  = await asyncio.to_thread(get_wallet, user_id)
+
+    if not wallet:
+        await interaction.followup.send(
+            "❌ Link your wallet first with `/link`.", ephemeral=True
+        )
+        return
+
+    # Fetch all Spark ASA IDs from spark_holdings
+    from database import get_supabase
+    db = get_supabase()
+    all_sparks = await asyncio.to_thread(
+        lambda: db.table("spark_holdings").select("asset_id, spark_type, tier, wallet").execute()
+    )
+    if not all_sparks.data:
+        await interaction.followup.send("❌ No Sparks found in the system.", ephemeral=True)
+        return
+
+    spark_asa_ids = [s["asset_id"] for s in all_sparks.data]
+
+    # Check wallet on-chain for any of those ASA IDs
+    import aiohttp
+    from algorand_lookup import INDEXER_URL
+    held_spark_ids = []
+    try:
+        async with aiohttp.ClientSession() as session:
+            url = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status == 200:
+                    data   = await resp.json()
+                    assets = data.get("assets", [])
+                    held_ids = {a["asset-id"] for a in assets if a.get("amount", 0) > 0}
+                    held_spark_ids = [sid for sid in spark_asa_ids if sid in held_ids]
+    except Exception as e:
+        await interaction.followup.send(
+            f"❌ Couldn't reach Algorand to verify holdings: {e}", ephemeral=True
+        )
+        return
+
+    if not held_spark_ids:
+        await interaction.followup.send(
+            "No Sparks found in your wallet. Purchase one on a marketplace first.",
+            ephemeral=True
+        )
+        return
+
+    # Claim unclaimed rows and update already-owned ones if wallet changed
+    claimed   = []
+    already   = []
+    for spark in all_sparks.data:
+        if spark["asset_id"] not in held_spark_ids:
+            continue
+        if spark.get("wallet") == wallet:
+            already.append(spark)
+        else:
+            # Claim it
+            await asyncio.to_thread(
+                lambda s=spark: db.table("spark_holdings")
+                .update({
+                    "wallet":          wallet,
+                    "discord_user_id": user_id,
+                    "purchased_at":    __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+                })
+                .eq("asset_id", s["asset_id"])
+                .execute()
+            )
+            claimed.append(spark)
+
+    # Build response
+    tier_names = {1: "Spark", 2: "Flare", 3: "Blaze"}
+    lines = []
+
+    if claimed:
+        lines.append(f"✅ **{len(claimed)} Spark(s) registered to your account:**")
+        for s in claimed:
+            lines.append(f"  🌟 **{s['spark_type'].capitalize()}** · T{s['tier']} {tier_names.get(s['tier'], '')}")
+
+    if already:
+        lines.append(f"\nAlready registered ({len(already)}):")
+        for s in already:
+            lines.append(f"  · {s['spark_type'].capitalize()} T{s['tier']}")
+
+    if not lines:
+        lines.append("No new Sparks to register.")
+
+    lines.append("\nYour Sparks will appear in the Clash entry flow next time registration opens.")
+    await interaction.followup.send("\n".join(lines), ephemeral=True)
+
+
 @tree.command(name="myzappies", description="List all your Zappies with names and ASA IDs")
 async def cmd_myzappies(interaction: discord.Interaction):
     """Show all Zappies in the linked wallet with names."""
