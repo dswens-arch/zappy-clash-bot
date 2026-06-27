@@ -2956,66 +2956,106 @@ async def close_and_resolve(channel: discord.TextChannel):
             name_a = get_display_name(player_a["discord_user_id"])
             name_b = get_display_name(player_b["discord_user_id"])
 
-            # -- Pre-fight embed: both Zappies same size as inline thumbnails --
-            def _spark_line(fighter):
+            # -- Pre-fight: two embeds, one per fighter, VS in between --
+            def _build_fighter_embed(fighter, player_name):
+                val = (
+                    f"⚡ VLT {fighter.VLT} · 🛡️ INS {fighter.INS} · 🎲 SPK {fighter.SPK}"
+                    + (f"\n✨ {fighter.combo}" if fighter.combo else "")
+                )
+                if fighter.ability and isinstance(fighter.ability, dict):
+                    ab = fighter.ability
+                    val += f"\n⚡ {ab.get('name','Ability')}"
                 if fighter.spark_type and fighter.spark_tier > 0:
-                    return f"\n🌟 Spark: **{fighter.spark_type.capitalize()}** T{fighter.spark_tier}"
-                return ""
+                    val += f"\n🌟 Spark: **{fighter.spark_type.capitalize()}** T{fighter.spark_tier}"
+                embed = discord.Embed(color=0xF5E642)
+                embed.add_field(
+                    name=f"{fighter.display_name} · {player_name}",
+                    value=val,
+                    inline=False,
+                )
+                if fighter.image_url:
+                    embed.set_thumbnail(url=_ipfs_url(fighter.image_url))
+                return embed
 
-            pre_embed = discord.Embed(
-                title="⚡ BRACKET MATCH",
-                color=0xF5E642,
-            )
-            pre_embed.add_field(
-                name=f"{fighter_a.display_name} · {name_a}",
-                value=(
-                    f"⚡ VLT {fighter_a.VLT} · 🛡️ INS {fighter_a.INS} · 🎲 SPK {fighter_a.SPK}"
-                    + (f"\n✨ {fighter_a.combo}" if fighter_a.combo else "")
-                    + _spark_line(fighter_a)
-                ),
-                inline=True,
-            )
-            pre_embed.add_field(name="vs.", value="⚡", inline=True)
-            pre_embed.add_field(
-                name=f"{fighter_b.display_name} · {name_b}",
-                value=(
-                    f"⚡ VLT {fighter_b.VLT} · 🛡️ INS {fighter_b.INS} · 🎲 SPK {fighter_b.SPK}"
-                    + (f"\n✨ {fighter_b.combo}" if fighter_b.combo else "")
-                    + _spark_line(fighter_b)
-                ),
-                inline=True,
-            )
-            # Both Zappies same size — A as thumbnail only, B posted separately after
-            if fighter_a.image_url:
-                pre_embed.set_thumbnail(url=_ipfs_url(fighter_a.image_url))
+            embed_a = _build_fighter_embed(fighter_a, name_a)
+            embed_b = _build_fighter_embed(fighter_b, name_b)
 
-            # Show See-Through passive in pre-battle embed if either fighter has it
-            for f, opp in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
-                ab = f.ability
+            # See-Through passive — add to the relevant fighter's embed
+            for fighter, opp, embed in [(fighter_a, fighter_b, embed_a), (fighter_b, fighter_a, embed_b)]:
+                ab = fighter.ability
                 if ab and isinstance(ab, dict) and ab.get("name") == "See-Through":
                     opp_stats = {"VLT": opp.VLT, "INS": opp.INS, "SPK": opp.SPK}
                     dominant  = max(opp_stats, key=opp_stats.get)
                     bonus     = int(opp_stats[dominant] * 0.18)
                     counter   = "INS" if dominant == "VLT" else "VLT"
-                    pre_embed.add_field(
+                    embed.add_field(
                         name="🩻 See-Through",
                         value=(
-                            f"**{f.display_name}** reads {opp.display_name}'s dominant stat "
+                            f"Reads {opp.display_name}'s dominant stat "
                             f"(**{dominant} {opp_stats[dominant]}**) — "
-                            f"+{bonus} {counter} applied before round 1."
+                            f"+{bonus} {counter} before round 1."
                         ),
                         inline=False,
                     )
 
-            await channel.send(embed=pre_embed)
+            SPARK_T1_CIDS_PRE = {
+                "zolt":   "bafkreign5ydt5zj4mltsays47lsp7d6stdzje756zvzehzx7tryqxmqv6q",
+                "scorch": "bafkreihpdkwbg6gvn4zutkohrmig67zalqtprg4wln624zkukw5nlo4f3q",
+                "jinx":   "bafkreierm7ti75i2hdpngztupgqpr5w7lbjull262outivdaanz4lshd7u",
+                "moss":   "bafkreib2iprbja2zhfdxflulcgqyav2m5i4z5behc3n6kt4qglus36dqqm",
+                "glitch": "bafkreidtjpiu4k44u5soltmqsfo6oyykef2p7mytw4jte6tn47dedrwhye",
+                "null":   "bafkreif7otb4ifgcgkqqsvxu3jgxe62yrvdwrgnbe37b5vwr4l5ypnmnpe",
+            }
+            SPARK_T2_CIDS_PRE = {
+                "zolt":   "bafybeia37zmaybuc6tiwy2ji22ub7fmuub6khdkjdl65s34inp5lzzwxae",
+                "scorch": "bafybeieksknm2nt4akeiht6ezu3jnv3bkv3gvh5p42mrvinivldrkh663m",
+                "jinx":   "bafybeicixawcaxwmzlegcylavymtv3flxanpoo35gljwbbqbt3jfx4ywtm",
+                "moss":   "bafybeifqz2ffykrpsjxmt4ktp7zzob3nkxdeaxh5ht7l62ysoyvwux6wfm",
+                "glitch": "bafybeiayhxvs72ceoygrpuirwuworkbrvuhdeuvqi3cvhn5grbc44k6lje",
+                "null":   "bafkreiayd2s5tw3eo676ofwuw47p5lcslsisbjdh4bsgm5krokw6a4uwoy",
+            }
+            SPARK_T3_CIDS_PRE = {
+                "zolt":   "bafybeigephla6nmi65gn46stp7dbz72p5or5rfeww4tvdpp2sv2cf5b3ou",
+                "scorch": "bafybeiemybyw7g3h655mf6ikqdnvse6cx3uze7stkqzsmyqhh42v6lqjoa",
+                "jinx":   "bafybeibziy5smed5hbfphrwoha4w2nbytrzulxvqgfrp3jyvblpmi2ng3i",
+                "moss":   "bafybeicdmpnisqaldipjyfhxqukpk6xeo6rvoknomfvkxpeec63edpadnq",
+                "glitch": "bafybeid4s6immn5o7sl62eyqydfsq4cyou3kxv6i42szz4ryjqtxhwwhzi",
+                "null":   "bafybeihtecxwqvlknjwwtcq42emldzm6s3ohkof6vcziikzsyr5m62jjte",
+            }
+            SPARK_COLORS_PRE = {
+                "zolt": 0xc8ff00, "scorch": 0xff5a1f, "jinx": 0xa78bfa,
+                "moss": 0x3dff9a, "glitch": 0xff2d78, "null": 0x94a3b8,
+            }
 
-            # Fighter B image — same thumbnail size as A
-            if fighter_b.image_url:
-                b_embed = discord.Embed(color=0xF5E642)
-                b_embed.set_thumbnail(url=_ipfs_url(fighter_b.image_url))
-                b_embed.description = f"**{fighter_b.display_name}** · {name_b}"
-                await channel.send(embed=b_embed)
+            def _spark_embed(fighter):
+                if not fighter.spark_type or fighter.spark_tier == 0:
+                    return None
+                stype = fighter.spark_type
+                stier = fighter.spark_tier
+                cid_map = {1: SPARK_T1_CIDS_PRE, 2: SPARK_T2_CIDS_PRE, 3: SPARK_T3_CIDS_PRE}
+                cid = cid_map.get(stier, SPARK_T1_CIDS_PRE).get(stype, "")
+                img_url = f"https://scarlet-written-scallop-153.mypinata.cloud/ipfs/{cid}" if cid else ""
+                tier_names = {1: "Spark", 2: "Flare", 3: "Blaze"}
+                color = SPARK_COLORS_PRE.get(stype, 0xffffff)
+                embed = discord.Embed(color=color)
+                embed.add_field(
+                    name=f"🌟 {stype.capitalize()} · T{stier} {tier_names.get(stier, '')}",
+                    value="Companion equipped",
+                    inline=False,
+                )
+                if img_url:
+                    embed.set_thumbnail(url=img_url)
+                return embed
 
+            spark_embed_a = _spark_embed(fighter_a)
+            spark_embed_b = _spark_embed(fighter_b)
+
+            await channel.send(content="⚡ **BRACKET MATCH**", embed=embed_a)
+            if spark_embed_a:
+                await channel.send(embed=spark_embed_a)
+            await channel.send(content="**vs.**", embed=embed_b)
+            if spark_embed_b:
+                await channel.send(embed=spark_embed_b)
             await asyncio.sleep(2)
 
             # -- Play-by-play text --
