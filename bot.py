@@ -961,6 +961,139 @@ async def cmd_spark_register(interaction: discord.Interaction):
     await interaction.followup.send("\n".join(lines), ephemeral=True)
 
 
+@tree.command(name="my-sparks", description="View all your Sparks and their XP progress")
+async def cmd_my_sparks(interaction: discord.Interaction):
+    """Show all Sparks registered to your account with XP and tier info."""
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+    await interaction.response.defer(ephemeral=True)
+
+    user_id = str(interaction.user.id)
+    wallet  = await asyncio.to_thread(get_wallet, user_id)
+
+    if not wallet:
+        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+        return
+
+    from database import get_sparks_for_wallet
+    sparks = await asyncio.to_thread(get_sparks_for_wallet, wallet)
+
+    if not sparks:
+        await interaction.followup.send(
+            "No Sparks registered to your account. Purchase one and run `/spark-register` to claim it.",
+            ephemeral=True
+        )
+        return
+
+    TIER_NAMES = {1: "Spark", 2: "Flare", 3: "Blaze"}
+    THRESHOLDS = {1: 1000, 2: 5000}
+
+    embed = discord.Embed(title="🌟 Your Sparks", color=0xA855F7)
+
+    for s in sparks:
+        tier    = s["tier"]
+        xp      = s["xp"]
+        stype   = s["spark_type"]
+        tier_nm = TIER_NAMES.get(tier, "")
+        if tier < 3:
+            threshold = THRESHOLDS.get(tier, 1000)
+            pct  = min(100, int((xp / threshold) * 100))
+            bar  = "█" * (pct // 10) + "░" * (10 - pct // 10)
+            prog = f"`{bar}` {xp}/{threshold} XP ({pct}%)"
+        else:
+            prog = "✅ Max tier"
+        embed.add_field(
+            name=f"{stype.capitalize()} · T{tier} {tier_nm}",
+            value=f"ASA `{s['asset_id']}`\n{prog}",
+            inline=True,
+        )
+
+    embed.set_footer(text="Equip a Spark when entering Clash to earn XP · 50 XP per entry · +50 for winning")
+    await interaction.followup.send(embed=embed, ephemeral=True)
+
+
+@tree.command(name="spark-info", description="Check the details and XP progress of a specific Spark")
+@app_commands.describe(asset_id="The Spark ASA ID to look up")
+async def cmd_spark_info(interaction: discord.Interaction, asset_id: int):
+    """Public Spark status — shows tier, XP, and progress."""
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+    await interaction.response.defer(ephemeral=True)
+
+    from database import get_spark
+    spark = await asyncio.to_thread(get_spark, asset_id)
+
+    if not spark:
+        await interaction.followup.send(f"❌ Spark ASA `{asset_id}` not found.", ephemeral=True)
+        return
+
+    SPARK_COLORS = {
+        "zolt": 0xc8ff00, "scorch": 0xff5a1f, "jinx": 0xa78bfa,
+        "moss": 0x3dff9a, "glitch": 0xff2d78, "null": 0x94a3b8,
+    }
+    TIER_NAMES  = {1: "Spark", 2: "Flare", 3: "Blaze"}
+    THRESHOLDS  = {1: 1000, 2: 5000}
+    T1_CIDS_PUB = {
+        "zolt":"bafkreign5ydt5zj4mltsays47lsp7d6stdzje756zvzehzx7tryqxmqv6q",
+        "scorch":"bafkreihpdkwbg6gvn4zutkohrmig67zalqtprg4wln624zkukw5nlo4f3q",
+        "jinx":"bafkreierm7ti75i2hdpngztupgqpr5w7lbjull262outivdaanz4lshd7u",
+        "moss":"bafkreib2iprbja2zhfdxflulcgqyav2m5i4z5behc3n6kt4qglus36dqqm",
+        "glitch":"bafkreidtjpiu4k44u5soltmqsfo6oyykef2p7mytw4jte6tn47dedrwhye",
+        "null":"bafkreif7otb4ifgcgkqqsvxu3jgxe62yrvdwrgnbe37b5vwr4l5ypnmnpe",
+    }
+    T2_CIDS_PUB = {
+        "zolt":"bafybeia37zmaybuc6tiwy2ji22ub7fmuub6khdkjdl65s34inp5lzzwxae",
+        "scorch":"bafybeieksknm2nt4akeiht6ezu3jnv3bkv3gvh5p42mrvinivldrkh663m",
+        "jinx":"bafybeicixawcaxwmzlegcylavymtv3flxanpoo35gljwbbqbt3jfx4ywtm",
+        "moss":"bafybeifqz2ffykrpsjxmt4ktp7zzob3nkxdeaxh5ht7l62ysoyvwux6wfm",
+        "glitch":"bafybeiayhxvs72ceoygrpuirwuworkbrvuhdeuvqi3cvhn5grbc44k6lje",
+        "null":"bafkreiayd2s5tw3eo676ofwuw47p5lcslsisbjdh4bsgm5krokw6a4uwoy",
+    }
+    T3_CIDS_PUB = {
+        "zolt":"bafybeigephla6nmi65gn46stp7dbz72p5or5rfeww4tvdpp2sv2cf5b3ou",
+        "scorch":"bafybeiemybyw7g3h655mf6ikqdnvse6cx3uze7stkqzsmyqhh42v6lqjoa",
+        "jinx":"bafybeibziy5smed5hbfphrwoha4w2nbytrzulxvqgfrp3jyvblpmi2ng3i",
+        "moss":"bafybeicdmpnisqaldipjyfhxqukpk6xeo6rvoknomfvkxpeec63edpadnq",
+        "glitch":"bafybeid4s6immn5o7sl62eyqydfsq4cyou3kxv6i42szz4ryjqtxhwwhzi",
+        "null":"bafybeihtecxwqvlknjwwtcq42emldzm6s3ohkof6vcziikzsyr5m62jjte",
+    }
+
+    stype   = spark["spark_type"]
+    tier    = spark["tier"]
+    xp      = spark["xp"]
+    color   = SPARK_COLORS.get(stype, 0xA855F7)
+    tier_nm = TIER_NAMES.get(tier, "")
+    cid_map = {1: T1_CIDS_PUB, 2: T2_CIDS_PUB, 3: T3_CIDS_PUB}
+    cid     = cid_map.get(tier, T1_CIDS_PUB).get(stype, "")
+    img_url = f"https://scarlet-written-scallop-153.mypinata.cloud/ipfs/{cid}" if cid else ""
+
+    embed = discord.Embed(title=f"{spark['name']} · T{tier} {tier_nm}", color=color)
+    embed.add_field(name="Type",  value=stype.capitalize(), inline=True)
+    embed.add_field(name="Tier",  value=f"T{tier} {tier_nm}", inline=True)
+    embed.add_field(name="XP",    value=str(xp), inline=True)
+    owner = spark.get("discord_user_id")
+    embed.add_field(name="Owner", value=f"<@{owner}>" if owner else "Unclaimed", inline=True)
+
+    if tier < 3:
+        threshold = THRESHOLDS.get(tier, 1000)
+        pct  = min(100, int((xp / threshold) * 100))
+        bar  = "█" * (pct // 10) + "░" * (10 - pct // 10)
+        embed.add_field(name=f"Progress to T{tier + 1}", value=f"`{bar}` {xp}/{threshold} XP ({pct}%)", inline=False)
+    else:
+        embed.add_field(name="Progress", value="✅ Max tier reached", inline=False)
+
+    if img_url:
+        embed.set_thumbnail(url=img_url)
+    embed.set_footer(text=f"ASA {asset_id}")
+    await interaction.followup.send(embed=embed, ephemeral=True)
+
+
 @tree.command(name="myzappies", description="List all your Zappies with names and ASA IDs")
 async def cmd_myzappies(interaction: discord.Interaction):
     """Show all Zappies in the linked wallet with names."""
