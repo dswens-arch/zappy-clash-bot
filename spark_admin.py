@@ -380,6 +380,8 @@ class SparkAdminCog(commands.Cog):
         except Exception as e:
             await interaction.followup.send(f"❌ Error: {e}", ephemeral=True)
             raise
+
+    @app_commands.command(name="spark-rollback", description="[Admin] Push T1 metadata back to a Spark ASA on-chain")
     @app_commands.describe(asset_id="The Spark ASA ID to roll back to T1")
     async def spark_rollback(self, interaction: discord.Interaction, asset_id: int):
         if not await admin_check(interaction):
