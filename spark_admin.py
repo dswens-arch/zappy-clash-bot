@@ -394,18 +394,18 @@ class SparkAdminCog(commands.Cog):
             if not spark:
                 return await interaction.followup.send(f"❌ Spark ASA {asset_id} not found in DB.", ephemeral=True)
 
-            spark_type = spark["spark_type"]
-            t1_cid     = T1_CIDS.get(spark_type)
-            if not t1_cid:
-                return await interaction.followup.send(f"❌ No T1 CID configured for type '{spark_type}'.", ephemeral=True)
+            spark_type  = spark["spark_type"]
+            t1_reserve  = T1_RESERVES.get(spark_type)
+            if not t1_reserve:
+                return await interaction.followup.send(f"❌ No T1 reserve configured for type '{spark_type}'.", ephemeral=True)
 
             ch = self._test_channel()
             if ch:
                 await ch.send(f"🔄 **[TEST]** Rolling back Spark `{asset_id}` ({spark_type}) to T1 on-chain...")
 
-            # Push ARC-19 update back to T1 CID
+            # Push ARC-19 update back to T1 reserve address
             success = await asyncio.to_thread(
-                _push_arc19_to_cid, asset_id, t1_cid
+                _push_arc19_to_reserve, asset_id, t1_reserve
             )
 
             # Reset DB to T1
@@ -432,34 +432,31 @@ class SparkAdminCog(commands.Cog):
 
 
 # ─────────────────────────────────────────────
-# ARC-19 push helper (raw CID version for rollback)
 # ─────────────────────────────────────────────
-def _push_arc19_to_cid(asset_id: int, cid: str) -> bool:
-    """
-    Push an ARC-19 update using a raw CID string.
-    Used for rollback — pushes T1 CID back to the ASA.
-    """
+# Pre-computed reserve addresses for rollback
+# ─────────────────────────────────────────────
+T1_RESERVES = {
+    "zolt":   "ZXXAOPXFHRROOIDCLT5OJ74P2KMPFET7X3GXEQ7G76OHCC5SCX2PCICZGM",
+    "scorch": "54NKYE3Y2VXTGSNJY6FRA337EBOCN6E3SZNX3LTFKRK3VVN3QXOIA6AAOA",
+    "jinx":   "SFT6ND7VDI4N5U3GOR42B6HW35MFGRNPL3J2SNCUMABXHROI4P6VRTDERI",
+    "moss":   "HJB6EFEDLE4UO4VORMI2DACXJTVDTHUEQ4LNXZKPSAZOSLPYOCB5S2OPRY",
+    "glitch": "ONF5CTRLTSTWJZONSCIV3Z3DBIQXJ75TCO3RGMT2NXT4MQOGY7A447WDRQ",
+    "null":   "X52MHRAUYIZKCCKW6TNE24T3LCGUO2EZUETP4HWW2HRPXB5VRV4RJHFPV4",
+}
+
+
+def _push_arc19_to_reserve(asset_id: int, reserve_address: str) -> bool:
+    """Push an ARC-19 update using a pre-computed reserve address."""
     try:
-        import base64
-        from algosdk import mnemonic, account, encoding as algo_encoding
+        from algosdk import mnemonic, account
         from algosdk.v2client import algod
         from algosdk.transaction import AssetConfigTxn, wait_for_confirmation
 
-        # Derive reserve address from CID
-        cid_stripped = cid.lstrip("b")
-        cid_bytes    = base64.b32decode(
-            cid_stripped.upper() + "=" * (-len(cid_stripped) % 8)
-        )
-        digest = cid_bytes[4:][:32].ljust(32, b"\x00")
-        new_reserve = algo_encoding.encode_address(digest)
-
-        # Connect
         algod_token   = os.environ.get("ALGOD_TOKEN", "")
         algod_address = "https://mainnet-api.algonode.cloud"
         headers       = {"X-Algo-API-Token": algod_token} if algod_token else {}
         algod_client  = algod.AlgodClient(algod_token, algod_address, headers=headers)
 
-        # Sign
         manager_mnemonic = os.environ["SPARK_MANAGER_MNEMONIC"]
         private_key      = mnemonic.to_private_key(manager_mnemonic)
         manager_address  = account.address_from_private_key(private_key)
@@ -473,7 +470,7 @@ def _push_arc19_to_cid(asset_id: int, cid: str) -> bool:
             sp       = sp,
             index    = asset_id,
             manager  = manager_address,
-            reserve  = new_reserve,
+            reserve  = reserve_address,
             freeze   = params.get("freeze"),
             clawback = params.get("clawback"),
             strict_empty_address_check=False,
@@ -481,12 +478,11 @@ def _push_arc19_to_cid(asset_id: int, cid: str) -> bool:
         signed = txn.sign(private_key)
         tx_id  = algod_client.send_transaction(signed)
         wait_for_confirmation(algod_client, tx_id, 4)
-
-        print(f"[SPARK ROLLBACK] ASA {asset_id} → T1 | tx {tx_id}")
+        print(f"[SPARK] ARC-19 update → {reserve_address[:20]}... | tx {tx_id}")
         return True
 
     except Exception as e:
-        print(f"[SPARK ROLLBACK] Failed for ASA {asset_id}: {e}")
+        print(f"[SPARK] ARC-19 update failed for ASA {asset_id}: {e}")
         return False
 
 
