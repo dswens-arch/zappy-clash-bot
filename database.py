@@ -447,13 +447,24 @@ SPARK_TIER_NAMES      = {1: "Spark", 2: "Flare", 3: "Blaze"}
 
 # T2 and T3 image CIDs per type — fill in after uploading to Pinata
 # Format: { "zolt": {"2": "bafk...", "3": "bafk..."}, ... }
+# Metadata JSON CIDs (uploaded to Pinata) — these become the reserve address
 SPARK_UPGRADE_CIDS: dict = {
-    "zolt":   {"2": "bafybeia37zmaybuc6tiwy2ji22ub7fmuub6khdkjdl65s34inp5lzzwxae",  "3": "bafybeigephla6nmi65gn46stp7dbz72p5or5rfeww4tvdpp2sv2cf5b3ou"},
-    "scorch": {"2": "bafybeieksknm2nt4akeiht6ezu3jnv3bkv3gvh5p42mrvinivldrkh663m", "3": "bafybeiemybyw7g3h655mf6ikqdnvse6cx3uze7stkqzsmyqhh42v6lqjoa"},
-    "jinx":   {"2": "bafybeicixawcaxwmzlegcylavymtv3flxanpoo35gljwbbqbt3jfx4ywtm", "3": "bafybeibziy5smed5hbfphrwoha4w2nbytrzulxvqgfrp3jyvblpmi2ng3i"},
-    "moss":   {"2": "bafybeifqz2ffykrpsjxmt4ktp7zzob3nkxdeaxh5ht7l62ysoyvwux6wfm","3": "bafybeicdmpnisqaldipjyfhxqukpk6xeo6rvoknomfvkxpeec63edpadnq"},
-    "glitch": {"2": "bafybeiayhxvs72ceoygrpuirwuworkbrvuhdeuvqi3cvhn5grbc44k6lje",  "3": "bafybeid4s6immn5o7sl62eyqydfsq4cyou3kxv6i42szz4ryjqtxhwwhzi"},
-    "null":   {"2": "bafkreiayd2s5tw3eo676ofwuw47p5lcslsisbjdh4bsgm5krokw6a4uwoy",  "3": "bafybeihtecxwqvlknjwwtcq42emldzm6s3ohkof6vcziikzsyr5m62jjte"},
+    "zolt":   {"2": "bafkreiczc6gmqqyy4kwdgjfv7qlktde2so2gxzgk6rr3kxnjaggrenirsy", "3": "bafkreigl5nmfxsit5ctqmigk3rgt4zsaq243uv5u3zypg72nv4jmj3d6vy"},
+    "scorch": {"2": "bafkreifjxt736tgqcll5r3f3m6qbimkx7fwkojvyejfgrdzzklpi2mfluu", "3": "bafkreigwh2hrzm3k6dsjt4lef2i6j6a2cneu34h6ywkvmnfjbyjmpbkcsu"},
+    "jinx":   {"2": "bafkreic6ek5tslf4cjvv7wjbfw5epkzsswioggbawnvi6uhvxhvhulb3li",  "3": "bafkreifcl24y75bkpo4q2osirjdlnpq3l7c3s7xf4szwb4we6bukzfo2z4"},
+    "moss":   {"2": "bafkreidwthf72n2dagc7vrzo3laxzuya5lu5ovuu2begclzadf2xu7mlxm",  "3": "bafkreigsvmjhbgvfm7wr3c2aupkosh4kq4yyuj6xzsgebiq7gg3ljzsnpi"},
+    "glitch": {"2": "bafkreifaogqn6zax4egxq6kemn5i4vcn6gfmjv4tetcaxbmd7gawyacuua", "3": "bafkreietobff4pf2xy4ga5lrkrrgsnv63vwtnm4i25lqf3ctftkxjhigui"},
+    "null":   {"2": "bafkreihicpgj6xxhmskioo3hxsh3d3o4pigdz25htg5zeab2va6dfmzaqu", "3": "bafkreie7et7fyp64qdfnpfb7eezdjrvhluvbyvopys7xrtr4hbcqfcmsoi"},
+}
+
+# Pre-computed reserve addresses from metadata CIDs (avoids runtime CID math)
+SPARK_UPGRADE_RESERVES: dict = {
+    "zolt":   {"2": "LELYZSCDDDRKYMZEWX6BNKMMTKJ3I27EZL2GHNK5VEAY2ERVCGLDTDJFME", "3": "ZPVVQW6JCPUKOBRAZLOE2PTGICDLTOSXWTPHB437JWXRFRHMP2XNMBGRTY"},
+    "scorch": {"2": "VG6P7P2M2AJNPWHMXNT2AFBRK74WZJZGXAREU2EPHFJN5DJQVOSSQSCR4E", "3": "2Y7I6HFTNLYOJGPRMQXJDZHYDIJUSTPQ73CZKVRUVEHBFR4FIKKQFRQVJ4"},
+    "jinx":   {"2": "LYRLWOJMXQJGWX6ZEEW3UR5LGKKZBYYYECZWVD2Q6W46U6RMHNNHW7EYJE", "3": "UJPLTD7UFJ53SDJ2JCFENNV6DNP4LOL64XSLGYHSYTYGRLEV3LH4RELLZU"},
+    "moss":   {"2": "O2M4X7JXIMAYL6WHF3NMC7GTADVOTV2WSTIEQYJPEAMXK6T5RO53HEZQCQ", "3": "2KVRE4E2UVT62HMLICR5J2I7RKDTDCRH27GIYQFCD4Y3NNHGJV5DVYDLWA"},
+    "glitch": {"2": "UBY2BX3EC7QQ26DZIRRXVDSUJXYYVRGXSMSMIC4FQP4YC3AAKSQP5V7BLQ",  "3": "SNYEUXR4XK7DQYDVOFKGE2JWX3OW2NVTRDLVOAXMKMWNK5E5A2RP2OB5AU"},
+    "null":   {"2": "5AJ4ZH2645SJJBZ3M66I7MPN3R5AYPHLU6M3XEQAHKUDYMVTECC4RADMKE", "3": "T4SP4XB73SAMVV4UH4QTENGGU5OSUHCVZ7CL66GOHQ4EKAUJSJZCUSBYLU"},
 }
 
 
@@ -519,7 +530,7 @@ def award_spark_xp(asset_id: int, won: bool) -> dict:
 def push_spark_arc19_upgrade(asset_id: int, spark_type: str, new_tier: int) -> bool:
     """
     Push an ARC-19 metadata update to upgrade a Spark NFT on-chain.
-    Updates the reserve address to the new tier's metadata CID.
+    Uses pre-computed reserve addresses from metadata CIDs.
     Returns True on success, False on failure.
 
     Requires env vars:
@@ -530,31 +541,12 @@ def push_spark_arc19_upgrade(asset_id: int, spark_type: str, new_tier: int) -> b
         from algosdk import mnemonic, account, encoding as algo_encoding
         from algosdk.v2client import algod
         from algosdk.transaction import AssetConfigTxn, wait_for_confirmation
-        import base64
 
-        # ── Get new image CID ──────────────────────────────────────────────
-        cid = SPARK_UPGRADE_CIDS.get(spark_type, {}).get(str(new_tier), "")
-        if not cid:
-            print(f"[SPARK] No upgrade CID configured for {spark_type} T{new_tier}")
+        # ── Look up pre-computed reserve address ──────────────────────────
+        new_reserve = SPARK_UPGRADE_RESERVES.get(spark_type, {}).get(str(new_tier), "")
+        if not new_reserve:
+            print(f"[SPARK] No upgrade reserve configured for {spark_type} T{new_tier}")
             return False
-
-        # ── Derive reserve address from CID ──────────────────────────────
-        # ARC-19: reserve address encodes the IPFS CID as an Algorand address
-        # For CIDv1 base32 sha2-256 (standard Pinata output):
-        # The reserve is the 32-byte multihash digest encoded as an Algorand address
-        import hashlib, base64 as b64
-
-        # Decode base32 CID to bytes, strip multicodec prefix (2 bytes)
-        # CIDv1 base32: starts with 'b', strip it, decode base32
-        cid_stripped = cid.lstrip("b")
-        cid_bytes    = base64.b32decode(cid_stripped.upper() + "=" * (-len(cid_stripped) % 8))
-        # CIDv1 layout: version(1) + codec(1) + multihash
-        # multihash layout: hash_func(1) + length(1) + digest(32)
-        digest = cid_bytes[4:]  # skip version, codec, hash_func, length bytes
-        if len(digest) > 32:
-            digest = digest[:32]
-        digest = digest.ljust(32, b"\x00")
-        new_reserve = algo_encoding.encode_address(digest)
 
         # ── Connect to Algorand ───────────────────────────────────────────
         algod_token   = os.environ.get("ALGOD_TOKEN", "")
