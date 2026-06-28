@@ -3090,11 +3090,28 @@ async def close_and_resolve(channel: discord.TextChannel):
             name_b = get_display_name(player_b["discord_user_id"])
 
             # -- Pre-fight: two embeds, one per fighter, VS in between --
+            COMBO_DESCS = {
+                "⚡ Storm Caller":        "Lightning + Electric skin — VLT and SPK surge. High risk, high reward.",
+                "🛡️ Iron Shell":          "Armored traits — absorbs one lethal hit completely. Tough to put down.",
+                "🎲 Lucky Fool":          "Angry eyes + common BG — massive SPK boost. The upset machine.",
+                "👑 Zappy Prime":         "Rare trait combo — all stats elevated. A well-rounded fighter.",
+                "👑 Royal Command":       "Crown head — all stats boosted. Commands the battlefield.",
+                "💀 Chaos Agent":         "Dark traits — unpredictable and dangerous. Thrives in disorder.",
+                "🔥 Firebrand":           "Fire traits — VLT and SPK amplified. Aggression is the strategy.",
+                "🥇 Gold Standard":       "Gold traits — solid across the board. Consistent performer.",
+                "📡 Signal Lost":         "Glitch traits — reality is optional. Stats shift mid-battle.",
+                "💀 Nothing Left to Lose": "Rock bottom stats — but no fear either. Anything goes.",
+            }
+
             def _build_fighter_embed(fighter, player_name):
                 val = (
                     f"⚡ VLT {fighter.VLT} · 🛡️ INS {fighter.INS} · 🎲 SPK {fighter.SPK}"
-                    + (f"\n✨ {fighter.combo}" if fighter.combo else "")
                 )
+                if fighter.combo:
+                    combo_desc = COMBO_DESCS.get(fighter.combo, "")
+                    val += f"\n✨ **{fighter.combo}**"
+                    if combo_desc:
+                        val += f" — {combo_desc}"
                 if fighter.ability and isinstance(fighter.ability, dict):
                     ab = fighter.ability
                     val += f"\n⚡ **{ab.get('name','Ability')}** — {ab.get('desc','')}"
