@@ -3097,7 +3097,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                 )
                 if fighter.ability and isinstance(fighter.ability, dict):
                     ab = fighter.ability
-                    val += f"\n⚡ {ab.get('name','Ability')}"
+                    val += f"\n⚡ **{ab.get('name','Ability')}** — {ab.get('desc','')}"
                 if fighter.spark_type and fighter.spark_tier > 0:
                     val += f"\n🌟 Spark: **{fighter.spark_type.capitalize()}** T{fighter.spark_tier}"
                 embed = discord.Embed(color=0xF5E642)
@@ -3363,7 +3363,7 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             winner_name = name_a if result["winner"].asset_id == player_a["asset_id"] else name_b
             # Skip win embed for final round — champion card handles it
-            is_final_round = len(next_round) == 1
+            is_final_round = len(current_round) == 1
             if not is_final_round:
                 try:
                     win_embed = discord.Embed(
