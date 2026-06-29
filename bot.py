@@ -890,7 +890,7 @@ async def cmd_spark_register(interaction: discord.Interaction):
         await interaction.followup.send("❌ No Sparks found in the system.", ephemeral=True)
         return
 
-    spark_asa_ids = [s["asset_id"] for s in all_sparks.data]
+    spark_asa_ids = [int(s["asset_id"]) for s in all_sparks.data]
 
     # Check wallet on-chain for any of those ASA IDs
     import aiohttp
