@@ -894,17 +894,37 @@ async def cmd_spark_register(interaction: discord.Interaction):
 
     # Check wallet on-chain for any of those ASA IDs
     import aiohttp
-    from algorand_lookup import INDEXER_URL
+    from algorand_lookup import INDEXER_URL, INDEXER_URL2
+    indexer_token = os.environ.get("INDEXER_TOKEN", "")
+    headers       = {"X-Indexer-API-Token": indexer_token} if indexer_token else {}
     held_spark_ids = []
     try:
         async with aiohttp.ClientSession() as session:
             url = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                print(f"[spark-register] indexer status {resp.status} for {wallet[:10]}...")
                 if resp.status == 200:
-                    data   = await resp.json()
-                    assets = data.get("assets", [])
+                    data     = await resp.json()
+                    assets   = data.get("assets", [])
                     held_ids = {a["asset-id"] for a in assets if a.get("amount", 0) > 0}
                     held_spark_ids = [sid for sid in spark_asa_ids if sid in held_ids]
+                    print(f"[spark-register] {len(held_ids)} assets in wallet, {len(held_spark_ids)} Sparks matched")
+                else:
+                    # Try fallback indexer
+                    url2 = f"{INDEXER_URL2}/v2/accounts/{wallet}/assets"
+                    async with session.get(url2, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp2:
+                        print(f"[spark-register] fallback indexer status {resp2.status}")
+                        if resp2.status == 200:
+                            data     = await resp2.json()
+                            assets   = data.get("assets", [])
+                            held_ids = {a["asset-id"] for a in assets if a.get("amount", 0) > 0}
+                            held_spark_ids = [sid for sid in spark_asa_ids if sid in held_ids]
+                        else:
+                            await interaction.followup.send(
+                                f"❌ Couldn't reach Algorand indexer (status {resp.status}). Try again in a moment.",
+                                ephemeral=True
+                            )
+                            return
     except Exception as e:
         await interaction.followup.send(
             f"❌ Couldn't reach Algorand to verify holdings: {e}", ephemeral=True
