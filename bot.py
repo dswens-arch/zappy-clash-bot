@@ -909,6 +909,8 @@ async def cmd_spark_register(interaction: discord.Interaction):
                     held_ids = {a["asset-id"] for a in assets if a.get("amount", 0) > 0}
                     held_spark_ids = [sid for sid in spark_asa_ids if sid in held_ids]
                     print(f"[spark-register] {len(held_ids)} assets in wallet, {len(held_spark_ids)} Sparks matched")
+                    print(f"[spark-register] sample held_ids: {list(held_ids)[:5]}")
+                    print(f"[spark-register] sample spark_asa_ids: {spark_asa_ids[:5]}")
                 else:
                     # Try fallback indexer
                     url2 = f"{INDEXER_URL2}/v2/accounts/{wallet}/assets"
