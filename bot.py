@@ -900,33 +900,41 @@ async def cmd_spark_register(interaction: discord.Interaction):
     held_spark_ids = []
     try:
         async with aiohttp.ClientSession() as session:
-            url = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                print(f"[spark-register] indexer status {resp.status} for {wallet[:10]}...")
-                if resp.status == 200:
-                    data     = await resp.json()
-                    assets   = data.get("assets", [])
-                    held_ids = {a["asset-id"] for a in assets if a.get("amount", 0) > 0}
-                    held_spark_ids = [sid for sid in spark_asa_ids if sid in held_ids]
-                    print(f"[spark-register] {len(held_ids)} assets in wallet, {len(held_spark_ids)} Sparks matched")
-                    print(f"[spark-register] sample held_ids: {list(held_ids)[:5]}")
-                    print(f"[spark-register] sample spark_asa_ids: {spark_asa_ids[:5]}")
-                else:
-                    # Try fallback indexer
-                    url2 = f"{INDEXER_URL2}/v2/accounts/{wallet}/assets"
-                    async with session.get(url2, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp2:
-                        print(f"[spark-register] fallback indexer status {resp2.status}")
-                        if resp2.status == 200:
-                            data     = await resp2.json()
-                            assets   = data.get("assets", [])
-                            held_ids = {a["asset-id"] for a in assets if a.get("amount", 0) > 0}
-                            held_spark_ids = [sid for sid in spark_asa_ids if sid in held_ids]
-                        else:
-                            await interaction.followup.send(
-                                f"❌ Couldn't reach Algorand indexer (status {resp.status}). Try again in a moment.",
-                                ephemeral=True
-                            )
-                            return
+            held_ids   = set()
+            next_token = None
+            url        = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
+
+            # Paginate through all assets
+            while True:
+                params = {"limit": 1000}
+                if next_token:
+                    params["next"] = next_token
+
+                async with session.get(url, headers=headers, params=params, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                    if resp.status != 200:
+                        # Try fallback
+                        url2 = f"{INDEXER_URL2}/v2/accounts/{wallet}/assets"
+                        async with session.get(url2, headers=headers, params=params, timeout=aiohttp.ClientTimeout(total=15)) as resp2:
+                            if resp2.status != 200:
+                                await interaction.followup.send(f"❌ Indexer error {resp.status}. Try again.", ephemeral=True)
+                                return
+                            data = await resp2.json()
+                    else:
+                        data = await resp.json()
+
+                    for a in data.get("assets", []):
+                        if a.get("amount", 0) > 0:
+                            held_ids.add(a["asset-id"])
+
+                    next_token = data.get("next-token")
+                    if not next_token:
+                        break
+
+            held_spark_ids = [sid for sid in spark_asa_ids if sid in held_ids]
+            print(f"[spark-register] {len(held_ids)} total assets, {len(held_spark_ids)} Sparks matched")
+            print(f"[spark-register] sample spark_asa_ids: {spark_asa_ids[:3]}")
+            print(f"[spark-register] any 3617 range in wallet: {[i for i in held_ids if 3617000000 < i < 3618000000][:5]}")
+
     except Exception as e:
         await interaction.followup.send(
             f"❌ Couldn't reach Algorand to verify holdings: {e}", ephemeral=True
