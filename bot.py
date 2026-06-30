@@ -3112,6 +3112,14 @@ async def close_and_resolve(channel: discord.TextChannel):
             fighter_a = build_fighter(zappy_a)
             fighter_b = build_fighter(zappy_b)
 
+            # Attach Spark data from bracket entry (set at /clash registration)
+            fighter_a.spark_asset_id = player_a.get("spark_asa")
+            fighter_a.spark_type     = player_a.get("spark_type")
+            fighter_a.spark_tier     = player_a.get("spark_tier") or 0
+            fighter_b.spark_asset_id = player_b.get("spark_asa")
+            fighter_b.spark_type     = player_b.get("spark_type")
+            fighter_b.spark_tier     = player_b.get("spark_tier") or 0
+
             # Run the battle
             result = resolve_battle(fighter_a, fighter_b)
 
