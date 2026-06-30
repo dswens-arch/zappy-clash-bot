@@ -431,7 +431,7 @@ async def cmd_clash(interaction: discord.Interaction):
                     self.resolved     = False
 
                     # Add one button per Spark (max 5 for Discord UI)
-                    for s in sparks[:4]:
+                    for s in sparks[:5]:  # Max 5 Spark buttons + No Spark = 6 total
                         btn = discord.ui.Button(
                             label=f"{s['spark_type'].capitalize()} T{s['tier']}",
                             style=discord.ButtonStyle.primary,
@@ -3146,7 +3146,19 @@ async def close_and_resolve(channel: discord.TextChannel):
                     ab = fighter.ability
                     val += f"\n⚡ **{ab.get('name','Ability')}** — {ab.get('desc','')}"
                 if fighter.spark_type and fighter.spark_tier > 0:
-                    val += f"\n🌟 Spark: **{fighter.spark_type.capitalize()}** T{fighter.spark_tier}"
+                    tier_names = {1: "Spark", 2: "Flare", 3: "Blaze"}
+                    spark_ability_map = {
+                        "zolt":   {1: "⚡ Crit → +15 flat damage",      2: "⚡ Crit → +25 flat damage",      3: "⚡ Crit → +35 damage + crit 2.5×"},
+                        "scorch": {1: "🔥 Opp ability → VLT −10",        2: "🔥 Opp ability → VLT −15",        3: "🔥 Opp ability → VLT −20, SPK −10"},
+                        "jinx":   {1: "🎲 Sudden death → opp roll 75%",  2: "🎲 Sudden death → opp roll 50%",  3: "🎲 Sudden death → opp roll 30%"},
+                        "moss":   {1: "🌿 Passive → INS +8 at start",    2: "🌿 Passive → INS +14 at start",   3: "🌿 Passive → INS +20, VLT +8"},
+                        "glitch": {1: "💀 Below 25 HP → rolls 0.5–2.0",  2: "💀 Below 35 HP → rolls 0.4–2.2",  3: "💀 Below 40 HP → rolls 0.3–2.5"},
+                        "null":   {1: "🌑 Opp ability → 50% cancel",     2: "🌑 Opp ability → 75% cancel",     3: "🌑 100% cancel + SPK +15"},
+                    }
+                    stype = fighter.spark_type
+                    stier = fighter.spark_tier
+                    ability_line = spark_ability_map.get(stype, {}).get(stier, "")
+                    val += f"\n🌟 **{stype.capitalize()} {tier_names.get(stier, '')}** · {ability_line}"
                 embed = discord.Embed(color=0xF5E642)
                 embed.add_field(
                     name=f"{fighter.display_name} · {player_name}",
