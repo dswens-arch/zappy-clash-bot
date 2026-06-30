@@ -160,16 +160,45 @@ async def render_entry_card(
     I = 4 * SCALE
     _rr(draw, [I, I, W-I, H-I], r=10*SCALE, fill=CARD_BG)
 
-    # Left accent stripe — extends full height including spark row
-    stripe_h = card_h - I if has_spark else H - I
-    _rr(draw, [I, I, I+5*SCALE, stripe_h], r=3*SCALE, fill=ACCENT)
-
-    # Vertical connector line behind thumbnails (Spark type color if equipped, else accent)
+    # ── Spark row (drawn before the stripe so the stripe sits on top, unbroken) ──
     if has_spark:
         spark_color = SPARK_COLORS_PIL.get(spark_type, (148, 163, 184))
-        line_color  = (*spark_color, 180)
-        line_x      = THUMB_PAD + THUMB_SIZE // 2
-        draw.line([(line_x, THUMB_Y), (line_x, card_h - I - 4)], fill=line_color, width=3*SCALE)
+        spark_rgba  = (*spark_color, 255)
+        row_y       = H - 2 * SCALE
+        row_bottom  = card_h - I
+
+        _rr(draw, [I, row_y, W-I, row_bottom], r=6*SCALE,
+            fill=(32, 34, 48), outline=(*spark_color, 80), width=2)
+
+        # Spark image thumbnail — vertically centered within the spark row
+        spark_thumb_y = row_y + (row_bottom - row_y - SPARK_THUMB) // 2
+        spark_img = await _fetch_image(spark_image_url) if spark_image_url else None
+        if spark_img:
+            sp = spark_img.resize((SPARK_THUMB, SPARK_THUMB), Image.LANCZOS)
+            mask = Image.new("L", (SPARK_THUMB, SPARK_THUMB), 0)
+            ImageDraw.Draw(mask).rounded_rectangle(
+                [0, 0, SPARK_THUMB-1, SPARK_THUMB-1], radius=6*SCALE, fill=255
+            )
+            canvas.paste(sp, (SPARK_PAD, spark_thumb_y), mask)
+
+        # Spark text — vertically centered within the spark row
+        spark_text_x = SPARK_PAD + SPARK_THUMB + 12 * SCALE
+        spark_text_y = row_y + (row_bottom - row_y) // 2
+        tier_names   = {1: "Spark", 2: "Flare", 3: "Blaze"}
+        spark_label  = f"{spark_type.upper()}  ·  T{spark_tier} {tier_names.get(spark_tier, '')}"
+        draw.text((spark_text_x, spark_text_y), spark_label,
+                  font=_FB, fill=spark_rgba, anchor="lm")
+
+        # Vertical connector line — runs from Zappy thumbnail center to Spark thumbnail center
+        line_x       = THUMB_PAD + THUMB_SIZE // 2
+        spark_center_y = spark_thumb_y + SPARK_THUMB // 2
+        line_color   = (*spark_color, 180)
+        draw.line([(line_x, THUMB_Y + THUMB_SIZE // 2), (line_x, spark_center_y)],
+                  fill=line_color, width=3*SCALE)
+
+    # Left accent stripe — drawn last so it sits cleanly on top, unbroken top-to-bottom
+    stripe_h = card_h - I if has_spark else H - I
+    _rr(draw, [I, I, I+5*SCALE, stripe_h], r=3*SCALE, fill=ACCENT)
 
     # Thumbnail — Zappy
     thumb_img = await _fetch_image(image_url)
@@ -226,35 +255,6 @@ async def render_entry_card(
         if champs > 0:
             rec_text += f"   {champs}x Bracket Champion"
         draw.text((TEXT_X, L3), rec_text, font=_FM, fill=MUTED, anchor="lm")
-
-    # ── Spark row (only if equipped) ────────────────────────────────────
-    if has_spark:
-        spark_color = SPARK_COLORS_PIL.get(spark_type, (148, 163, 184))
-        spark_rgba  = (*spark_color, 255)
-
-        # Spark row background
-        row_y = H - 2 * SCALE
-        _rr(draw, [I, row_y, W-I, card_h - I], r=6*SCALE,
-            fill=(32, 34, 48), outline=(*spark_color, 80), width=2)
-
-        # Spark image thumbnail
-        spark_thumb_y = row_y + (card_h - I - row_y - SPARK_THUMB) // 2
-        spark_img = await _fetch_image(spark_image_url) if spark_image_url else None
-        if spark_img:
-            sp = spark_img.resize((SPARK_THUMB, SPARK_THUMB), Image.LANCZOS)
-            mask = Image.new("L", (SPARK_THUMB, SPARK_THUMB), 0)
-            ImageDraw.Draw(mask).rounded_rectangle(
-                [0, 0, SPARK_THUMB-1, SPARK_THUMB-1], radius=6*SCALE, fill=255
-            )
-            canvas.paste(sp, (SPARK_PAD, spark_thumb_y), mask)
-
-        # Spark text
-        spark_text_x = SPARK_PAD + SPARK_THUMB + 12 * SCALE
-        spark_text_y = row_y + (card_h - I - row_y) // 2
-        tier_names   = {1: "Spark", 2: "Flare", 3: "Blaze"}
-        spark_label  = f"{spark_type.upper()}  ·  T{spark_tier} {tier_names.get(spark_tier, '')}"
-        draw.text((spark_text_x, spark_text_y), spark_label,
-                  font=_FB, fill=spark_rgba, anchor="lm")
 
     # Downscale 2x → 1x
     out = canvas.resize((OUT_W, out_h), Image.LANCZOS)
