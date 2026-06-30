@@ -159,7 +159,17 @@ async def render_entry_card(
 
     I = 4 * SCALE
     _rr(draw, [I, I, W-I, H-I], r=10*SCALE, fill=CARD_BG)
-    _rr(draw, [I, I, I+5*SCALE, H-I], r=3*SCALE, fill=ACCENT)
+
+    # Left accent stripe — extends full height including spark row
+    stripe_h = card_h - I if has_spark else H - I
+    _rr(draw, [I, I, I+5*SCALE, stripe_h], r=3*SCALE, fill=ACCENT)
+
+    # Vertical connector line behind thumbnails (Spark type color if equipped, else accent)
+    if has_spark:
+        spark_color = SPARK_COLORS_PIL.get(spark_type, (148, 163, 184))
+        line_color  = (*spark_color, 180)
+        line_x      = THUMB_PAD + THUMB_SIZE // 2
+        draw.line([(line_x, THUMB_Y), (line_x, card_h - I - 4)], fill=line_color, width=3*SCALE)
 
     # Thumbnail — Zappy
     thumb_img = await _fetch_image(image_url)
@@ -242,7 +252,7 @@ async def render_entry_card(
         spark_text_x = SPARK_PAD + SPARK_THUMB + 12 * SCALE
         spark_text_y = row_y + (card_h - I - row_y) // 2
         tier_names   = {1: "Spark", 2: "Flare", 3: "Blaze"}
-        spark_label  = f"🌟  {spark_type.upper()}  ·  T{spark_tier} {tier_names.get(spark_tier, '')}"
+        spark_label  = f"{spark_type.upper()}  ·  T{spark_tier} {tier_names.get(spark_tier, '')}"
         draw.text((spark_text_x, spark_text_y), spark_label,
                   font=_FB, fill=spark_rgba, anchor="lm")
 
