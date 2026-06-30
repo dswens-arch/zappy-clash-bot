@@ -430,18 +430,21 @@ async def cmd_clash(interaction: discord.Interaction):
                     self.chosen_spark = None
                     self.resolved     = False
 
-                    # Add one button per Spark (max 5 for Discord UI)
-                    for s in sparks[:5]:  # Max 5 Spark buttons + No Spark = 6 total
+                    # Add one button per Spark — explicit rows so all 6 fit cleanly
+                    for i, s in enumerate(sparks[:6]):
                         btn = discord.ui.Button(
                             label=f"{s['spark_type'].capitalize()} T{s['tier']}",
                             style=discord.ButtonStyle.primary,
                             custom_id=str(s["asset_id"]),
+                            row=i // 4,  # 4 per row → row 0: first 4, row 1: next 2
                         )
                         btn.callback = self._make_callback(s)
                         self.add_item(btn)
 
-                    # Skip button
-                    skip_btn = discord.ui.Button(label="⚡ No Spark", style=discord.ButtonStyle.secondary)
+                    # Skip button — own row at the bottom
+                    skip_btn = discord.ui.Button(
+                        label="⚡ No Spark", style=discord.ButtonStyle.secondary, row=2
+                    )
                     skip_btn.callback = self._skip
                     self.add_item(skip_btn)
 
@@ -2887,6 +2890,10 @@ async def close_and_resolve(channel: discord.TextChannel):
     entries = await asyncio.to_thread(get_bracket_entries, bracket_id)
     n = len(entries)
 
+    # Track every Spark ASA that entered this bracket — XP awarded once at the end
+    spark_participant_ids = {e["spark_asa"] for e in entries if e.get("spark_asa")}
+    champion_spark_asa = None  # set if/when a champion is crowned
+
     if n < 2:
         await channel.send(
             f"⚠️ Not enough players registered ({n}/2 minimum). Bracket cancelled. "
@@ -3394,12 +3401,9 @@ async def close_and_resolve(channel: discord.TextChannel):
                 round_num=round_num,
             )
 
-            # -- Award Spark XP --
+            # Spark XP is awarded once per bracket entry at the end of the bracket —
+            # not per match — see the end of close_and_resolve()
             winner_is_a = result["winner"].asset_id == player_a["asset_id"]
-            if result.get("spark_a_asset_id"):
-                await award_spark_xp(result["spark_a_asset_id"], won=winner_is_a, clash_channel=channel)
-            if result.get("spark_b_asset_id"):
-                await award_spark_xp(result["spark_b_asset_id"], won=not winner_is_a, clash_channel=channel)
 
             # -- Token rewards --
             loser_wallet  = await asyncio.to_thread(get_wallet, loser_id)
@@ -3483,6 +3487,7 @@ async def close_and_resolve(channel: discord.TextChannel):
         if len(next_round) == 1:
             # We have a bracket champion
             champion_id = next_round[0]["discord_user_id"]
+            champion_spark_asa = next_round[0].get("spark_asa")
             champ_asset = await fetch_zappy_traits(next_round[0]["asset_id"])
             champ_name = champ_asset["name"] if champ_asset else f"ASA {next_round[0]['asset_id']}"
 
@@ -3588,6 +3593,12 @@ async def close_and_resolve(channel: discord.TextChannel):
                     f"⚡ Use `/top` to see the updated leaderboard."
                 )
             break
+
+    # ── Spark XP — awarded once per Spark per bracket, not per match ──
+    # 50 XP for every Spark that entered, +50 bonus for the bracket champion's Spark
+    for spark_asa in spark_participant_ids:
+        won_bracket = (spark_asa == champion_spark_asa)
+        await award_spark_xp(spark_asa, won=won_bracket, clash_channel=channel)
 
     active_bracket_id = None
 
