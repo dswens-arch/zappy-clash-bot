@@ -307,47 +307,13 @@ def apply_spark(fighter: Fighter, opponent: Fighter, is_crit: bool, dmg: int, ro
             f"+{bonus} damage added."
         )
 
-    # ── Scorch: opponent ability fires → VLT debuff ──────────────────────────
-    if fighter.spark_type == "scorch" and opponent.ability_used and not fighter.spark_triggered:
-        debuff = {1: 10, 2: 15, 3: 20}[t]
-        spk_debuff = 10 if t == 3 else 0
-        opponent.VLT = max(10, opponent.VLT - debuff)
-        if spk_debuff:
-            opponent.SPK = max(10, opponent.SPK - spk_debuff)
-        fighter.spark_triggered = True
-        msg = f"🔥 **SCORCH** retaliates — {opponent.display_name} paid a price for that ability. VLT -{debuff}"
-        if spk_debuff:
-            msg += f", SPK -{spk_debuff}"
-        return dmg, msg + " for the rest of the battle."
+    # ── Scorch: handled in round loop (ability interception) ───────────────────
 
-    # ── Glitch: either fighter low HP → widen damage variance ───────────────
-    if fighter.spark_type == "glitch" and not fighter.spark_triggered:
-        threshold = {1: 25, 2: 35, 3: 40}[t]
-        if fighter.hp <= threshold or opponent.hp <= threshold:
-            low, high = {1: (0.5, 2.0), 2: (0.4, 2.2), 3: (0.3, 2.5)}[t]
-            fighter.glitch_roll_range   = (low, high)
-            opponent.glitch_roll_range  = (low, high)
-            fighter.spark_triggered = True
-            return dmg, (
-                f"💀 **GLITCH** corrupts the field — {fighter.display_name}'s companion short-circuits. "
-                f"Damage rolls go wild for remaining rounds!"
-            )
+    # ── Glitch: handled post-damage in round loop so HP check is accurate ─
 
     # ── Moss: passive — applied pre-battle in resolve_battle(), nothing here ─
     # ── Jinx: sudden death only — handled in tiebreaker block ────────────────
-    # ── Null: opponent ability fires → cancel + SPK boost ───────────────────
-    if fighter.spark_type == "null" and opponent.ability_used and not fighter.spark_triggered:
-        cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[t]
-        if random.random() < cancel_chance:
-            spk_bonus = 15 if t == 3 else 0
-            if spk_bonus:
-                fighter.SPK = min(100, fighter.SPK + spk_bonus)
-            fighter.spark_triggered = True
-            msg = f"🌑 **NULL** absorbs it — {opponent.display_name}'s ability is cancelled!"
-            if spk_bonus:
-                msg += f" {fighter.display_name} absorbs the energy. SPK +{spk_bonus}."
-            return dmg, msg
-
+        # ── Null: handled in round loop (ability interception before apply_ability) ─
     return dmg, ""
 
 
@@ -517,9 +483,48 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
 
         # Try to trigger abilities (both fighters)
         for attacker, defender in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
-            ability_triggered, ability_msg = apply_ability(attacker, defender, round_num)
-            if ability_triggered and ability_msg:
-                round_msg.append(ability_msg)
+            # ── Null: intercept BEFORE ability applies ──
+            ability = attacker.ability
+            null_cancelled = False
+            if ability and isinstance(ability, dict) and not attacker.ability_used:
+                trigger = ability.get("trigger_round")
+                # Check if ability would fire this round
+                would_fire = (
+                    trigger == round_num or
+                    (trigger == "random" and not attacker.ability_used)
+                )
+                if would_fire and defender.spark_type == "null" and defender.spark_tier > 0 and not defender.spark_triggered:
+                    cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[defender.spark_tier]
+                    if random.random() < cancel_chance:
+                        spk_bonus = 15 if defender.spark_tier == 3 else 0
+                        if spk_bonus:
+                            defender.SPK = min(100, defender.SPK + spk_bonus)
+                        defender.spark_triggered = True
+                        attacker.ability_used = True  # Mark used but don't apply effect
+                        msg = f"\U0001f311 **NULL** intercepts! {defender.display_name}'s companion cancels {attacker.display_name}'s ability before it fires!"
+                        if spk_bonus:
+                            msg += f" {defender.display_name} absorbs the energy. SPK +{spk_bonus}."
+                        round_msg.append(msg)
+                        null_cancelled = True
+
+            if not null_cancelled:
+                ability_triggered, ability_msg = apply_ability(attacker, defender, round_num)
+                if ability_triggered and ability_msg:
+                    round_msg.append(ability_msg)
+
+                # ── Scorch: fires after opponent ability confirmed used ──
+                if ability_triggered and defender.spark_type == "scorch" and defender.spark_tier > 0 and not defender.spark_triggered:
+                    t = defender.spark_tier
+                    debuff = {1: 10, 2: 15, 3: 20}[t]
+                    spk_debuff = 10 if t == 3 else 0
+                    attacker.VLT = max(10, attacker.VLT - debuff)
+                    if spk_debuff:
+                        attacker.SPK = max(10, attacker.SPK - spk_debuff)
+                    defender.spark_triggered = True
+                    msg = f"\U0001f525 **SCORCH** retaliates \u2014 {attacker.display_name} paid a price for that ability. VLT -{debuff}"
+                    if spk_debuff:
+                        msg += f", SPK -{spk_debuff}"
+                    round_msg.append(msg + " for the rest of the battle.")
 
         # ── Fighter A attacks Fighter B ──
         if fighter_a.skip_next_attack:
@@ -617,6 +622,21 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # Clamp HP
         fighter_a.hp = max(0, fighter_a.hp)
         fighter_b.hp = max(0, fighter_b.hp)
+
+        # ── Glitch: check HP after damage lands ──
+        for glitch_fighter, glitch_opp in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
+            if glitch_fighter.spark_type == "glitch" and glitch_fighter.spark_tier > 0 and not glitch_fighter.spark_triggered:
+                t = glitch_fighter.spark_tier
+                threshold = {1: 25, 2: 35, 3: 40}[t]
+                if glitch_fighter.hp <= threshold or glitch_opp.hp <= threshold:
+                    low, high = {1: (0.5, 2.0), 2: (0.4, 2.2), 3: (0.3, 2.5)}[t]
+                    glitch_fighter.glitch_roll_range = (low, high)
+                    glitch_opp.glitch_roll_range     = (low, high)
+                    glitch_fighter.spark_triggered   = True
+                    round_msg.append(
+                        f"💀 **GLITCH** corrupts the field — {glitch_fighter.display_name}'s companion short-circuits. "
+                        f"Damage rolls go wild for remaining rounds!"
+                    )
 
         # HP status
         round_msg.append(f"  HP: **{fighter_a.display_name}** {fighter_a.hp} · **{fighter_b.display_name}** {fighter_b.hp}")
