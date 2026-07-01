@@ -191,12 +191,7 @@ async def render_entry_card(
         draw.text((spark_text_x, spark_text_y), spark_label,
                   font=_FB, fill=spark_rgba, anchor="lm")
 
-        # Vertical connector line — from bottom of Zappy thumb to top of Spark thumb
-        # Stops at row_y so it doesn't bleed through the Spark row outline
-        line_color    = (*spark_color, 180)
-        zappy_bottom  = THUMB_Y + THUMB_SIZE
-        draw.line([(line_x, zappy_bottom), (line_x, row_y)],
-                  fill=line_color, width=3*SCALE)
+
 
     # Left accent stripe — drawn last so it sits cleanly on top, unbroken top-to-bottom
     stripe_h = card_h - I if has_spark else H - I
