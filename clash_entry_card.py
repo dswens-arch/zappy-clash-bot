@@ -170,7 +170,9 @@ async def render_entry_card(
         _rr(draw, [I, row_y, W-I, row_bottom], r=6*SCALE,
             fill=(32, 34, 48), outline=(*spark_color, 80), width=2)
 
-        # Spark image thumbnail — vertically centered within the spark row
+        # Spark image thumbnail — centered horizontally under the Zappy thumbnail
+        line_x        = THUMB_PAD + THUMB_SIZE // 2  # center x of Zappy thumb
+        spark_x       = line_x - SPARK_THUMB // 2    # center Spark thumb on same x
         spark_thumb_y = row_y + (row_bottom - row_y - SPARK_THUMB) // 2
         spark_img = await _fetch_image(spark_image_url) if spark_image_url else None
         if spark_img:
@@ -179,21 +181,21 @@ async def render_entry_card(
             ImageDraw.Draw(mask).rounded_rectangle(
                 [0, 0, SPARK_THUMB-1, SPARK_THUMB-1], radius=6*SCALE, fill=255
             )
-            canvas.paste(sp, (SPARK_PAD, spark_thumb_y), mask)
+            canvas.paste(sp, (spark_x, spark_thumb_y), mask)
 
-        # Spark text — vertically centered within the spark row
-        spark_text_x = SPARK_PAD + SPARK_THUMB + 12 * SCALE
+        # Spark text — starts after the thumbnail with some padding
+        spark_text_x = spark_x + SPARK_THUMB + 12 * SCALE
         spark_text_y = row_y + (row_bottom - row_y) // 2
         tier_names   = {1: "Spark", 2: "Flare", 3: "Blaze"}
         spark_label  = f"{spark_type.upper()}  ·  T{spark_tier} {tier_names.get(spark_tier, '')}"
         draw.text((spark_text_x, spark_text_y), spark_label,
                   font=_FB, fill=spark_rgba, anchor="lm")
 
-        # Vertical connector line — runs from Zappy thumbnail center to Spark thumbnail center
-        line_x       = THUMB_PAD + THUMB_SIZE // 2
-        spark_center_y = spark_thumb_y + SPARK_THUMB // 2
-        line_color   = (*spark_color, 180)
-        draw.line([(line_x, THUMB_Y + THUMB_SIZE // 2), (line_x, spark_center_y)],
+        # Vertical connector line — from bottom of Zappy thumb to top of Spark thumb
+        # Stops at row_y so it doesn't bleed through the Spark row outline
+        line_color    = (*spark_color, 180)
+        zappy_bottom  = THUMB_Y + THUMB_SIZE
+        draw.line([(line_x, zappy_bottom), (line_x, row_y)],
                   fill=line_color, width=3*SCALE)
 
     # Left accent stripe — drawn last so it sits cleanly on top, unbroken top-to-bottom
