@@ -34,6 +34,7 @@ from clash_auction import setup_auction_commands, auction_checker
 import grand_prix_cog
 from grand_prix_cog import GrandPrixCog
 from spark_admin import SparkAdminCog
+from spark_jobs  import SparkJobsCog
 
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
@@ -3623,6 +3624,7 @@ async def on_ready():
     print("⚡ Grand Prix cog loaded")
 
     await bot.add_cog(SparkAdminCog(bot))
+    await bot.add_cog(SparkJobsCog(bot))
     print("⚡ Spark admin cog loaded")
 
     # Games
