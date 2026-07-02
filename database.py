@@ -590,3 +590,206 @@ def push_spark_arc19_upgrade(asset_id: int, spark_type: str, new_tier: int) -> b
     except Exception as e:
         print(f"[SPARK] ARC-19 upgrade failed for ASA {asset_id}: {e}")
         return False
+
+
+# ─────────────────────────────────────────────
+# SPARK JOBS — DAILY WORK SYSTEM
+# ─────────────────────────────────────────────
+# spark_job_log is the source of truth (same principle as gp_transactions —
+# reconstructable, never silently skipped even if a payout leg fails).
+# `paid` tracks whether the payout leg (ALGO transfer or NFT send) for a
+# resolved row has gone out yet, so a failed transfer can be retried without
+# re-rolling or re-resolving the row.
+
+JOB_WALLET_TRANSFER_COOLDOWN_HOURS = 24
+JOB_SAME_SPARK_COOLDOWN_HOURS      = 24
+JOB_DURATION_HOURS                 = 8
+
+
+def get_eligible_sparks_for_job(wallet: str) -> dict:
+    """
+    Returns {"eligible": [...], "skipped": {asset_id: reason}} for a wallet.
+    reason is one of: "wallet_transfer_cooldown", "already_working", "already_paid_today"
+    """
+    db = get_supabase()
+    cutoff_iso = (datetime.now(timezone.utc) - timedelta(hours=JOB_WALLET_TRANSFER_COOLDOWN_HOURS)).isoformat()
+
+    holdings = (
+        db.table("spark_holdings")
+        .select("asset_id, name, spark_type, tier, wallet, discord_user_id, purchased_at")
+        .eq("wallet", wallet)
+        .execute()
+        .data or []
+    )
+
+    eligible, skipped = [], {}
+    for h in holdings:
+        asa = h["asset_id"]
+
+        if h.get("purchased_at") and h["purchased_at"] > cutoff_iso:
+            skipped[asa] = "wallet_transfer_cooldown"
+            continue
+
+        last = (
+            db.table("spark_job_log")
+            .select("status, clock_in_at")
+            .eq("spark_asa", asa)
+            .order("clock_in_at", desc=True)
+            .limit(1)
+            .execute()
+            .data
+        )
+        if last:
+            row = last[0]
+            if row["status"] == "working":
+                skipped[asa] = "already_working"
+                continue
+            if row["status"] == "complete" and row["clock_in_at"] > cutoff_iso:
+                skipped[asa] = "already_paid_today"
+                continue
+
+        eligible.append(h)
+
+    return {"eligible": eligible, "skipped": skipped}
+
+
+def create_spark_job(spark: dict, job: str, flavor_line: str) -> dict:
+    """Clock a Spark in. Writes a 'working' row with resolve_at = now + 8h."""
+    db = get_supabase()
+    now = datetime.now(timezone.utc)
+    data = {
+        "spark_asa":       spark["asset_id"],
+        "wallet":          spark["wallet"],
+        "discord_user_id": spark.get("discord_user_id"),
+        "spark_type":      spark["spark_type"],
+        "spark_tier":      spark["tier"],
+        "spark_name":      spark.get("name"),
+        "job":             job,
+        "status":          "working",
+        "clock_in_at":     now.isoformat(),
+        "resolve_at":      (now + timedelta(hours=JOB_DURATION_HOURS)).isoformat(),
+        "flavor_line":     flavor_line,
+    }
+    result = db.table("spark_job_log").insert(data).execute()
+    return result.data[0] if result.data else {}
+
+
+def get_due_jobs() -> list:
+    """Jobs whose 8-hour timer has elapsed and are ready to resolve."""
+    db = get_supabase()
+    now_iso = datetime.now(timezone.utc).isoformat()
+    result = (
+        db.table("spark_job_log")
+        .select("*")
+        .eq("status", "working")
+        .lte("resolve_at", now_iso)
+        .execute()
+    )
+    return result.data or []
+
+
+def complete_job(job_id: int, outcome: str, amount: float | None, nft_asa: int | None, flavor_line: str) -> None:
+    """Resolve a due job. outcome is 'miss' | 'algo' | 'nft'."""
+    db = get_supabase()
+    db.table("spark_job_log").update({
+        "status":      "complete",
+        "outcome":     outcome,
+        "amount":      amount,
+        "nft_asa":     nft_asa,
+        "flavor_line": flavor_line,
+        "resolved_at": datetime.now(timezone.utc).isoformat(),
+    }).eq("id", job_id).execute()
+
+
+def get_unpaid_algo_jobs() -> list:
+    """Completed jobs with an ALGO hit that haven't been paid out yet."""
+    db = get_supabase()
+    result = (
+        db.table("spark_job_log")
+        .select("*")
+        .eq("status", "complete")
+        .eq("paid", False)
+        .gt("amount", 0)
+        .execute()
+    )
+    return result.data or []
+
+
+def get_unpaid_nft_jobs() -> list:
+    """Completed jobs with an NFT hit that haven't been sent yet."""
+    db = get_supabase()
+    result = (
+        db.table("spark_job_log")
+        .select("*")
+        .eq("status", "complete")
+        .eq("paid", False)
+        .not_.is_("nft_asa", "null")
+        .execute()
+    )
+    return result.data or []
+
+
+def mark_jobs_paid(job_ids: list) -> None:
+    if not job_ids:
+        return
+    db = get_supabase()
+    db.table("spark_job_log").update({"paid": True}).in_("id", job_ids).execute()
+
+
+def create_job_payout(wallet: str, total_algo: float, spark_count: int, job_log_ids: list, tx_id: str | None) -> dict:
+    db = get_supabase()
+    data = {
+        "wallet":      wallet,
+        "total_algo":  total_algo,
+        "spark_count": spark_count,
+        "job_log_ids": job_log_ids,
+        "tx_id":       tx_id,
+    }
+    result = db.table("spark_job_payouts").insert(data).execute()
+    return result.data[0] if result.data else {}
+
+
+# ── NFT prizes for Spark Jobs draw from the reward wallet's live on-chain
+#    inventory (via nft_rewards.pick_random_nft()) — no tagging/reservation
+#    table needed. Once an NFT is sent out, it naturally drops out of the
+#    wallet's balance and won't be picked again.
+
+
+# ── Flat per-shift XP (separate from Clash's award_spark_xp, which uses
+#    Clash-sized 50/100 values — Jobs XP is a fixed, smaller amount per shift) ──
+
+SPARK_JOB_XP_PER_SHIFT = 5
+
+
+def award_spark_job_xp(asset_id: int) -> dict:
+    """Award flat XP for completing a Spark Job shift, win or miss. Same tier-upgrade check as Clash XP."""
+    db = get_supabase()
+    spark = get_spark(asset_id)
+    if not spark:
+        return {}
+
+    xp_gain  = SPARK_JOB_XP_PER_SHIFT
+    new_xp   = spark["xp"] + xp_gain
+    old_tier = spark["tier"]
+    new_tier = old_tier
+
+    if old_tier < 3 and new_xp >= SPARK_TIER_THRESHOLDS.get(old_tier, 999999):
+        new_tier = old_tier + 1
+
+    update_data = {"xp": new_xp}
+    if new_tier != old_tier:
+        update_data["tier"]        = new_tier
+        update_data["upgraded_at"] = datetime.now(timezone.utc).isoformat()
+
+    db.table("spark_holdings").update(update_data).eq("asset_id", asset_id).execute()
+
+    return {
+        "asset_id":    asset_id,
+        "spark_type":  spark["spark_type"],
+        "name":        spark["name"],
+        "xp_gained":   xp_gain,
+        "new_xp":      new_xp,
+        "tier_before": old_tier,
+        "tier_after":  new_tier,
+        "upgraded":    new_tier != old_tier,
+    }
