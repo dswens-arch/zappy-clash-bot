@@ -172,6 +172,261 @@ JOBS = {
             "kept watch till dawn, no incidents",
         ],
     },
+    "The Docks": {
+        "clock_in": [
+            "heads down to the docks for a loading shift",
+            "clocks in on the docks",
+            "reports for a shift hauling crates on the docks",
+        ],
+        "hit": [
+            "finds a crate that was never on the manifest, {amt} ALGO",
+            "a foreman slips them a cut off the top — {amt} ALGO",
+            "pries open the wrong crate and gets very lucky, {amt} ALGO",
+        ],
+        "miss": [
+            "hauled crates all shift, nothing but splinters",
+            "watched the tide come in, quiet dock",
+            "loaded the boat, nothing worth mentioning",
+        ],
+    },
+    "The Vault": {
+        "clock_in": [
+            "pulls a shift guarding the vault",
+            "clocks in at the vault door",
+            "reports for vault duty",
+        ],
+        "hit": [
+            "finds a miscounted drawer, pockets {amt} ALGO",
+            "the vault audit comes up short in their favor — {amt} ALGO",
+            "cracks the tumblers just to see, walks with {amt} ALGO",
+        ],
+        "miss": [
+            "counted the same stack twice, nothing off",
+            "stood by the door all shift, uneventful",
+            "the vault stayed locked and boring",
+        ],
+    },
+    "The Switchboard": {
+        "clock_in": [
+            "clocks in at the switchboard",
+            "takes a shift routing calls at the switchboard",
+            "reports to the switchboard room",
+        ],
+        "hit": [
+            "patches through a call that pays out {amt} ALGO",
+            "overhears a tip worth {amt} ALGO",
+            "reroutes a stray signal into {amt} ALGO",
+        ],
+        "miss": [
+            "routed calls all shift, nothing interesting",
+            "static all night, no luck",
+            "kept the lines open, quiet shift",
+        ],
+    },
+    "The Greenhouse": {
+        "clock_in": [
+            "heads into the greenhouse for a shift",
+            "clocks in among the glass and vines",
+            "reports to the greenhouse",
+        ],
+        "hit": [
+            "a rare bloom fetches {amt} ALGO",
+            "finds a buyer waiting at the door, {amt} ALGO",
+            "the greenhouse yields something special — {amt} ALGO",
+        ],
+        "miss": [
+            "misted the leaves all shift, nothing bloomed",
+            "pruned vines all day, no luck",
+            "kept the glass clean, quiet shift",
+        ],
+    },
+    "The Arcade": {
+        "clock_in": [
+            "clocks in running the arcade floor",
+            "takes a shift at the arcade",
+            "reports to the arcade counter",
+        ],
+        "hit": [
+            "hits the jackpot machine for {amt} ALGO",
+            "a high score pays out {amt} ALGO",
+            "the token cashout runs hot — {amt} ALGO",
+        ],
+        "miss": [
+            "restocked tokens all shift, nothing hit",
+            "watched the machines blink, quiet floor",
+            "swept up all night, no jackpot",
+        ],
+    },
+    "The Scrapyard": {
+        "clock_in": [
+            "heads out to the scrapyard",
+            "clocks in sorting scrap",
+            "reports for a shift at the yard",
+        ],
+        "hit": [
+            "finds something valuable buried in the pile, {amt} ALGO",
+            "a scrap buyer overpays for a haul — {amt} ALGO",
+            "strikes something worth salvaging, {amt} ALGO",
+        ],
+        "miss": [
+            "sorted scrap all day, nothing but rust",
+            "hauled metal all shift, no luck",
+            "picked through the pile, quiet day",
+        ],
+    },
+    "The Observatory": {
+        "clock_in": [
+            "clocks in at the observatory",
+            "heads up to the observatory for a night shift",
+            "reports for a shift at the observatory",
+        ],
+        "hit": [
+            "spots something worth reporting, {amt} ALGO in finder's fee",
+            "the telescope pays for itself tonight — {amt} ALGO",
+            "logs a rare sighting, cashes out {amt} ALGO",
+        ],
+        "miss": [
+            "logged stars all night, nothing unusual",
+            "clouded over, quiet shift",
+            "watched the sky all night, no luck",
+        ],
+    },
+    "The Kitchen": {
+        "clock_in": [
+            "clocks in for a shift in the kitchen",
+            "heads back to run the kitchen",
+            "reports to the kitchen line",
+        ],
+        "hit": [
+            "a big table tips {amt} ALGO",
+            "the special sells out and the owner shares {amt} ALGO",
+            "gets a fat tip from a regular, {amt} ALGO",
+        ],
+        "miss": [
+            "worked the line all shift, standard tips",
+            "burned through the rush, nothing extra",
+            "kept the kitchen running, quiet night",
+        ],
+    },
+    "The Print Shop": {
+        "clock_in": [
+            "clocks in at the print shop",
+            "takes a shift running the presses",
+            "reports to the print shop",
+        ],
+        "hit": [
+            "a rush job pays out {amt} ALGO",
+            "finds a smudged bill in their favor, {amt} ALGO",
+            "the press run comes in over budget — {amt} ALGO",
+        ],
+        "miss": [
+            "ran the presses all shift, standard pay",
+            "reset the ink all day, nothing extra",
+            "kept the pages moving, quiet shift",
+        ],
+    },
+    "The Tannery": {
+        "clock_in": [
+            "heads out to the tannery",
+            "clocks in at the tannery",
+            "reports for a shift at the tannery",
+        ],
+        "hit": [
+            "cures a hide worth {amt} ALGO",
+            "a buyer overpays for the batch, {amt} ALGO",
+            "finds a rare pelt in the pile, {amt} ALGO",
+        ],
+        "miss": [
+            "worked the hides all shift, nothing special",
+            "kept the vats running, quiet day",
+            "cured leather all shift, no luck",
+        ],
+    },
+    "The Mines": {
+        "clock_in": [
+            "heads down into the mines",
+            "clocks in for a shift in the mines",
+            "reports underground for the mines",
+        ],
+        "hit": [
+            "strikes a vein worth {amt} ALGO",
+            "pulls a rich ore cart, {amt} ALGO",
+            "finds something glittering in the rock, {amt} ALGO",
+        ],
+        "miss": [
+            "swung a pick all shift, nothing but stone",
+            "hauled ore carts all day, no luck",
+            "worked the tunnel, quiet shift",
+        ],
+    },
+    "The Lighthouse": {
+        "clock_in": [
+            "heads out to the lighthouse",
+            "clocks in keeping the lighthouse",
+            "reports for a shift at the lighthouse",
+        ],
+        "hit": [
+            "guides in a grateful trader for {amt} ALGO",
+            "finds something washed up worth {amt} ALGO",
+            "the keeper's cut pays out {amt} ALGO",
+        ],
+        "miss": [
+            "kept the light burning, quiet shift",
+            "watched the water all night, nothing washed up",
+            "logged the ships passing, no luck",
+        ],
+    },
+    "The Pit": {
+        "clock_in": [
+            "heads down to the pit",
+            "clocks in working the pit",
+            "reports for a shift at the pit",
+        ],
+        "hit": [
+            "wins big on a side bet, {amt} ALGO",
+            "the crowd pays out {amt} ALGO on a good call",
+            "makes a killing running the book tonight — {amt} ALGO",
+        ],
+        "miss": [
+            "worked the crowd all night, nothing extra",
+            "ran the book, no big bets landed",
+            "kept the pit running, quiet night",
+        ],
+    },
+    "The Courier Run": {
+        "clock_in": [
+            "picks up a courier run",
+            "clocks in for a delivery run",
+            "heads out on a courier job",
+        ],
+        "hit": [
+            "the client tips big on delivery, {amt} ALGO",
+            "finds a shortcut and still gets paid full plus a bonus — {amt} ALGO",
+            "delivers early, earns a rush bonus of {amt} ALGO",
+        ],
+        "miss": [
+            "made the delivery on time, standard pay",
+            "ran the route all shift, nothing extra",
+            "delivered the package, quiet run",
+        ],
+    },
+    "The Black Market": {
+        "clock_in": [
+            "slips into the black market for a shift",
+            "clocks in at a black market stall",
+            "reports to a back-alley stall",
+        ],
+        "hit": [
+            "moves a shady deal for {amt} ALGO",
+            "flips something rare for {amt} ALGO",
+            "a deal goes better than expected — {amt} ALGO",
+        ],
+        "miss": [
+            "worked the stall all night, no takers",
+            "kept an eye out for trouble, quiet shift",
+            "sat on inventory all night, no buyers",
+        ],
+    },
 }
 
 JOB_NAMES = list(JOBS.keys())
@@ -278,39 +533,9 @@ class SparkJobsCog(commands.Cog):
     # ──────────────────────────────────────────
     @tasks.loop(minutes=RESOLVER_INTERVAL_MINUTES)
     async def resolver(self):
-        from nft_rewards import pick_random_nft
-
         try:
             due = await asyncio.to_thread(get_due_jobs)
-            resolved = []
-
-            for row in due:
-                spark_name = row.get("spark_name") or row["spark_type"]
-                algo_hit, nft_hit, amount = _roll_hits(row["spark_tier"])
-
-                nft_asa, nft_name = None, None
-                if nft_hit:
-                    # Pulls from whatever NFTs are actually sitting in the reward
-                    # wallet right now — no tagging/reservation list to maintain.
-                    nft = await pick_random_nft()
-                    if nft:
-                        nft_asa, nft_name = nft["asset_id"], nft["name"]
-                    # If the wallet's NFT inventory is empty, this just quietly
-                    # doesn't award an NFT — the ALGO roll (if any) still stands.
-
-                outcome = "nft" if nft_asa else ("algo" if algo_hit else "miss")
-                flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
-
-                await asyncio.to_thread(complete_job, row["id"], outcome, amount, nft_asa, flavor_line)
-
-                # Flat XP for every completed shift, win or miss.
-                xp_result = await asyncio.to_thread(award_spark_job_xp, row["spark_asa"])
-                if xp_result.get("upgraded"):
-                    await asyncio.to_thread(
-                        push_spark_arc19_upgrade, row["spark_asa"], xp_result["spark_type"], xp_result["tier_after"]
-                    )
-
-                resolved.append({**row, "outcome": outcome, "amount": amount, "nft_asa": nft_asa, "flavor_line": flavor_line})
+            resolved = await self._resolve_and_settle(due)
 
             if resolved:
                 await self._process_algo_payouts()
@@ -323,6 +548,46 @@ class SparkJobsCog(commands.Cog):
     @resolver.before_loop
     async def before_resolver(self):
         await self.bot.wait_until_ready()
+
+    async def _resolve_and_settle(self, rows: list) -> list:
+        """
+        Given 'working' spark_job_log rows, roll + resolve + award XP for
+        each. Shared by the scheduled resolver and the admin force-resolve
+        command so both go through the exact same roll/payout code path —
+        force-resolve is a real resolution, not a simulation.
+        """
+        from nft_rewards import pick_random_nft
+
+        resolved = []
+        for row in rows:
+            spark_name = row.get("spark_name") or row["spark_type"]
+            algo_hit, nft_hit, amount = _roll_hits(row["spark_tier"])
+
+            nft_asa, nft_name = None, None
+            if nft_hit:
+                # Pulls from whatever NFTs are actually sitting in the reward
+                # wallet right now — no tagging/reservation list to maintain.
+                nft = await pick_random_nft()
+                if nft:
+                    nft_asa, nft_name = nft["asset_id"], nft["name"]
+                # If the wallet's NFT inventory is empty, this just quietly
+                # doesn't award an NFT — the ALGO roll (if any) still stands.
+
+            outcome = "nft" if nft_asa else ("algo" if algo_hit else "miss")
+            flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
+
+            await asyncio.to_thread(complete_job, row["id"], outcome, amount, nft_asa, flavor_line)
+
+            # Flat XP for every completed shift, win or miss.
+            xp_result = await asyncio.to_thread(award_spark_job_xp, row["spark_asa"])
+            if xp_result.get("upgraded"):
+                await asyncio.to_thread(
+                    push_spark_arc19_upgrade, row["spark_asa"], xp_result["spark_type"], xp_result["tier_after"]
+                )
+
+            resolved.append({**row, "outcome": outcome, "amount": amount, "nft_asa": nft_asa, "flavor_line": flavor_line})
+
+        return resolved
 
     async def _process_algo_payouts(self):
         """
@@ -383,7 +648,9 @@ class SparkJobsCog(commands.Cog):
         if not channel:
             return
 
-        lines = [f"💰 {r['flavor_line']}" for r in resolved]
+        icons = {"algo": "💰", "nft": "🎁", "miss": "💤"}
+        lines = [f"{icons.get(r['outcome'], '💰')} {r['flavor_line']}" for r in resolved]
+
         # Post in chunks to stay under Discord's message length limit
         chunk, length = [], 0
         for line in lines:
@@ -394,6 +661,48 @@ class SparkJobsCog(commands.Cog):
             length += len(line)
         if chunk:
             await channel.send("\n".join(chunk))
+
+    # ──────────────────────────────────────────
+    # /spark-job-force-resolve (admin) — resolves one currently-working
+    # shift immediately instead of waiting for its 8-hour timer. Goes
+    # through the exact same roll/complete/XP/payout code path as the
+    # scheduled resolver — useful for testing the ALGO/NFT payout leg
+    # without waiting on RNG across real 8-hour cycles.
+    # ──────────────────────────────────────────
+    @app_commands.command(name="spark-job-force-resolve", description="[Admin] Force-resolve a Spark's current shift immediately")
+    @app_commands.describe(asa_id="ASA ID of a Spark currently on shift (status='working')")
+    async def spark_job_force_resolve(self, interaction: discord.Interaction, asa_id: int):
+        from spark_admin import admin_check
+        if not await admin_check(interaction):
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        from database import get_working_job_by_spark
+        job = await asyncio.to_thread(get_working_job_by_spark, asa_id)
+        if not job:
+            await interaction.followup.send(f"❌ No `working` shift found for ASA `{asa_id}`.", ephemeral=True)
+            return
+
+        resolved = await self._resolve_and_settle([job])
+        await self._process_algo_payouts()
+        await self._process_nft_sends()
+        await self._post_digest(resolved)
+
+        r = resolved[0]
+        outcome_line = {
+            "algo": f"💰 ALGO hit — {r['amount']} ALGO",
+            "nft":  f"🎁 NFT hit — ASA `{r['nft_asa']}`" + (f" ({r['amount']} ALGO also hit)" if r["amount"] else ""),
+            "miss": "💤 Miss",
+        }[r["outcome"]]
+
+        await interaction.followup.send(
+            f"✅ Force-resolved ASA `{asa_id}`\n"
+            f"Job: **{r['job']}**\n"
+            f"Result: {outcome_line}\n"
+            f"Flavor: _{r['flavor_line']}_\n\n"
+            f"Payout leg was attempted — check Railway logs / the wallet directly to confirm the transfer landed.",
+            ephemeral=True,
+        )
 
 
 async def setup(bot: commands.Bot):
