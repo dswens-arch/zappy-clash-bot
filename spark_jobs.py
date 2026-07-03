@@ -549,9 +549,7 @@ class SparkJobsCog(commands.Cog):
     async def _resolve_and_settle(self, rows: list) -> list:
         """
         Given 'working' spark_job_log rows, roll + resolve + award XP for
-        each. Shared by the scheduled resolver and the admin force-resolve
-        command so both go through the exact same roll/payout code path —
-        force-resolve is a real resolution, not a simulation.
+        each. Used by the scheduled resolver loop.
         """
         from nft_rewards import pick_random_nft
 
@@ -658,100 +656,6 @@ class SparkJobsCog(commands.Cog):
             length += len(line)
         if chunk:
             await channel.send("\n".join(chunk))
-
-    # ──────────────────────────────────────────
-    # /spark-job-force-resolve (admin) — resolves one currently-working
-    # shift immediately instead of waiting for its 8-hour timer. Goes
-    # through the exact same roll/complete/XP/payout code path as the
-    # scheduled resolver — useful for testing the ALGO/NFT payout leg
-    # without waiting on RNG across real 8-hour cycles.
-    # ──────────────────────────────────────────
-    @app_commands.command(name="spark-job-force-resolve", description="[Admin] Force-resolve a Spark's current shift immediately")
-    @app_commands.describe(asa_id="ASA ID of a Spark currently on shift (status='working')")
-    async def spark_job_force_resolve(self, interaction: discord.Interaction, asa_id: int):
-        from spark_admin import admin_check
-        if not await admin_check(interaction):
-            return
-        await interaction.response.defer(ephemeral=True)
-
-        from database import get_working_job_by_spark
-        job = await asyncio.to_thread(get_working_job_by_spark, asa_id)
-        if not job:
-            await interaction.followup.send(f"❌ No `working` shift found for ASA `{asa_id}`.", ephemeral=True)
-            return
-
-        resolved = await self._resolve_and_settle([job])
-        await self._process_algo_payouts()
-        await self._process_nft_sends()
-        await self._post_digest(resolved)
-
-        r = resolved[0]
-        outcome_line = {
-            "algo": f"💰 ALGO hit — {r['amount']} ALGO",
-            "nft":  f"🎁 NFT hit — ASA `{r['nft_asa']}`" + (f" ({r['amount']} ALGO also hit)" if r["amount"] else ""),
-            "miss": "💤 Miss",
-        }[r["outcome"]]
-
-        await interaction.followup.send(
-            f"✅ Force-resolved ASA `{asa_id}`\n"
-            f"Job: **{r['job']}**\n"
-            f"Result: {outcome_line}\n"
-            f"Flavor: _{r['flavor_line']}_\n\n"
-            f"Payout leg was attempted — check Railway logs / the wallet directly to confirm the transfer landed.",
-            ephemeral=True,
-        )
-
-    # ──────────────────────────────────────────
-    # /spark-job-test-cycle (admin) — clocks a Spark in AND force-resolves
-    # it in one shot. Convenience over running /spark-job then
-    # /spark-job-force-resolve separately — works even if the Spark is
-    # currently idle (force-resolve alone requires an existing 'working' row).
-    # ──────────────────────────────────────────
-    @app_commands.command(name="spark-job-test-cycle", description="[Admin] Clock in + immediately resolve a Spark in one step")
-    @app_commands.describe(asa_id="ASA ID of any registered Spark")
-    async def spark_job_test_cycle(self, interaction: discord.Interaction, asa_id: int):
-        from spark_admin import admin_check
-        if not await admin_check(interaction):
-            return
-        await interaction.response.defer(ephemeral=True)
-
-        from database import get_spark, get_working_job_by_spark
-        spark = await asyncio.to_thread(get_spark, asa_id)
-        if not spark:
-            await interaction.followup.send(f"❌ No Spark registered with ASA `{asa_id}`.", ephemeral=True)
-            return
-
-        # If it's mid-shift already (e.g. from a real /spark-job), resolve that
-        # instead of creating a duplicate row.
-        existing = await asyncio.to_thread(get_working_job_by_spark, asa_id)
-        if existing:
-            job_row = existing
-        else:
-            job = random.choice(JOB_NAMES)
-            display_name = spark.get("name") or spark["spark_type"].capitalize()
-            line = f"**{display_name}** " + random.choice(JOBS[job]["clock_in"])
-            job_row = await asyncio.to_thread(create_spark_job, spark, job, line)
-
-        resolved = await self._resolve_and_settle([job_row])
-        await self._process_algo_payouts()
-        await self._process_nft_sends()
-        await self._post_digest(resolved)
-
-        r = resolved[0]
-        outcome_line = {
-            "algo": f"💰 ALGO hit — {r['amount']} ALGO",
-            "nft":  f"🎁 NFT hit — ASA `{r['nft_asa']}`" + (f" ({r['amount']} ALGO also hit)" if r["amount"] else ""),
-            "miss": "💤 Miss",
-        }[r["outcome"]]
-
-        await interaction.followup.send(
-            f"✅ Test cycle complete for ASA `{asa_id}`\n"
-            f"Job: **{r['job']}**\n"
-            f"Result: {outcome_line}\n"
-            f"Flavor: _{r['flavor_line']}_\n\n"
-            f"Run this again anytime — no cooldown to wait out.",
-            ephemeral=True,
-        )
 
 
 async def setup(bot: commands.Bot):
