@@ -602,14 +602,17 @@ def push_spark_arc19_upgrade(asset_id: int, spark_type: str, new_tier: int) -> b
 # re-rolling or re-resolving the row.
 
 JOB_WALLET_TRANSFER_COOLDOWN_HOURS = 24
-JOB_SAME_SPARK_COOLDOWN_HOURS      = 24
 JOB_DURATION_HOURS                 = 8
 
 
 def get_eligible_sparks_for_job(wallet: str) -> dict:
     """
     Returns {"eligible": [...], "skipped": {asset_id: reason}} for a wallet.
-    reason is one of: "wallet_transfer_cooldown", "already_working", "already_paid_today"
+    reason is one of: "wallet_transfer_cooldown", "already_working"
+
+    No daily cooldown — a Spark is eligible again the moment its current
+    shift resolves. The 8-hour shift duration itself is the natural pacing;
+    the only other gate is the wallet-transfer anti-farming check.
     """
     db = get_supabase()
     cutoff_iso = (datetime.now(timezone.utc) - timedelta(hours=JOB_WALLET_TRANSFER_COOLDOWN_HOURS)).isoformat()
@@ -632,21 +635,16 @@ def get_eligible_sparks_for_job(wallet: str) -> dict:
 
         last = (
             db.table("spark_job_log")
-            .select("status, clock_in_at")
+            .select("status")
             .eq("spark_asa", asa)
             .order("clock_in_at", desc=True)
             .limit(1)
             .execute()
             .data
         )
-        if last:
-            row = last[0]
-            if row["status"] == "working":
-                skipped[asa] = "already_working"
-                continue
-            if row["status"] == "complete" and row["clock_in_at"] > cutoff_iso:
-                skipped[asa] = "already_paid_today"
-                continue
+        if last and last[0]["status"] == "working":
+            skipped[asa] = "already_working"
+            continue
 
         eligible.append(h)
 
