@@ -688,6 +688,21 @@ def get_due_jobs() -> list:
     return result.data or []
 
 
+def get_working_job_by_spark(spark_asa: int) -> dict | None:
+    """Fetch a Spark's current in-progress shift regardless of resolve_at — used by /spark-job-force-resolve."""
+    db = get_supabase()
+    result = (
+        db.table("spark_job_log")
+        .select("*")
+        .eq("spark_asa", spark_asa)
+        .eq("status", "working")
+        .order("clock_in_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    return result.data[0] if result.data else None
+
+
 def complete_job(job_id: int, outcome: str, amount: float | None, nft_asa: int | None, flavor_line: str) -> None:
     """Resolve a due job. outcome is 'miss' | 'algo' | 'nft'."""
     db = get_supabase()
