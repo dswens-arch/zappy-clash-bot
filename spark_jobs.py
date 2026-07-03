@@ -15,11 +15,12 @@ Payouts go out as real on-chain Algorand transactions to each holder's
 linked wallet ADDRESS (spark_holdings.wallet / the same address /link
 stores) — there is no internal Supabase balance ledger involved. ALGO
 goes out via algo_layer's bot wallet sender (BOT_WALLET_MNEMONIC), the
-same wallet that already funds Clash/GP payouts. NFT hits pick a random
-NFT currently sitting in that same wallet on-chain (nft_rewards.pick_random_nft)
-and send it directly — no tagging step, any NFT actually held by the
-reward wallet is eligible, and once sent it naturally drops out of future
-picks because the wallet's own balance reflects it's gone.
+same wallet that already funds Clash/GP payouts, sent automatically by
+the resolver with no action needed from the winner. NFT hits reuse the
+existing Zone 5 claim flow (nft_rewards.award_nft_prize / /claimnft) —
+a random NFT from whatever's actually sitting in the reward wallet right
+now is recorded as a pending prize, and the winner claims it with the
+same /claimnft command they already know, once they've opted in.
 
 Env vars required:
   SPARK_JOBS_CHANNEL_ID — channel /spark-job posts clock-ins and the resolver
@@ -44,7 +45,6 @@ from database import (
     get_due_jobs,
     complete_job,
     get_unpaid_algo_jobs,
-    get_unpaid_nft_jobs,
     mark_jobs_paid,
     create_job_payout,
     award_spark_job_xp,
@@ -536,7 +536,6 @@ class SparkJobsCog(commands.Cog):
 
             if resolved:
                 await self._process_algo_payouts()
-                await self._process_nft_sends()
                 await self._post_digest(resolved)
 
         except Exception as e:
@@ -550,8 +549,17 @@ class SparkJobsCog(commands.Cog):
         """
         Given 'working' spark_job_log rows, roll + resolve + award XP for
         each. Used by the scheduled resolver loop.
+
+        NFT hits reuse the same pending-claim flow as Zone 5 drops
+        (nft_rewards.award_nft_prize) — it picks a random NFT from whatever's
+        actually in the reward wallet right now and writes a pending row to
+        nft_prizes, keyed off the winner's discord_user_id (copied onto
+        spark_job_log from spark_holdings at clock-in time, same field
+        /spark-register keeps current). The winner then runs the same
+        /claimnft they already know from Zone 5 once they've opted in —
+        no separate send/retry logic needed here.
         """
-        from nft_rewards import pick_random_nft
+        from nft_rewards import award_nft_prize
 
         resolved = []
         for row in rows:
@@ -560,16 +568,19 @@ class SparkJobsCog(commands.Cog):
 
             nft_asa, nft_name = None, None
             if nft_hit:
-                # Pulls from whatever NFTs are actually sitting in the reward
-                # wallet right now — no tagging/reservation list to maintain.
-                nft = await pick_random_nft()
-                if nft:
-                    nft_asa, nft_name = nft["asset_id"], nft["name"]
-                # If the wallet's NFT inventory is empty, this just quietly
-                # doesn't award an NFT — the ALGO roll (if any) still stands.
+                prize = await award_nft_prize(
+                    row.get("discord_user_id"), row["wallet"], source="spark_jobs"
+                )
+                if prize.get("success"):
+                    nft_asa, nft_name = prize["asset_id"], prize["name"]
+                # If the wallet's NFT inventory is empty, award_nft_prize
+                # returns success=False and this just quietly doesn't award
+                # an NFT — the ALGO roll (if any) still stands.
 
             outcome = "nft" if nft_asa else ("algo" if algo_hit else "miss")
             flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
+            if nft_name:
+                flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
 
             await asyncio.to_thread(complete_job, row["id"], outcome, amount, nft_asa, flavor_line)
 
@@ -583,6 +594,7 @@ class SparkJobsCog(commands.Cog):
             resolved.append({**row, "outcome": outcome, "amount": amount, "nft_asa": nft_asa, "flavor_line": flavor_line})
 
         return resolved
+
 
     async def _process_algo_payouts(self):
         """
@@ -617,45 +629,34 @@ class SparkJobsCog(commands.Cog):
             except Exception as e:
                 print(f"[spark_jobs] ALGO payout failed for {wallet}: {e} — will retry next pass")
 
-    async def _process_nft_sends(self):
-        """Individually send each unpaid NFT hit directly to the holder's wallet address."""
-        from nft_rewards import send_nft, check_nft_opt_in
-
-        unpaid = await asyncio.to_thread(get_unpaid_nft_jobs)
-        for row in unpaid:
-            wallet, asa = row["wallet"], row["nft_asa"]
-
-            opted_in = await check_nft_opt_in(wallet, asa)
-            if not opted_in:
-                # Leave unpaid — picked up again next resolver pass once they opt in.
-                continue
-
-            try:
-                txid = await asyncio.to_thread(send_nft, wallet, asa, f"Spark Jobs prize — ASA {asa}")
-                if txid:
-                    await asyncio.to_thread(mark_jobs_paid, [row["id"]])
-                    print(f"[spark_jobs] Sent NFT {asa} to {wallet[:8]}... txid={txid}")
-            except Exception as e:
-                print(f"[spark_jobs] NFT send failed for {wallet} ASA {asa}: {e} — will retry next pass")
-
     async def _post_digest(self, resolved: list):
         channel = self._jobs_channel()
         if not channel:
             return
 
         icons = {"algo": "💰", "nft": "🎁", "miss": "💤"}
-        lines = [f"{icons.get(r['outcome'], '💰')} {r['flavor_line']}" for r in resolved]
+        lines = []
+        for r in resolved:
+            icon  = icons.get(r["outcome"], "💰")
+            owner = f"<@{r['discord_user_id']}> " if r.get("discord_user_id") else ""
+            lines.append(f"{icon} {owner}{r['flavor_line']}")
+
+        # Mentions render as clickable @names so owners can spot their own
+        # Sparks and re-run /spark-job on them, but don't ping/notify —
+        # a payday digest with a dozen mixed owners shouldn't buzz everyone's
+        # phone on every single line, hits or misses alike.
+        no_ping = discord.AllowedMentions(users=False)
 
         # Post in chunks to stay under Discord's message length limit
         chunk, length = [], 0
         for line in lines:
             if length + len(line) > 1800:
-                await channel.send("\n".join(chunk))
+                await channel.send("\n".join(chunk), allowed_mentions=no_ping)
                 chunk, length = [], 0
             chunk.append(line)
             length += len(line)
         if chunk:
-            await channel.send("\n".join(chunk))
+            await channel.send("\n".join(chunk), allowed_mentions=no_ping)
 
 
 async def setup(bot: commands.Bot):
