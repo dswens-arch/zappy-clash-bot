@@ -53,6 +53,12 @@ from database import (
 
 JOBS_CHANNEL_ID = int(os.environ["SPARK_JOBS_CHANNEL_ID"]) if os.environ.get("SPARK_JOBS_CHANNEL_ID") else None
 
+# Optional artwork for win embeds — set these once you have images (any hosted
+# URL: Imgur, GitHub raw, IPFS gateway, etc.) and wins will pick them up on the
+# next resolver pass, no redeploy needed beyond the env var.
+ALGO_WIN_IMAGE_URL = os.environ.get("SPARK_JOB_ALGO_WIN_IMAGE_URL")
+NFT_WIN_IMAGE_URL  = os.environ.get("SPARK_JOB_NFT_WIN_IMAGE_URL")
+
 RESOLVER_INTERVAL_MINUTES = 5
 
 # ─────────────────────────────────────────────
@@ -431,6 +437,30 @@ JOBS = {
 
 JOB_NAMES = list(JOBS.keys())
 
+JOB_EMOJIS = {
+    "Electrical":       "⚡",
+    "The Forge":        "🔥",
+    "Fortune Table":    "🎴",
+    "The Garden":       "🌱",
+    "The Mainframe":    "🖥️",
+    "Night Security":   "🌙",
+    "The Docks":        "🚢",
+    "The Vault":        "🔐",
+    "The Switchboard":  "☎️",
+    "The Greenhouse":   "🌿",
+    "The Arcade":       "🕹️",
+    "The Scrapyard":    "♻️",
+    "The Observatory":  "🔭",
+    "The Kitchen":      "🍳",
+    "The Print Shop":   "🖨️",
+    "The Tannery":      "🧵",
+    "The Mines":        "⛏️",
+    "The Lighthouse":   "🗼",
+    "The Pit":          "🥊",
+    "The Courier Run":  "📦",
+    "The Black Market": "🕶️",
+}
+
 
 def _roll_hits(spark_tier: int) -> tuple[bool, bool, float | None]:
     """Roll ALGO + NFT independently, tier-weighted. Returns (algo_hit, nft_hit, amount)."""
@@ -450,10 +480,10 @@ def _build_flavor_line(job: str, spark_name: str, algo_hit: bool, amount: float 
     if nft_name:
         # NFT hit overrides the line regardless of whether ALGO also hit — but the
         # ALGO amount (if any) is still paid separately; this only changes the text.
-        return f"{spark_name} stumbles onto something on the {job} shift and walks away with **{nft_name}**."
+        return f"**{spark_name}** stumbles onto something on the {job} shift and walks away with **{nft_name}**."
     if algo_hit:
-        return f"{spark_name} " + random.choice(bank["hit"]).format(amt=amount)
-    return f"{spark_name} " + random.choice(bank["miss"])
+        return f"**{spark_name}** " + random.choice(bank["hit"]).format(amt=amount)
+    return f"**{spark_name}** " + random.choice(bank["miss"])
 
 
 class SparkJobsCog(commands.Cog):
@@ -502,7 +532,8 @@ class SparkJobsCog(commands.Cog):
         for spark in eligible:
             job = random.choice(JOB_NAMES)
             display_name = spark.get("name") or spark["spark_type"].capitalize()
-            line = f"**{display_name}** " + random.choice(JOBS[job]["clock_in"])
+            emoji = JOB_EMOJIS.get(job, "🔧")
+            line = f"{emoji} **{display_name}** " + random.choice(JOBS[job]["clock_in"])
             await asyncio.to_thread(create_spark_job, spark, job, line)
             clock_in_lines.append(line)
 
@@ -634,29 +665,64 @@ class SparkJobsCog(commands.Cog):
         if not channel:
             return
 
-        icons = {"algo": "💰", "nft": "🎁", "miss": "💤"}
-        lines = []
-        for r in resolved:
-            icon  = icons.get(r["outcome"], "💰")
-            owner = f"<@{r['discord_user_id']}> " if r.get("discord_user_id") else ""
-            lines.append(f"{icon} {owner}{r['flavor_line']}")
+        misses = [r for r in resolved if r["outcome"] == "miss"]
+        wins   = [r for r in resolved if r["outcome"] in ("algo", "nft")]
 
-        # Mentions render as clickable @names so owners can spot their own
-        # Sparks and re-run /spark-job on them, but don't ping/notify —
-        # a payday digest with a dozen mixed owners shouldn't buzz everyone's
-        # phone on every single line, hits or misses alike.
-        no_ping = discord.AllowedMentions(users=False)
+        # Wins get their own embed each, posted first — rare enough that they
+        # deserve a real ping and some visual weight instead of blending into
+        # the miss list below.
+        for r in wins:
+            await self._post_win_embed(r)
 
-        # Post in chunks to stay under Discord's message length limit
-        chunk, length = [], 0
-        for line in lines:
-            if length + len(line) > 1800:
+        # Misses stay a quiet, compact batched list — no ping, no fanfare,
+        # this is most of what happens on any given pass.
+        if misses:
+            no_ping = discord.AllowedMentions(users=False)
+            lines = []
+            for r in misses:
+                job_emoji = JOB_EMOJIS.get(r["job"], "🔧")
+                owner     = f"<@{r['discord_user_id']}> " if r.get("discord_user_id") else ""
+                lines.append(f"💤 {job_emoji} {owner}{r['flavor_line']}")
+
+            chunk, length = [], 0
+            for line in lines:
+                if length + len(line) > 1800:
+                    await channel.send("\n".join(chunk), allowed_mentions=no_ping)
+                    chunk, length = [], 0
+                chunk.append(line)
+                length += len(line)
+            if chunk:
                 await channel.send("\n".join(chunk), allowed_mentions=no_ping)
-                chunk, length = [], 0
-            chunk.append(line)
-            length += len(line)
-        if chunk:
-            await channel.send("\n".join(chunk), allowed_mentions=no_ping)
+
+    async def _post_win_embed(self, r: dict):
+        channel = self._jobs_channel()
+        if not channel:
+            return
+
+        job_emoji = JOB_EMOJIS.get(r["job"], "🔧")
+        spark_name = r.get("spark_name") or r["spark_type"]
+
+        if r["outcome"] == "nft":
+            embed = discord.Embed(
+                title=f"🎁 NFT DROP — {spark_name}",
+                description=r["flavor_line"],
+                color=0xB833FF,
+            )
+            if NFT_WIN_IMAGE_URL:
+                embed.set_image(url=NFT_WIN_IMAGE_URL)
+        else:
+            embed = discord.Embed(
+                title=f"💰 ALGO HIT — {spark_name}",
+                description=r["flavor_line"],
+                color=0xFFD700,
+            )
+            if ALGO_WIN_IMAGE_URL:
+                embed.set_image(url=ALGO_WIN_IMAGE_URL)
+
+        embed.set_footer(text=f"{job_emoji} {r['job']} shift · Spark Jobs")
+
+        content = f"<@{r['discord_user_id']}>" if r.get("discord_user_id") else None
+        await channel.send(content=content, embed=embed)
 
 
 async def setup(bot: commands.Bot):
