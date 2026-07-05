@@ -49,7 +49,6 @@ class Fighter:
     survived_zero:   bool  = field(default=False, init=False)   # Nine Lives tracker
     iron_shell_used:    bool  = field(default=False, init=False)   # Iron Shell one-time shield tracker
     skip_next_attack:   bool  = field(default=False, init=False)   # Royal Decree weakened-attack flag
-    talon_used:         bool  = field(default=False, init=False)   # Talon Strike fired — skip normal attack entirely
     shield_active:      bool  = field(default=False, init=False)   # Divine Shield block flag
     rot_poisoned:       bool  = field(default=False, init=False)   # Rot Touch poison flag
     sweet_spot_active:  bool  = field(default=False, init=False)   # Pastel Sweet Spot heal-on-crit flag
@@ -236,11 +235,9 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         if _rand.random() < 0.5:
             bonus = int(opponent.hp * 0.8)
             opponent.hp -= bonus
-            fighter.talon_used = True   # talon strike IS the attack — skip normal hit
-            return True, f"🦅 **TALON STRIKE!** {fighter.display_name} dives — {bonus} damage! {opponent.display_name} is reeling! (HP: {max(0, opponent.hp)})"
+            return True, f"🦅 **TALON STRIKE!** {fighter.display_name} dives — {bonus} bonus damage! {opponent.display_name} is reeling! (HP: {max(0, opponent.hp)})"
         else:
-            fighter.talon_used = True   # missed the dive — no normal attack either
-            return True, f"🦅 **TALON STRIKE MISSES!** {fighter.display_name} overcommits — {opponent.display_name} sidesteps the dive! No attack this round."
+            return True, f"🦅 **TALON STRIKE MISSES!** {fighter.display_name} overcommits — no bonus damage this round."
 
     elif name == "Zappy Spirit":
         fighter.VLT += 5
@@ -530,10 +527,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     round_msg.append(msg + " for the rest of the battle.")
 
         # ── Fighter A attacks Fighter B ──
-        if fighter_a.talon_used:
-            fighter_a.talon_used = False
-            dmg_a, crit_a = 0, False   # Talon Strike was the attack — no normal hit
-        elif fighter_a.skip_next_attack:
+        if fighter_a.skip_next_attack:
             fighter_a.skip_next_attack = False
             dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
             dmg_a = int(dmg_a * 0.40)
@@ -570,10 +564,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             fighter_b.hp -= dmg_a
 
         # ── Fighter B attacks Fighter A ──
-        if fighter_b.talon_used:
-            fighter_b.talon_used = False
-            dmg_b, crit_b = 0, False   # Talon Strike was the attack — no normal hit
-        elif fighter_b.skip_next_attack:
+        if fighter_b.skip_next_attack:
             fighter_b.skip_next_attack = False
             dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
             dmg_b = int(dmg_b * 0.40)
