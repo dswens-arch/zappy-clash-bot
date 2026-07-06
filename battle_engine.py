@@ -51,6 +51,7 @@ class Fighter:
     skip_next_attack:   bool  = field(default=False, init=False)   # Royal Decree weakened-attack flag
     shield_active:      bool  = field(default=False, init=False)   # Divine Shield block flag
     rot_poisoned:       bool  = field(default=False, init=False)   # Rot Touch poison flag
+    venom_poisoned:     bool  = field(default=False, init=False)   # Venom Bite poison flag
     sweet_spot_active:  bool  = field(default=False, init=False)   # Pastel Sweet Spot heal-on-crit flag
     pure_signal_ready:  bool  = field(default=False, init=False)   # Clean Zappy no-variance first strike
 
@@ -246,6 +247,10 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         return True, f"⚡ **ZAPPY SPIRIT** — Brand loyalty pays off. All stats +5."
 
     # ── New skin abilities ──────────────────────────────────────────────────
+
+    elif name == "Venom Bite":
+        opponent.venom_poisoned = True
+        return True, f"🐍 **VENOM BITE!** {fighter.display_name} sinks its fangs in — {opponent.display_name} is poisoned for the rest of the battle!"
 
     elif name == "Rot Touch":
         # Mark the opponent as poisoned — drain handled post-round in resolve_battle()
@@ -563,6 +568,14 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(f"  **{fighter_a.display_name}** {random.choice(WEAK_HIT)} — {dmg_a} damage.")
             fighter_b.hp -= dmg_a
 
+            # Feeding Frenzy — bonus scales with how much HP fighter_b has already lost
+            if fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Feeding Frenzy" and fighter_b.hp > 0:
+                missing_pct = 1 - (fighter_b.hp / STARTING_HP)
+                frenzy_bonus = int(dmg_a * missing_pct)
+                if frenzy_bonus > 0:
+                    fighter_b.hp = max(0, fighter_b.hp - frenzy_bonus)
+                    round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_a.display_name} smells blood — {frenzy_bonus} bonus damage!")
+
         # ── Fighter B attacks Fighter A ──
         if fighter_b.skip_next_attack:
             fighter_b.skip_next_attack = False
@@ -600,6 +613,14 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(f"  **{fighter_b.display_name}** {random.choice(WEAK_HIT)} — {dmg_b} damage.")
             fighter_a.hp -= dmg_b
 
+            # Feeding Frenzy — bonus scales with how much HP fighter_a has already lost
+            if fighter_b.ability and isinstance(fighter_b.ability, dict) and fighter_b.ability.get("name") == "Feeding Frenzy" and fighter_a.hp > 0:
+                missing_pct = 1 - (fighter_a.hp / STARTING_HP)
+                frenzy_bonus = int(dmg_b * missing_pct)
+                if frenzy_bonus > 0:
+                    fighter_a.hp = max(0, fighter_a.hp - frenzy_bonus)
+                    round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_b.display_name} smells blood — {frenzy_bonus} bonus damage!")
+
         # Nine Lives check
         for f in [fighter_a, fighter_b]:
             if f.hp <= 0 and f.survived_zero == True and not hasattr(f, '_nine_lives_used'):
@@ -613,6 +634,12 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 if getattr(poisoned, 'rot_poisoned', False):
                     poisoned.hp = max(0, poisoned.hp - 5)
                     round_msg.append(f"  🧟 **ROT TOUCH** — {poisoned.display_name} takes 5 poison damage!")
+
+        # Venom Bite poison drain (every round, starting round 1)
+        for poisoned in [fighter_a, fighter_b]:
+            if getattr(poisoned, 'venom_poisoned', False):
+                poisoned.hp = max(0, poisoned.hp - 25)
+                round_msg.append(f"  🐍 **VENOM BITE** — {poisoned.display_name} takes 25 poison damage!")
             # Also check Nothing Left to Lose combo — double drain
             for poisoned, src in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
                 if getattr(poisoned, 'rot_poisoned', False) and src.combo == "💀 Nothing Left to Lose":
