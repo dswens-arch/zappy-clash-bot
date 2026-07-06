@@ -342,6 +342,8 @@ HERO_STATS = {
     "Frog":       {"VLT": 75, "INS": 68, "SPK": 94, "ability": {"name": "Patience",   "desc": "Sits out round 1 entirely, then crits are guaranteed in round 2.", "trigger_round": 1}},
     "Eagle":      {"VLT": 82, "INS": 58, "SPK": 100, "ability": {"name": "Talon Strike", "desc": "50% chance at the start of round 1 to deal 80% of opponent's current HP as bonus damage, on top of Eagle's normal attack.", "trigger_round": 1}},
     "Buck":       {"VLT": 88, "INS": 82, "SPK": 65, "ability": {"name": "Antler Clash", "desc": "Reduces opponent's VLT by 15 starting round 2. The longer the fight, the less damage they can deal.", "trigger_round": 2}},
+    "Snake":      {"VLT": 78, "INS": 72, "SPK": 80, "ability": {"name": "Venom Bite", "desc": "Poisons the opponent starting round 1 — they lose 25 HP at the start of every remaining round, regardless of INS.", "trigger_round": 1}},
+    "Shark":      {"VLT": 90, "INS": 65, "SPK": 88, "ability": {"name": "Feeding Frenzy", "desc": "Bonus damage scales with how much HP the opponent has already lost. The lower they are, the harder Shark hits.", "trigger_round": "every"}},
 }
 
 COLLAB_STATS = {
