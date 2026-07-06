@@ -84,6 +84,7 @@ ANNOUNCE_CHANNEL   = int(os.environ.get("ANNOUNCE_CHANNEL_ID", CLASH_CHANNEL))
 ADMIN_NOTIFY_ID    = int(os.environ["ADMIN_NOTIFY_USER_ID"]) if os.environ.get("ADMIN_NOTIFY_USER_ID") else None  # e.g. dano's Discord user ID
 EXPEDITION_CHANNEL = int(os.environ["EXPEDITION_CHANNEL_ID"]) if os.environ.get("EXPEDITION_CHANNEL_ID") else None   # Optional - if not set, works anywhere
 APEX_TEST_CHANNEL  = int(os.environ["APEX_TEST_CHANNEL_ID"])  if os.environ.get("APEX_TEST_CHANNEL_ID")  else None   # Optional - test channel for /expedition_test
+HOLDER_CHANNEL     = int(os.environ.get("HOLDER_CHANNEL_ID", "1314066280592052244"))  # All NFT win claim announcements (buddy/clash/zone5/spark jobs)
 
 # Session timing (UTC)
 MORNING_OPEN    = dtime(14,  0, tzinfo=timezone.utc)
@@ -2224,7 +2225,7 @@ async def cmd_claimnft(interaction: discord.Interaction):
 
     # Announce publicly if successful
     if result.get("success"):
-        channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
+        channel = bot.get_channel(HOLDER_CHANNEL)
         if channel:
             if result.get("is_buddy"):
                 await channel.send(
@@ -2235,6 +2236,11 @@ async def cmd_claimnft(interaction: discord.Interaction):
                 await channel.send(
                     f"🎁 <@{user_id}> just claimed their Clash champion NFT prize: "
                     f"**{result['name']}**! ⚡🏆"
+                )
+            elif result.get("source") == "spark_jobs":
+                await channel.send(
+                    f"🎁 <@{user_id}> just claimed their Spark Jobs NFT prize: "
+                    f"**{result['name']}**! ⚡💼"
                 )
             else:
                 await channel.send(
