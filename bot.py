@@ -3991,16 +3991,25 @@ async def award_spark_xp(spark_asset_id: int, won: bool, clash_channel: discord.
     if not result:
         return
 
-    # Announce upgrade if tier changed
-    if result.get("upgraded") and clash_channel and result.get("discord_user_id"):
+    # Announce upgrade if tier changed — posts to the holder channel rather
+    # than the Clash channel itself, so it doesn't get lost in bracket chatter
+    # (same reasoning as Spark Jobs' tier-up announcements: all tier upgrades,
+    # regardless of source, land in one place).
+    if result.get("upgraded") and result.get("discord_user_id"):
         new_tier = result["tier_after"]
         tier_names = {2: "Flare", 3: "Blaze"}
-        await clash_channel.send(
-            f"🌟 **SPARK UPGRADE!** <@{result['discord_user_id']}>'s "
-            f"**{result['name']}** has evolved to **T{new_tier} {tier_names[new_tier]}**! "
-            f"({result['new_xp']} XP total)"
-        )
-        # Push ARC-19 on-chain update
+
+        holder_channel = bot.get_channel(HOLDER_CHANNEL)
+        if holder_channel:
+            await holder_channel.send(
+                f"🌟 **SPARK UPGRADE!** <@{result['discord_user_id']}>'s "
+                f"**{result['name']}** has evolved to **T{new_tier} {tier_names[new_tier]}**! "
+                f"({result['new_xp']} XP total)"
+            )
+
+        # Push ARC-19 on-chain update — always runs even if the channel lookup
+        # above failed, since the on-chain metadata update shouldn't depend on
+        # whether the announcement posted.
         await asyncio.to_thread(
             push_spark_arc19_upgrade, spark_asset_id, result["spark_type"], new_tier
         )
