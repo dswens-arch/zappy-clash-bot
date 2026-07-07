@@ -53,6 +53,11 @@ from database import (
 
 JOBS_CHANNEL_ID = int(os.environ["SPARK_JOBS_CHANNEL_ID"]) if os.environ.get("SPARK_JOBS_CHANNEL_ID") else None
 
+# Same channel bot.py's HOLDER_CHANNEL points at (same default, independently
+# read here rather than imported — importing from bot.py would be circular,
+# since bot.py is the one that imports SparkJobsCog).
+HOLDER_CHANNEL_ID = int(os.environ.get("HOLDER_CHANNEL_ID", "1314066280592052244"))
+
 # Optional artwork for win embeds — set these once you have images (any hosted
 # URL: Imgur, GitHub raw, IPFS gateway, etc.) and wins will pick them up on the
 # next resolver pass, no redeploy needed beyond the env var.
@@ -621,10 +626,27 @@ class SparkJobsCog(commands.Cog):
                 await asyncio.to_thread(
                     push_spark_arc19_upgrade, row["spark_asa"], xp_result["spark_type"], xp_result["tier_after"]
                 )
+                await self._post_tier_upgrade(row, xp_result)
 
             resolved.append({**row, "outcome": outcome, "amount": amount, "nft_asa": nft_asa, "flavor_line": flavor_line})
 
         return resolved
+
+    async def _post_tier_upgrade(self, row: dict, xp_result: dict):
+        """Public announcement in the holder channel when a Spark tiers up from Jobs XP (mirrors Clash's tier-up announcement)."""
+        channel = self.bot.get_channel(HOLDER_CHANNEL_ID)
+        if not channel or not row.get("discord_user_id"):
+            return
+
+        new_tier   = xp_result["tier_after"]
+        tier_name  = TIER_NAMES.get(new_tier, f"T{new_tier}")
+        spark_name = row.get("spark_name") or row["spark_type"]
+
+        await channel.send(
+            f"🌟 **SPARK UPGRADE!** <@{row['discord_user_id']}>'s "
+            f"**{spark_name}** has evolved to **T{new_tier} {tier_name}** working a Spark Jobs shift! "
+            f"({xp_result['new_xp']} XP total)"
+        )
 
 
     async def _process_algo_payouts(self):
