@@ -419,29 +419,46 @@ async def cmd_clash(interaction: discord.Interaction):
                 ),
                 color=0xA855F7,
             )
-            for s in sparks:
-                spark_embed.add_field(
-                    name=f"{s['name']} · T{s['tier']}",
-                    value=f"Type: **{s['spark_type'].capitalize()}** · XP: {s['xp']}",
-                    inline=True,
-                )
+
+            PAGE_SIZE = 6  # most holders have 6 or fewer — this is the common case, not the paginated one
 
             class SparkSelectView(discord.ui.View):
                 def __init__(self):
                     super().__init__(timeout=60)
                     self.chosen_spark = None
                     self.resolved     = False
+                    self.page         = 0
+                    self.total_pages  = (len(sparks) + PAGE_SIZE - 1) // PAGE_SIZE
+                    self._render()
 
-                    # Add one button per Spark — explicit rows so all 6 fit cleanly
-                    for i, s in enumerate(sparks[:6]):
+                def _render(self):
+                    self.clear_items()
+                    start = self.page * PAGE_SIZE
+                    page_sparks = sparks[start:start + PAGE_SIZE]
+
+                    # Up to 6 Spark buttons — 4 on row 0, 2 on row 1, matching the
+                    # common case exactly (most holders never see a second page).
+                    for i, s in enumerate(page_sparks):
                         btn = discord.ui.Button(
-                            label=f"{s['spark_type'].capitalize()} T{s['tier']}",
+                            label=f"{s['name'] or s['spark_type'].capitalize()} T{s['tier']}"[:80],
                             style=discord.ButtonStyle.primary,
                             custom_id=str(s["asset_id"]),
-                            row=i // 4,  # 4 per row → row 0: first 4, row 1: next 2
+                            row=i // 4,
                         )
                         btn.callback = self._make_callback(s)
                         self.add_item(btn)
+
+                    # Prev/Next only appear at all if there's more than one page —
+                    # for the 6-or-fewer majority these never show up.
+                    if self.total_pages > 1:
+                        if self.page > 0:
+                            prev_btn = discord.ui.Button(label="◀ Prev", style=discord.ButtonStyle.secondary, row=1)
+                            prev_btn.callback = self._prev
+                            self.add_item(prev_btn)
+                        if self.page < self.total_pages - 1:
+                            next_btn = discord.ui.Button(label="Next ▶", style=discord.ButtonStyle.secondary, row=1)
+                            next_btn.callback = self._next
+                            self.add_item(next_btn)
 
                     # Skip button — own row at the bottom
                     skip_btn = discord.ui.Button(
@@ -465,6 +482,16 @@ async def cmd_clash(interaction: discord.Interaction):
                             item.disabled = True
                         await _finalize_register(inter, zappy, spark_data)
                     return callback
+
+                async def _next(self, inter: discord.Interaction):
+                    self.page += 1
+                    self._render()
+                    await inter.response.edit_message(view=self)
+
+                async def _prev(self, inter: discord.Interaction):
+                    self.page -= 1
+                    self._render()
+                    await inter.response.edit_message(view=self)
 
                 async def _skip(self, inter: discord.Interaction):
                     if self.resolved:
