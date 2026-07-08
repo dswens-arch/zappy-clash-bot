@@ -989,14 +989,23 @@ async def cmd_spark_register(interaction: discord.Interaction):
         if spark.get("wallet") == wallet:
             already.append(spark)
         else:
-            # Claim it
+            old_wallet = spark.get("wallet")
+            update_data = {
+                "wallet":          wallet,
+                "discord_user_id": user_id,
+            }
+            # Only start the wallet-transfer cooldown (used by Spark Jobs'
+            # anti-farming check) on a genuine transfer — i.e. this Spark was
+            # previously claimed under a DIFFERENT wallet. A first-time claim
+            # (old_wallet is None/empty, never registered before) shouldn't
+            # lock a brand-new holder out of Jobs for 24h — they didn't flip
+            # anything, they just registered.
+            if old_wallet:
+                update_data["purchased_at"] = datetime.now(timezone.utc).isoformat()
+
             await asyncio.to_thread(
-                lambda s=spark: db.table("spark_holdings")
-                .update({
-                    "wallet":          wallet,
-                    "discord_user_id": user_id,
-                    "purchased_at":    __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
-                })
+                lambda s=spark, ud=update_data: db.table("spark_holdings")
+                .update(ud)
                 .eq("asset_id", s["asset_id"])
                 .execute()
             )
