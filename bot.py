@@ -1053,9 +1053,14 @@ async def cmd_my_sparks(interaction: discord.Interaction):
     TIER_NAMES = {1: "Spark", 2: "Flare", 3: "Blaze"}
     THRESHOLDS = {1: 1000, 2: 5000}
 
-    embed = discord.Embed(title="🌟 Your Sparks", color=0xA855F7)
+    overflow = len(sparks) > 25
+    shown    = sparks[:25]  # Discord embeds cap at 25 fields
 
-    for s in sparks:
+    embed = discord.Embed(title="🌟 Your Sparks", color=0xA855F7)
+    if overflow:
+        embed.description = f"Showing your first 25 of {len(sparks)} Sparks."
+
+    for s in shown:
         tier    = s["tier"]
         xp      = s["xp"]
         stype   = s["spark_type"]
