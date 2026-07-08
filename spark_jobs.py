@@ -467,6 +467,24 @@ JOB_EMOJIS = {
 }
 
 
+def _chunk_lines(lines: list, limit: int = 1800) -> list:
+    """
+    Groups lines into chunks that stay under Discord's message content limit
+    (2000 chars) — used anywhere a holder's Spark count could produce a
+    message longer than that (clock-in lists, payday digests, summaries).
+    """
+    chunks, current, length = [], [], 0
+    for line in lines:
+        if current and length + len(line) + 1 > limit:
+            chunks.append("\n".join(current))
+            current, length = [], 0
+        current.append(line)
+        length += len(line) + 1
+    if current:
+        chunks.append("\n".join(current))
+    return chunks
+
+
 def _roll_hits(spark_tier: int) -> tuple[bool, bool, float | None]:
     """Roll ALGO + NFT independently, tier-weighted. Returns (algo_hit, nft_hit, amount)."""
     algo_hit = random.random() < ALGO_HIT_CHANCE.get(spark_tier, 0)
@@ -545,20 +563,24 @@ class SparkJobsCog(commands.Cog):
         channel = self._jobs_channel()
         if channel:
             header = f"🕐 <@{user_id}> sends **{len(eligible)}** Spark(s) to work:"
-            await channel.send(header + "\n" + "\n".join(f"• {l}" for l in clock_in_lines))
+            bullet_lines = [f"• {l}" for l in clock_in_lines]
+            chunks = _chunk_lines(bullet_lines)
+            for i, chunk in enumerate(chunks):
+                content = f"{header}\n{chunk}" if i == 0 else chunk
+                await channel.send(content)
 
-        summary = [f"✅ Sent **{len(eligible)}** Spark(s) to work — back in 8 hours."]
+        summary_lines = [f"✅ Sent **{len(eligible)}** Spark(s) to work — back in 8 hours."]
         if skipped:
-            skip_lines = []
+            summary_lines.append(f"\nSkipped ({len(skipped)}):")
             for asa, reason in skipped.items():
                 readable = {
                     "wallet_transfer_cooldown": "recently transferred, on cooldown",
                     "already_working": "already on shift",
                 }.get(reason, reason)
-                skip_lines.append(f"  · ASA `{asa}` — {readable}")
-            summary.append(f"\nSkipped ({len(skipped)}):\n" + "\n".join(skip_lines))
+                summary_lines.append(f"  · ASA `{asa}` — {readable}")
 
-        await interaction.followup.send("\n".join(summary), ephemeral=True)
+        for chunk in _chunk_lines(summary_lines):
+            await interaction.followup.send(chunk, ephemeral=True)
 
     # ──────────────────────────────────────────
     # Resolver — runs every few minutes, resolves due jobs, awards XP,
@@ -706,15 +728,8 @@ class SparkJobsCog(commands.Cog):
                 owner     = f"<@{r['discord_user_id']}> " if r.get("discord_user_id") else ""
                 lines.append(f"💤 {job_emoji} {owner}{r['flavor_line']}")
 
-            chunk, length = [], 0
-            for line in lines:
-                if length + len(line) > 1800:
-                    await channel.send("\n".join(chunk), allowed_mentions=no_ping)
-                    chunk, length = [], 0
-                chunk.append(line)
-                length += len(line)
-            if chunk:
-                await channel.send("\n".join(chunk), allowed_mentions=no_ping)
+            for chunk in _chunk_lines(lines):
+                await channel.send(chunk, allowed_mentions=no_ping)
 
     async def _post_win_embed(self, r: dict):
         channel = self._jobs_channel()
