@@ -72,7 +72,7 @@ RESOLVER_INTERVAL_MINUTES = 5
 # ─────────────────────────────────────────────
 ALGO_HIT_CHANCE  = {1: 0.040, 2: 0.047, 3: 0.055}
 NFT_HIT_CHANCE   = {1: 0.0025, 2: 0.0034, 3: 0.0045}
-PAYOUT_RANGE     = {1: (0.05, 0.12), 2: (0.10, 0.20), 3: (0.15, 0.30)}
+PAYOUT_RANGE     = {1: (0.1, 0.4), 2: (0.2, 0.7), 3: (0.3, 1.0)}
 MAX_SHIFT_PAYOUT = 1.0  # hard cap, ALGO
 
 TIER_NAMES = {1: "Spark", 2: "Flare", 3: "Blaze"}
