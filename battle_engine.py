@@ -532,16 +532,21 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     round_msg.append(msg + " for the rest of the battle.")
 
         # ── Fighter A attacks Fighter B ──
-        if fighter_a.skip_next_attack:
+        # Shield checked first — it should always fully block, no matter what
+        # state the attacker is in (skip_next_attack shouldn't let a hit sneak
+        # through underneath it).
+        if fighter_b.shield_active:
+            fighter_b.shield_active = False
+            if fighter_a.skip_next_attack:
+                fighter_a.skip_next_attack = False  # still consumed — the attempt happened, just got blocked
+            round_msg.append(f"  😇 **{fighter_b.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
+            dmg_a, crit_a = 0, False
+        elif fighter_a.skip_next_attack:
             fighter_a.skip_next_attack = False
             dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
             dmg_a = int(dmg_a * 0.40)
             round_msg.append(f"  👑 **{fighter_a.display_name}** swings weakly under the decree — {dmg_a} damage.")
             crit_a = False
-        elif fighter_b.shield_active:
-            fighter_b.shield_active = False
-            round_msg.append(f"  😇 **{fighter_b.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
-            dmg_a, crit_a = 0, False
         else:
             dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
             dmg_a, spark_msg_a = apply_spark(fighter_a, fighter_b, crit_a, dmg_a, round_num)
@@ -577,16 +582,18 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_a.display_name} smells blood — {frenzy_bonus} bonus damage!")
 
         # ── Fighter B attacks Fighter A ──
-        if fighter_b.skip_next_attack:
+        if fighter_a.shield_active:
+            fighter_a.shield_active = False
+            if fighter_b.skip_next_attack:
+                fighter_b.skip_next_attack = False  # still consumed — the attempt happened, just got blocked
+            round_msg.append(f"  😇 **{fighter_a.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
+            dmg_b, crit_b = 0, False
+        elif fighter_b.skip_next_attack:
             fighter_b.skip_next_attack = False
             dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
             dmg_b = int(dmg_b * 0.40)
             round_msg.append(f"  👑 **{fighter_b.display_name}** swings weakly under the decree — {dmg_b} damage.")
             crit_b = False
-        elif fighter_a.shield_active:
-            fighter_a.shield_active = False
-            round_msg.append(f"  😇 **{fighter_a.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
-            dmg_b, crit_b = 0, False
         else:
             dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
             dmg_b, spark_msg_b = apply_spark(fighter_b, fighter_a, crit_b, dmg_b, round_num)
@@ -686,13 +693,16 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         total_a = fighter_a.VLT + fighter_a.INS + fighter_a.SPK
         total_b = fighter_b.VLT + fighter_b.INS + fighter_b.SPK
 
-        # Jinx: cap opponent's roll pool
+        # Jinx: cap opponent's roll pool. Two independent `if`s (not if/elif) —
+        # when BOTH fighters have Jinx equipped, each should still shrink the
+        # other's pool. They mutate different variables (total_a vs total_b),
+        # so there's no conflict in letting both fire in the same tiebreaker.
         if fighter_a.spark_type == "jinx" and fighter_a.spark_tier > 0 and not fighter_a.spark_triggered:
             cap = {1: 0.75, 2: 0.50, 3: 0.30}[fighter_a.spark_tier]
             total_b = max(1, int(total_b * cap))
             fighter_a.spark_triggered = True
             log.append(f"🎲 **JINX** — {fighter_a.display_name}'s companion grins. {fighter_b.display_name}'s roll pool shrinks to {total_b}!")
-        elif fighter_b.spark_type == "jinx" and fighter_b.spark_tier > 0 and not fighter_b.spark_triggered:
+        if fighter_b.spark_type == "jinx" and fighter_b.spark_tier > 0 and not fighter_b.spark_triggered:
             cap = {1: 0.75, 2: 0.50, 3: 0.30}[fighter_b.spark_tier]
             total_a = max(1, int(total_a * cap))
             fighter_b.spark_triggered = True
