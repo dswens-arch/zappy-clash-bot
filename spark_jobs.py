@@ -77,6 +77,18 @@ MAX_SHIFT_PAYOUT = 1.0  # hard cap, ALGO
 
 TIER_NAMES = {1: "Spark", 2: "Flare", 3: "Blaze"}
 
+# Clock-in embeds get a color band per person, deterministically hashed from
+# their Discord ID — same person always gets the same color across every
+# post, so in a busy channel you can visually track "that's them again"
+# without re-reading the mention every time.
+CLOCK_IN_COLORS = [0x5865F2, 0x57F287, 0xFEE75C, 0xEB459E, 0xED4245, 0x1ABC9C, 0xE67E22, 0x9B59B6]
+
+
+def _color_for_user(discord_user_id: str | None) -> int:
+    if not discord_user_id:
+        return CLOCK_IN_COLORS[0]
+    return CLOCK_IN_COLORS[int(discord_user_id) % len(CLOCK_IN_COLORS)]
+
 # ─────────────────────────────────────────────
 # Jobs — flavor line banks
 # ─────────────────────────────────────────────
@@ -560,21 +572,19 @@ class SparkJobsCog(commands.Cog):
             await asyncio.to_thread(create_spark_job, spark, job, line)
             clock_in_lines.append(line)
 
-        # Keep Spark Holder / Spark Family role in sync whenever someone sends
-        # Sparks to work — local import avoids a circular import at module load
-        # (bot.py imports SparkJobsCog from this file).
-        from bot import assign_spark_role
-        total_held = len(eligible) + len(skipped)
-        await assign_spark_role(interaction, total_held)
-
         channel = self._jobs_channel()
         if channel:
-            header = f"🕐 <@{user_id}> sends **{len(eligible)}** Spark(s) to work:"
             bullet_lines = [f"• {l}" for l in clock_in_lines]
             chunks = _chunk_lines(bullet_lines)
+            color = _color_for_user(user_id)
+            ping  = f"🕐 <@{user_id}> sends **{len(eligible)}** Spark(s) to work:"
+
             for i, chunk in enumerate(chunks):
-                content = f"{header}\n{chunk}" if i == 0 else chunk
-                await channel.send(content)
+                embed = discord.Embed(description=chunk, color=color)
+                # Ping/header stays as normal message content above the embed —
+                # the colored embed card is what visually separates this batch
+                # from whatever posted right before or after it.
+                await channel.send(content=ping if i == 0 else None, embed=embed)
 
         summary_lines = [f"✅ Sent **{len(eligible)}** Spark(s) to work — back in 8 hours."]
         if skipped:
