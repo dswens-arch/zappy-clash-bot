@@ -560,6 +560,13 @@ class SparkJobsCog(commands.Cog):
             await asyncio.to_thread(create_spark_job, spark, job, line)
             clock_in_lines.append(line)
 
+        # Keep Spark Holder / Spark Family role in sync whenever someone sends
+        # Sparks to work — local import avoids a circular import at module load
+        # (bot.py imports SparkJobsCog from this file).
+        from bot import assign_spark_role
+        total_held = len(eligible) + len(skipped)
+        await assign_spark_role(user_id, total_held)
+
         channel = self._jobs_channel()
         if channel:
             header = f"🕐 <@{user_id}> sends **{len(eligible)}** Spark(s) to work:"
