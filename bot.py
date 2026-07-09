@@ -1040,7 +1040,7 @@ async def cmd_spark_register(interaction: discord.Interaction):
 
     # Update Spark Holder / Spark Family role based on total Sparks now owned
     total_owned = len(claimed) + len(already)
-    await assign_spark_role(user_id, total_owned)
+    await assign_spark_role(interaction, total_owned)
 
     await interaction.followup.send("\n".join(lines), ephemeral=True)
 
@@ -1068,7 +1068,7 @@ async def cmd_my_sparks(interaction: discord.Interaction):
     # Keep Spark Holder / Spark Family role in sync every time this is checked —
     # this also catches downgrades (Spark sold/transferred away) since /my-sparks
     # reflects current holdings, not just what was claimed at registration time.
-    await assign_spark_role(user_id, len(sparks) if sparks else 0)
+    await assign_spark_role(interaction, len(sparks) if sparks else 0)
 
     if not sparks:
         await interaction.followup.send(
@@ -2818,25 +2818,19 @@ async def assign_cp_role(discord_user_id: str, cp_total: int):
         print(f"Error assigning CP role: {e}")
 
 
-async def assign_spark_role(discord_user_id: str, spark_count: int):
-    """Assign Spark Holder (1-5) or Spark Family (6+) based on how many Sparks the user owns."""
+async def assign_spark_role(interaction: discord.Interaction, spark_count: int):
+    """Assign Spark Holder (1-5) or Spark Family (6+) based on how many Sparks the user owns.
+    Takes the live interaction so guild/member come straight from Discord's
+    gateway payload — no cache lookup or fetch_guild/fetch_member needed."""
     try:
-        guild = bot.get_guild(GUILD_ID)
+        guild = interaction.guild
         if not guild:
-            # Cache miss (e.g. shortly after reconnect) — fall back to an API fetch
-            try:
-                guild = await bot.fetch_guild(GUILD_ID)
-            except Exception as fetch_err:
-                print(f"Error assigning Spark role: guild {GUILD_ID} unavailable ({fetch_err})")
-                return
+            print("Error assigning Spark role: interaction has no guild (DM context?)")
+            return
 
-        member = guild.get_member(int(discord_user_id))
+        member = interaction.user if isinstance(interaction.user, discord.Member) else guild.get_member(interaction.user.id)
         if not member:
-            try:
-                member = await guild.fetch_member(int(discord_user_id))
-            except Exception:
-                return
-        if not member:
+            print(f"Error assigning Spark role: could not resolve member {interaction.user.id}")
             return
 
         earned_role_id = None
