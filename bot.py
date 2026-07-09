@@ -125,6 +125,14 @@ ROLE_CP_1000        = 1487260807371690114   # 1,000 CP milestone
 ROLE_CP_5000        = 1487260907615551729   # 5,000 CP milestone
 ROLE_CP_10000       = 1487261099685445702   # 10,000 CP milestone
 ROLE_BUDDY_FINDER   = 1487261184565448886   # found a Zappy buddy
+ROLE_SPARK_HOLDER    = 1524584464229863695  # 1-5 Sparks
+ROLE_SPARK_FAMILY    = 1524584686163197952  # 6+ Sparks
+
+# Spark ownership roles in order — only highest is kept
+SPARK_ROLES = [
+    (1, ROLE_SPARK_HOLDER),
+    (6, ROLE_SPARK_FAMILY),
+]
 
 # Streak roles in order — only highest is kept
 STREAK_ROLES = [
@@ -1029,6 +1037,11 @@ async def cmd_spark_register(interaction: discord.Interaction):
         lines.append("No new Sparks to register.")
 
     lines.append("\nYour Sparks will appear in the Clash entry flow next time registration opens.")
+
+    # Update Spark Holder / Spark Family role based on total Sparks now owned
+    total_owned = len(claimed) + len(already)
+    await assign_spark_role(user_id, total_owned)
+
     await interaction.followup.send("\n".join(lines), ephemeral=True)
 
 
@@ -1051,6 +1064,11 @@ async def cmd_my_sparks(interaction: discord.Interaction):
 
     from database import get_sparks_for_wallet
     sparks = await asyncio.to_thread(get_sparks_for_wallet, wallet)
+
+    # Keep Spark Holder / Spark Family role in sync every time this is checked —
+    # this also catches downgrades (Spark sold/transferred away) since /my-sparks
+    # reflects current holdings, not just what was claimed at registration time.
+    await assign_spark_role(user_id, len(sparks) if sparks else 0)
 
     if not sparks:
         await interaction.followup.send(
@@ -2800,6 +2818,34 @@ async def assign_cp_role(discord_user_id: str, cp_total: int):
         print(f"Error assigning CP role: {e}")
 
 
+async def assign_spark_role(discord_user_id: str, spark_count: int):
+    """Assign Spark Holder (1-5) or Spark Family (6+) based on how many Sparks the user owns."""
+    try:
+        guild  = bot.get_guild(GUILD_ID)
+        member = guild.get_member(int(discord_user_id))
+        if not member:
+            return
+
+        earned_role_id = None
+        for threshold, role_id in SPARK_ROLES:
+            if spark_count >= threshold:
+                earned_role_id = role_id
+
+        # Remove all Spark roles first
+        all_spark_role_ids = [r for _, r in SPARK_ROLES]
+        roles_to_remove = [guild.get_role(r) for r in all_spark_role_ids
+                           if guild.get_role(r) in member.roles]
+        if roles_to_remove:
+            await member.remove_roles(*roles_to_remove, reason="Spark holding update")
+
+        if earned_role_id:
+            role = guild.get_role(earned_role_id)
+            if role:
+                await member.add_roles(role, reason=f"{spark_count} Spark(s) held")
+    except Exception as e:
+        print(f"Error assigning Spark role: {e}")
+
+
 async def assign_champion_role(discord_user_id: str):
     """Assign Clash Champion role, stripping it from any current holder first."""
     try:
@@ -3184,16 +3230,16 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             # -- Pre-fight: two embeds, one per fighter, VS in between --
             COMBO_DESCS = {
-                "⚡ Storm Caller":        "Lightning + Electric skin — VLT and SPK surge. High risk, high reward.",
-                "🛡️ Iron Shell":          "Armored traits — absorbs one lethal hit completely. Tough to put down.",
-                "🎲 Lucky Fool":          "Angry eyes + common BG — massive SPK boost. The upset machine.",
-                "👑 Zappy Prime":         "Rare trait combo — all stats elevated. A well-rounded fighter.",
-                "👑 Royal Command":       "Crown head — all stats boosted. Commands the battlefield.",
-                "💀 Chaos Agent":         "Dark traits — unpredictable and dangerous. Thrives in disorder.",
-                "🔥 Firebrand":           "Fire traits — VLT and SPK amplified. Aggression is the strategy.",
-                "🥇 Gold Standard":       "Gold traits — solid across the board. Consistent performer.",
-                "📡 Signal Lost":         "Glitch traits — reality is optional. Stats shift mid-battle.",
-                "💀 Nothing Left to Lose": "Rock bottom stats — but no fear either. Anything goes.",
+                "⚡ Storm Caller":        "Lightning earring + Chroma background — VLT and SPK surge. High risk, high reward.",
+                "🛡️ Iron Shell":          "Armor body + Celeste/Cloudy/X-ray/Pastel skin — absorbs one lethal hit completely. Tough to put down.",
+                "🎲 Lucky Fool":          "Pissed/Dead/Dizzy eyes + Green/Orange/Yellow background — massive SPK boost. The upset machine.",
+                "👑 Zappy Prime":         "Chroma background + Chroma skin — all stats elevated. A well-rounded fighter.",
+                "👑 Royal Command":       "Royal Robe body + Crown or Laurel Crown head — all stats boosted. Commands the battlefield.",
+                "💀 Chaos Agent":         "Naked body + Dead eyes — unpredictable and dangerous. Thrives in disorder.",
+                "🔥 Firebrand":           "Fiery Companion head + Red background or Crimson skin — VLT amplified. Aggression is the strategy.",
+                "🥇 Gold Standard":       "Gold skin + any Suit body — solid across the board. Consistent performer.",
+                "📡 Signal Lost":         "Cloudy skin + Dead eyes — signal scrambled. Frustrating wall to fight through.",
+                "💀 Nothing Left to Lose": "Zombie skin + Naked body — nothing to protect, nothing to lose. Poison hits twice as hard.",
             }
 
             def _build_fighter_embed(fighter, player_name):
@@ -3201,10 +3247,13 @@ async def close_and_resolve(channel: discord.TextChannel):
                     f"⚡ VLT {fighter.VLT} · 🛡️ INS {fighter.INS} · 🎲 SPK {fighter.SPK}"
                 )
                 if fighter.combo:
-                    combo_desc = COMBO_DESCS.get(fighter.combo, "")
+                    # combo can be a single name or stacked ("A + B") if two
+                    # combos fired on the same Zappy — look up each piece.
+                    combo_parts = [c.strip() for c in fighter.combo.split(" + ")]
+                    descs = [COMBO_DESCS[c] for c in combo_parts if c in COMBO_DESCS]
                     val += f"\n✨ **{fighter.combo}**"
-                    if combo_desc:
-                        val += f" — {combo_desc}"
+                    if descs:
+                        val += f" — {' / '.join(descs)}"
                 if fighter.ability and isinstance(fighter.ability, dict):
                     ab = fighter.ability
                     val += f"\n⚡ **{ab.get('name','Ability')}** — {ab.get('desc','')}"
