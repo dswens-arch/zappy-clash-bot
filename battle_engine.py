@@ -54,6 +54,10 @@ class Fighter:
     venom_poisoned:     bool  = field(default=False, init=False)   # Venom Bite poison flag
     sweet_spot_active:  bool  = field(default=False, init=False)   # Pastel Sweet Spot heal-on-crit flag
     pure_signal_ready:  bool  = field(default=False, init=False)   # Clean Zappy no-variance first strike
+    patience_guard:     bool  = field(default=False, init=False)   # Frog Patience: round 1 fired, awaiting round 2 payoff
+    guaranteed_crit_next: bool = field(default=False, init=False)  # Frog Patience: round 2 guaranteed crit
+    pack_hunt_stacks:   int   = field(default=0,     init=False)   # Wolf Pack Hunt: cumulative VLT stack count
+    no_attack_this_round: bool = field(default=False, init=False)  # Frog Patience: fully sits out round 1's attack
 
     # Spark battle state
     spark_triggered:    bool  = field(default=False, init=False)   # Spark ability fired this battle
@@ -108,8 +112,12 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     ins_reduction = defender.INS * 0.3   # INS reduces ~30% of damage
     damage = max(1, raw_damage - ins_reduction)
 
-    # Crit check
-    is_crit = random.random() < attacker.crit_chance
+    # Crit check — Patience guarantees a crit in round 2
+    if getattr(attacker, 'guaranteed_crit_next', False):
+        is_crit = True
+        attacker.guaranteed_crit_next = False
+    else:
+        is_crit = random.random() < attacker.crit_chance
     flavor_note = ""
 
     if is_crit:
@@ -200,7 +208,7 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         fighter.VLT, fighter.INS, fighter.SPK = stats["VLT"], stats["INS"], stats["SPK"]
         return True, f"🌈 **CHROMA SHIFT!** {fighter.display_name} swaps {highest} and {lowest} — stats scrambled!"
 
-    elif name == "Halo":
+    elif name == "Holy Ground":
         # Block opponent crits by reducing their SPK to near 0 this round
         original_spk = opponent.SPK
         opponent.SPK = 5
@@ -286,6 +294,17 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         # Handled in calculate_damage via fighter.pure_signal_ready flag
         fighter.pure_signal_ready = True
         return True, f"📡 **PURE SIGNAL** — {fighter.display_name} locks in. First strike hits at full VLT, no variance."
+
+    elif name == "Patience":
+        # Round 1 only inside the one-shot gate — sets up the turtle/guard.
+        # The round 2 crit guarantee is handled separately below (outside this
+        # gate) since ability_used would otherwise block it from firing twice.
+        if round_num == 1:
+            fighter.shield_active = True
+            fighter.no_attack_this_round = True  # Frog sits fully out — not a weak swing, zero attack
+            fighter.patience_guard = True        # marks round 1 complete, round 2 payoff pending
+            return True, f"🐸 **PATIENCE** — {fighter.display_name} turtles up, watching. Guard raised — round 2 crit is locked in."
+        return False, ""
 
     return False, ""
 
@@ -535,7 +554,10 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # Shield checked first — it should always fully block, no matter what
         # state the attacker is in (skip_next_attack shouldn't let a hit sneak
         # through underneath it).
-        if fighter_b.shield_active:
+        if fighter_a.no_attack_this_round:
+            fighter_a.no_attack_this_round = False
+            dmg_a, crit_a = 0, False
+        elif fighter_b.shield_active:
             fighter_b.shield_active = False
             if fighter_a.skip_next_attack:
                 fighter_a.skip_next_attack = False  # still consumed — the attempt happened, just got blocked
@@ -581,8 +603,24 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     fighter_b.hp = max(0, fighter_b.hp - frenzy_bonus)
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_a.display_name} smells blood — {frenzy_bonus} bonus damage!")
 
+            # Pack Hunt — VLT rises every round the fight continues
+            if fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Pack Hunt" and fighter_b.hp > 0:
+                fighter_a.pack_hunt_stacks += 1
+                gain = 10
+                fighter_a.VLT = min(100, fighter_a.VLT + gain)
+                round_msg.append(f"  🐺 **PACK HUNT** — {fighter_a.display_name}'s VLT rises by {gain}. The longer this goes, the worse it gets.")
+
+            # Patience — round 2 payoff, guaranteed crit (set up in round 1, fires here)
+            if fighter_a.patience_guard and not fighter_a.guaranteed_crit_next:
+                fighter_a.guaranteed_crit_next = True
+                fighter_a.patience_guard = False
+                round_msg.append(f"  🐸 **PATIENCE pays off!** {fighter_a.display_name}'s crit is guaranteed this round.")
+
         # ── Fighter B attacks Fighter A ──
-        if fighter_a.shield_active:
+        if fighter_b.no_attack_this_round:
+            fighter_b.no_attack_this_round = False
+            dmg_b, crit_b = 0, False
+        elif fighter_a.shield_active:
             fighter_a.shield_active = False
             if fighter_b.skip_next_attack:
                 fighter_b.skip_next_attack = False  # still consumed — the attempt happened, just got blocked
@@ -627,6 +665,19 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 if frenzy_bonus > 0:
                     fighter_a.hp = max(0, fighter_a.hp - frenzy_bonus)
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_b.display_name} smells blood — {frenzy_bonus} bonus damage!")
+
+            # Pack Hunt — VLT rises every round the fight continues
+            if fighter_b.ability and isinstance(fighter_b.ability, dict) and fighter_b.ability.get("name") == "Pack Hunt" and fighter_a.hp > 0:
+                fighter_b.pack_hunt_stacks += 1
+                gain = 10
+                fighter_b.VLT = min(100, fighter_b.VLT + gain)
+                round_msg.append(f"  🐺 **PACK HUNT** — {fighter_b.display_name}'s VLT rises by {gain}. The longer this goes, the worse it gets.")
+
+            # Patience — round 2 payoff, guaranteed crit (set up in round 1, fires here)
+            if fighter_b.patience_guard and not fighter_b.guaranteed_crit_next:
+                fighter_b.guaranteed_crit_next = True
+                fighter_b.patience_guard = False
+                round_msg.append(f"  🐸 **PATIENCE pays off!** {fighter_b.display_name}'s crit is guaranteed this round.")
 
         # Nine Lives check
         for f in [fighter_a, fighter_b]:
