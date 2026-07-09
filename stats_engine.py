@@ -50,7 +50,6 @@ BODY_INS_BONUS = {
     "Royal Robe":         25,  # Ultra rare
     # Mid
     "Hoodie":             15,
-    "Polo Shirt":         14,
     "Sweater":            14,
     "Turtleneck Sweater": 14,
     "Oversize Sweater":   14,
@@ -80,7 +79,6 @@ BODY_INS_BONUS = {
     "Lifesaver":          15,
     # Low
     "Naked":               5,
-    "Tracksuit Top":      13,
     "Fanny Pack":         10,
 }
 
@@ -339,7 +337,7 @@ HERO_STATS = {
     "Cat":        {"VLT": 75, "INS": 80, "SPK": 95, "ability": {"name": "Nine Lives", "desc": "If HP hits 0, survives at 1 HP once. Only fires once per battle."}},
     "Rabbit":     {"VLT": 80, "INS": 70, "SPK": 90, "ability": {"name": "Lucky Foot", "desc": "Crit multiplier becomes 3x instead of 2x this battle."}},
     "Wolf":       {"VLT": 92, "INS": 85, "SPK": 70, "ability": {"name": "Pack Hunt",  "desc": "VLT increases by 10 each round. The longer the fight, the worse it gets for you.",  "trigger_round": "random"}},
-    "Frog":       {"VLT": 75, "INS": 68, "SPK": 94, "ability": {"name": "Patience",   "desc": "Sits out round 1 entirely, then crits are guaranteed in round 2.", "trigger_round": 1}},
+    "Frog":       {"VLT": 75, "INS": 68, "SPK": 94, "ability": {"name": "Patience",   "desc": "Round 1: turtles up, blocking the opponent's attack completely. Round 2: guaranteed crit.", "trigger_round": 1}},
     "Eagle":      {"VLT": 82, "INS": 58, "SPK": 100, "ability": {"name": "Talon Strike", "desc": "50% chance at the start of round 1 to deal 80% of opponent's current HP as bonus damage, on top of Eagle's normal attack.", "trigger_round": 1}},
     "Buck":       {"VLT": 88, "INS": 82, "SPK": 65, "ability": {"name": "Antler Clash", "desc": "Reduces opponent's VLT by 15 starting round 2. The longer the fight, the less damage they can deal.", "trigger_round": 2}},
     "Snake":      {"VLT": 78, "INS": 72, "SPK": 80, "ability": {"name": "Venom Bite", "desc": "Poisons the opponent starting round 1 — they lose 25 HP at the start of every remaining round, regardless of INS.", "trigger_round": 1}},
@@ -470,6 +468,21 @@ def check_combos(traits: dict, vlt: float, ins: float, spk: float) -> dict:
         ins += 10
         combo_name = "🥇 Gold Standard"
 
+    # Signal Lost: Cloudy skin + Dead eyes → scramble wall
+    elif skin == "Cloudy" and eyes == "Dead":
+        ins += 15
+        combo_name = "📡 Signal Lost"
+
+    # Nothing Left to Lose: Zombie skin + Naked body → Rot Touch hits twice as hard
+    # Stacks with Chaos Agent — both can fire on the same Zappy since they reward
+    # different things (Naked body vs. Zombie skin specifically)
+    if skin == "Zombie" and body == "Naked":
+        spk = min(100, spk + 10)
+        if combo_name:
+            combo_name = f"{combo_name} + 💀 Nothing Left to Lose"
+        else:
+            combo_name = "💀 Nothing Left to Lose"
+
     return {"VLT": max(10, min(100, vlt)), "INS": max(10, min(100, ins)),
             "SPK": max(10, min(100, spk)), "combo_name": combo_name}
 
@@ -556,6 +569,74 @@ def get_ability(traits: dict) -> dict | None:
             "name": "Zappy Spirit",
             "desc": "All stats get +5 flat bonus. Wearing the brand means something.",
             "trigger_round": "passive",
+        }
+
+    # ── New skin abilities ──────────────────────────────────────────────────
+
+    if skin == "Zombie":
+        return {
+            "name": "Rot Touch",
+            "desc": "Applies a poison that drains 5 HP from the opponent at the end of rounds 2 and 3. Slow and relentless.",
+            "trigger_round": 1,
+        }
+
+    if skin == "Cloudy":
+        return {
+            "name": "Static Veil",
+            "desc": "40% chance each round to scramble opponent's signal — reduces their VLT by 20% for that round only.",
+            "trigger_round": "random",
+        }
+
+    if skin == "Infected":
+        return {
+            "name": "Viral Spread",
+            "desc": "Transfers 15 SPK from the opponent to self in round 2. The mutation spreads.",
+            "trigger_round": 2,
+        }
+
+    if skin == "Zebra":
+        return {
+            "name": "Pattern Break",
+            "desc": "Pre-battle: opponent's crit multiplier is randomized (1.5x–3.0x) instead of a flat 2x. You know your pattern; they don't know theirs.",
+            "trigger_round": "passive",
+        }
+
+    if skin == "Tattooed":
+        return {
+            "name": "Battle Ink",
+            "desc": "Gains +12 VLT from round 2 onward. Every scar is a lesson.",
+            "trigger_round": 2,
+        }
+
+    if skin == "Vitiligo":
+        return {
+            "name": "Split Focus",
+            "desc": "Pre-battle: reads opponent's two lowest stats and adds half the gap to your own weakest stat. Finds balance where others are exposed.",
+            "trigger_round": "passive",
+        }
+
+    if skin == "Pastel":
+        return {
+            "name": "Sweet Spot",
+            "desc": "When you land a crit, heal 5 HP in addition to dealing crit damage. Soft but dangerous.",
+            "trigger_round": "random",
+        }
+
+    if skin == "Celeste":
+        return {
+            "name": "Ice Frame",
+            "desc": "Reduces opponent's SPK by 15 in round 1 only. Freezes their crit window before they can open it.",
+            "trigger_round": 1,
+        }
+
+    # ── Clean Zappy (minimal traits) ────────────────────────────────────────
+    NON_TRAITS = {"None", "Standard", "", "Naked"}
+    trait_count = sum(1 for v in traits.values() if v and v not in NON_TRAITS)
+    if trait_count <= 3:
+        return {
+            "name": "Pure Signal",
+            "desc": "Minimal traits, maximum focus. First attack has no roll variance — hits at exactly full VLT, no luck involved.",
+            "trigger_round": 1,
         }
 
     return None
