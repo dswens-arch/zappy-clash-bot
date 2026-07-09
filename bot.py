@@ -2821,8 +2821,21 @@ async def assign_cp_role(discord_user_id: str, cp_total: int):
 async def assign_spark_role(discord_user_id: str, spark_count: int):
     """Assign Spark Holder (1-5) or Spark Family (6+) based on how many Sparks the user owns."""
     try:
-        guild  = bot.get_guild(GUILD_ID)
+        guild = bot.get_guild(GUILD_ID)
+        if not guild:
+            # Cache miss (e.g. shortly after reconnect) — fall back to an API fetch
+            try:
+                guild = await bot.fetch_guild(GUILD_ID)
+            except Exception as fetch_err:
+                print(f"Error assigning Spark role: guild {GUILD_ID} unavailable ({fetch_err})")
+                return
+
         member = guild.get_member(int(discord_user_id))
+        if not member:
+            try:
+                member = await guild.fetch_member(int(discord_user_id))
+            except Exception:
+                return
         if not member:
             return
 
