@@ -735,18 +735,28 @@ class SparkJobsCog(commands.Cog):
         for r in wins:
             await self._post_win_embed(r)
 
-        # Misses stay a quiet, compact batched list — no ping, no fanfare,
-        # this is most of what happens on any given pass.
+        # Misses stay quiet — no ping, no fanfare, this is most of what
+        # happens on any given pass. But grouped by owner into the same
+        # colored-card treatment clock-ins get, instead of one giant plain
+        # list mixing everyone's Sparks together — that's what actually made
+        # this hard to read, more than any single line's lack of color.
         if misses:
             no_ping = discord.AllowedMentions(users=False)
-            lines = []
+            by_owner: dict[str | None, list] = {}
             for r in misses:
-                job_emoji = JOB_EMOJIS.get(r["job"], "🔧")
-                owner     = f"<@{r['discord_user_id']}> " if r.get("discord_user_id") else ""
-                lines.append(f"💤 {job_emoji} {owner}{r['flavor_line']}")
+                by_owner.setdefault(r.get("discord_user_id"), []).append(r)
 
-            for chunk in _chunk_lines(lines):
-                await channel.send(chunk, allowed_mentions=no_ping)
+            for owner_id, rows in by_owner.items():
+                lines = []
+                for r in rows:
+                    job_emoji = JOB_EMOJIS.get(r["job"], "🔧")
+                    lines.append(f"💤 {job_emoji} {r['flavor_line']}")
+
+                color = _color_for_user(owner_id)
+                for chunk in _chunk_lines(lines):
+                    embed = discord.Embed(description=chunk, color=color)
+                    content = f"<@{owner_id}>" if owner_id else None
+                    await channel.send(content=content, embed=embed, allowed_mentions=no_ping)
 
     async def _post_win_embed(self, r: dict):
         channel = self._jobs_channel()
