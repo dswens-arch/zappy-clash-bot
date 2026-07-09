@@ -565,7 +565,7 @@ class SparkJobsCog(commands.Cog):
         # (bot.py imports SparkJobsCog from this file).
         from bot import assign_spark_role
         total_held = len(eligible) + len(skipped)
-        await assign_spark_role(user_id, total_held)
+        await assign_spark_role(interaction, total_held)
 
         channel = self._jobs_channel()
         if channel:
