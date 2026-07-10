@@ -3309,6 +3309,44 @@ async def close_and_resolve(channel: discord.TextChannel):
                         inline=False,
                     )
 
+            # Split Focus passive (Vitiligo) — reads opponent's two lowest stats,
+            # adds half the gap to fighter's own weakest stat. Shown here since
+            # resolve_battle() hasn't run yet — this embed uses pre-bonus stats.
+            for fighter, opp, embed in [(fighter_a, fighter_b, embed_a), (fighter_b, fighter_a, embed_b)]:
+                ab = fighter.ability
+                if ab and isinstance(ab, dict) and ab.get("name") == "Split Focus":
+                    opp_stats = {"VLT": opp.VLT, "INS": opp.INS, "SPK": opp.SPK}
+                    opp_sorted = sorted(opp_stats, key=opp_stats.get)
+                    low1, low2 = opp_sorted[0], opp_sorted[1]
+                    gap = abs(opp_stats[low1] - opp_stats[low2])
+                    bonus = max(1, gap // 2)
+                    f_stats = {"VLT": fighter.VLT, "INS": fighter.INS, "SPK": fighter.SPK}
+                    weakest_self = min(f_stats, key=f_stats.get)
+                    embed.add_field(
+                        name="🌸 Split Focus",
+                        value=(
+                            f"Reads {opp.display_name}'s two lowest stats "
+                            f"(**{low1} {opp_stats[low1]}**, **{low2} {opp_stats[low2]}**) — "
+                            f"+{bonus} {weakest_self} before round 1."
+                        ),
+                        inline=False,
+                    )
+
+            # Pattern Break passive (Zebra) — randomizes the opponent's crit
+            # multiplier before battle starts. Actual roll happens in
+            # resolve_battle(), so this just flags that it's coming.
+            for fighter, opp, embed in [(fighter_a, fighter_b, embed_a), (fighter_b, fighter_a, embed_b)]:
+                ab = fighter.ability
+                if ab and isinstance(ab, dict) and ab.get("name") == "Pattern Break":
+                    embed.add_field(
+                        name="🦓 Pattern Break",
+                        value=(
+                            f"{opp.display_name}'s crit multiplier will be randomized "
+                            f"(1.5x–3.0x) before round 1. They won't know which."
+                        ),
+                        inline=False,
+                    )
+
             SPARK_T1_CIDS_PRE = {
                 "zolt":   "bafkreign5ydt5zj4mltsays47lsp7d6stdzje756zvzehzx7tryqxmqv6q",
                 "scorch": "bafkreihpdkwbg6gvn4zutkohrmig67zalqtprg4wln624zkukw5nlo4f3q",
