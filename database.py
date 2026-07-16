@@ -794,3 +794,411 @@ def award_spark_job_xp(asset_id: int) -> dict:
         "tier_after":  new_tier,
         "upgraded":    new_tier != old_tier,
     }
+
+
+# ─────────────────────────────────────────────
+# SPARK OFFICE — PROMOTION SYSTEM
+# (append this whole block to the end of database.py — after
+#  award_spark_job_xp, which it reuses for shift XP)
+# ─────────────────────────────────────────────
+# spark_office_log is the source of truth for Office shifts (same principle
+# as spark_job_log — reconstructable, never silently skipped). Promotion
+# is deliberately luck-gated, not effort-gated: eligibility and demotion
+# both key off HIT outcomes, not raw shift volume, so grinding alone can't
+# force your way in or keep a seat warm.
+
+OFFICE_MIN_SHIFTS          = 20   # floor — need this many completed base shifts before checking hits at all
+OFFICE_WINDOW_SHIFTS       = 40   # trailing window checked for the hit requirement
+OFFICE_HITS_NEEDED         = 3    # hits required inside that window
+OFFICE_SEAT_CAP            = 20
+OFFICE_SPONSOR_ZAPPY_COUNT = 5    # one-time check at promotion, not locked afterward
+
+OFFICE_SHIFT_DURATION_HOURS   = 8    # same shift length as base Jobs
+OFFICE_DAILY_COOLDOWN_HOURS   = 24   # only 1 shift/day, unlike base (no cooldown)
+OFFICE_NO_SHOW_GRACE_HOURS    = 4    # window after next_shift_due_at before it's a no-show
+OFFICE_DEMOTION_MISS_DAYS     = 7    # consecutive misses (~days, since 1 shift/day) before demotion
+OFFICE_MIN_SHIFTS_FOR_DUEL    = 5    # a seat must have this many Office shifts before it's duel-eligible
+OFFICE_DUEL_SUBMIT_HOURS      = 1    # window to submit picks before the bot auto-rolls for you
+
+# Office odds/payouts — a genuine bump over base Jobs (base: ALGO_HIT_CHANCE /
+# NFT_HIT_CHANCE / PAYOUT_RANGE in spark_jobs.py), not just cushier flavor text.
+OFFICE_ALGO_HIT_CHANCE = {1: 0.070, 2: 0.080, 3: 0.090}
+OFFICE_NFT_HIT_CHANCE  = {1: 0.0060, 2: 0.0070, 3: 0.0080}
+OFFICE_PAYOUT_RANGE    = {1: (0.2, 0.6), 2: (0.35, 1.0), 3: (0.5, 1.5)}
+OFFICE_MAX_SHIFT_PAYOUT = 1.5
+
+
+def get_office_seat_count() -> int:
+    db = get_supabase()
+    result = db.table("spark_office_seats").select("id", count="exact").eq("status", "active").execute()
+    return result.count or 0
+
+
+def get_office_seats() -> list:
+    """All active Office seats, lowest hit-rate first (for duel targeting display)."""
+    db = get_supabase()
+    result = db.table("spark_office_seats").select("*").eq("status", "active").execute()
+    seats = result.data or []
+    seats.sort(key=lambda s: (s["hits"] / s["shifts_completed"]) if s["shifts_completed"] else 0.0)
+    return seats
+
+
+def get_office_seat(spark_asa: int) -> dict | None:
+    db = get_supabase()
+    result = db.table("spark_office_seats").select("*").eq("spark_asa", spark_asa).execute()
+    return result.data[0] if result.data else None
+
+
+def get_lowest_hitrate_seat() -> dict | None:
+    """
+    Duel target: lowest lifetime hit rate among seats with enough Office
+    shifts to be judged fairly (OFFICE_MIN_SHIFTS_FOR_DUEL floor). Excludes
+    any seat already mid-duel.
+    """
+    db = get_supabase()
+    result = (
+        db.table("spark_office_seats")
+        .select("*")
+        .eq("status", "active")
+        .gte("shifts_completed", OFFICE_MIN_SHIFTS_FOR_DUEL)
+        .execute()
+    )
+    seats = result.data or []
+    if not seats:
+        return None
+    seats.sort(key=lambda s: s["hits"] / s["shifts_completed"])
+    return seats[0]
+
+
+def check_office_eligibility(asset_id: int) -> dict:
+    """
+    Returns {"eligible": bool, "reason": str, "shifts_seen": int, "hits_seen": int}.
+    Pulls the most recent OFFICE_WINDOW_SHIFTS completed base-Jobs rows for
+    this Spark. Since rows come back newest-first and capped at the window
+    size, a returned count below OFFICE_MIN_SHIFTS on its own means the
+    floor isn't met yet — no separate count query needed.
+    """
+    db = get_supabase()
+    rows = (
+        db.table("spark_job_log")
+        .select("outcome")
+        .eq("spark_asa", asset_id)
+        .eq("status", "complete")
+        .order("clock_in_at", desc=True)
+        .limit(OFFICE_WINDOW_SHIFTS)
+        .execute()
+        .data or []
+    )
+    shifts_seen = len(rows)
+    hits_seen   = sum(1 for r in rows if r.get("outcome") in ("algo", "nft"))
+
+    if shifts_seen < OFFICE_MIN_SHIFTS:
+        return {"eligible": False, "reason": "not_enough_shifts", "shifts_seen": shifts_seen, "hits_seen": hits_seen}
+    if hits_seen < OFFICE_HITS_NEEDED:
+        return {"eligible": False, "reason": "not_lucky_enough", "shifts_seen": shifts_seen, "hits_seen": hits_seen}
+    return {"eligible": True, "reason": "eligible", "shifts_seen": shifts_seen, "hits_seen": hits_seen}
+
+
+def seat_spark(spark: dict) -> dict:
+    """Promote a Spark into an open Office seat. Caller must have already
+    checked eligibility, sponsorship, and seat availability."""
+    db = get_supabase()
+    now = datetime.now(timezone.utc)
+    data = {
+        "spark_asa":         spark["asset_id"],
+        "wallet":            spark["wallet"],
+        "discord_user_id":   spark.get("discord_user_id"),
+        "spark_name":        spark.get("name"),
+        "spark_type":        spark["spark_type"],
+        "spark_tier":        spark["tier"],
+        "seated_at":         now.isoformat(),
+        "next_shift_due_at": now.isoformat(),  # eligible to clock in immediately
+        "status":            "active",
+    }
+    result = db.table("spark_office_seats").upsert(data, on_conflict="spark_asa").execute()
+    return result.data[0] if result.data else {}
+
+
+def vacate_seat(spark_asa: int) -> None:
+    """Remove a Spark from its Office seat (demotion or duel loss). The
+    Spark itself is untouched — it just falls back to base Jobs eligibility."""
+    db = get_supabase()
+    db.table("spark_office_seats").delete().eq("spark_asa", spark_asa).execute()
+
+
+def get_eligible_sparks_for_office(wallet: str) -> dict:
+    """
+    Mirrors get_eligible_sparks_for_job's shape. Returns
+    {"eligible": [...holdings dicts...], "skipped": {asset_id: reason}}.
+    reason: "already_seated" | "not_enough_shifts" | "not_lucky_enough"
+    """
+    db = get_supabase()
+    holdings = (
+        db.table("spark_holdings")
+        .select("asset_id, name, spark_type, tier, wallet, discord_user_id")
+        .eq("wallet", wallet)
+        .execute()
+        .data or []
+    )
+
+    seated_asas = {
+        s["spark_asa"] for s in
+        db.table("spark_office_seats").select("spark_asa").eq("wallet", wallet).execute().data or []
+    }
+
+    eligible, skipped = [], {}
+    for h in holdings:
+        asa = h["asset_id"]
+        if asa in seated_asas:
+            skipped[asa] = "already_seated"
+            continue
+        check = check_office_eligibility(asa)
+        if not check["eligible"]:
+            skipped[asa] = check["reason"]
+            continue
+        eligible.append(h)
+
+    return {"eligible": eligible, "skipped": skipped}
+
+
+# ── Office shift lifecycle — mirrors create_spark_job / get_due_jobs /
+#    complete_job exactly, just against spark_office_log ──────────────────
+
+def create_office_shift(seat: dict, job: str, flavor_line: str) -> dict:
+    """Clock an Office Spark in. Writes a 'working' row, resolve in 8h."""
+    db = get_supabase()
+    now = datetime.now(timezone.utc)
+    data = {
+        "spark_asa":       seat["spark_asa"],
+        "wallet":          seat["wallet"],
+        "discord_user_id": seat.get("discord_user_id"),
+        "spark_type":      seat["spark_type"],
+        "spark_tier":      seat["spark_tier"],
+        "spark_name":      seat.get("spark_name"),
+        "job":             job,
+        "status":          "working",
+        "clock_in_at":     now.isoformat(),
+        "resolve_at":      (now + timedelta(hours=OFFICE_SHIFT_DURATION_HOURS)).isoformat(),
+        "flavor_line":     flavor_line,
+    }
+    result = db.table("spark_office_log").insert(data).execute()
+
+    # Advance the seat's daily window immediately on clock-in, same instant
+    # a base-Jobs Spark becomes "already_working" — next_shift_due_at is what
+    # the no-show check reads, not resolve_at.
+    db.table("spark_office_seats").update({
+        "last_shift_at":     now.isoformat(),
+        "next_shift_due_at": (now + timedelta(hours=OFFICE_DAILY_COOLDOWN_HOURS)).isoformat(),
+    }).eq("spark_asa", seat["spark_asa"]).execute()
+
+    return result.data[0] if result.data else {}
+
+
+def get_office_seats_for_wallet(wallet: str) -> list:
+    db = get_supabase()
+    result = db.table("spark_office_seats").select("*").eq("wallet", wallet).execute()
+    return result.data or []
+
+
+def get_working_office_shift(spark_asa: int) -> dict | None:
+    """The current 'working' spark_office_log row for a Spark, if any.
+    Used both by the bulk clock-in skip-check and by the admin
+    force-resolve test command."""
+    db = get_supabase()
+    result = (
+        db.table("spark_office_log")
+        .select("*")
+        .eq("spark_asa", spark_asa)
+        .eq("status", "working")
+        .order("clock_in_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    return result.data[0] if result.data else None
+
+
+def get_due_office_jobs() -> list:
+    db = get_supabase()
+    now_iso = datetime.now(timezone.utc).isoformat()
+    result = (
+        db.table("spark_office_log")
+        .select("*")
+        .eq("status", "working")
+        .lte("resolve_at", now_iso)
+        .execute()
+    )
+    return result.data or []
+
+
+def complete_office_job(job_id: int, spark_asa: int, outcome: str, amount: float | None,
+                         nft_asa: int | None, flavor_line: str) -> None:
+    """Resolve a due Office shift AND update the seat's running hit-rate /
+    consecutive-miss counters in the same call — those counters are what
+    duel targeting and cold-streak demotion both read."""
+    db = get_supabase()
+    db.table("spark_office_log").update({
+        "status":      "complete",
+        "outcome":     outcome,
+        "amount":      amount,
+        "nft_asa":     nft_asa,
+        "flavor_line": flavor_line,
+        "resolved_at": datetime.now(timezone.utc).isoformat(),
+    }).eq("id", job_id).execute()
+
+    seat = get_office_seat(spark_asa)
+    if not seat:
+        return  # seat was vacated between roll and resolve — nothing to update
+
+    hit = outcome in ("algo", "nft")
+    update = {"shifts_completed": seat["shifts_completed"] + 1}
+    if hit:
+        update["hits"] = seat["hits"] + 1
+        update["consecutive_misses"] = 0
+    else:
+        update["consecutive_misses"] = seat["consecutive_misses"] + 1
+    db.table("spark_office_seats").update(update).eq("spark_asa", spark_asa).execute()
+
+
+def get_seats_for_cold_streak_demotion() -> list:
+    """Active seats that just crossed OFFICE_DEMOTION_MISS_DAYS consecutive misses."""
+    db = get_supabase()
+    result = (
+        db.table("spark_office_seats")
+        .select("*")
+        .eq("status", "active")
+        .gte("consecutive_misses", OFFICE_DEMOTION_MISS_DAYS)
+        .execute()
+    )
+    return result.data or []
+
+
+def get_seats_for_noshow_demotion() -> list:
+    """
+    Active seats past their grace window with no 'working' shift open —
+    i.e. they never clocked in for the current daily window at all.
+    """
+    db = get_supabase()
+    cutoff_iso = (datetime.now(timezone.utc) - timedelta(hours=OFFICE_NO_SHOW_GRACE_HOURS)).isoformat()
+    seats = (
+        db.table("spark_office_seats")
+        .select("*")
+        .eq("status", "active")
+        .lt("next_shift_due_at", cutoff_iso)
+        .execute()
+        .data or []
+    )
+    no_show = []
+    for seat in seats:
+        working = (
+            db.table("spark_office_log")
+            .select("id")
+            .eq("spark_asa", seat["spark_asa"])
+            .eq("status", "working")
+            .execute()
+            .data
+        )
+        if not working:
+            no_show.append(seat)
+    return no_show
+
+
+def get_unpaid_office_algo_jobs() -> list:
+    db = get_supabase()
+    result = (
+        db.table("spark_office_log")
+        .select("*")
+        .eq("status", "complete")
+        .eq("paid", False)
+        .gt("amount", 0)
+        .execute()
+    )
+    return result.data or []
+
+
+def mark_office_jobs_paid(job_ids: list) -> None:
+    if not job_ids:
+        return
+    db = get_supabase()
+    db.table("spark_office_log").update({"paid": True}).in_("id", job_ids).execute()
+
+
+def create_office_payout(wallet: str, total_algo: float, spark_count: int, office_log_ids: list, tx_id: str | None) -> dict:
+    db = get_supabase()
+    data = {
+        "wallet":         wallet,
+        "total_algo":     total_algo,
+        "spark_count":    spark_count,
+        "office_log_ids": office_log_ids,
+        "tx_id":          tx_id,
+    }
+    result = db.table("spark_office_payouts").insert(data).execute()
+    return result.data[0] if result.data else {}
+
+
+# ── Duels — async best-of-7 RPS for seat takeover ─────────────────────────
+
+def create_office_duel(challenger: dict, defender_seat: dict) -> dict:
+    db = get_supabase()
+    now = datetime.now(timezone.utc)
+    data = {
+        "challenger_asa":        challenger["asset_id"],
+        "challenger_wallet":     challenger["wallet"],
+        "challenger_discord_id": challenger.get("discord_user_id"),
+        "challenger_name":       challenger.get("name"),
+
+        "defender_asa":          defender_seat["spark_asa"],
+        "defender_wallet":       defender_seat["wallet"],
+        "defender_discord_id":   defender_seat.get("discord_user_id"),
+        "defender_name":         defender_seat.get("spark_name"),
+
+        "status":     "pending",
+        "created_at": now.isoformat(),
+        "expires_at": (now + timedelta(hours=OFFICE_DUEL_SUBMIT_HOURS)).isoformat(),
+    }
+    result = db.table("spark_office_duels").insert(data).execute()
+
+    db.table("spark_office_seats").update({"status": "in_duel"}).eq("spark_asa", defender_seat["spark_asa"]).execute()
+    return result.data[0] if result.data else {}
+
+
+def get_pending_duel_for_spark(asset_id: int) -> dict | None:
+    """Find a pending duel where this Spark is either side — used by the
+    pick-submission command to figure out which duel/side the caller is in."""
+    db = get_supabase()
+    for col in ("challenger_asa", "defender_asa"):
+        result = db.table("spark_office_duels").select("*").eq(col, asset_id).eq("status", "pending").execute()
+        if result.data:
+            return result.data[0]
+    return None
+
+
+def submit_duel_picks(duel_id: int, side: str, picks: list) -> None:
+    """side is 'challenger' or 'defender'."""
+    db = get_supabase()
+    db.table("spark_office_duels").update({
+        f"{side}_picks":         picks,
+        f"{side}_submitted_at":  datetime.now(timezone.utc).isoformat(),
+    }).eq("id", duel_id).execute()
+
+
+def get_expired_pending_duels() -> list:
+    db = get_supabase()
+    now_iso = datetime.now(timezone.utc).isoformat()
+    result = (
+        db.table("spark_office_duels")
+        .select("*")
+        .eq("status", "pending")
+        .lt("expires_at", now_iso)
+        .execute()
+    )
+    return result.data or []
+
+
+def resolve_office_duel(duel_id: int, winner_asa: int, rounds: list) -> None:
+    db = get_supabase()
+    db.table("spark_office_duels").update({
+        "status":      "resolved",
+        "winner_asa":  winner_asa,
+        "rounds":      rounds,
+        "resolved_at": datetime.now(timezone.utc).isoformat(),
+    }).eq("id", duel_id).execute()
