@@ -74,6 +74,7 @@ from database import (
     OFFICE_MAX_SHIFT_PAYOUT,
     OFFICE_MIN_SHIFTS_FOR_DUEL,
     OFFICE_DUEL_SUBMIT_HOURS,
+    OFFICE_NO_SHOW_GRACE_HOURS,
 )
 
 # Reuse the existing flavor-line banks and small helpers instead of
