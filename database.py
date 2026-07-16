@@ -608,11 +608,13 @@ JOB_DURATION_HOURS                 = 8
 def get_eligible_sparks_for_job(wallet: str) -> dict:
     """
     Returns {"eligible": [...], "skipped": {asset_id: reason}} for a wallet.
-    reason is one of: "wallet_transfer_cooldown", "already_working"
+    reason is one of: "wallet_transfer_cooldown", "already_working", "office_seat"
 
     No daily cooldown — a Spark is eligible again the moment its current
     shift resolves. The 8-hour shift duration itself is the natural pacing;
-    the only other gate is the wallet-transfer anti-farming check.
+    the other gates are the wallet-transfer anti-farming check and Office
+    seat exclusivity — a promoted Spark works Office shifts only, never
+    both at once.
     """
     db = get_supabase()
     cutoff_iso = (datetime.now(timezone.utc) - timedelta(hours=JOB_WALLET_TRANSFER_COOLDOWN_HOURS)).isoformat()
@@ -625,9 +627,18 @@ def get_eligible_sparks_for_job(wallet: str) -> dict:
         .data or []
     )
 
+    office_seated = {
+        s["spark_asa"] for s in
+        db.table("spark_office_seats").select("spark_asa").eq("wallet", wallet).execute().data or []
+    }
+
     eligible, skipped = [], {}
     for h in holdings:
         asa = h["asset_id"]
+
+        if asa in office_seated:
+            skipped[asa] = "office_seat"
+            continue
 
         if h.get("purchased_at") and h["purchased_at"] > cutoff_iso:
             skipped[asa] = "wallet_transfer_cooldown"
