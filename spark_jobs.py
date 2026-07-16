@@ -558,6 +558,8 @@ class SparkJobsCog(commands.Cog):
             reasons = set(skipped.values())
             if reasons == {"already_working"}:
                 msg = "All your Sparks are already on shift — check back later for payday."
+            elif reasons == {"office_seat"}:
+                msg = "All your Sparks are working the Office — check that channel instead."
             else:
                 msg = "None of your Sparks are eligible to work right now."
             await interaction.followup.send(f"⏳ {msg}", ephemeral=True)
@@ -593,6 +595,7 @@ class SparkJobsCog(commands.Cog):
                 readable = {
                     "wallet_transfer_cooldown": "recently transferred, on cooldown",
                     "already_working": "already on shift",
+                    "office_seat": "promoted to the Office",
                 }.get(reason, reason)
                 summary_lines.append(f"  · ASA `{asa}` — {readable}")
 
