@@ -192,44 +192,10 @@ class DuelPickView(discord.ui.View):
         await self._handle_pick(interaction, "scissors")
 
 
-class OfficeClockInView(discord.ui.View):
-    """
-    Persistent (timeout=None, fixed custom_id) — survives bot restarts once
-    registered via bot.add_view() in SparkOfficeCog.cog_load(). One button,
-    no picker: clicking it clocks in every due Office seat you hold, same
-    as running /office-shift with no arguments.
-    """
-
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="Clock In", emoji="🕐", style=discord.ButtonStyle.primary, custom_id="office_clock_in_button")
-    async def clock_in(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        user_id = str(interaction.user.id)
-        wallet  = await asyncio.to_thread(get_wallet, user_id)
-        if not wallet:
-            await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
-            return
-
-        cog = interaction.client.get_cog("SparkOfficeCog")
-        if not cog:
-            await interaction.followup.send("❌ Office system isn't loaded right now — try again shortly.", ephemeral=True)
-            return
-
-        result = await cog._clock_in_all_due(user_id, wallet)
-        await interaction.followup.send(cog._format_clock_in_result(result), ephemeral=True)
-
-
 class SparkOfficeCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.resolver.start()
-
-    async def cog_load(self):
-        # Register the button so it keeps working across bot restarts —
-        # same pattern grand_prix_cog uses for JoinAlgoView/JoinZapView.
-        self.bot.add_view(OfficeClockInView())
 
     def cog_unload(self):
         self.resolver.cancel()
@@ -323,8 +289,7 @@ class SparkOfficeCog(commands.Cog):
     # ──────────────────────────────────────────
     # /office-shift — clocks in EVERY due, active Office seat you hold in
     # one shot. No asset_id needed — same "no picker, send everything"
-    # philosophy as /spark-job. The persistent button in the promotion
-    # channel (OfficeClockInView, below) calls this exact same helper.
+    # philosophy as /spark-job.
     # ──────────────────────────────────────────
     async def _clock_in_all_due(self, user_id: str, wallet: str) -> dict:
         """Returns {"clocked": [lines...], "skipped": {asa: reason}, "count": n, "no_seats": bool}."""
@@ -419,24 +384,8 @@ class SparkOfficeCog(commands.Cog):
         await interaction.response.send_message(view._progress_text(), view=view, ephemeral=True)
 
     # ──────────────────────────────────────────
-    # Admin — setup & testing
+    # Admin — troubleshooting
     # ──────────────────────────────────────────
-    @app_commands.command(name="office-panel", description="[Admin] Post the Office clock-in button to the promotion channel")
-    async def office_panel(self, interaction: discord.Interaction):
-        if not await admin_check(interaction):
-            return
-        channel = self._promotion_channel()
-        if not channel:
-            await interaction.response.send_message("❌ PROMOTION_CHANNEL_ID isn't set.", ephemeral=True)
-            return
-        embed = discord.Embed(
-            title="🏢 The Office",
-            description="Hold an Office seat? Clock in for today's shift below — no ASA typing required.",
-            color=0x5865F2,
-        )
-        await channel.send(embed=embed, view=OfficeClockInView())
-        await interaction.response.send_message("✅ Panel posted.", ephemeral=True)
-
     @app_commands.command(name="office-force-resolve", description="[Admin] Force-resolve a working Office shift with a chosen outcome")
     @app_commands.describe(
         asset_id="Spark ASA currently on an Office shift",
