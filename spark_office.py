@@ -28,7 +28,7 @@ ALGOD_TOKEN, ALGOD_URL, INDEXER_URL, HOLDER_CHANNEL_ID for tier-ups).
 import os
 import random
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timezone, time as dtime
 
 import discord
 from discord.ext import commands, tasks
@@ -62,6 +62,7 @@ from database import (
     resolve_office_duel,
     get_office_seats_for_wallet,
     get_working_office_shift,
+    get_all_office_candidates,
     OFFICE_SEAT_CAP,
     OFFICE_SPONSOR_ZAPPY_COUNT,
     OFFICE_ALGO_HIT_CHANCE,
@@ -86,6 +87,10 @@ PROMOTION_CHANNEL_ID = int(os.environ["PROMOTION_CHANNEL_ID"]) if os.environ.get
 HOLDER_CHANNEL_ID    = int(os.environ.get("HOLDER_CHANNEL_ID", "1314066280592052244"))
 
 RESOLVER_INTERVAL_MINUTES = 5
+
+# Twice daily, 12h apart — spaced away from the Clash bracket times (2PM/12AM
+# UTC) so a heavy Clash resolution and a promotion sweep don't land at once.
+PROMOTION_SWEEP_TIMES = [dtime(hour=6, minute=0, tzinfo=timezone.utc), dtime(hour=18, minute=0, tzinfo=timezone.utc)]
 
 RPS_CHOICES = ["rock", "paper", "scissors"]
 RPS_BEATS   = {"rock": "scissors", "scissors": "paper", "paper": "rock"}
@@ -196,9 +201,11 @@ class SparkOfficeCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.resolver.start()
+        self.promotion_sweep.start()
 
     def cog_unload(self):
         self.resolver.cancel()
+        self.promotion_sweep.cancel()
 
     def _promotion_channel(self) -> discord.TextChannel | None:
         if not PROMOTION_CHANNEL_ID:
@@ -459,6 +466,68 @@ class SparkOfficeCog(commands.Cog):
     @resolver.before_loop
     async def before_resolver(self):
         await self.bot.wait_until_ready()
+
+    # ──────────────────────────────────────────
+    # Auto-promotion sweep — twice daily. Checks every Spark, luckiest
+    # first: open seats get auto-filled, and once seats are full, an
+    # eligible candidate auto-spawns a duel against the lowest hit-rate
+    # seat. Neither side chooses the moment, so both get equal footing —
+    # this mirrors /office-promote exactly, just run on everyone at once
+    # instead of one Spark at a time on request.
+    # ──────────────────────────────────────────
+    @tasks.loop(time=PROMOTION_SWEEP_TIMES)
+    async def promotion_sweep(self):
+        try:
+            await self._run_promotion_sweep()
+        except Exception as e:
+            print(f"[spark_office] promotion sweep error: {e}")
+
+    @promotion_sweep.before_loop
+    async def before_promotion_sweep(self):
+        await self.bot.wait_until_ready()
+
+    async def _run_promotion_sweep(self):
+        from algorand_lookup import verify_wallet_owns_zappy
+
+        candidates = await asyncio.to_thread(get_all_office_candidates)
+        if not candidates:
+            return
+
+        for c in candidates:
+            wallet = c["wallet"]
+            spark_name = c.get("name") or c["spark_type"].capitalize()
+
+            # Re-check seat count fresh each iteration — an earlier candidate
+            # in this same sweep may have just filled the last open seat.
+            seat_count = await asyncio.to_thread(get_office_seat_count)
+
+            ownership = await verify_wallet_owns_zappy(wallet)
+            if ownership.get("error"):
+                continue  # couldn't verify this pass, will retry next sweep
+            zappy_count = (
+                len(ownership.get("zappies", []))
+                + len(ownership.get("heroes", []))
+                + len(ownership.get("collabs", []))
+            )
+            if zappy_count < OFFICE_SPONSOR_ZAPPY_COUNT:
+                continue  # not sponsored — skip silently, eligible again next sweep
+
+            if seat_count < OFFICE_SEAT_CAP:
+                await asyncio.to_thread(seat_spark, c)
+                await self._post_promotion_channel(
+                    f"🏢 **{spark_name}** (<@{c.get('discord_user_id')}>) was auto-promoted into an "
+                    f"open Office seat! ({c['hits_seen']} hits in its last 40 shifts)"
+                )
+                continue
+
+            # Seats are full — spawn a duel against the current lowest
+            # hit-rate seat. Can't challenge your own seat.
+            target = await asyncio.to_thread(get_lowest_hitrate_seat)
+            if not target or target["wallet"] == wallet:
+                continue  # no valid target this pass — try again next sweep
+
+            duel = await asyncio.to_thread(create_office_duel, c, target)
+            await self._post_duel_challenge(duel)
 
     async def _resolve_and_settle(self, rows: list, forced_outcome: str | None = None, forced_amount: float | None = None) -> list:
         """
