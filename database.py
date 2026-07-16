@@ -1115,6 +1115,50 @@ def complete_office_job(job_id: int, spark_asa: int, outcome: str, amount: float
     db.table("spark_office_seats").update(update).eq("spark_asa", spark_asa).execute()
 
 
+def get_seats_needing_reminder() -> list:
+    """
+    Active seats whose daily window has opened, haven't clocked in for it
+    yet, and haven't already been reminded for this specific cycle (so a
+    5-min resolver tick doesn't re-DM someone every pass until they show up).
+    """
+    db = get_supabase()
+    now_iso = datetime.now(timezone.utc).isoformat()
+    seats = (
+        db.table("spark_office_seats")
+        .select("*")
+        .eq("status", "active")
+        .lte("next_shift_due_at", now_iso)
+        .execute()
+        .data or []
+    )
+
+    result = []
+    for seat in seats:
+        due = seat.get("next_shift_due_at")
+        last_reminder = seat.get("last_reminder_at")
+        if last_reminder and due and last_reminder >= due:
+            continue  # already reminded since this window opened
+
+        working = (
+            db.table("spark_office_log")
+            .select("id")
+            .eq("spark_asa", seat["spark_asa"])
+            .eq("status", "working")
+            .execute()
+            .data
+        )
+        if working:
+            continue  # already clocked in, nothing to remind about
+
+        result.append(seat)
+    return result
+
+
+def mark_seat_reminded(spark_asa: int, when: datetime) -> None:
+    db = get_supabase()
+    db.table("spark_office_seats").update({"last_reminder_at": when.isoformat()}).eq("spark_asa", spark_asa).execute()
+
+
 def get_seats_for_cold_streak_demotion() -> list:
     """Active seats that just crossed OFFICE_DEMOTION_MISS_DAYS consecutive misses."""
     db = get_supabase()
