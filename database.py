@@ -899,6 +899,43 @@ def check_office_eligibility(asset_id: int) -> dict:
     return {"eligible": True, "reason": "eligible", "shifts_seen": shifts_seen, "hits_seen": hits_seen}
 
 
+def get_all_office_candidates() -> list:
+    """
+    Every Spark, across every wallet, currently eligible for Office
+    promotion and not already seated — ranked luckiest-first (most hits in
+    its trailing window). Used by the twice-daily auto-promotion sweep.
+
+    NOTE: this runs check_office_eligibility() (one query each) across all
+    of spark_holdings. Fine at current scale (~100 Sparks); if the
+    collection grows a lot, this is the first place to optimize (e.g. a
+    materialized hits-in-window column maintained by complete_job instead
+    of computed fresh each sweep).
+    """
+    db = get_supabase()
+    seated = {
+        s["spark_asa"] for s in
+        db.table("spark_office_seats").select("spark_asa").execute().data or []
+    }
+    holdings = (
+        db.table("spark_holdings")
+        .select("asset_id, name, spark_type, tier, wallet, discord_user_id")
+        .execute()
+        .data or []
+    )
+
+    candidates = []
+    for h in holdings:
+        asa = h["asset_id"]
+        if asa in seated:
+            continue
+        check = check_office_eligibility(asa)
+        if check["eligible"]:
+            candidates.append({**h, "hits_seen": check["hits_seen"]})
+
+    candidates.sort(key=lambda c: c["hits_seen"], reverse=True)
+    return candidates
+
+
 def seat_spark(spark: dict) -> dict:
     """Promote a Spark into an open Office seat. Caller must have already
     checked eligibility, sponsorship, and seat availability."""
