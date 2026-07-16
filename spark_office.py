@@ -241,6 +241,12 @@ class SparkOfficeCog(commands.Cog):
             if not candidates:
                 await interaction.followup.send("❌ No Sparks found on your wallet.", ephemeral=True)
                 return
+            # get_sparks_for_wallet only selects asset_id/name/spark_type/tier/xp —
+            # wallet and discord_user_id aren't in that row, so stamp them on
+            # explicitly since every downstream function expects them.
+            for spark in candidates:
+                spark["wallet"] = wallet
+                spark["discord_user_id"] = user_id
 
         # Filter down to not-already-seated + currently eligible, luckiest first.
         eligible, skipped = [], {}
