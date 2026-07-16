@@ -28,7 +28,7 @@ ALGOD_TOKEN, ALGOD_URL, INDEXER_URL, HOLDER_CHANNEL_ID for tier-ups).
 import os
 import random
 import asyncio
-from datetime import datetime, timezone, time as dtime
+from datetime import datetime, timezone, timedelta, time as dtime
 
 import discord
 from discord.ext import commands, tasks
@@ -62,6 +62,7 @@ from database import (
     resolve_office_duel,
     get_office_seats_for_wallet,
     get_working_office_shift,
+    get_working_office_shifts_map,
     get_all_office_candidates,
     OFFICE_SEAT_CAP,
     OFFICE_SPONSOR_ZAPPY_COUNT,
@@ -87,6 +88,13 @@ PROMOTION_CHANNEL_ID = int(os.environ["PROMOTION_CHANNEL_ID"]) if os.environ.get
 HOLDER_CHANNEL_ID    = int(os.environ.get("HOLDER_CHANNEL_ID", "1314066280592052244"))
 
 RESOLVER_INTERVAL_MINUTES = 5
+
+# Live board — a manual /office-board command always works; this is the
+# "shows up on its own" half. Checked every 30 min, ~6% chance each check,
+# which averages out to roughly 3-4 unprompted posts a day at random times
+# rather than a predictable fixed schedule.
+AMBIENT_BOARD_CHECK_MINUTES = 30
+AMBIENT_BOARD_CHANCE        = 0.06
 
 # Twice daily, 12h apart — spaced away from the Clash bracket times (2PM/12AM
 # UTC) so a heavy Clash resolution and a promotion sweep don't land at once.
@@ -202,10 +210,12 @@ class SparkOfficeCog(commands.Cog):
         self.bot = bot
         self.resolver.start()
         self.promotion_sweep.start()
+        self.ambient_board.start()
 
     def cog_unload(self):
         self.resolver.cancel()
         self.promotion_sweep.cancel()
+        self.ambient_board.cancel()
 
     def _promotion_channel(self) -> discord.TextChannel | None:
         if not PROMOTION_CHANNEL_ID:
@@ -416,6 +426,82 @@ class SparkOfficeCog(commands.Cog):
         await interaction.response.send_message(view._progress_text(), view=view, ephemeral=True)
 
     # ──────────────────────────────────────────
+    # /office-board — live snapshot of who's seated and what they're doing.
+    # Same embed also posts on its own at random intervals (ambient_board,
+    # below) so the Office has visible activity without anyone having to ask.
+    # ──────────────────────────────────────────
+    @app_commands.command(name="office-board", description="See who's working the Office right now")
+    async def office_board(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        embed = await self._build_office_board_embed()
+        await interaction.followup.send(embed=embed)
+
+    @staticmethod
+    def _progress_bar(filled: int, total: int, length: int = 10) -> str:
+        filled_blocks = round(filled / total * length) if total else 0
+        return "▰" * filled_blocks + "▱" * (length - filled_blocks)
+
+    def _next_sweep_time(self, now: datetime) -> datetime:
+        candidates = []
+        for t in PROMOTION_SWEEP_TIMES:
+            candidate = now.replace(hour=t.hour, minute=t.minute, second=0, microsecond=0)
+            if candidate <= now:
+                candidate += timedelta(days=1)
+            candidates.append(candidate)
+        return min(candidates)
+
+    async def _build_office_board_embed(self) -> discord.Embed:
+        seats = await asyncio.to_thread(get_office_seats)  # already sorted lowest hit-rate first
+        working_map = await asyncio.to_thread(get_working_office_shifts_map)
+        now = datetime.now(timezone.utc)
+        seat_count = len(seats)
+        bar = self._progress_bar(seat_count, OFFICE_SEAT_CAP)
+
+        if not seats:
+            embed = discord.Embed(
+                title="🏢 The Office — Live Board",
+                description=f"{bar}  **0/{OFFICE_SEAT_CAP}** seats filled\n\nEmpty right now — be the first with `/office-promote`.",
+                color=0x5865F2,
+            )
+            return embed
+
+        board_lines = [f"{bar}  **{seat_count}/{OFFICE_SEAT_CAP}** seats filled", ""]
+
+        for seat in seats:
+            name  = seat.get("spark_name") or seat["spark_type"].capitalize()
+            tier  = seat.get("spark_tier")
+            shifts, hits, misses = seat["shifts_completed"], seat["hits"], seat["consecutive_misses"]
+            rate  = f"{(hits / shifts * 100):.0f}%" if shifts else "—"
+            cold_flag = " ❄️" if misses >= max(OFFICE_DEMOTION_MISS_DAYS - 2, 1) else ""
+
+            if seat["status"] == "in_duel":
+                status = "⚔️ In a duel"
+            elif seat["spark_asa"] in working_map:
+                resolve_at = datetime.fromisoformat(working_map[seat["spark_asa"]]["resolve_at"])
+                status = f"🔧 On shift — back <t:{int(resolve_at.timestamp())}:R>"
+            else:
+                due = datetime.fromisoformat(seat["next_shift_due_at"]) if seat.get("next_shift_due_at") else now
+                status = f"💤 Resting — due <t:{int(due.timestamp())}:R>" if now < due else "⏳ Due now"
+
+            board_lines.append(f"🪑 **{name}** T{tier} — {status} · `{hits}/{shifts}` hits ({rate}){cold_flag}")
+
+        # Embed description caps at 4096 chars — 20 short seat lines never
+        # comes close, so no chunking/fields needed (embed fields cap at
+        # 1024 chars each, which _chunk_lines' default 1800 could exceed).
+        embed = discord.Embed(title="🏢 The Office — Live Board", description="\n".join(board_lines), color=0x5865F2)
+
+        lowest = seats[0]
+        lowest_name = lowest.get("spark_name") or lowest["spark_type"].capitalize()
+        lowest_rate = f"{(lowest['hits'] / lowest['shifts_completed'] * 100):.0f}%" if lowest["shifts_completed"] else "—"
+        next_sweep = self._next_sweep_time(now)
+        footer = f"⚔️ Duel target: {lowest_name} ({lowest_rate})"
+        if seat_count >= OFFICE_SEAT_CAP:
+            footer += f" · Next auto-sweep <t:{int(next_sweep.timestamp())}:R>"
+        embed.set_footer(text=footer)
+
+        return embed
+
+    # ──────────────────────────────────────────
     # Admin — troubleshooting
     # ──────────────────────────────────────────
     @app_commands.command(name="office-force-resolve", description="[Admin] Force-resolve a working Office shift with a chosen outcome")
@@ -509,6 +595,30 @@ class SparkOfficeCog(commands.Cog):
 
     @promotion_sweep.before_loop
     async def before_promotion_sweep(self):
+        await self.bot.wait_until_ready()
+
+    # ──────────────────────────────────────────
+    # Ambient board — same embed as /office-board, but shows up on its own.
+    # Checked every 30 min with a small independent chance each time, so
+    # posts land at random points through the day rather than a predictable
+    # schedule. Skips quietly if the Office is empty — no point announcing
+    # nothing.
+    # ──────────────────────────────────────────
+    @tasks.loop(minutes=AMBIENT_BOARD_CHECK_MINUTES)
+    async def ambient_board(self):
+        try:
+            if random.random() >= AMBIENT_BOARD_CHANCE:
+                return
+            seat_count = await asyncio.to_thread(get_office_seat_count)
+            if seat_count == 0:
+                return
+            embed = await self._build_office_board_embed()
+            await self._post_promotion_channel(embed=embed)
+        except Exception as e:
+            print(f"[spark_office] ambient board error: {e}")
+
+    @ambient_board.before_loop
+    async def before_ambient_board(self):
         await self.bot.wait_until_ready()
 
     async def _run_promotion_sweep(self):
