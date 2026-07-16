@@ -35,6 +35,7 @@ import grand_prix_cog
 from grand_prix_cog import GrandPrixCog
 from spark_admin import SparkAdminCog
 from spark_jobs  import SparkJobsCog
+from spark_office import SparkOfficeCog
 
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
@@ -85,6 +86,7 @@ ADMIN_NOTIFY_ID    = int(os.environ["ADMIN_NOTIFY_USER_ID"]) if os.environ.get("
 EXPEDITION_CHANNEL = int(os.environ["EXPEDITION_CHANNEL_ID"]) if os.environ.get("EXPEDITION_CHANNEL_ID") else None   # Optional - if not set, works anywhere
 APEX_TEST_CHANNEL  = int(os.environ["APEX_TEST_CHANNEL_ID"])  if os.environ.get("APEX_TEST_CHANNEL_ID")  else None   # Optional - test channel for /expedition_test
 HOLDER_CHANNEL     = int(os.environ.get("HOLDER_CHANNEL_ID", "1314066280592052244"))  # All NFT win claim announcements (buddy/clash/zone5/spark jobs)
+PROMOTION_CHANNEL  = int(os.environ["PROMOTION_CHANNEL_ID"]) if os.environ.get("PROMOTION_CHANNEL_ID") else None  # Office seatings/demotions/duels
 
 # Session timing (UTC)
 MORNING_OPEN    = dtime(14,  0, tzinfo=timezone.utc)
@@ -3766,6 +3768,7 @@ async def on_ready():
 
     await bot.add_cog(SparkAdminCog(bot))
     await bot.add_cog(SparkJobsCog(bot))
+    await bot.add_cog(SparkOfficeCog(bot))
     print("⚡ Spark admin cog loaded")
 
     # Games
