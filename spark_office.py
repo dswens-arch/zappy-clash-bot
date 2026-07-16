@@ -214,11 +214,14 @@ class SparkOfficeCog(commands.Cog):
 
     # ──────────────────────────────────────────
     # /office-promote — the entry point. Seats directly if a spot is open,
-    # otherwise challenges the lowest hit-rate seat on your behalf.
+    # otherwise challenges the lowest hit-rate seat on your behalf. asset_id
+    # is optional — omit it and every Spark in your wallet gets checked and
+    # attempted at once, same "don't make me look up an ID" philosophy as
+    # /office-shift.
     # ──────────────────────────────────────────
-    @app_commands.command(name="office-promote", description="Try to promote an eligible Spark into the Office")
-    @app_commands.describe(asset_id="ASA ID of the Spark to promote")
-    async def office_promote(self, interaction: discord.Interaction, asset_id: int):
+    @app_commands.command(name="office-promote", description="Try to promote your eligible Spark(s) into the Office")
+    @app_commands.describe(asset_id="Optional — ASA ID of one specific Spark. Omit to check your whole wallet.")
+    async def office_promote(self, interaction: discord.Interaction, asset_id: int | None = None):
         await interaction.response.defer(ephemeral=True)
         user_id = str(interaction.user.id)
 
@@ -227,26 +230,41 @@ class SparkOfficeCog(commands.Cog):
             await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
             return
 
-        spark = await asyncio.to_thread(get_spark, asset_id)
-        if not spark or spark.get("wallet") != wallet:
-            await interaction.followup.send("❌ That Spark isn't registered to your wallet.", ephemeral=True)
+        if asset_id is not None:
+            spark = await asyncio.to_thread(get_spark, asset_id)
+            if not spark or spark.get("wallet") != wallet:
+                await interaction.followup.send("❌ That Spark isn't registered to your wallet.", ephemeral=True)
+                return
+            candidates = [spark]
+        else:
+            candidates = await asyncio.to_thread(get_sparks_for_wallet, wallet)
+            if not candidates:
+                await interaction.followup.send("❌ No Sparks found on your wallet.", ephemeral=True)
+                return
+
+        # Filter down to not-already-seated + currently eligible, luckiest first.
+        eligible, skipped = [], {}
+        for spark in candidates:
+            asa = spark["asset_id"]
+            if await asyncio.to_thread(get_office_seat, asa):
+                skipped[asa] = "already_seated"
+                continue
+            check = await asyncio.to_thread(check_office_eligibility, asa)
+            if not check["eligible"]:
+                skipped[asa] = check["reason"]
+                continue
+            eligible.append((spark, check))
+        eligible.sort(key=lambda pair: pair[1]["hits_seen"], reverse=True)
+
+        if not eligible:
+            if asset_id is not None:
+                reason = INELIGIBLE_REASONS.get(skipped.get(asset_id, "not_eligible"), "not eligible right now")
+                await interaction.followup.send(f"❌ Not eligible — {reason}.", ephemeral=True)
+            else:
+                await interaction.followup.send("❌ None of your Sparks are currently eligible for promotion.", ephemeral=True)
             return
 
-        existing_seat = await asyncio.to_thread(get_office_seat, asset_id)
-        if existing_seat:
-            await interaction.followup.send("⏳ That Spark already holds an Office seat.", ephemeral=True)
-            return
-
-        check = await asyncio.to_thread(check_office_eligibility, asset_id)
-        if not check["eligible"]:
-            reason = INELIGIBLE_REASONS.get(check["reason"], check["reason"])
-            await interaction.followup.send(
-                f"❌ Not eligible — {reason}. ({check['hits_seen']} hits in last {check['shifts_seen']} shifts)",
-                ephemeral=True,
-            )
-            return
-
-        # Sponsorship — 5 Zappies, same wallet, one-time check.
+        # Sponsorship is wallet-level — one check covers every eligible Spark this run.
         from algorand_lookup import link_wallet as verify_wallet
         ownership = await verify_wallet(user_id, wallet)
         if ownership.get("error"):
@@ -255,43 +273,44 @@ class SparkOfficeCog(commands.Cog):
         zappy_count = len(ownership.get("zappies", [])) + len(ownership.get("heroes", [])) + len(ownership.get("collabs", []))
         if zappy_count < OFFICE_SPONSOR_ZAPPY_COUNT:
             await interaction.followup.send(
-                f"❌ Needs {OFFICE_SPONSOR_ZAPPY_COUNT} Zappies in your wallet to sponsor the promotion "
-                f"— you have {zappy_count}.",
+                f"❌ Needs {OFFICE_SPONSOR_ZAPPY_COUNT} Zappies in your wallet to sponsor a promotion "
+                f"— you have {zappy_count}. ({len(eligible)} Spark(s) otherwise ready to go.)",
                 ephemeral=True,
             )
             return
 
-        seat_count = await asyncio.to_thread(get_office_seat_count)
-        spark_name = spark.get("name") or spark["spark_type"].capitalize()
+        results = []
+        for spark, check in eligible:
+            asa = spark["asset_id"]
+            spark_name = spark.get("name") or spark["spark_type"].capitalize()
+            seat_count = await asyncio.to_thread(get_office_seat_count)
 
-        if seat_count < OFFICE_SEAT_CAP:
-            seat = {**spark, "asset_id": asset_id}
-            await asyncio.to_thread(seat_spark, seat)
-            await interaction.followup.send(f"🎉 **{spark_name}** promoted straight into an open Office seat!", ephemeral=True)
-            await self._post_promotion_channel(
-                f"🏢 **{spark_name}** (<@{user_id}>) just walked into an open seat in the Office."
+            if seat_count < OFFICE_SEAT_CAP:
+                await asyncio.to_thread(seat_spark, {**spark, "asset_id": asa})
+                results.append(f"🎉 **{spark_name}** promoted into an open seat!")
+                await self._post_promotion_channel(
+                    f"🏢 **{spark_name}** (<@{user_id}>) just walked into an open seat in the Office."
+                )
+                continue
+
+            target = await asyncio.to_thread(get_lowest_hitrate_seat)
+            target = target if (target and target["wallet"] != wallet) else None
+            if not target:
+                results.append(f"⏳ **{spark_name}** is eligible, but there's no valid seat to challenge right now.")
+                continue
+
+            duel = await asyncio.to_thread(create_office_duel, {**spark, "asset_id": asa}, target)
+            results.append(
+                f"⚔️ **{spark_name}** is challenging **{target.get('spark_name') or target['spark_type']}** for their seat!"
             )
-            return
+            await self._post_duel_challenge(duel)
 
-        # No open seats — challenge the lowest hit-rate seat instead.
-        target = await asyncio.to_thread(get_lowest_hitrate_seat)
-        target = target if (target and target["wallet"] != wallet) else None
-        if not target:
-            await interaction.followup.send(
-                "⏳ The Office is full and there's no valid seat to challenge right now. Try again later.",
-                ephemeral=True,
+        if skipped:
+            results.append(
+                f"\nSkipped ({len(skipped)}): "
+                + ", ".join(f"`{asa}` ({INELIGIBLE_REASONS.get(r, r)})" for asa, r in skipped.items())
             )
-            return
-
-        challenger = {**spark, "asset_id": asset_id}
-        duel = await asyncio.to_thread(create_office_duel, challenger, target)
-        await interaction.followup.send(
-            f"⚔️ The Office is full — **{spark_name}** is challenging "
-            f"**{target.get('spark_name') or target['spark_type']}** for their seat! "
-            f"Both sides have {OFFICE_DUEL_SUBMIT_HOURS}h to submit picks with `/office-duel-respond`.",
-            ephemeral=True,
-        )
-        await self._post_duel_challenge(duel)
+        await interaction.followup.send("\n".join(results), ephemeral=True)
 
     # ──────────────────────────────────────────
     # /office-shift — clocks in EVERY due, active Office seat you hold in
