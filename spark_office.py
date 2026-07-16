@@ -326,7 +326,8 @@ class SparkOfficeCog(commands.Cog):
                 f"\nSkipped ({len(skipped)}): "
                 + ", ".join(f"`{asa}` ({INELIGIBLE_REASONS.get(r, r)})" for asa, r in skipped.items())
             )
-        await interaction.followup.send("\n".join(results), ephemeral=True)
+        for chunk in _chunk_lines(results):
+            await interaction.followup.send(chunk, ephemeral=True)
 
     # ──────────────────────────────────────────
     # /office-shift — clocks in EVERY due, active Office seat you hold in
@@ -400,7 +401,8 @@ class SparkOfficeCog(commands.Cog):
             await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
             return
         result = await self._clock_in_all_due(user_id, wallet)
-        await interaction.followup.send(self._format_clock_in_result(result), ephemeral=True)
+        for chunk in _chunk_lines(self._format_clock_in_result(result).split("\n")):
+            await interaction.followup.send(chunk, ephemeral=True)
 
     # ──────────────────────────────────────────
     # /office-duel-respond — submit picks for a pending duel
