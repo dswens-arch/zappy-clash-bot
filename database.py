@@ -1048,6 +1048,14 @@ def get_office_seats_for_wallet(wallet: str) -> list:
     return result.data or []
 
 
+def get_working_office_shifts_map() -> dict:
+    """spark_asa -> current 'working' spark_office_log row, for every seat
+    at once — used by the live board so it doesn't run 20 separate queries."""
+    db = get_supabase()
+    result = db.table("spark_office_log").select("*").eq("status", "working").execute()
+    return {r["spark_asa"]: r for r in (result.data or [])}
+
+
 def get_working_office_shift(spark_asa: int) -> dict | None:
     """The current 'working' spark_office_log row for a Spark, if any.
     Used both by the bulk clock-in skip-check and by the admin
