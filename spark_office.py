@@ -52,6 +52,8 @@ from database import (
     complete_office_job,
     get_seats_for_cold_streak_demotion,
     get_seats_for_noshow_demotion,
+    get_seats_needing_reminder,
+    mark_seat_reminded,
     get_unpaid_office_algo_jobs,
     mark_office_jobs_paid,
     create_office_payout,
@@ -558,7 +560,7 @@ class SparkOfficeCog(commands.Cog):
         await self._post_promotion_channel(embed=embed)
 
     # ──────────────────────────────────────────
-    # Resolver — shifts, no-shows, cold-streak demotions, duel expiry
+    # Resolver — shifts, reminders, no-shows, cold-streak demotions, duel expiry
     # ──────────────────────────────────────────
     @tasks.loop(minutes=RESOLVER_INTERVAL_MINUTES)
     async def resolver(self):
@@ -569,6 +571,7 @@ class SparkOfficeCog(commands.Cog):
                 await self._process_algo_payouts()
                 await self._post_digest(resolved)
 
+            await self._process_shift_reminders()
             await self._process_noshow_demotions()
             await self._process_coldstreak_demotions()
             await self._process_expired_duels()
@@ -790,6 +793,24 @@ class SparkOfficeCog(commands.Cog):
 
         content = f"<@{r['discord_user_id']}>" if r.get("discord_user_id") else None
         await channel.send(content=content, embed=embed)
+
+    async def _process_shift_reminders(self):
+        seats = await asyncio.to_thread(get_seats_needing_reminder)
+        for seat in seats:
+            await self._send_shift_reminder(seat)
+            await asyncio.to_thread(mark_seat_reminded, seat["spark_asa"], datetime.now(timezone.utc))
+
+    async def _send_shift_reminder(self, seat: dict):
+        """Post the alarm right in the promotion channel — no DMs."""
+        name = seat.get("spark_name") or seat["spark_type"].capitalize()
+        discord_id = seat.get("discord_user_id")
+        mention = f"<@{discord_id}> " if discord_id else ""
+        message = (
+            f"{mention}⏰ **Alarm — time to clock in!** "
+            f"**{name}**'s Office shift is open. Run `/office-shift` within "
+            f"{OFFICE_NO_SHOW_GRACE_HOURS}h or the seat opens up."
+        )
+        await self._post_promotion_channel(message)
 
     async def _process_noshow_demotions(self):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
