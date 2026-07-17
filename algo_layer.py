@@ -32,7 +32,7 @@ from qrcode.image.pure import PyPNGImage
 from algosdk import mnemonic, account, transaction
 from algosdk.v2client import algod, indexer
 
-from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, looks_like_quota_error
+from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, looks_like_quota_error, record_call
 
 
 # ---------------------------------------------------------------------------
@@ -269,6 +269,7 @@ def get_bot_balance() -> int:
     if is_quota_blocked():
         raise RuntimeError("Algorand API quota exceeded — skipping call, try again later.")
     try:
+        record_call()
         client = get_algod_client()
         _, address = get_bot_account()
         return client.account_info(address)["amount"]
@@ -293,6 +294,7 @@ def get_current_round() -> int:
     if is_quota_blocked():
         raise RuntimeError("Algorand API quota exceeded — skipping call, try again later.")
     try:
+        record_call()
         return get_algod_client().status()["last-round"]
     except Exception as e:
         if looks_like_quota_error(e):
@@ -323,6 +325,7 @@ def find_payment_txn(
     expected_b64 = base64.b64encode(expected_note.encode()).decode()
 
     try:
+        record_call()
         response = idx.search_transactions(
             address=sender_address,
             address_role="sender",
@@ -421,6 +424,7 @@ def _send_algo(receiver: str, amount_microalgo: int, note: str) -> str:
         raise RuntimeError("Algorand API quota exceeded — skipping payout, will retry once quota clears.")
 
     try:
+        record_call()
         private_key, bot_address = get_bot_account()
         client = get_algod_client()
         params = client.suggested_params()
