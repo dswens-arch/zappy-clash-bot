@@ -700,6 +700,11 @@ class SparkJobsCog(commands.Cog):
         on spark_holdings (the same address /link records).
         """
         from algo_layer import _send_algo
+        from algo_quota_guard import is_quota_blocked
+
+        if is_quota_blocked():
+            print("[spark_jobs] Skipping ALGO payout pass — quota block active.")
+            return
 
         unpaid = await asyncio.to_thread(get_unpaid_algo_jobs)
         if not unpaid:
