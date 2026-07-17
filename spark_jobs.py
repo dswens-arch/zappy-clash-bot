@@ -484,12 +484,29 @@ def _chunk_lines(lines: list, limit: int = 1800) -> list:
     Groups lines into chunks that stay under Discord's message content limit
     (2000 chars) — used anywhere a holder's Spark count could produce a
     message longer than that (clock-in lists, payday digests, summaries).
+
+    Also hard-splits any INDIVIDUAL line that's longer than `limit` on its
+    own (e.g. a single summary line joining many skipped entries) — without
+    this, a lone oversized line would become its own chunk that still
+    exceeds Discord's cap, since the running-length check below only fires
+    when appending to a chunk that already has content in it.
     """
     chunks, current, length = [], [], 0
     for line in lines:
         if current and length + len(line) + 1 > limit:
             chunks.append("\n".join(current))
             current, length = [], 0
+
+        if len(line) > limit:
+            # This single line alone is too big — flush whatever's pending,
+            # then hard-split the line itself into limit-sized pieces.
+            if current:
+                chunks.append("\n".join(current))
+                current, length = [], 0
+            for i in range(0, len(line), limit):
+                chunks.append(line[i:i + limit])
+            continue
+
         current.append(line)
         length += len(line) + 1
     if current:
