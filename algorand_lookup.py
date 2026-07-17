@@ -13,7 +13,7 @@ import aiohttp
 import asyncio
 from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
 from stats_engine import calculate_stats, get_hero_stats, get_collab_stats, get_king_stats
-from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, looks_like_quota_error
+from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, looks_like_quota_error, record_call
 
 KING_ASA = 3562991430
 
@@ -205,6 +205,7 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
                     params["next"] = next_token
 
                 headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")}
+                record_call()
                 async with session.get(url, params=params, headers=headers,
                                        timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status != 200:
@@ -212,6 +213,7 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
                             mark_quota_exceeded(detail="algorand_lookup: primary indexer 403")
                         # Try fallback indexer
                         fallback_url = f"{INDEXER_URL2}/v2/accounts/{wallet_address}/assets"
+                        record_call()
                         async with session.get(fallback_url, params=params, headers=headers,
                                                timeout=aiohttp.ClientTimeout(total=15)) as resp2:
                             if resp2.status != 200:
