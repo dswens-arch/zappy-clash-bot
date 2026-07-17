@@ -305,6 +305,28 @@ class SparkOfficeCog(commands.Cog):
             return None
         return self.bot.get_channel(PROMOTION_CHANNEL_ID)
 
+    @staticmethod
+    def _shift_time_picker_message(seats: list[tuple]) -> str:
+        """
+        Message shown alongside the shift-time picker. UTC is confusing to
+        pick blind, so this lists every hour slot next to Discord's <t:...>
+        timestamp tag — Discord renders that in each viewer's own local
+        time automatically, so this works correctly for anyone regardless
+        of timezone without us needing to know or ask what it is.
+        """
+        names = ", ".join(f"**{name}**" for _, name in seats)
+        now = datetime.now(timezone.utc)
+        today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        ref_lines = [
+            f"`{h:02d}:00 UTC` → <t:{int((today_midnight + timedelta(hours=h)).timestamp())}:t> your time"
+            for h in range(24)
+        ]
+        return (
+            f"Pick a daily shift time for {names}.\n"
+            f"-# Each UTC slot below, shown in your own local time:\n"
+            + "\n".join(ref_lines)
+        )
+
     # ──────────────────────────────────────────
     # /office-promote — the entry point. Seats directly if a spot is open,
     # otherwise challenges the lowest hit-rate seat on your behalf. asset_id
@@ -416,9 +438,8 @@ class SparkOfficeCog(commands.Cog):
             await interaction.followup.send(chunk, ephemeral=True)
 
         if newly_seated:
-            names = ", ".join(f"**{name}**" for _, name in newly_seated)
             await interaction.followup.send(
-                f"Pick a daily shift time for {names}:",
+                self._shift_time_picker_message(newly_seated),
                 view=ShiftTimeSelectView(newly_seated),
                 ephemeral=True,
             )
@@ -542,9 +563,8 @@ class SparkOfficeCog(commands.Cog):
             return
 
         seat_list = [(s["spark_asa"], s.get("spark_name") or s["spark_type"].capitalize()) for s in seats]
-        names = ", ".join(f"**{n}**" for _, n in seat_list)
         await interaction.response.send_message(
-            f"Pick a daily shift time for {names}:",
+            self._shift_time_picker_message(seat_list),
             view=ShiftTimeSelectView(seat_list),
             ephemeral=True,
         )
