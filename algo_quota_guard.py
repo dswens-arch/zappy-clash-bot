@@ -43,7 +43,7 @@ Usage at any Algorand call site:
         raise
 """
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, date
 
 _ROW_ID = 1
 
@@ -51,6 +51,13 @@ _ROW_ID = 1
 # AlgoNode's quota resets daily; 6 hours is a safe middle ground that
 # avoids re-testing constantly while not waiting a full day unnecessarily.
 DEFAULT_BLOCK_HOURS = 6
+
+# Warn once we cross this fraction of AlgoNode's stated 200K/day cap.
+# This only counts calls our own bot code makes (payouts, wallet lookups)
+# — it can't see Discord's own embed-image fetches, so real usage may be
+# higher than this counter shows. Treat it as an early-warning floor,
+# not a precise total.
+WARNING_THRESHOLD = 150_000
 
 # Local (per-process) cache of the last Supabase read, so a burst of many
 # calls in the same second doesn't each round-trip to Supabase. This is
@@ -154,3 +161,90 @@ def clear_quota_block():
         print("[algo_quota_guard] Block cleared manually.")
     except Exception as e:
         print(f"[algo_quota_guard] failed to clear block in Supabase: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Daily request counter — early warning before the wall, not after
+# ---------------------------------------------------------------------------
+# NOTE: this only counts calls made from THIS bot's Python code (payouts,
+# wallet lookups, etc). It cannot see Discord's own image-embed fetches
+# against ipfs-pera.algonode.dev, which also count toward the same AlgoNode
+# quota but happen server-side on Discord's end, invisible to us. Real
+# daily usage is likely higher than this number shows.
+
+def record_call():
+    """
+    Call this once per real AlgoNode request attempt (right before making
+    it, so failed attempts are counted too — matching how AlgoNode itself
+    bills against your quota). Resets automatically at UTC midnight.
+    Sets needs_warning=True the first time today's count crosses
+    WARNING_THRESHOLD, so a separate Discord-side task can DM you.
+    Fails silently on any Supabase error — never blocks the real call.
+    """
+    try:
+        from database import get_supabase
+        db = get_supabase()
+        today = date.today().isoformat()
+
+        row = (
+            db.table("algo_quota_state")
+            .select("request_count, count_date, needs_warning")
+            .eq("id", _ROW_ID)
+            .single()
+            .execute()
+            .data
+        ) or {}
+
+        if row.get("count_date") != today:
+            new_count = 1
+            needs_warning = False
+            reset_fields = {"warning_sent": False}
+        else:
+            new_count = (row.get("request_count") or 0) + 1
+            needs_warning = row.get("needs_warning") or False
+            reset_fields = {}
+
+        crossed_now = (not needs_warning) and new_count >= WARNING_THRESHOLD
+        if crossed_now:
+            needs_warning = True
+
+        db.table("algo_quota_state").upsert({
+            "id": _ROW_ID,
+            "request_count": new_count,
+            "count_date": today,
+            "needs_warning": needs_warning,
+            **reset_fields,
+        }).execute()
+
+    except Exception as e:
+        print(f"[algo_quota_guard] record_call failed (non-fatal): {e}")
+
+
+def pop_warning_if_due() -> int | None:
+    """
+    Checked periodically from bot.py (Discord side, since only it can send
+    a DM). Returns today's request count if a warning is due and hasn't
+    been sent yet, and immediately clears the flag so it only fires once.
+    Returns None if no warning is due.
+    """
+    try:
+        from database import get_supabase
+        db = get_supabase()
+        row = (
+            db.table("algo_quota_state")
+            .select("request_count, needs_warning, warning_sent")
+            .eq("id", _ROW_ID)
+            .single()
+            .execute()
+            .data
+        )
+        if not row or not row.get("needs_warning") or row.get("warning_sent"):
+            return None
+
+        count = row.get("request_count") or 0
+        db.table("algo_quota_state").update({"warning_sent": True}).eq("id", _ROW_ID).execute()
+        return count
+
+    except Exception as e:
+        print(f"[algo_quota_guard] pop_warning_if_due failed (non-fatal): {e}")
+        return None
