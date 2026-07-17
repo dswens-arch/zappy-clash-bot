@@ -199,7 +199,7 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
                 if next_token:
                     params["next"] = next_token
 
-                headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")}
+                headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")} if os.getenv("INDEXER_TOKEN") else {}
                 async with session.get(url, params=params, headers=headers,
                                        timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status != 200:
