@@ -9,7 +9,8 @@ You will paste your SUPABASE_URL and SUPABASE_KEY into .env
 
 import os
 import asyncio
-from datetime import datetime, timezone, timedelta
+import time
+from datetime import datetime, timezone, timedelta, time as dt_time
 from supabase import create_client, Client
 
 
@@ -947,6 +948,27 @@ def get_all_office_candidates() -> list:
     return candidates
 
 
+def set_office_shift_time(spark_asa: int, hour: int, minute: int = 0) -> dict | None:
+    """
+    Set or change a seat's fixed daily shift-time anchor. Recomputes
+    next_shift_due_at to the next occurrence of the new time immediately,
+    rather than waiting for the old anchor to fire once more first — so
+    picking a new time takes effect right away.
+    """
+    db = get_supabase()
+    now = datetime.now(timezone.utc)
+    new_time = dt_time(hour=hour, minute=minute)
+    next_due = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if next_due <= now:
+        next_due += timedelta(days=1)
+
+    result = db.table("spark_office_seats").update({
+        "shift_time_utc":    new_time.isoformat(),
+        "next_shift_due_at": next_due.isoformat(),
+    }).eq("spark_asa", spark_asa).execute()
+    return result.data[0] if result.data else None
+
+
 def seat_spark(spark: dict) -> dict:
     """Promote a Spark into an open Office seat. Caller must have already
     checked eligibility, sponsorship, and seat availability."""
@@ -961,6 +983,11 @@ def seat_spark(spark: dict) -> dict:
         "spark_tier":        spark["tier"],
         "seated_at":         now.isoformat(),
         "next_shift_due_at": now.isoformat(),  # eligible to clock in immediately
+        # Fixed daily anchor, locked in once at promotion — every future
+        # clock-in advances to tomorrow's occurrence of THIS time, not
+        # "24h from whenever you happened to click." Prevents the schedule
+        # from drifting later every time you're a bit late.
+        "shift_time_utc":    now.time().isoformat(),
         "status":            "active",
     }
     result = db.table("spark_office_seats").upsert(data, on_conflict="spark_asa").execute()
@@ -1031,12 +1058,24 @@ def create_office_shift(seat: dict, job: str, flavor_line: str) -> dict:
     }
     result = db.table("spark_office_log").insert(data).execute()
 
-    # Advance the seat's daily window immediately on clock-in, same instant
-    # a base-Jobs Spark becomes "already_working" — next_shift_due_at is what
-    # the no-show check reads, not resolve_at.
+    # Advance to TOMORROW'S occurrence of this seat's fixed shift_time_utc —
+    # not "24h from right now." A fixed anchor means clocking in late once
+    # doesn't push every future day later too; it always snaps back to the
+    # same time-of-day. Falls back to the old now+24h behavior only if a
+    # seat somehow has no shift_time_utc set (shouldn't happen post-migration).
+    shift_time = seat.get("shift_time_utc")
+    if shift_time:
+        if isinstance(shift_time, str):
+            shift_time = dt_time.fromisoformat(shift_time)
+        next_due = now.replace(hour=shift_time.hour, minute=shift_time.minute, second=0, microsecond=0)
+        if next_due <= now:
+            next_due += timedelta(days=1)
+    else:
+        next_due = now + timedelta(hours=OFFICE_DAILY_COOLDOWN_HOURS)
+
     db.table("spark_office_seats").update({
         "last_shift_at":     now.isoformat(),
-        "next_shift_due_at": (now + timedelta(hours=OFFICE_DAILY_COOLDOWN_HOURS)).isoformat(),
+        "next_shift_due_at": next_due.isoformat(),
     }).eq("spark_asa", seat["spark_asa"]).execute()
 
     return result.data[0] if result.data else {}
