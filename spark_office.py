@@ -28,7 +28,7 @@ ALGOD_TOKEN, ALGOD_URL, INDEXER_URL, HOLDER_CHANNEL_ID for tier-ups).
 import os
 import random
 import asyncio
-from datetime import datetime, timezone, timedelta, time as dtime
+from datetime import datetime, timezone
 
 import discord
 from discord.ext import commands, tasks
@@ -52,8 +52,6 @@ from database import (
     complete_office_job,
     get_seats_for_cold_streak_demotion,
     get_seats_for_noshow_demotion,
-    get_seats_needing_reminder,
-    mark_seat_reminded,
     get_unpaid_office_algo_jobs,
     mark_office_jobs_paid,
     create_office_payout,
@@ -64,8 +62,6 @@ from database import (
     resolve_office_duel,
     get_office_seats_for_wallet,
     get_working_office_shift,
-    get_working_office_shifts_map,
-    get_all_office_candidates,
     OFFICE_SEAT_CAP,
     OFFICE_SPONSOR_ZAPPY_COUNT,
     OFFICE_ALGO_HIT_CHANCE,
@@ -74,8 +70,6 @@ from database import (
     OFFICE_MAX_SHIFT_PAYOUT,
     OFFICE_MIN_SHIFTS_FOR_DUEL,
     OFFICE_DUEL_SUBMIT_HOURS,
-    OFFICE_NO_SHOW_GRACE_HOURS,
-    OFFICE_DEMOTION_MISS_DAYS,
 )
 
 # Reuse the existing flavor-line banks and small helpers instead of
@@ -93,17 +87,6 @@ HOLDER_CHANNEL_ID    = int(os.environ.get("HOLDER_CHANNEL_ID", "1314066280592052
 
 RESOLVER_INTERVAL_MINUTES = 5
 
-# Live board — a manual /office-board command always works; this is the
-# "shows up on its own" half. Checked every 30 min, ~6% chance each check,
-# which averages out to roughly 3-4 unprompted posts a day at random times
-# rather than a predictable fixed schedule.
-AMBIENT_BOARD_CHECK_MINUTES = 30
-AMBIENT_BOARD_CHANCE        = 0.06
-
-# Twice daily, 12h apart — spaced away from the Clash bracket times (2PM/12AM
-# UTC) so a heavy Clash resolution and a promotion sweep don't land at once.
-PROMOTION_SWEEP_TIMES = [dtime(hour=6, minute=0, tzinfo=timezone.utc), dtime(hour=18, minute=0, tzinfo=timezone.utc)]
-
 RPS_CHOICES = ["rock", "paper", "scissors"]
 RPS_BEATS   = {"rock": "scissors", "scissors": "paper", "paper": "rock"}
 RPS_EMOJI   = {"rock": "🪨", "paper": "📄", "scissors": "✂️"}
@@ -119,56 +102,6 @@ SHIFT_SKIP_REASONS = {
     "already_working":  "already on shift",
     "in_duel":          "seat tied up in a duel",
 }
-
-# Office shifts reuse the same per-job story flavor text as base Jobs, but
-# every outcome also gets one of these appended — this is what makes the
-# Office actually read like a 9-to-5 rather than just "Jobs with better odds."
-# Misses send you home for the day; wins get real workplace praise.
-OFFICE_MISS_LINES = [
-    "Nothing today — clock out, head home, and get some rest. Same time tomorrow.",
-    "Quiet one. Go home, eat some dinner, and recharge — the desk will still be there.",
-    "That's a wrap for today. Log off, put your feet up, come back sharp tomorrow.",
-    "Slow shift. Head home and decompress — tomorrow's a new day.",
-    "No dice this time. Go grab dinner and get some sleep — you've earned the evening off.",
-    "Punch out. Rest up tonight and try again tomorrow.",
-    "One of those days. Shut the laptop, order something good, and call it early.",
-    "Nothing on the books today. Head home — no sense staying late for this.",
-    "Coffee didn't help today. Go home, unwind, and reset for tomorrow.",
-    "Not every shift's a winner. Go home, get some real rest, and shake it off.",
-    "Quiet on the floor. Head out, eat well, and come back fresh.",
-    "That one just wasn't in the cards. Go home, relax, try again tomorrow.",
-    "Nothing to show for today. Log off early and take the evening for yourself.",
-    "Dry spell continues. Go home, get some sleep, don't overthink it.",
-    "Long day, short results. Head home and let it go till tomorrow.",
-]
-OFFICE_ALGO_WIN_LINES = [
-    "Outstanding work — that's going in the performance review.",
-    "Employee of the Month energy right there.",
-    "Management's taking notice. Keep this up.",
-    "That's the kind of quarter that gets you a corner office.",
-    "Solid close — drinks are on the company tonight.",
-    "Someone's getting a raise after that.",
-    "Now that's a number worth putting in the newsletter.",
-    "That's the kind of day that gets you name-dropped in the town hall.",
-    "Numbers like that don't go unnoticed upstairs.",
-    "Chalk that up as a career highlight.",
-    "That's a bonus-worthy shift if there ever was one.",
-    "Someone's putting your name up for the leaderboard.",
-    "That's the kind of close that gets applause in the Monday meeting.",
-    "Textbook performance. HR's going to want a quote for the newsletter.",
-    "That's the shift people talk about at the water cooler.",
-]
-OFFICE_NFT_WIN_LINES = [
-    "That's a career-defining win — frame it for the office wall.",
-    "That's the deal that gets you a keynote at the next all-hands.",
-    "Landed the big one. That's a corner-office kind of day.",
-    "That's how you make partner.",
-    "That's the kind of win they name a conference room after.",
-    "Legendary quarter. That one's going on the office plaque.",
-    "That's the deal of the fiscal year, full stop.",
-    "Someone's getting a corner office out of that one.",
-    "That's the kind of close that ends up in the annual report.",
-]
 
 
 def _roll_office_hits(spark_tier: int) -> tuple[bool, bool, float | None]:
@@ -259,17 +192,47 @@ class DuelPickView(discord.ui.View):
         await self._handle_pick(interaction, "scissors")
 
 
+class OfficeClockInView(discord.ui.View):
+    """
+    Persistent (timeout=None, fixed custom_id) — survives bot restarts once
+    registered via bot.add_view() in SparkOfficeCog.cog_load(). One button,
+    no picker: clicking it clocks in every due Office seat you hold, same
+    as running /office-shift with no arguments.
+    """
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Clock In", emoji="🕐", style=discord.ButtonStyle.primary, custom_id="office_clock_in_button")
+    async def clock_in(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        user_id = str(interaction.user.id)
+        wallet  = await asyncio.to_thread(get_wallet, user_id)
+        if not wallet:
+            await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+            return
+
+        cog = interaction.client.get_cog("SparkOfficeCog")
+        if not cog:
+            await interaction.followup.send("❌ Office system isn't loaded right now — try again shortly.", ephemeral=True)
+            return
+
+        result = await cog._clock_in_all_due(user_id, wallet)
+        await interaction.followup.send(cog._format_clock_in_result(result), ephemeral=True)
+
+
 class SparkOfficeCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.resolver.start()
-        self.promotion_sweep.start()
-        self.ambient_board.start()
+
+    async def cog_load(self):
+        # Register the button so it keeps working across bot restarts —
+        # same pattern grand_prix_cog uses for JoinAlgoView/JoinZapView.
+        self.bot.add_view(OfficeClockInView())
 
     def cog_unload(self):
         self.resolver.cancel()
-        self.promotion_sweep.cancel()
-        self.ambient_board.cancel()
 
     def _promotion_channel(self) -> discord.TextChannel | None:
         if not PROMOTION_CHANNEL_ID:
@@ -278,14 +241,11 @@ class SparkOfficeCog(commands.Cog):
 
     # ──────────────────────────────────────────
     # /office-promote — the entry point. Seats directly if a spot is open,
-    # otherwise challenges the lowest hit-rate seat on your behalf. asset_id
-    # is optional — omit it and every Spark in your wallet gets checked and
-    # attempted at once, same "don't make me look up an ID" philosophy as
-    # /office-shift.
+    # otherwise challenges the lowest hit-rate seat on your behalf.
     # ──────────────────────────────────────────
-    @app_commands.command(name="office-promote", description="Try to promote your eligible Spark(s) into the Office")
-    @app_commands.describe(asset_id="Optional — ASA ID of one specific Spark. Omit to check your whole wallet.")
-    async def office_promote(self, interaction: discord.Interaction, asset_id: int | None = None):
+    @app_commands.command(name="office-promote", description="Try to promote an eligible Spark into the Office")
+    @app_commands.describe(asset_id="ASA ID of the Spark to promote")
+    async def office_promote(self, interaction: discord.Interaction, asset_id: int):
         await interaction.response.defer(ephemeral=True)
         user_id = str(interaction.user.id)
 
@@ -294,47 +254,26 @@ class SparkOfficeCog(commands.Cog):
             await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
             return
 
-        if asset_id is not None:
-            spark = await asyncio.to_thread(get_spark, asset_id)
-            if not spark or spark.get("wallet") != wallet:
-                await interaction.followup.send("❌ That Spark isn't registered to your wallet.", ephemeral=True)
-                return
-            candidates = [spark]
-        else:
-            candidates = await asyncio.to_thread(get_sparks_for_wallet, wallet)
-            if not candidates:
-                await interaction.followup.send("❌ No Sparks found on your wallet.", ephemeral=True)
-                return
-            # get_sparks_for_wallet only selects asset_id/name/spark_type/tier/xp —
-            # wallet and discord_user_id aren't in that row, so stamp them on
-            # explicitly since every downstream function expects them.
-            for spark in candidates:
-                spark["wallet"] = wallet
-                spark["discord_user_id"] = user_id
-
-        # Filter down to not-already-seated + currently eligible, luckiest first.
-        eligible, skipped = [], {}
-        for spark in candidates:
-            asa = spark["asset_id"]
-            if await asyncio.to_thread(get_office_seat, asa):
-                skipped[asa] = "already_seated"
-                continue
-            check = await asyncio.to_thread(check_office_eligibility, asa)
-            if not check["eligible"]:
-                skipped[asa] = check["reason"]
-                continue
-            eligible.append((spark, check))
-        eligible.sort(key=lambda pair: pair[1]["hits_seen"], reverse=True)
-
-        if not eligible:
-            if asset_id is not None:
-                reason = INELIGIBLE_REASONS.get(skipped.get(asset_id, "not_eligible"), "not eligible right now")
-                await interaction.followup.send(f"❌ Not eligible — {reason}.", ephemeral=True)
-            else:
-                await interaction.followup.send("❌ None of your Sparks are currently eligible for promotion.", ephemeral=True)
+        spark = await asyncio.to_thread(get_spark, asset_id)
+        if not spark or spark.get("wallet") != wallet:
+            await interaction.followup.send("❌ That Spark isn't registered to your wallet.", ephemeral=True)
             return
 
-        # Sponsorship is wallet-level — one check covers every eligible Spark this run.
+        existing_seat = await asyncio.to_thread(get_office_seat, asset_id)
+        if existing_seat:
+            await interaction.followup.send("⏳ That Spark already holds an Office seat.", ephemeral=True)
+            return
+
+        check = await asyncio.to_thread(check_office_eligibility, asset_id)
+        if not check["eligible"]:
+            reason = INELIGIBLE_REASONS.get(check["reason"], check["reason"])
+            await interaction.followup.send(
+                f"❌ Not eligible — {reason}. ({check['hits_seen']} hits in last {check['shifts_seen']} shifts)",
+                ephemeral=True,
+            )
+            return
+
+        # Sponsorship — 5 Zappies, same wallet, one-time check.
         from algorand_lookup import link_wallet as verify_wallet
         ownership = await verify_wallet(user_id, wallet)
         if ownership.get("error"):
@@ -343,50 +282,49 @@ class SparkOfficeCog(commands.Cog):
         zappy_count = len(ownership.get("zappies", [])) + len(ownership.get("heroes", [])) + len(ownership.get("collabs", []))
         if zappy_count < OFFICE_SPONSOR_ZAPPY_COUNT:
             await interaction.followup.send(
-                f"❌ Needs {OFFICE_SPONSOR_ZAPPY_COUNT} Zappies in your wallet to sponsor a promotion "
-                f"— you have {zappy_count}. ({len(eligible)} Spark(s) otherwise ready to go.)",
+                f"❌ Needs {OFFICE_SPONSOR_ZAPPY_COUNT} Zappies in your wallet to sponsor the promotion "
+                f"— you have {zappy_count}.",
                 ephemeral=True,
             )
             return
 
-        results = []
-        for spark, check in eligible:
-            asa = spark["asset_id"]
-            spark_name = spark.get("name") or spark["spark_type"].capitalize()
-            seat_count = await asyncio.to_thread(get_office_seat_count)
+        seat_count = await asyncio.to_thread(get_office_seat_count)
+        spark_name = spark.get("name") or spark["spark_type"].capitalize()
 
-            if seat_count < OFFICE_SEAT_CAP:
-                await asyncio.to_thread(seat_spark, {**spark, "asset_id": asa})
-                results.append(f"🎉 **{spark_name}** promoted into an open seat!")
-                await self._post_promotion_channel(
-                    f"🏢 **{spark_name}** (<@{user_id}>) just walked into an open seat in the Office."
-                )
-                continue
-
-            target = await asyncio.to_thread(get_lowest_hitrate_seat)
-            target = target if (target and target["wallet"] != wallet) else None
-            if not target:
-                results.append(f"⏳ **{spark_name}** is eligible, but there's no valid seat to challenge right now.")
-                continue
-
-            duel = await asyncio.to_thread(create_office_duel, {**spark, "asset_id": asa}, target)
-            results.append(
-                f"⚔️ **{spark_name}** is challenging **{target.get('spark_name') or target['spark_type']}** for their seat!"
+        if seat_count < OFFICE_SEAT_CAP:
+            seat = {**spark, "asset_id": asset_id}
+            await asyncio.to_thread(seat_spark, seat)
+            await interaction.followup.send(f"🎉 **{spark_name}** promoted straight into an open Office seat!", ephemeral=True)
+            await self._post_promotion_channel(
+                f"🏢 **{spark_name}** (<@{user_id}>) just walked into an open seat in the Office."
             )
-            await self._post_duel_challenge(duel)
+            return
 
-        if skipped:
-            results.append(
-                f"\nSkipped ({len(skipped)}): "
-                + ", ".join(f"`{asa}` ({INELIGIBLE_REASONS.get(r, r)})" for asa, r in skipped.items())
+        # No open seats — challenge the lowest hit-rate seat instead.
+        target = await asyncio.to_thread(get_lowest_hitrate_seat)
+        target = target if (target and target["wallet"] != wallet) else None
+        if not target:
+            await interaction.followup.send(
+                "⏳ The Office is full and there's no valid seat to challenge right now. Try again later.",
+                ephemeral=True,
             )
-        for chunk in _chunk_lines(results):
-            await interaction.followup.send(chunk, ephemeral=True)
+            return
+
+        challenger = {**spark, "asset_id": asset_id}
+        duel = await asyncio.to_thread(create_office_duel, challenger, target)
+        await interaction.followup.send(
+            f"⚔️ The Office is full — **{spark_name}** is challenging "
+            f"**{target.get('spark_name') or target['spark_type']}** for their seat! "
+            f"Both sides have {OFFICE_DUEL_SUBMIT_HOURS}h to submit picks with `/office-duel-respond`.",
+            ephemeral=True,
+        )
+        await self._post_duel_challenge(duel)
 
     # ──────────────────────────────────────────
     # /office-shift — clocks in EVERY due, active Office seat you hold in
     # one shot. No asset_id needed — same "no picker, send everything"
-    # philosophy as /spark-job.
+    # philosophy as /spark-job. The persistent button in the promotion
+    # channel (OfficeClockInView, below) calls this exact same helper.
     # ──────────────────────────────────────────
     async def _clock_in_all_due(self, user_id: str, wallet: str) -> dict:
         """Returns {"clocked": [lines...], "skipped": {asa: reason}, "count": n, "no_seats": bool}."""
@@ -455,8 +393,7 @@ class SparkOfficeCog(commands.Cog):
             await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
             return
         result = await self._clock_in_all_due(user_id, wallet)
-        for chunk in _chunk_lines(self._format_clock_in_result(result).split("\n")):
-            await interaction.followup.send(chunk, ephemeral=True)
+        await interaction.followup.send(self._format_clock_in_result(result), ephemeral=True)
 
     # ──────────────────────────────────────────
     # /office-duel-respond — submit picks for a pending duel
@@ -482,84 +419,24 @@ class SparkOfficeCog(commands.Cog):
         await interaction.response.send_message(view._progress_text(), view=view, ephemeral=True)
 
     # ──────────────────────────────────────────
-    # /office-board — live snapshot of who's seated and what they're doing.
-    # Same embed also posts on its own at random intervals (ambient_board,
-    # below) so the Office has visible activity without anyone having to ask.
+    # Admin — setup & testing
     # ──────────────────────────────────────────
-    @app_commands.command(name="office-board", description="See who's working the Office right now")
-    async def office_board(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        embed = await self._build_office_board_embed()
-        await interaction.followup.send(embed=embed)
+    @app_commands.command(name="office-panel", description="[Admin] Post the Office clock-in button to the promotion channel")
+    async def office_panel(self, interaction: discord.Interaction):
+        if not await admin_check(interaction):
+            return
+        channel = self._promotion_channel()
+        if not channel:
+            await interaction.response.send_message("❌ PROMOTION_CHANNEL_ID isn't set.", ephemeral=True)
+            return
+        embed = discord.Embed(
+            title="🏢 The Office",
+            description="Hold an Office seat? Clock in for today's shift below — no ASA typing required.",
+            color=0x5865F2,
+        )
+        await channel.send(embed=embed, view=OfficeClockInView())
+        await interaction.response.send_message("✅ Panel posted.", ephemeral=True)
 
-    @staticmethod
-    def _progress_bar(filled: int, total: int, length: int = 10) -> str:
-        filled_blocks = round(filled / total * length) if total else 0
-        return "▰" * filled_blocks + "▱" * (length - filled_blocks)
-
-    def _next_sweep_time(self, now: datetime) -> datetime:
-        candidates = []
-        for t in PROMOTION_SWEEP_TIMES:
-            candidate = now.replace(hour=t.hour, minute=t.minute, second=0, microsecond=0)
-            if candidate <= now:
-                candidate += timedelta(days=1)
-            candidates.append(candidate)
-        return min(candidates)
-
-    async def _build_office_board_embed(self) -> discord.Embed:
-        seats = await asyncio.to_thread(get_office_seats)  # already sorted lowest hit-rate first
-        working_map = await asyncio.to_thread(get_working_office_shifts_map)
-        now = datetime.now(timezone.utc)
-        seat_count = len(seats)
-        bar = self._progress_bar(seat_count, OFFICE_SEAT_CAP)
-
-        if not seats:
-            embed = discord.Embed(
-                title="🏢 The Office — Live Board",
-                description=f"{bar}  **0/{OFFICE_SEAT_CAP}** seats filled\n\nEmpty right now — be the first with `/office-promote`.",
-                color=0x5865F2,
-            )
-            return embed
-
-        board_lines = [f"{bar}  **{seat_count}/{OFFICE_SEAT_CAP}** seats filled", ""]
-
-        for seat in seats:
-            name  = seat.get("spark_name") or seat["spark_type"].capitalize()
-            tier  = seat.get("spark_tier")
-            shifts, hits, misses = seat["shifts_completed"], seat["hits"], seat["consecutive_misses"]
-            rate  = f"{(hits / shifts * 100):.0f}%" if shifts else "—"
-            cold_flag = " ❄️" if misses >= max(OFFICE_DEMOTION_MISS_DAYS - 2, 1) else ""
-
-            if seat["status"] == "in_duel":
-                status = "⚔️ In a duel"
-            elif seat["spark_asa"] in working_map:
-                resolve_at = datetime.fromisoformat(working_map[seat["spark_asa"]]["resolve_at"])
-                status = f"🔧 On shift — back <t:{int(resolve_at.timestamp())}:R>"
-            else:
-                due = datetime.fromisoformat(seat["next_shift_due_at"]) if seat.get("next_shift_due_at") else now
-                status = f"💤 Resting — due <t:{int(due.timestamp())}:R>" if now < due else "⏳ Due now"
-
-            board_lines.append(f"🪑 **{name}** T{tier} — {status} · `{hits}/{shifts}` hits ({rate}){cold_flag}")
-
-        # Embed description caps at 4096 chars — 20 short seat lines never
-        # comes close, so no chunking/fields needed (embed fields cap at
-        # 1024 chars each, which _chunk_lines' default 1800 could exceed).
-        embed = discord.Embed(title="🏢 The Office — Live Board", description="\n".join(board_lines), color=0x5865F2)
-
-        lowest = seats[0]
-        lowest_name = lowest.get("spark_name") or lowest["spark_type"].capitalize()
-        lowest_rate = f"{(lowest['hits'] / lowest['shifts_completed'] * 100):.0f}%" if lowest["shifts_completed"] else "—"
-        next_sweep = self._next_sweep_time(now)
-        footer = f"⚔️ Duel target: {lowest_name} ({lowest_rate})"
-        if seat_count >= OFFICE_SEAT_CAP:
-            footer += f" · Next auto-sweep <t:{int(next_sweep.timestamp())}:R>"
-        embed.set_footer(text=footer)
-
-        return embed
-
-    # ──────────────────────────────────────────
-    # Admin — troubleshooting
-    # ──────────────────────────────────────────
     @app_commands.command(name="office-force-resolve", description="[Admin] Force-resolve a working Office shift with a chosen outcome")
     @app_commands.describe(
         asset_id="Spark ASA currently on an Office shift",
@@ -612,7 +489,7 @@ class SparkOfficeCog(commands.Cog):
         await self._post_promotion_channel(embed=embed)
 
     # ──────────────────────────────────────────
-    # Resolver — shifts, reminders, no-shows, cold-streak demotions, duel expiry
+    # Resolver — shifts, no-shows, cold-streak demotions, duel expiry
     # ──────────────────────────────────────────
     @tasks.loop(minutes=RESOLVER_INTERVAL_MINUTES)
     async def resolver(self):
@@ -623,7 +500,6 @@ class SparkOfficeCog(commands.Cog):
                 await self._process_algo_payouts()
                 await self._post_digest(resolved)
 
-            await self._process_shift_reminders()
             await self._process_noshow_demotions()
             await self._process_coldstreak_demotions()
             await self._process_expired_duels()
@@ -634,92 +510,9 @@ class SparkOfficeCog(commands.Cog):
     @resolver.before_loop
     async def before_resolver(self):
         await self.bot.wait_until_ready()
-
-    # ──────────────────────────────────────────
-    # Auto-promotion sweep — twice daily. Checks every Spark, luckiest
-    # first: open seats get auto-filled, and once seats are full, an
-    # eligible candidate auto-spawns a duel against the lowest hit-rate
-    # seat. Neither side chooses the moment, so both get equal footing —
-    # this mirrors /office-promote exactly, just run on everyone at once
-    # instead of one Spark at a time on request.
-    # ──────────────────────────────────────────
-    @tasks.loop(time=PROMOTION_SWEEP_TIMES)
-    async def promotion_sweep(self):
-        try:
-            await self._run_promotion_sweep()
-        except Exception as e:
-            print(f"[spark_office] promotion sweep error: {e}")
-
-    @promotion_sweep.before_loop
-    async def before_promotion_sweep(self):
-        await self.bot.wait_until_ready()
-
-    # ──────────────────────────────────────────
-    # Ambient board — same embed as /office-board, but shows up on its own.
-    # Checked every 30 min with a small independent chance each time, so
-    # posts land at random points through the day rather than a predictable
-    # schedule. Skips quietly if the Office is empty — no point announcing
-    # nothing.
-    # ──────────────────────────────────────────
-    @tasks.loop(minutes=AMBIENT_BOARD_CHECK_MINUTES)
-    async def ambient_board(self):
-        try:
-            if random.random() >= AMBIENT_BOARD_CHANCE:
-                return
-            seat_count = await asyncio.to_thread(get_office_seat_count)
-            if seat_count == 0:
-                return
-            embed = await self._build_office_board_embed()
-            await self._post_promotion_channel(embed=embed)
-        except Exception as e:
-            print(f"[spark_office] ambient board error: {e}")
-
-    @ambient_board.before_loop
-    async def before_ambient_board(self):
-        await self.bot.wait_until_ready()
-
-    async def _run_promotion_sweep(self):
-        from algorand_lookup import verify_wallet_owns_zappy
-
-        candidates = await asyncio.to_thread(get_all_office_candidates)
-        if not candidates:
-            return
-
-        for c in candidates:
-            wallet = c["wallet"]
-            spark_name = c.get("name") or c["spark_type"].capitalize()
-
-            # Re-check seat count fresh each iteration — an earlier candidate
-            # in this same sweep may have just filled the last open seat.
-            seat_count = await asyncio.to_thread(get_office_seat_count)
-
-            ownership = await verify_wallet_owns_zappy(wallet)
-            if ownership.get("error"):
-                continue  # couldn't verify this pass, will retry next sweep
-            zappy_count = (
-                len(ownership.get("zappies", []))
-                + len(ownership.get("heroes", []))
-                + len(ownership.get("collabs", []))
-            )
-            if zappy_count < OFFICE_SPONSOR_ZAPPY_COUNT:
-                continue  # not sponsored — skip silently, eligible again next sweep
-
-            if seat_count < OFFICE_SEAT_CAP:
-                await asyncio.to_thread(seat_spark, c)
-                await self._post_promotion_channel(
-                    f"🏢 **{spark_name}** (<@{c.get('discord_user_id')}>) was auto-promoted into an "
-                    f"open Office seat! ({c['hits_seen']} hits in its last 40 shifts)"
-                )
-                continue
-
-            # Seats are full — spawn a duel against the current lowest
-            # hit-rate seat. Can't challenge your own seat.
-            target = await asyncio.to_thread(get_lowest_hitrate_seat)
-            if not target or target["wallet"] == wallet:
-                continue  # no valid target this pass — try again next sweep
-
-            duel = await asyncio.to_thread(create_office_duel, c, target)
-            await self._post_duel_challenge(duel)
+        # Offset from Spark Jobs' resolver (same 5-min interval) so the two
+        # systems don't both hit AlgoNode in the same instant every cycle.
+        await asyncio.sleep(150)
 
     async def _resolve_and_settle(self, rows: list, forced_outcome: str | None = None, forced_amount: float | None = None) -> list:
         """
@@ -752,12 +545,7 @@ class SparkOfficeCog(commands.Cog):
             outcome = "nft" if nft_asa else ("algo" if algo_hit else "miss")
             flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
             if nft_name:
-                flavor_line += " " + random.choice(OFFICE_NFT_WIN_LINES)
                 flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
-            elif algo_hit:
-                flavor_line += " " + random.choice(OFFICE_ALGO_WIN_LINES)
-            else:
-                flavor_line += " " + random.choice(OFFICE_MISS_LINES)
 
             await asyncio.to_thread(
                 complete_office_job, row["id"], row["spark_asa"], outcome, amount, nft_asa, flavor_line
@@ -788,6 +576,11 @@ class SparkOfficeCog(commands.Cog):
 
     async def _process_algo_payouts(self):
         from algo_layer import _send_algo
+        from algo_quota_guard import is_quota_blocked
+
+        if is_quota_blocked():
+            print("[spark_office] Skipping ALGO payout pass — quota block active.")
+            return
 
         unpaid = await asyncio.to_thread(get_unpaid_office_algo_jobs)
         if not unpaid:
@@ -850,24 +643,6 @@ class SparkOfficeCog(commands.Cog):
 
         content = f"<@{r['discord_user_id']}>" if r.get("discord_user_id") else None
         await channel.send(content=content, embed=embed)
-
-    async def _process_shift_reminders(self):
-        seats = await asyncio.to_thread(get_seats_needing_reminder)
-        for seat in seats:
-            await self._send_shift_reminder(seat)
-            await asyncio.to_thread(mark_seat_reminded, seat["spark_asa"], datetime.now(timezone.utc))
-
-    async def _send_shift_reminder(self, seat: dict):
-        """Post the alarm right in the promotion channel — no DMs."""
-        name = seat.get("spark_name") or seat["spark_type"].capitalize()
-        discord_id = seat.get("discord_user_id")
-        mention = f"<@{discord_id}> " if discord_id else ""
-        message = (
-            f"{mention}⏰ **Alarm — time to clock in!** "
-            f"**{name}**'s Office shift is open. Run `/office-shift` within "
-            f"{OFFICE_NO_SHOW_GRACE_HOURS}h or the seat opens up."
-        )
-        await self._post_promotion_channel(message)
 
     async def _process_noshow_demotions(self):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
