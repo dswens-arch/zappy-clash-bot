@@ -75,6 +75,7 @@ from database import (
     OFFICE_MIN_SHIFTS_FOR_DUEL,
     OFFICE_DUEL_SUBMIT_HOURS,
     OFFICE_NO_SHOW_GRACE_HOURS,
+    OFFICE_DEMOTION_MISS_DAYS,
 )
 
 # Reuse the existing flavor-line banks and small helpers instead of
@@ -118,6 +119,56 @@ SHIFT_SKIP_REASONS = {
     "already_working":  "already on shift",
     "in_duel":          "seat tied up in a duel",
 }
+
+# Office shifts reuse the same per-job story flavor text as base Jobs, but
+# every outcome also gets one of these appended — this is what makes the
+# Office actually read like a 9-to-5 rather than just "Jobs with better odds."
+# Misses send you home for the day; wins get real workplace praise.
+OFFICE_MISS_LINES = [
+    "Nothing today — clock out, head home, and get some rest. Same time tomorrow.",
+    "Quiet one. Go home, eat some dinner, and recharge — the desk will still be there.",
+    "That's a wrap for today. Log off, put your feet up, come back sharp tomorrow.",
+    "Slow shift. Head home and decompress — tomorrow's a new day.",
+    "No dice this time. Go grab dinner and get some sleep — you've earned the evening off.",
+    "Punch out. Rest up tonight and try again tomorrow.",
+    "One of those days. Shut the laptop, order something good, and call it early.",
+    "Nothing on the books today. Head home — no sense staying late for this.",
+    "Coffee didn't help today. Go home, unwind, and reset for tomorrow.",
+    "Not every shift's a winner. Go home, get some real rest, and shake it off.",
+    "Quiet on the floor. Head out, eat well, and come back fresh.",
+    "That one just wasn't in the cards. Go home, relax, try again tomorrow.",
+    "Nothing to show for today. Log off early and take the evening for yourself.",
+    "Dry spell continues. Go home, get some sleep, don't overthink it.",
+    "Long day, short results. Head home and let it go till tomorrow.",
+]
+OFFICE_ALGO_WIN_LINES = [
+    "Outstanding work — that's going in the performance review.",
+    "Employee of the Month energy right there.",
+    "Management's taking notice. Keep this up.",
+    "That's the kind of quarter that gets you a corner office.",
+    "Solid close — drinks are on the company tonight.",
+    "Someone's getting a raise after that.",
+    "Now that's a number worth putting in the newsletter.",
+    "That's the kind of day that gets you name-dropped in the town hall.",
+    "Numbers like that don't go unnoticed upstairs.",
+    "Chalk that up as a career highlight.",
+    "That's a bonus-worthy shift if there ever was one.",
+    "Someone's putting your name up for the leaderboard.",
+    "That's the kind of close that gets applause in the Monday meeting.",
+    "Textbook performance. HR's going to want a quote for the newsletter.",
+    "That's the shift people talk about at the water cooler.",
+]
+OFFICE_NFT_WIN_LINES = [
+    "That's a career-defining win — frame it for the office wall.",
+    "That's the deal that gets you a keynote at the next all-hands.",
+    "Landed the big one. That's a corner-office kind of day.",
+    "That's how you make partner.",
+    "That's the kind of win they name a conference room after.",
+    "Legendary quarter. That one's going on the office plaque.",
+    "That's the deal of the fiscal year, full stop.",
+    "Someone's getting a corner office out of that one.",
+    "That's the kind of close that ends up in the annual report.",
+]
 
 
 def _roll_office_hits(spark_tier: int) -> tuple[bool, bool, float | None]:
@@ -701,7 +752,12 @@ class SparkOfficeCog(commands.Cog):
             outcome = "nft" if nft_asa else ("algo" if algo_hit else "miss")
             flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
             if nft_name:
+                flavor_line += " " + random.choice(OFFICE_NFT_WIN_LINES)
                 flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
+            elif algo_hit:
+                flavor_line += " " + random.choice(OFFICE_ALGO_WIN_LINES)
+            else:
+                flavor_line += " " + random.choice(OFFICE_MISS_LINES)
 
             await asyncio.to_thread(
                 complete_office_job, row["id"], row["spark_asa"], outcome, amount, nft_asa, flavor_line
