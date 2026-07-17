@@ -38,18 +38,22 @@ from algosdk.v2client import algod, indexer
 # ---------------------------------------------------------------------------
 
 def get_algod_client() -> algod.AlgodClient:
+    token = os.getenv("ALGOD_TOKEN", "")
+    headers = {"X-Algo-API-Token": token} if token else {}
     return algod.AlgodClient(
-        algod_token=os.getenv("ALGOD_TOKEN", ""),
+        algod_token=token,
         algod_address=os.getenv("ALGOD_URL", "https://mainnet-api.algonode.cloud"),
-        headers={"X-Algo-API-Token": os.getenv("ALGOD_TOKEN", "")},
+        headers=headers,
     )
 
 
 def get_indexer_client() -> indexer.IndexerClient:
+    token = os.getenv("INDEXER_TOKEN", "")
+    headers = {"X-Indexer-API-Token": token} if token else {}
     return indexer.IndexerClient(
-        indexer_token=os.getenv("INDEXER_TOKEN", ""),
+        indexer_token=token,
         indexer_address=os.getenv("INDEXER_URL", "https://mainnet-idx.algonode.cloud"),
-        headers={"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")},
+        headers=headers,
     )
 
 
