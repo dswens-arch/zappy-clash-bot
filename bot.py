@@ -2902,6 +2902,50 @@ async def assign_buddy_finder_role(discord_user_id: str):
 
 
 
+@tasks.loop(minutes=2)
+async def quota_warning_watcher():
+    """
+    Checks Supabase every 2 minutes for a pending AlgoNode quota warning
+    (set by algo_quota_guard.record_call() once today's tracked AlgoNode
+    call count crosses the warning threshold) and DMs the server owner.
+
+    Note: this counter only sees calls this bot's own code makes (payouts,
+    wallet lookups) — it can't see Discord's own image-embed fetches
+    against the same AlgoNode quota, so real usage may be higher than
+    what gets reported here. Treat the DM as an early warning, not a
+    precise total.
+    """
+    try:
+        from algo_quota_guard import pop_warning_if_due
+        count = pop_warning_if_due()
+        if count is None:
+            return
+
+        channel = bot.get_channel(CLASH_CHANNEL)
+        guild = channel.guild if channel else bot.get_guild(GUILD_ID)
+        if not guild or not guild.owner_id:
+            print(f"[quota_warning_watcher] Threshold crossed ({count} calls) but couldn't resolve guild owner to DM.")
+            return
+
+        owner = await bot.fetch_user(guild.owner_id)
+        await owner.send(
+            f"⚠️ **AlgoNode quota warning** — tracked Algorand calls today: **{count:,}** "
+            f"(warning threshold: 150,000 of AlgoNode's ~200,000/day free-tier cap).\n\n"
+            f"This count only includes payouts/wallet-lookup calls this bot makes directly — "
+            f"it doesn't include Discord's own image-embed fetches against the same quota, "
+            f"so real usage may already be higher. Worth checking Railway logs / easing off "
+            f"non-essential Algorand calls for the rest of today."
+        )
+        print(f"[quota_warning_watcher] Sent quota warning DM to owner ({count} calls today).")
+    except Exception as e:
+        print(f"[quota_warning_watcher] error: {e}")
+
+
+@quota_warning_watcher.before_loop
+async def before_quota_warning_watcher():
+    await bot.wait_until_ready()
+
+
 @tasks.loop(minutes=1)
 async def session_scheduler():
     """Checks every minute and triggers session events at the right time."""
@@ -3793,6 +3837,8 @@ async def on_ready():
     session_scheduler.start()
     print("⏰ Session scheduler running")
     auction_checker.start()
+    quota_warning_watcher.start()
+    print("📊 AlgoNode quota warning watcher running")
 
 def _load_extra_zappies():
     """Load Zappies added via /addzappies from Supabase into the live collection."""
