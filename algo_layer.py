@@ -32,6 +32,8 @@ from qrcode.image.pure import PyPNGImage
 from algosdk import mnemonic, account, transaction
 from algosdk.v2client import algod, indexer
 
+from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, looks_like_quota_error
+
 
 # ---------------------------------------------------------------------------
 # Client setup
@@ -264,9 +266,16 @@ def make_payment_view(algo_uri: str, pera_uri: str):
 
 def get_bot_balance() -> int:
     """Return bot wallet balance in microALGO."""
-    client = get_algod_client()
-    _, address = get_bot_account()
-    return client.account_info(address)["amount"]
+    if is_quota_blocked():
+        raise RuntimeError("Algorand API quota exceeded — skipping call, try again later.")
+    try:
+        client = get_algod_client()
+        _, address = get_bot_account()
+        return client.account_info(address)["amount"]
+    except Exception as e:
+        if looks_like_quota_error(e):
+            mark_quota_exceeded(detail=str(e))
+        raise
 
 
 def check_bot_can_pay() -> bool:
@@ -281,7 +290,14 @@ def get_account_balance(address: str) -> int:
 
 
 def get_current_round() -> int:
-    return get_algod_client().status()["last-round"]
+    if is_quota_blocked():
+        raise RuntimeError("Algorand API quota exceeded — skipping call, try again later.")
+    try:
+        return get_algod_client().status()["last-round"]
+    except Exception as e:
+        if looks_like_quota_error(e):
+            mark_quota_exceeded(detail=str(e))
+        raise
 
 
 # ---------------------------------------------------------------------------
@@ -299,6 +315,10 @@ def find_payment_txn(
     Search the indexer for a confirmed ALGO payment matching all criteria.
     Returns txid if found, None otherwise.
     """
+    if is_quota_blocked():
+        print("[algo_layer] Skipping indexer search — quota block active.")
+        return None
+
     idx          = get_indexer_client()
     expected_b64 = base64.b64encode(expected_note.encode()).decode()
 
@@ -311,6 +331,8 @@ def find_payment_txn(
             min_round=after_round,
         )
     except Exception as e:
+        if looks_like_quota_error(e):
+            mark_quota_exceeded(detail=str(e))
         print(f"[algo_layer] Indexer search error: {e}")
         return None
 
@@ -395,22 +417,30 @@ async def wait_for_payment(
 
 def _send_algo(receiver: str, amount_microalgo: int, note: str) -> str:
     """Sign, broadcast, and confirm an ALGO payment from the bot wallet."""
-    private_key, bot_address = get_bot_account()
-    client = get_algod_client()
-    params = client.suggested_params()
+    if is_quota_blocked():
+        raise RuntimeError("Algorand API quota exceeded — skipping payout, will retry once quota clears.")
 
-    txn = transaction.PaymentTxn(
-        sender=bot_address,
-        sp=params,
-        receiver=receiver,
-        amt=amount_microalgo,
-        note=note.encode("utf-8"),
-    )
+    try:
+        private_key, bot_address = get_bot_account()
+        client = get_algod_client()
+        params = client.suggested_params()
 
-    signed = txn.sign(private_key)
-    txid   = client.send_transaction(signed)
-    transaction.wait_for_confirmation(client, txid, 10)
-    return txid
+        txn = transaction.PaymentTxn(
+            sender=bot_address,
+            sp=params,
+            receiver=receiver,
+            amt=amount_microalgo,
+            note=note.encode("utf-8"),
+        )
+
+        signed = txn.sign(private_key)
+        txid   = client.send_transaction(signed)
+        transaction.wait_for_confirmation(client, txid, 10)
+        return txid
+    except Exception as e:
+        if looks_like_quota_error(e):
+            mark_quota_exceeded(detail=str(e))
+        raise
 
 
 def send_payout(winner_address: str, duel_id: str) -> str:
