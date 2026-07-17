@@ -66,6 +66,7 @@ from database import (
     get_working_office_shift,
     get_working_office_shifts_map,
     get_all_office_candidates,
+    set_office_shift_time,
     OFFICE_SEAT_CAP,
     OFFICE_SPONSOR_ZAPPY_COUNT,
     OFFICE_ALGO_HIT_CHANCE,
@@ -259,6 +260,34 @@ class DuelPickView(discord.ui.View):
         await self._handle_pick(interaction, "scissors")
 
 
+class ShiftTimeSelect(discord.ui.Select):
+    """24 fixed hourly UTC slots — Discord has no native time picker, and
+    this avoids free-text parsing/validation entirely. Applies the chosen
+    time to every seat passed in, in one shot — no need to pick per-Spark."""
+
+    def __init__(self, seats: list[tuple[int, str]]):
+        options = [discord.SelectOption(label=f"{h:02d}:00 UTC", value=str(h)) for h in range(24)]
+        super().__init__(placeholder="Choose your daily shift time (UTC)", options=options)
+        self.seats = seats
+
+    async def callback(self, interaction: discord.Interaction):
+        hour = int(self.values[0])
+        for asa, _ in self.seats:
+            await asyncio.to_thread(set_office_shift_time, asa, hour, 0)
+        names = ", ".join(f"**{name}**" for _, name in self.seats)
+        await interaction.response.edit_message(
+            content=f"✅ Daily shift time set to **{hour:02d}:00 UTC** for {names}. "
+                    f"Shifts open at this time every day from now on.",
+            view=None,
+        )
+
+
+class ShiftTimeSelectView(discord.ui.View):
+    def __init__(self, seats: list[tuple[int, str]]):
+        super().__init__(timeout=300)
+        self.add_item(ShiftTimeSelect(seats))
+
+
 class SparkOfficeCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -350,6 +379,7 @@ class SparkOfficeCog(commands.Cog):
             return
 
         results = []
+        newly_seated = []  # (asa, spark_name) — used to offer the shift-time picker after
         for spark, check in eligible:
             asa = spark["asset_id"]
             spark_name = spark.get("name") or spark["spark_type"].capitalize()
@@ -357,6 +387,7 @@ class SparkOfficeCog(commands.Cog):
 
             if seat_count < OFFICE_SEAT_CAP:
                 await asyncio.to_thread(seat_spark, {**spark, "asset_id": asa})
+                newly_seated.append((asa, spark_name))
                 results.append(f"🎉 **{spark_name}** promoted into an open seat!")
                 await self._post_promotion_channel(
                     f"🏢 **{spark_name}** (<@{user_id}>) just walked into an open seat in the Office."
@@ -380,8 +411,17 @@ class SparkOfficeCog(commands.Cog):
                 f"\nSkipped ({len(skipped)}): "
                 + ", ".join(f"`{asa}` ({INELIGIBLE_REASONS.get(r, r)})" for asa, r in skipped.items())
             )
+
         for chunk in _chunk_lines(results):
             await interaction.followup.send(chunk, ephemeral=True)
+
+        if newly_seated:
+            names = ", ".join(f"**{name}**" for _, name in newly_seated)
+            await interaction.followup.send(
+                f"Pick a daily shift time for {names}:",
+                view=ShiftTimeSelectView(newly_seated),
+                ephemeral=True,
+            )
 
     # ──────────────────────────────────────────
     # /office-shift — clocks in EVERY due, active Office seat you hold in
@@ -480,6 +520,34 @@ class SparkOfficeCog(commands.Cog):
 
         view = DuelPickView(duel["id"], side, name or f"ASA {asset_id}")
         await interaction.response.send_message(view._progress_text(), view=view, ephemeral=True)
+
+    # ──────────────────────────────────────────
+    # /office-set-shift-time — pick/change a seat's fixed daily anchor.
+    # Covers both existing seat-holders (their time was auto-backfilled
+    # from the old rolling system and they may want to actually choose
+    # one) and anyone who skipped the inline picker after promotion.
+    # ──────────────────────────────────────────
+    @app_commands.command(name="office-set-shift-time", description="Choose your daily Office clock-in time for all your seated Sparks")
+    async def office_set_shift_time(self, interaction: discord.Interaction):
+        user_id = str(interaction.user.id)
+        wallet = await asyncio.to_thread(get_wallet, user_id)
+        if not wallet:
+            await interaction.response.send_message("❌ Link your wallet first with `/link`.", ephemeral=True)
+            return
+
+        seats = await asyncio.to_thread(get_office_seats_for_wallet, wallet)
+        seats = [s for s in seats if s.get("status") == "active"]
+        if not seats:
+            await interaction.response.send_message("❌ You don't hold any Office seats.", ephemeral=True)
+            return
+
+        seat_list = [(s["spark_asa"], s.get("spark_name") or s["spark_type"].capitalize()) for s in seats]
+        names = ", ".join(f"**{n}**" for _, n in seat_list)
+        await interaction.response.send_message(
+            f"Pick a daily shift time for {names}:",
+            view=ShiftTimeSelectView(seat_list),
+            ephemeral=True,
+        )
 
     # ──────────────────────────────────────────
     # /office-board — live snapshot of who's seated and what they're doing.
