@@ -28,6 +28,20 @@ from expedition_events import (
     MOMENTUM_START, momentum_multiplier, momentum_label, momentum_bar,
 )
 
+
+def _ipfs_url(url: str) -> str:
+    """Rewrite any IPFS gateway URL to the reliable Pera gateway.
+
+    Mirrors the helper in bot.py — same rewrite used for Clash and board
+    thumbnails, which no longer have flaky-image issues. Kept as a local
+    copy here (rather than imported from bot.py) to avoid a circular import
+    between the cog and this module.
+    """
+    if url and "/ipfs/" in url:
+        cid = url.split("/ipfs/")[-1].split("?")[0].strip()
+        return f"https://ipfs-pera.algonode.dev/ipfs/{cid}?optimizer=image&width=512&quality=80"
+    return url
+
 # ─────────────────────────────────────────────
 # Collection bonus tiers
 # ─────────────────────────────────────────────
@@ -856,7 +870,7 @@ def build_run_complete_embed(run: dict, nft_drop: bool = False) -> discord.Embed
         )
 
     if zappy.get("image_url"):
-        embed.set_thumbnail(url=zappy["image_url"])
+        embed.set_thumbnail(url=_ipfs_url(zappy["image_url"]))
 
     embed.set_footer(text=f"{zappy.get('name','Your Zappy')} · Use /exprank to see the Expedition leaderboard")
     return embed
