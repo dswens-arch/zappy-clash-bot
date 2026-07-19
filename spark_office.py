@@ -171,6 +171,35 @@ OFFICE_NFT_WIN_LINES = [
     "That's the kind of close that ends up in the annual report.",
 ]
 
+# Promotion is a bigger moment than any single shift — it's the reward for
+# a genuine hot streak, not a grind milestone, so it gets its own bank and
+# its own embed treatment rather than a one-line channel post.
+OFFICE_PROMOTION_LINES = [
+    "The streak got noticed. Welcome to the Office.",
+    "That kind of luck doesn't go unnoticed upstairs.",
+    "Someone upstairs pulled some strings. New desk, new odds.",
+    "Hot hand, corner office. That's how it works around here.",
+    "The board took one look at that run and made the call.",
+    "Turns out being lucky is a hireable skill.",
+    "That's the kind of run that gets you headhunted internally.",
+    "Management doesn't ask how, just how often. Welcome aboard.",
+    "Somebody pulled a badge and a keycard together real fast.",
+]
+
+
+def _append_office_line(base: str, addition: str) -> str:
+    """
+    Appends office-flavor text after the base job-story line, making sure
+    there's real sentence-ending punctuation between them first. Without
+    this, a base line ending mid-clause (no trailing period) runs straight
+    into the next sentence with no separation — e.g. "...no luck Quiet on
+    the floor." instead of "...no luck. Quiet on the floor."
+    """
+    base = base.rstrip()
+    if base and base[-1] not in ".!?":
+        base += "."
+    return f"{base} {addition}"
+
 
 def _roll_office_hits(spark_tier: int) -> tuple[bool, bool, float | None]:
     algo_hit = random.random() < OFFICE_ALGO_HIT_CHANCE.get(spark_tier, 0)
@@ -288,12 +317,43 @@ class ShiftTimeSelectView(discord.ui.View):
         self.add_item(ShiftTimeSelect(seats))
 
 
+class OfficeReminderClockInView(discord.ui.View):
+    """
+    Persistent button attached to shift-reminder alarms — clicking it
+    clocks in every due Office seat the wallet holds (not just the one
+    Spark that triggered this specific reminder), same bulk behavior as
+    /office-shift. Persistent (timeout=None, fixed custom_id) so it keeps
+    working even if the bot restarts before someone clicks it.
+    """
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Clock In", emoji="🕐", style=discord.ButtonStyle.primary, custom_id="office_reminder_clock_in")
+    async def clock_in(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        user_id = str(interaction.user.id)
+        wallet = await asyncio.to_thread(get_wallet, user_id)
+        if not wallet:
+            await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+            return
+        cog = interaction.client.get_cog("SparkOfficeCog")
+        if not cog:
+            await interaction.followup.send("❌ Office system isn't loaded right now — try again shortly.", ephemeral=True)
+            return
+        result = await cog._clock_in_all_due(user_id, wallet)
+        await interaction.followup.send(cog._format_clock_in_result(result), ephemeral=True)
+
+
 class SparkOfficeCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.resolver.start()
         self.promotion_sweep.start()
         self.ambient_board.start()
+
+    async def cog_load(self):
+        self.bot.add_view(OfficeReminderClockInView())
 
     def cog_unload(self):
         self.resolver.cancel()
@@ -326,6 +386,24 @@ class SparkOfficeCog(commands.Cog):
             f"-# Each UTC slot below, shown in your own local time:\n"
             + "\n".join(ref_lines)
         )
+
+    @staticmethod
+    def _promotion_celebration_embed(spark_name: str, discord_user_id: str | None, hits_seen: int | None = None) -> discord.Embed:
+        """
+        Shared celebration embed for both the manual /office-promote path
+        and the auto-sweep — a promotion is the payoff for a genuine hot
+        streak, so it earns real fanfare instead of a plain one-line post.
+        """
+        who = f"<@{discord_user_id}>" if discord_user_id else "Someone"
+        line = random.choice(OFFICE_PROMOTION_LINES)
+        stat = f"\n\n🔥 {hits_seen} hits in its last 40 shifts." if hits_seen is not None else ""
+        embed = discord.Embed(
+            title="🎉 PROMOTED TO THE OFFICE!",
+            description=f"**{spark_name}** just earned a seat. {who}'s Spark is moving up.\n\n*{line}*{stat}",
+            color=0xFFD700,
+        )
+        embed.set_footer(text="🏢 The Office · run /office-set-shift-time to pick a clock-in time")
+        return embed
 
     # ──────────────────────────────────────────
     # /office-promote — the entry point. Seats directly if a spot is open,
@@ -412,7 +490,7 @@ class SparkOfficeCog(commands.Cog):
                 newly_seated.append((asa, spark_name))
                 results.append(f"🎉 **{spark_name}** promoted into an open seat!")
                 await self._post_promotion_channel(
-                    f"🏢 **{spark_name}** (<@{user_id}>) just walked into an open seat in the Office."
+                    embed=self._promotion_celebration_embed(spark_name, user_id, check["hits_seen"])
                 )
                 continue
 
@@ -487,10 +565,13 @@ class SparkOfficeCog(commands.Cog):
                 bullet_lines = [f"• {l}" for l in clocked_lines]
                 chunks = _chunk_lines(bullet_lines)
                 color = _color_for_user(user_id)
-                ping  = f"🕐 <@{user_id}> clocks **{len(clocked_lines)}** Office Spark(s) in:"
                 for i, chunk in enumerate(chunks):
-                    embed = discord.Embed(description=chunk, color=color)
-                    await channel.send(content=ping if i == 0 else None, embed=embed)
+                    embed = discord.Embed(
+                        title=f"🕐 Clocking In — {len(clocked_lines)} Office Spark(s)" if i == 0 else "🕐 Clocking In (cont.)",
+                        description=chunk,
+                        color=color,
+                    )
+                    await channel.send(content=f"<@{user_id}>" if i == 0 else None, embed=embed)
 
         return {"clocked": clocked_lines, "skipped": skipped, "count": len(clocked_lines), "no_seats": False}
 
@@ -802,8 +883,7 @@ class SparkOfficeCog(commands.Cog):
             if seat_count < OFFICE_SEAT_CAP:
                 await asyncio.to_thread(seat_spark, c)
                 await self._post_promotion_channel(
-                    f"🏢 **{spark_name}** (<@{c.get('discord_user_id')}>) was auto-promoted into an "
-                    f"open Office seat! ({c['hits_seen']} hits in its last 40 shifts)"
+                    embed=self._promotion_celebration_embed(spark_name, c.get("discord_user_id"), c["hits_seen"])
                 )
                 continue
 
@@ -847,12 +927,12 @@ class SparkOfficeCog(commands.Cog):
             outcome = "nft" if nft_asa else ("algo" if algo_hit else "miss")
             flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
             if nft_name:
-                flavor_line += " " + random.choice(OFFICE_NFT_WIN_LINES)
+                flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_NFT_WIN_LINES))
                 flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
             elif algo_hit:
-                flavor_line += " " + random.choice(OFFICE_ALGO_WIN_LINES)
+                flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_ALGO_WIN_LINES))
             else:
-                flavor_line += " " + random.choice(OFFICE_MISS_LINES)
+                flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_MISS_LINES))
 
             await asyncio.to_thread(
                 complete_office_job, row["id"], row["spark_asa"], outcome, amount, nft_asa, flavor_line
@@ -933,10 +1013,14 @@ class SparkOfficeCog(commands.Cog):
             for r in misses:
                 by_owner.setdefault(r.get("discord_user_id"), []).append(r)
             for owner_id, rows in by_owner.items():
-                lines = [f"💤 {JOB_EMOJIS.get(r['job'], '🔧')} {r['flavor_line']}" for r in rows]
+                lines = [f"{JOB_EMOJIS.get(r['job'], '🔧')} {r['flavor_line']}" for r in rows]
                 color = _color_for_user(owner_id)
-                for chunk in _chunk_lines(lines):
-                    embed = discord.Embed(description=chunk, color=color)
+                for i, chunk in enumerate(_chunk_lines(lines)):
+                    embed = discord.Embed(
+                        title="💤 Office — End of Shift" if i == 0 else "💤 Office — End of Shift (cont.)",
+                        description=chunk,
+                        color=color,
+                    )
                     content = f"<@{owner_id}>" if owner_id else None
                     await channel.send(content=content, embed=embed, allowed_mentions=no_ping)
 
@@ -963,36 +1047,48 @@ class SparkOfficeCog(commands.Cog):
             await asyncio.to_thread(mark_seat_reminded, seat["spark_asa"], datetime.now(timezone.utc))
 
     async def _send_shift_reminder(self, seat: dict):
-        """Post the alarm right in the promotion channel — no DMs."""
         name = seat.get("spark_name") or seat["spark_type"].capitalize()
         discord_id = seat.get("discord_user_id")
-        mention = f"<@{discord_id}> " if discord_id else ""
-        message = (
-            f"{mention}⏰ **Alarm — time to clock in!** "
-            f"**{name}**'s Office shift is open. Run `/office-shift` within "
-            f"{OFFICE_NO_SHOW_GRACE_HOURS}h or the seat opens up."
+        mention = f"<@{discord_id}>" if discord_id else None
+
+        embed = discord.Embed(
+            title="⏰ Alarm — time to clock in!",
+            description=(
+                f"**{name}**'s Office shift is open.\n"
+                f"Tap below within **{OFFICE_NO_SHOW_GRACE_HOURS}h** or the seat opens up."
+            ),
+            color=0xE67E22,
         )
-        await self._post_promotion_channel(message)
+        channel = self._promotion_channel()
+        if channel:
+            await channel.send(content=mention, embed=embed, view=OfficeReminderClockInView())
 
     async def _process_noshow_demotions(self):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
         for seat in no_shows:
             await asyncio.to_thread(vacate_seat, seat["spark_asa"])
             name = seat.get("spark_name") or seat["spark_type"]
-            await self._post_promotion_channel(
-                f"🚪 **{name}** (<@{seat.get('discord_user_id')}>) lost their Office seat — no-show. "
-                f"A seat just opened up."
+            embed = discord.Embed(
+                title="🚪 Seat Vacated — No-Show",
+                description=f"**{name}** (<@{seat.get('discord_user_id')}>) didn't clock in in time. A seat just opened up.",
+                color=0xE74C3C,
             )
+            await self._post_promotion_channel(embed=embed)
 
     async def _process_coldstreak_demotions(self):
         cold = await asyncio.to_thread(get_seats_for_cold_streak_demotion)
         for seat in cold:
             await asyncio.to_thread(vacate_seat, seat["spark_asa"])
             name = seat.get("spark_name") or seat["spark_type"]
-            await self._post_promotion_channel(
-                f"❄️ **{name}** (<@{seat.get('discord_user_id')}>) ran cold and lost their Office seat "
-                f"— {seat['consecutive_misses']} shifts with no hit. A seat just opened up."
+            embed = discord.Embed(
+                title="❄️ Seat Vacated — Cold Streak",
+                description=(
+                    f"**{name}** (<@{seat.get('discord_user_id')}>) ran cold — "
+                    f"{seat['consecutive_misses']} shifts with no hit. A seat just opened up."
+                ),
+                color=0xE74C3C,
             )
+            await self._post_promotion_channel(embed=embed)
 
     async def _process_expired_duels(self):
         expired = await asyncio.to_thread(get_expired_pending_duels)
