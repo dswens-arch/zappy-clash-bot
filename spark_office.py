@@ -1042,20 +1042,32 @@ class SparkOfficeCog(commands.Cog):
 
     async def _process_shift_reminders(self):
         seats = await asyncio.to_thread(get_seats_needing_reminder)
-        for seat in seats:
-            await self._send_shift_reminder(seat)
-            await asyncio.to_thread(mark_seat_reminded, seat["spark_asa"], datetime.now(timezone.utc))
+        if not seats:
+            return
 
-    async def _send_shift_reminder(self, seat: dict):
-        name = seat.get("spark_name") or seat["spark_type"].capitalize()
-        discord_id = seat.get("discord_user_id")
+        # One button already clocks in every due seat for a wallet, so
+        # multiple due Sparks on the same wallet get ONE combined alarm
+        # instead of a separate embed+button per Spark.
+        by_wallet: dict[str, list] = {}
+        for seat in seats:
+            by_wallet.setdefault(seat["wallet"], []).append(seat)
+
+        for wallet_seats in by_wallet.values():
+            await self._send_shift_reminder(wallet_seats)
+            for seat in wallet_seats:
+                await asyncio.to_thread(mark_seat_reminded, seat["spark_asa"], datetime.now(timezone.utc))
+
+    async def _send_shift_reminder(self, seats: list[dict]):
+        discord_id = seats[0].get("discord_user_id")
         mention = f"<@{discord_id}>" if discord_id else None
+        names = ", ".join(f"**{s.get('spark_name') or s['spark_type'].capitalize()}**" for s in seats)
+        plural = len(seats) > 1
 
         embed = discord.Embed(
             title="⏰ Alarm — time to clock in!",
             description=(
-                f"**{name}**'s Office shift is open.\n"
-                f"Tap below within **{OFFICE_NO_SHOW_GRACE_HOURS}h** or the seat opens up."
+                f"The following Office shift{'s are' if plural else ' is'} open: {names}.\n"
+                f"Tap below within **{OFFICE_NO_SHOW_GRACE_HOURS}h** or the seat{'s' if plural else ''} open{'s' if not plural else ''} up."
             ),
             color=0xE67E22,
         )
