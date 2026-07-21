@@ -301,6 +301,38 @@ def _build_gamble_flavor_line(scenario_emoji: str, scenario_name: str, spark_nam
         return f"{scenario_emoji} **{spark_name}** crushed the {scenario_name} for **{amount} ALGO**! {random.choice(GAMBLE_WIN_LINES)}"
     return f"{scenario_emoji} **{spark_name}** walked into the {scenario_name}... {random.choice(GAMBLE_MISS_LINES)}"
 
+# Images — same pattern as grand_prix_cog: files committed directly into
+# the repo (Railway deploys them to disk, no external hosting needed),
+# loaded locally and attached to the message. Missing a file just logs a
+# warning and sends without the image rather than breaking anything.
+OFFICE_IMAGES_DIR = "office_images"
+OFFICE_IMAGE_FILES = {
+    "alarm":     "alarm.jpg",
+    "board":     "board.jpg",
+    "promotion": "promotion.jpg",
+}
+
+
+def _office_image_file(kind: str) -> discord.File | None:
+    filename = OFFICE_IMAGE_FILES.get(kind)
+    if not filename:
+        return None
+    path = os.path.join(OFFICE_IMAGES_DIR, filename)
+    if not os.path.exists(path):
+        print(f"[spark_office] image missing: {path}")
+        return None
+    return discord.File(path, filename=filename)
+
+
+def _attach_office_image(embed: discord.Embed, kind: str) -> discord.File | None:
+    """Loads the image (if present) and wires it into the embed's set_image
+    reference — caller still needs to pass the returned File to the actual
+    send() call, Discord requires both together."""
+    file = _office_image_file(kind)
+    if file:
+        embed.set_image(url=f"attachment://{file.filename}")
+    return file
+
 
 def _roll_office_hits(
     spark_tier: int, gamble: bool = False,
@@ -658,9 +690,9 @@ class SparkOfficeCog(commands.Cog):
                 await asyncio.to_thread(seat_spark, {**spark, "asset_id": asa})
                 newly_seated.append((asa, spark_name))
                 results.append(f"🎉 **{spark_name}** promoted into an open seat!")
-                await self._post_promotion_channel(
-                    embed=self._promotion_celebration_embed(spark_name, user_id, check["hits_seen"])
-                )
+                promo_embed = self._promotion_celebration_embed(spark_name, user_id, check["hits_seen"])
+                promo_file = _attach_office_image(promo_embed, "promotion")
+                await self._post_promotion_channel(embed=promo_embed, file=promo_file)
                 continue
 
             target = await asyncio.to_thread(get_lowest_hitrate_seat)
@@ -890,7 +922,8 @@ class SparkOfficeCog(commands.Cog):
     async def office_board(self, interaction: discord.Interaction):
         await interaction.response.defer()
         embed = await self._build_office_board_embed()
-        await interaction.followup.send(embed=embed)
+        board_file = _attach_office_image(embed, "board")
+        await interaction.followup.send(embed=embed, file=board_file)
 
     @staticmethod
     def _progress_bar(filled: int, total: int, length: int = 10) -> str:
@@ -998,10 +1031,10 @@ class SparkOfficeCog(commands.Cog):
     # ──────────────────────────────────────────
     # Promotion channel helpers
     # ──────────────────────────────────────────
-    async def _post_promotion_channel(self, content: str = None, embed: discord.Embed = None):
+    async def _post_promotion_channel(self, content: str = None, embed: discord.Embed = None, file: discord.File = None):
         channel = self._promotion_channel()
         if channel:
-            await channel.send(content=content, embed=embed)
+            await channel.send(content=content, embed=embed, file=file)
 
     async def _post_duel_challenge(self, duel: dict):
         embed = discord.Embed(
@@ -1082,7 +1115,8 @@ class SparkOfficeCog(commands.Cog):
             if seat_count == 0:
                 return
             embed = await self._build_office_board_embed()
-            await self._post_promotion_channel(embed=embed)
+            board_file = _attach_office_image(embed, "board")
+            await self._post_promotion_channel(embed=embed, file=board_file)
         except Exception as e:
             print(f"[spark_office] ambient board error: {e}")
 
@@ -1183,9 +1217,9 @@ class SparkOfficeCog(commands.Cog):
 
             if seat_count < OFFICE_SEAT_CAP:
                 await asyncio.to_thread(seat_spark, c)
-                await self._post_promotion_channel(
-                    embed=self._promotion_celebration_embed(spark_name, c.get("discord_user_id"), c["hits_seen"])
-                )
+                promo_embed = self._promotion_celebration_embed(spark_name, c.get("discord_user_id"), c["hits_seen"])
+                promo_file = _attach_office_image(promo_embed, "promotion")
+                await self._post_promotion_channel(embed=promo_embed, file=promo_file)
                 continue
 
             # Seats are full — spawn a duel against the current lowest
@@ -1400,9 +1434,10 @@ class SparkOfficeCog(commands.Cog):
             )
 
         embed = discord.Embed(title="⏰ Alarm — time to clock in!", description=description, color=0xE67E22)
+        alarm_file = _attach_office_image(embed, "alarm")
         channel = self._promotion_channel()
         if channel:
-            await channel.send(content=mention, embed=embed, view=OfficeReminderView(gamble_index))
+            await channel.send(content=mention, embed=embed, view=OfficeReminderView(gamble_index), file=alarm_file)
 
     async def _process_noshow_demotions(self):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
