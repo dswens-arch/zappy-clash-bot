@@ -67,6 +67,8 @@ from database import (
     get_working_office_shifts_map,
     get_all_office_candidates,
     set_office_shift_time,
+    get_active_office_event,
+    set_office_event,
     OFFICE_SEAT_CAP,
     OFFICE_SPONSOR_ZAPPY_COUNT,
     OFFICE_ALGO_HIT_CHANCE,
@@ -77,6 +79,10 @@ from database import (
     OFFICE_DUEL_SUBMIT_HOURS,
     OFFICE_NO_SHOW_GRACE_HOURS,
     OFFICE_DEMOTION_MISS_DAYS,
+    OFFICE_GAMBLE_HIT_CHANCE_MULT,
+    OFFICE_GAMBLE_NFT_CHANCE_MULT,
+    OFFICE_GAMBLE_PAYOUT_MULT,
+    OFFICE_EVENT_DURATION_HOURS,
 )
 
 # Reuse the existing flavor-line banks and small helpers instead of
@@ -100,6 +106,16 @@ RESOLVER_INTERVAL_MINUTES = 5
 # rather than a predictable fixed schedule.
 AMBIENT_BOARD_CHECK_MINUTES = 30
 AMBIENT_BOARD_CHANCE        = 0.06
+
+# Gossip — pure texture, checked more often than the board since it's cheap
+# and low-stakes; ~5% per 45-min check averages a few posts a day.
+OFFICE_GOSSIP_CHECK_MINUTES = 45
+OFFICE_GOSSIP_CHANCE        = 0.05
+
+# Office-wide events — checked hourly, low chance, so they stay rare and
+# feel like a genuine surprise rather than a predictable freebie.
+OFFICE_EVENT_CHECK_MINUTES = 60
+OFFICE_EVENT_CHANCE        = 0.02
 
 # Twice daily, 12h apart — spaced away from the Clash bracket times (2PM/12AM
 # UTC) so a heavy Clash resolution and a promotion sweep don't land at once.
@@ -186,6 +202,76 @@ OFFICE_PROMOTION_LINES = [
     "Somebody pulled a badge and a keycard together real fast.",
 ]
 
+# Gossip — pure atmosphere, never tied to a roll or a stat. Posts at random
+# on its own, same "small chance each check" trick as the ambient board.
+OFFICE_GOSSIP_SOLO_LINES = [
+    "Rumor has it {name} is up for a raise.",
+    "Word around the office is {name} brought homemade cookies today. No one's seen them since.",
+    "{name} has been suspiciously quiet during meetings lately.",
+    "Someone saw {name} practicing their acceptance speech in the break room mirror.",
+    "{name} keeps 'accidentally' cc'ing management on everything.",
+    "Overheard: '{name} definitely knows something we don't.'",
+    "{name} has a suspiciously tidy desk this week. Something's up.",
+    "{name} has been first in, last out all week. Someone's angling for something.",
+    "There's a rumor {name} has a standing lunch with the board now.",
+]
+OFFICE_GOSSIP_DUO_LINES = [
+    "{name} and {name2} were seen arguing over the good stapler again.",
+    "{name} is covering for {name2}, who's out 'sick' for the third time this month.",
+    "Rumor has it {name} and {name2} are in a fierce competition for employee of the month.",
+    "{name} keeps taking credit for {name2}'s work in the group chat.",
+    "{name} and {name2} were spotted whispering by the printer. Nobody knows why.",
+    "{name} and {name2} have matching coffee orders now. Make of that what you will.",
+]
+
+# Office-wide events — every seated Spark's odds get boosted at once, for a
+# full day, independent of anyone's individual roll.
+OFFICE_EVENTS = [
+    {"name": "☕ Free Coffee in the Break Room", "algo_bonus": 0.020, "nft_bonus": 0.000},
+    {"name": "🎉 Casual Friday Energy",           "algo_bonus": 0.015, "nft_bonus": 0.002},
+    {"name": "📈 Good Quarter Vibes Company-Wide", "algo_bonus": 0.025, "nft_bonus": 0.000},
+    {"name": "🍕 Pizza Party in the Break Room",   "algo_bonus": 0.020, "nft_bonus": 0.001},
+    {"name": "🏆 CEO's in a Good Mood Today",      "algo_bonus": 0.010, "nft_bonus": 0.003},
+]
+
+# High-stakes gamble — 6 rotating scenario names/emoji, same underlying
+# mechanic and flavor banks either way. Only the name changes, so it
+# doesn't feel like the exact same button offer every time.
+GAMBLE_SCENARIOS = [
+    {"emoji": "🎤", "name": "Big Pitch Meeting"},
+    {"emoji": "📊", "name": "Quarterly Business Review"},
+    {"emoji": "💼", "name": "Client Negotiation"},
+    {"emoji": "🤝", "name": "Merger Talks"},
+    {"emoji": "🎯", "name": "Performance Review"},
+    {"emoji": "📽️", "name": "Board Presentation"},
+]
+GAMBLE_SCENARIO_BY_NAME = {s["name"]: s for s in GAMBLE_SCENARIOS}
+OFFICE_GAMBLE_OFFER_CHANCE = 0.25  # chance the reminder also offers a gamble button
+
+# Kept scenario-neutral so the same bank reads fine under any of the 6
+# names above — nothing here references "pitch" specifically.
+GAMBLE_CLOCK_IN_LINES = [
+    "walks in, notes in hand, ready for whatever's about to happen.",
+    "takes a breath and steps into the room.",
+    "double-checks the numbers one more time before walking in.",
+    "straightens their collar and heads in.",
+    "brought the good font for this one. It's that kind of day.",
+]
+GAMBLE_WIN_LINES = [
+    "Knocked it out of the park.",
+    "The room went silent, then erupted.",
+    "That's the kind of moment that gets framed on the wall.",
+    "Standing ovation. Actual standing ovation.",
+    "Someone's already drafting the case study.",
+]
+GAMBLE_MISS_LINES = [
+    "Swung big and missed. Back to the drawing board.",
+    "The room was polite about it, which is somehow worse.",
+    "Slides crashed halfway through. Rough one.",
+    "Nobody asked a single follow-up question. Never good.",
+    "Live to fight another day.",
+]
+
 
 def _append_office_line(base: str, addition: str) -> str:
     """
@@ -201,13 +287,46 @@ def _append_office_line(base: str, addition: str) -> str:
     return f"{base} {addition}"
 
 
-def _roll_office_hits(spark_tier: int) -> tuple[bool, bool, float | None]:
-    algo_hit = random.random() < OFFICE_ALGO_HIT_CHANCE.get(spark_tier, 0)
-    nft_hit  = random.random() < OFFICE_NFT_HIT_CHANCE.get(spark_tier, 0)
+def _build_gamble_flavor_line(scenario_emoji: str, scenario_name: str, spark_name: str,
+                               algo_hit: bool, amount: float | None, nft_name: str | None) -> str:
+    """
+    Gamble shifts aren't one of the 21 random jobs, so this doesn't go
+    through _build_flavor_line (which expects a real JOBS dict key) —
+    it's its own flavor entirely, built around whichever of the 6 gamble
+    scenarios this particular shift landed on.
+    """
+    if nft_name:
+        return f"{scenario_emoji} **{spark_name}** crushed the {scenario_name} and walked out with **{nft_name}**! {random.choice(GAMBLE_WIN_LINES)}"
+    if algo_hit:
+        return f"{scenario_emoji} **{spark_name}** crushed the {scenario_name} for **{amount} ALGO**! {random.choice(GAMBLE_WIN_LINES)}"
+    return f"{scenario_emoji} **{spark_name}** walked into the {scenario_name}... {random.choice(GAMBLE_MISS_LINES)}"
+
+
+def _roll_office_hits(
+    spark_tier: int, gamble: bool = False,
+    event_algo_bonus: float = 0.0, event_nft_bonus: float = 0.0,
+) -> tuple[bool, bool, float | None]:
+    algo_chance = OFFICE_ALGO_HIT_CHANCE.get(spark_tier, 0)
+    nft_chance  = OFFICE_NFT_HIT_CHANCE.get(spark_tier, 0)
+    lo, hi = OFFICE_PAYOUT_RANGE.get(spark_tier, (0.1, 0.3))
+    cap = OFFICE_MAX_SHIFT_PAYOUT
+
+    if gamble:
+        algo_chance *= OFFICE_GAMBLE_HIT_CHANCE_MULT
+        nft_chance  *= OFFICE_GAMBLE_NFT_CHANCE_MULT
+        lo *= OFFICE_GAMBLE_PAYOUT_MULT
+        hi *= OFFICE_GAMBLE_PAYOUT_MULT
+        cap *= OFFICE_GAMBLE_PAYOUT_MULT
+
+    # Office-wide event bonus applies to everyone's roll, gambling or not.
+    algo_chance += event_algo_bonus
+    nft_chance  += event_nft_bonus
+
+    algo_hit = random.random() < algo_chance
+    nft_hit  = random.random() < nft_chance
     amount = None
     if algo_hit:
-        lo, hi = OFFICE_PAYOUT_RANGE.get(spark_tier, (0.1, 0.3))
-        amount = round(min(random.uniform(lo, hi), OFFICE_MAX_SHIFT_PAYOUT), 3)
+        amount = round(min(random.uniform(lo, hi), cap), 3)
     return algo_hit, nft_hit, amount
 
 
@@ -317,20 +436,14 @@ class ShiftTimeSelectView(discord.ui.View):
         self.add_item(ShiftTimeSelect(seats))
 
 
-class OfficeReminderClockInView(discord.ui.View):
-    """
-    Persistent button attached to shift-reminder alarms — clicking it
-    clocks in every due Office seat the wallet holds (not just the one
-    Spark that triggered this specific reminder), same bulk behavior as
-    /office-shift. Persistent (timeout=None, fixed custom_id) so it keeps
-    working even if the bot restarts before someone clicks it.
-    """
+class OfficeClockInButton(discord.ui.Button):
+    """The safe option — always present on a reminder. Bulk-clocks in
+    every due seat the wallet holds."""
 
     def __init__(self):
-        super().__init__(timeout=None)
+        super().__init__(label="Clock In", emoji="🕐", style=discord.ButtonStyle.primary, custom_id="office_reminder_clock_in")
 
-    @discord.ui.button(label="Clock In", emoji="🕐", style=discord.ButtonStyle.primary, custom_id="office_reminder_clock_in")
-    async def clock_in(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
         user_id = str(interaction.user.id)
         wallet = await asyncio.to_thread(get_wallet, user_id)
@@ -345,20 +458,76 @@ class OfficeReminderClockInView(discord.ui.View):
         await interaction.followup.send(cog._format_clock_in_result(result), ephemeral=True)
 
 
+class OfficeGambleButton(discord.ui.Button):
+    """
+    The risky option — only shows up ~25% of the time (see
+    OFFICE_GAMBLE_OFFER_CHANCE), rotating through 6 scenario names so it
+    doesn't read as the same button every time. Bulk-gambles every due
+    seat the wallet holds, same "everyone at once" behavior as the safe
+    button, just riskier.
+    """
+
+    def __init__(self, scenario_index: int):
+        scenario = GAMBLE_SCENARIOS[scenario_index]
+        super().__init__(
+            label=scenario["name"], emoji=scenario["emoji"],
+            style=discord.ButtonStyle.danger,
+            custom_id=f"office_gamble_btn_{scenario_index}",
+        )
+        self.scenario_index = scenario_index
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        user_id = str(interaction.user.id)
+        wallet = await asyncio.to_thread(get_wallet, user_id)
+        if not wallet:
+            await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+            return
+        cog = interaction.client.get_cog("SparkOfficeCog")
+        if not cog:
+            await interaction.followup.send("❌ Office system isn't loaded right now — try again shortly.", ephemeral=True)
+            return
+        scenario = GAMBLE_SCENARIOS[self.scenario_index]
+        result = await cog._gamble_in_all_due(user_id, wallet, scenario)
+        await interaction.followup.send(cog._format_gamble_result(result, scenario), ephemeral=True)
+
+
+class OfficeReminderView(discord.ui.View):
+    """
+    Persistent (timeout=None). Always carries the safe Clock In button;
+    when gamble_scenario_index is given, also carries the riskier option
+    for that specific scenario. Registered in cog_load for all 7 possible
+    combinations (safe-only + one per scenario) so buttons keep working
+    across bot restarts regardless of which variant was originally sent.
+    """
+
+    def __init__(self, gamble_scenario_index: int | None = None):
+        super().__init__(timeout=None)
+        self.add_item(OfficeClockInButton())
+        if gamble_scenario_index is not None:
+            self.add_item(OfficeGambleButton(gamble_scenario_index))
+
+
 class SparkOfficeCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.resolver.start()
         self.promotion_sweep.start()
         self.ambient_board.start()
+        self.office_gossip.start()
+        self.office_event_check.start()
 
     async def cog_load(self):
-        self.bot.add_view(OfficeReminderClockInView())
+        self.bot.add_view(OfficeReminderView())
+        for i in range(len(GAMBLE_SCENARIOS)):
+            self.bot.add_view(OfficeReminderView(gamble_scenario_index=i))
 
     def cog_unload(self):
         self.resolver.cancel()
         self.promotion_sweep.cancel()
         self.ambient_board.cancel()
+        self.office_gossip.cancel()
+        self.office_event_check.cancel()
 
     def _promotion_channel(self) -> discord.TextChannel | None:
         if not PROMOTION_CHANNEL_ID:
@@ -588,6 +757,68 @@ class SparkOfficeCog(commands.Cog):
                 lines.append(f"  · ASA `{asa}` — {SHIFT_SKIP_REASONS.get(reason, reason)}")
         return "\n".join(lines)
 
+    async def _gamble_in_all_due(self, user_id: str, wallet: str, scenario: dict) -> dict:
+        """
+        Bulk version of /office-gamble, used by the reminder's gamble
+        button — every due, active seat this wallet holds goes into the
+        SAME scenario at once, mirroring how the safe Clock In button
+        bulk-clocks everyone in rather than picking one at random.
+        """
+        seats = await asyncio.to_thread(get_office_seats_for_wallet, wallet)
+        if not seats:
+            return {"gambled": [], "skipped": {}, "count": 0, "no_seats": True}
+
+        now = datetime.now(timezone.utc)
+        gambled_lines = []
+        skipped = {}
+
+        for seat in seats:
+            if seat["status"] != "active":
+                skipped[seat["spark_asa"]] = "in_duel"
+                continue
+            due = datetime.fromisoformat(seat["next_shift_due_at"])
+            if now < due:
+                skipped[seat["spark_asa"]] = "not_due_yet"
+                continue
+            working = await asyncio.to_thread(get_working_office_shift, seat["spark_asa"])
+            if working:
+                skipped[seat["spark_asa"]] = "already_working"
+                continue
+
+            spark_name = seat.get("spark_name") or seat["spark_type"].capitalize()
+            line = f"{scenario['emoji']} **{spark_name}** (Office) " + random.choice(GAMBLE_CLOCK_IN_LINES)
+            await asyncio.to_thread(create_office_shift, seat, scenario["name"], line, True)
+            gambled_lines.append(line)
+
+        if gambled_lines:
+            channel = self._promotion_channel()
+            if channel:
+                bullet_lines = [f"• {l}" for l in gambled_lines]
+                color = _color_for_user(user_id)
+                for i, chunk in enumerate(_chunk_lines(bullet_lines)):
+                    embed = discord.Embed(
+                        title=f"{scenario['emoji']} {scenario['name']} — {len(gambled_lines)} Office Spark(s)"
+                              if i == 0 else f"{scenario['emoji']} {scenario['name']} (cont.)",
+                        description=chunk,
+                        color=color,
+                    )
+                    await channel.send(content=f"<@{user_id}>" if i == 0 else None, embed=embed)
+
+        return {"gambled": gambled_lines, "skipped": skipped, "count": len(gambled_lines), "no_seats": False}
+
+    def _format_gamble_result(self, result: dict, scenario: dict) -> str:
+        if result["no_seats"]:
+            return "❌ You don't hold any Office seats."
+        if result["count"] == 0 and not result["skipped"]:
+            return "❌ You don't hold any Office seats."
+        lines = [f"🎲 Sent **{result['count']}** Spark(s) into the {scenario['name']}." if result["count"]
+                  else "⏳ Nothing to send in right now."]
+        if result["skipped"]:
+            lines.append(f"\nSkipped ({len(result['skipped'])}):")
+            for asa, reason in result["skipped"].items():
+                lines.append(f"  · ASA `{asa}` — {SHIFT_SKIP_REASONS.get(reason, reason)}")
+        return "\n".join(lines)
+
     @app_commands.command(name="office-shift", description="Clock in all your due Office Spark(s) for today")
     async def office_shift(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -678,19 +909,24 @@ class SparkOfficeCog(commands.Cog):
     async def _build_office_board_embed(self) -> discord.Embed:
         seats = await asyncio.to_thread(get_office_seats)  # already sorted lowest hit-rate first
         working_map = await asyncio.to_thread(get_working_office_shifts_map)
+        event = await asyncio.to_thread(get_active_office_event)
         now = datetime.now(timezone.utc)
         seat_count = len(seats)
         bar = self._progress_bar(seat_count, OFFICE_SEAT_CAP)
+        event_line = ""
+        if event:
+            expires = datetime.fromisoformat(event["expires_at"])
+            event_line = f"\n{event['event_name']} — boosted odds until <t:{int(expires.timestamp())}:R>"
 
         if not seats:
             embed = discord.Embed(
                 title="🏢 The Office — Live Board",
-                description=f"{bar}  **0/{OFFICE_SEAT_CAP}** seats filled\n\nEmpty right now — be the first with `/office-promote`.",
+                description=f"{bar}  **0/{OFFICE_SEAT_CAP}** seats filled{event_line}\n\nEmpty right now — be the first with `/office-promote`.",
                 color=0x5865F2,
             )
             return embed
 
-        board_lines = [f"{bar}  **{seat_count}/{OFFICE_SEAT_CAP}** seats filled", ""]
+        board_lines = [f"{bar}  **{seat_count}/{OFFICE_SEAT_CAP}** seats filled{event_line}", ""]
 
         for seat in seats:
             name  = seat.get("spark_name") or seat["spark_type"].capitalize()
@@ -854,6 +1090,71 @@ class SparkOfficeCog(commands.Cog):
     async def before_ambient_board(self):
         await self.bot.wait_until_ready()
 
+    # ──────────────────────────────────────────
+    # Gossip — pure atmosphere, never touches odds/payouts/stats. References
+    # currently-seated Sparks by name so the room feels populated rather
+    # than 20 people soloing in parallel.
+    # ──────────────────────────────────────────
+    @tasks.loop(minutes=OFFICE_GOSSIP_CHECK_MINUTES)
+    async def office_gossip(self):
+        try:
+            if random.random() >= OFFICE_GOSSIP_CHANCE:
+                return
+            seats = await asyncio.to_thread(get_office_seats)
+            if not seats:
+                return
+            names = [s.get("spark_name") or s["spark_type"].capitalize() for s in seats]
+
+            if len(names) >= 2 and random.random() < 0.4:
+                a, b = random.sample(names, 2)
+                line = random.choice(OFFICE_GOSSIP_DUO_LINES).format(name=a, name2=b)
+            else:
+                line = random.choice(OFFICE_GOSSIP_SOLO_LINES).format(name=random.choice(names))
+
+            embed = discord.Embed(description=f"💬 *{line}*", color=0x95A5A6)
+            await self._post_promotion_channel(embed=embed)
+        except Exception as e:
+            print(f"[spark_office] gossip error: {e}")
+
+    @office_gossip.before_loop
+    async def before_office_gossip(self):
+        await self.bot.wait_until_ready()
+
+    # ──────────────────────────────────────────
+    # Office-wide events — every seated Spark's odds get boosted at once for
+    # a full day, independent of anyone's individual roll. Rare on purpose
+    # (2% per hourly check) so it stays a genuine surprise, and only one can
+    # be active at a time.
+    # ──────────────────────────────────────────
+    @tasks.loop(minutes=OFFICE_EVENT_CHECK_MINUTES)
+    async def office_event_check(self):
+        try:
+            active = await asyncio.to_thread(get_active_office_event)
+            if active:
+                return
+            if random.random() >= OFFICE_EVENT_CHANCE:
+                return
+            seat_count = await asyncio.to_thread(get_office_seat_count)
+            if seat_count == 0:
+                return
+
+            event = random.choice(OFFICE_EVENTS)
+            await asyncio.to_thread(
+                set_office_event, event["name"], event["algo_bonus"], event["nft_bonus"], OFFICE_EVENT_DURATION_HOURS
+            )
+            embed = discord.Embed(
+                title=event["name"],
+                description=f"Every seated Spark gets boosted odds for the next {OFFICE_EVENT_DURATION_HOURS}h!",
+                color=0x2ECC71,
+            )
+            await self._post_promotion_channel(embed=embed)
+        except Exception as e:
+            print(f"[spark_office] event check error: {e}")
+
+    @office_event_check.before_loop
+    async def before_office_event_check(self):
+        await self.bot.wait_until_ready()
+
     async def _run_promotion_sweep(self):
         from algorand_lookup import verify_wallet_owns_zappy
 
@@ -904,9 +1205,14 @@ class SparkOfficeCog(commands.Cog):
         """
         from nft_rewards import award_nft_prize
 
+        event = None if forced_outcome is not None else await asyncio.to_thread(get_active_office_event)
+        event_algo_bonus = event["bonus_algo_pct"] if event else 0.0
+        event_nft_bonus = event["bonus_nft_pct"] if event else 0.0
+
         resolved = []
         for row in rows:
             spark_name = row.get("spark_name") or row["spark_type"]
+            is_gamble = row.get("is_gamble", False)
 
             if forced_outcome is not None:
                 algo_hit = forced_outcome == "algo"
@@ -916,7 +1222,10 @@ class SparkOfficeCog(commands.Cog):
                     lo, hi = OFFICE_PAYOUT_RANGE.get(row["spark_tier"], (0.1, 0.3))
                     amount = forced_amount if forced_amount is not None else round(min(random.uniform(lo, hi), OFFICE_MAX_SHIFT_PAYOUT), 3)
             else:
-                algo_hit, nft_hit, amount = _roll_office_hits(row["spark_tier"])
+                algo_hit, nft_hit, amount = _roll_office_hits(
+                    row["spark_tier"], gamble=is_gamble,
+                    event_algo_bonus=event_algo_bonus, event_nft_bonus=event_nft_bonus,
+                )
 
             nft_asa, nft_name = None, None
             if nft_hit:
@@ -925,14 +1234,23 @@ class SparkOfficeCog(commands.Cog):
                     nft_asa, nft_name = prize["asset_id"], prize["name"]
 
             outcome = "nft" if nft_asa else ("algo" if algo_hit else "miss")
-            flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
-            if nft_name:
-                flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_NFT_WIN_LINES))
-                flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
-            elif algo_hit:
-                flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_ALGO_WIN_LINES))
+
+            if is_gamble:
+                gamble_scenario = GAMBLE_SCENARIO_BY_NAME.get(row["job"], GAMBLE_SCENARIOS[0])
+                flavor_line = _build_gamble_flavor_line(
+                    gamble_scenario["emoji"], gamble_scenario["name"], spark_name, algo_hit, amount, nft_name
+                )
+                if nft_name:
+                    flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
             else:
-                flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_MISS_LINES))
+                flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
+                if nft_name:
+                    flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_NFT_WIN_LINES))
+                    flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
+                elif algo_hit:
+                    flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_ALGO_WIN_LINES))
+                else:
+                    flavor_line = _append_office_line(flavor_line, random.choice(OFFICE_MISS_LINES))
 
             await asyncio.to_thread(
                 complete_office_job, row["id"], row["spark_asa"], outcome, amount, nft_asa, flavor_line
@@ -1013,7 +1331,10 @@ class SparkOfficeCog(commands.Cog):
             for r in misses:
                 by_owner.setdefault(r.get("discord_user_id"), []).append(r)
             for owner_id, rows in by_owner.items():
-                lines = [f"{JOB_EMOJIS.get(r['job'], '🔧')} {r['flavor_line']}" for r in rows]
+                lines = [
+                    f"{GAMBLE_SCENARIO_BY_NAME.get(r['job'], GAMBLE_SCENARIOS[0])['emoji'] if r.get('is_gamble') else JOB_EMOJIS.get(r['job'], '🔧')} {r['flavor_line']}"
+                    for r in rows
+                ]
                 color = _color_for_user(owner_id)
                 for i, chunk in enumerate(_chunk_lines(lines)):
                     embed = discord.Embed(
@@ -1028,14 +1349,16 @@ class SparkOfficeCog(commands.Cog):
         channel = self._promotion_channel()
         if not channel:
             return
-        job_emoji  = JOB_EMOJIS.get(r["job"], "🔧")
+        gamble_scenario = GAMBLE_SCENARIO_BY_NAME.get(r["job"], GAMBLE_SCENARIOS[0]) if r.get("is_gamble") else None
+        job_emoji  = gamble_scenario["emoji"] if gamble_scenario else JOB_EMOJIS.get(r["job"], "🔧")
+        job_label  = gamble_scenario["name"] if gamble_scenario else r["job"]
         spark_name = r.get("spark_name") or r["spark_type"]
 
         if r["outcome"] == "nft":
             embed = discord.Embed(title=f"🎁 OFFICE NFT DROP — {spark_name}", description=r["flavor_line"], color=0xB833FF)
         else:
             embed = discord.Embed(title=f"💰 OFFICE ALGO HIT — {spark_name}", description=r["flavor_line"], color=0xFFD700)
-        embed.set_footer(text=f"{job_emoji} {r['job']} shift · The Office")
+        embed.set_footer(text=f"{job_emoji} {job_label} · The Office")
 
         content = f"<@{r['discord_user_id']}>" if r.get("discord_user_id") else None
         await channel.send(content=content, embed=embed)
@@ -1063,17 +1386,23 @@ class SparkOfficeCog(commands.Cog):
         names = ", ".join(f"**{s.get('spark_name') or s['spark_type'].capitalize()}**" for s in seats)
         plural = len(seats) > 1
 
-        embed = discord.Embed(
-            title="⏰ Alarm — time to clock in!",
-            description=(
-                f"The following Office shift{'s are' if plural else ' is'} open: {names}.\n"
-                f"Tap below within **{OFFICE_NO_SHOW_GRACE_HOURS}h** or the seat{'s' if plural else ''} open{'s' if not plural else ''} up."
-            ),
-            color=0xE67E22,
+        gamble_index = random.randrange(len(GAMBLE_SCENARIOS)) if random.random() < OFFICE_GAMBLE_OFFER_CHANCE else None
+
+        description = (
+            f"The following Office shift{'s are' if plural else ' is'} open: {names}.\n"
+            f"Tap below within **{OFFICE_NO_SHOW_GRACE_HOURS}h** or the seat{'s' if plural else ''} open{'s' if not plural else ''} up."
         )
+        if gamble_index is not None:
+            scenario = GAMBLE_SCENARIOS[gamble_index]
+            description += (
+                f"\n\n{scenario['emoji']} **Rare opportunity:** a **{scenario['name']}** just opened up — "
+                f"go big instead of playing it safe. Lower odds, way bigger payout."
+            )
+
+        embed = discord.Embed(title="⏰ Alarm — time to clock in!", description=description, color=0xE67E22)
         channel = self._promotion_channel()
         if channel:
-            await channel.send(content=mention, embed=embed, view=OfficeReminderClockInView())
+            await channel.send(content=mention, embed=embed, view=OfficeReminderView(gamble_index))
 
     async def _process_noshow_demotions(self):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
