@@ -839,6 +839,41 @@ OFFICE_NFT_HIT_CHANCE  = {1: 0.0060, 2: 0.0070, 3: 0.0080}
 OFFICE_PAYOUT_RANGE    = {1: (0.2, 0.6), 2: (0.35, 1.0), 3: (0.5, 1.5)}
 OFFICE_MAX_SHIFT_PAYOUT = 1.5
 
+# High-stakes gamble — trade the safe daily roll for much lower odds and a
+# much bigger payout. Multipliers apply on top of the normal tables above.
+OFFICE_GAMBLE_HIT_CHANCE_MULT = 0.5   # half the normal ALGO hit chance
+OFFICE_GAMBLE_NFT_CHANCE_MULT = 2.0   # double the NFT shot — the "big win" flavor
+OFFICE_GAMBLE_PAYOUT_MULT     = 3.0   # triple the payout range (and cap)
+
+# Office-wide events — periodic surprise that boosts EVERY seat's odds at
+# once, independent of any one person's roll. At most one active at a time.
+OFFICE_EVENT_DURATION_HOURS = 24  # spans a full day so every fixed shift-time anchor gets one shot at it
+
+
+def get_active_office_event() -> dict | None:
+    """Returns the current office-wide event if one is active, else None."""
+    db = get_supabase()
+    row = db.table("spark_office_events").select("*").eq("id", 1).single().execute().data
+    if not row or not row.get("expires_at"):
+        return None
+    expires = datetime.fromisoformat(row["expires_at"])
+    if datetime.now(timezone.utc) >= expires:
+        return None
+    return row
+
+
+def set_office_event(name: str, bonus_algo_pct: float, bonus_nft_pct: float, hours: int = OFFICE_EVENT_DURATION_HOURS) -> None:
+    db = get_supabase()
+    expires = datetime.now(timezone.utc) + timedelta(hours=hours)
+    db.table("spark_office_events").upsert({
+        "id":             1,
+        "event_name":     name,
+        "bonus_algo_pct": bonus_algo_pct,
+        "bonus_nft_pct":  bonus_nft_pct,
+        "expires_at":     expires.isoformat(),
+        "created_at":     datetime.now(timezone.utc).isoformat(),
+    }).execute()
+
 
 def get_office_seat_count() -> int:
     db = get_supabase()
@@ -1039,7 +1074,7 @@ def get_eligible_sparks_for_office(wallet: str) -> dict:
 # ── Office shift lifecycle — mirrors create_spark_job / get_due_jobs /
 #    complete_job exactly, just against spark_office_log ──────────────────
 
-def create_office_shift(seat: dict, job: str, flavor_line: str) -> dict:
+def create_office_shift(seat: dict, job: str, flavor_line: str, is_gamble: bool = False) -> dict:
     """Clock an Office Spark in. Writes a 'working' row, resolve in 8h."""
     db = get_supabase()
     now = datetime.now(timezone.utc)
@@ -1055,6 +1090,7 @@ def create_office_shift(seat: dict, job: str, flavor_line: str) -> dict:
         "clock_in_at":     now.isoformat(),
         "resolve_at":      (now + timedelta(hours=OFFICE_SHIFT_DURATION_HOURS)).isoformat(),
         "flavor_line":     flavor_line,
+        "is_gamble":       is_gamble,
     }
     result = db.table("spark_office_log").insert(data).execute()
 
