@@ -714,6 +714,41 @@ def complete_job(job_id: int, outcome: str, amount: float | None, nft_asa: int |
     }).eq("id", job_id).execute()
 
 
+def get_weekly_luck_leaders(limit: int = 3) -> list:
+    """
+    Top Sparks by hit count (ALGO or NFT) over the trailing 7 days —
+    powers the weekly shoutout. Rolling window, not a fixed calendar week,
+    so it works no matter what day the shoutout actually posts on.
+    """
+    db = get_supabase()
+    cutoff_iso = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    rows = (
+        db.table("spark_job_log")
+        .select("spark_asa, spark_name, spark_type, wallet, discord_user_id, outcome")
+        .eq("status", "complete")
+        .in_("outcome", ["algo", "nft"])
+        .gte("clock_in_at", cutoff_iso)
+        .execute()
+        .data or []
+    )
+
+    tallies: dict[int, dict] = {}
+    for r in rows:
+        asa = r["spark_asa"]
+        if asa not in tallies:
+            tallies[asa] = {
+                "spark_asa": asa,
+                "spark_name": r.get("spark_name") or r.get("spark_type"),
+                "wallet": r["wallet"],
+                "discord_user_id": r.get("discord_user_id"),
+                "hits": 0,
+            }
+        tallies[asa]["hits"] += 1
+
+    leaders = sorted(tallies.values(), key=lambda t: t["hits"], reverse=True)
+    return leaders[:limit]
+
+
 def get_unpaid_algo_jobs() -> list:
     """Completed jobs with an ALGO hit that haven't been paid out yet."""
     db = get_supabase()
