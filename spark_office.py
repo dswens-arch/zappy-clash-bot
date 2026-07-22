@@ -129,6 +129,7 @@ INELIGIBLE_REASONS = {
     "already_seated":     "already holds an Office seat",
     "not_enough_shifts":  "hasn't worked enough base shifts yet",
     "not_lucky_enough":   "hasn't hit enough recently — needs 3+ hits in its last 40 shifts",
+    "recently_demoted":   "on cooldown after a recent demotion",
 }
 
 SHIFT_SKIP_REASONS = {
@@ -1442,7 +1443,7 @@ class SparkOfficeCog(commands.Cog):
     async def _process_noshow_demotions(self):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
         for seat in no_shows:
-            await asyncio.to_thread(vacate_seat, seat["spark_asa"])
+            await asyncio.to_thread(vacate_seat, seat["spark_asa"], "no_show")
             name = seat.get("spark_name") or seat["spark_type"]
             embed = discord.Embed(
                 title="🚪 Seat Vacated — No-Show",
@@ -1454,7 +1455,7 @@ class SparkOfficeCog(commands.Cog):
     async def _process_coldstreak_demotions(self):
         cold = await asyncio.to_thread(get_seats_for_cold_streak_demotion)
         for seat in cold:
-            await asyncio.to_thread(vacate_seat, seat["spark_asa"])
+            await asyncio.to_thread(vacate_seat, seat["spark_asa"], "cold_streak")
             name = seat.get("spark_name") or seat["spark_type"]
             embed = discord.Embed(
                 title="❄️ Seat Vacated — Cold Streak",
@@ -1481,7 +1482,7 @@ class SparkOfficeCog(commands.Cog):
                 # Duel rows only carry names, not type/tier, so pull the Spark's current
                 # record fresh rather than guessing — it may have tiered up since the challenge.
                 challenger_spark = await asyncio.to_thread(get_spark, duel["challenger_asa"])
-                await asyncio.to_thread(vacate_seat, duel["defender_asa"])
+                await asyncio.to_thread(vacate_seat, duel["defender_asa"], "duel_loss")
                 await asyncio.to_thread(seat_spark, {
                     "asset_id":        duel["challenger_asa"],
                     "wallet":          duel["challenger_wallet"],
