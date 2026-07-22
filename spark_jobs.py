@@ -32,7 +32,7 @@ Existing env vars this depends on (already set for token/nft rewards):
 import os
 import random
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timezone, time as dtime
 
 import discord
 from discord.ext import commands, tasks
@@ -49,6 +49,7 @@ from database import (
     create_job_payout,
     award_spark_job_xp,
     push_spark_arc19_upgrade,
+    get_weekly_luck_leaders,
 )
 
 JOBS_CHANNEL_ID = int(os.environ["SPARK_JOBS_CHANNEL_ID"]) if os.environ.get("SPARK_JOBS_CHANNEL_ID") else None
@@ -65,6 +66,12 @@ ALGO_WIN_IMAGE_URL = os.environ.get("SPARK_JOB_ALGO_WIN_IMAGE_URL")
 NFT_WIN_IMAGE_URL  = os.environ.get("SPARK_JOB_NFT_WIN_IMAGE_URL")
 
 RESOLVER_INTERVAL_MINUTES = 5
+
+# Weekly shoutout — checked daily at a fixed time, only actually posts on
+# the target weekday. Rolling 7-day window underneath (see
+# get_weekly_luck_leaders), so it doesn't matter which day it lands on.
+WEEKLY_SHOUTOUT_TIME    = dtime(hour=17, minute=0, tzinfo=timezone.utc)
+WEEKLY_SHOUTOUT_WEEKDAY = 0  # Monday (datetime.weekday(): Mon=0 ... Sun=6)
 
 # ─────────────────────────────────────────────
 # Odds / payout table (tier-weighted, same target as before:
@@ -514,6 +521,29 @@ def _chunk_lines(lines: list, limit: int = 1800) -> list:
     return chunks
 
 
+# Lucky Shifts — a small chance any ALGO hit doubles its payout. Rolled
+# per-shift (not per-day like anything in the Office), which fits Jobs'
+# high-frequency, no-cooldown rhythm — something to hope for on literally
+# any given roll instead of a once-a-day event.
+LUCKY_SHIFT_CHANCE     = 0.12
+LUCKY_SHIFT_MULTIPLIER = 2.0
+
+# Easter eggs — a rare miss instead turns up something quirky and
+# worthless. Zero mechanics, zero payout, purely a "huh, neat" moment to
+# break up the miss digest.
+EASTER_EGG_CHANCE = 0.03
+EASTER_EGG_LINES = [
+    "found a suspiciously shiny bottle cap. Not ALGO, but hey.",
+    "found a rubber duck wedged behind the machinery.",
+    "found a note that just says 'good job' in someone else's handwriting.",
+    "found half a sandwich. Still good, probably.",
+    "found a single sock. The mystery deepens.",
+    "found a mysterious key that doesn't fit anything nearby.",
+    "found a coupon for 10% off somewhere that closed years ago.",
+    "found a very confident spider. Left it alone.",
+]
+
+
 def _roll_hits(spark_tier: int) -> tuple[bool, bool, float | None]:
     """Roll ALGO + NFT independently, tier-weighted. Returns (algo_hit, nft_hit, amount)."""
     algo_hit = random.random() < ALGO_HIT_CHANCE.get(spark_tier, 0)
@@ -542,9 +572,11 @@ class SparkJobsCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.resolver.start()
+        self.weekly_shoutout.start()
 
     def cog_unload(self):
         self.resolver.cancel()
+        self.weekly_shoutout.cancel()
 
     def _jobs_channel(self) -> discord.TextChannel | None:
         if not JOBS_CHANNEL_ID:
@@ -640,6 +672,41 @@ class SparkJobsCog(commands.Cog):
     async def before_resolver(self):
         await self.bot.wait_until_ready()
 
+    # ──────────────────────────────────────────
+    # Weekly shoutout — luckiest Spark(s) over the trailing 7 days.
+    # ──────────────────────────────────────────
+    @tasks.loop(time=WEEKLY_SHOUTOUT_TIME)
+    async def weekly_shoutout(self):
+        try:
+            if datetime.now(timezone.utc).weekday() != WEEKLY_SHOUTOUT_WEEKDAY:
+                return
+            leaders = await asyncio.to_thread(get_weekly_luck_leaders, 3)
+            if not leaders:
+                return
+
+            medals = ["🥇", "🥈", "🥉"]
+            lines = [
+                f"{medals[i] if i < len(medals) else '🏅'} **{l['spark_name']}** "
+                f"(<@{l['discord_user_id']}>) — {l['hits']} hits this week"
+                if l.get("discord_user_id") else
+                f"{medals[i] if i < len(medals) else '🏅'} **{l['spark_name']}** — {l['hits']} hits this week"
+                for i, l in enumerate(leaders)
+            ]
+            embed = discord.Embed(
+                title="🏆 Luckiest Sparks This Week",
+                description="\n".join(lines),
+                color=0xFFD700,
+            )
+            channel = self._jobs_channel()
+            if channel:
+                await channel.send(embed=embed)
+        except Exception as e:
+            print(f"[spark_jobs] weekly shoutout error: {e}")
+
+    @weekly_shoutout.before_loop
+    async def before_weekly_shoutout(self):
+        await self.bot.wait_until_ready()
+
     async def _resolve_and_settle(self, rows: list) -> list:
         """
         Given 'working' spark_job_log rows, roll + resolve + award XP for
@@ -673,9 +740,22 @@ class SparkJobsCog(commands.Cog):
                 # an NFT — the ALGO roll (if any) still stands.
 
             outcome = "nft" if nft_asa else ("algo" if algo_hit else "miss")
-            flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
-            if nft_name:
-                flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
+
+            is_lucky = False
+            if algo_hit and amount is not None and random.random() < LUCKY_SHIFT_CHANCE:
+                is_lucky = True
+                amount = round(amount * LUCKY_SHIFT_MULTIPLIER, 3)
+
+            is_egg = False
+            if outcome == "miss" and random.random() < EASTER_EGG_CHANCE:
+                is_egg = True
+                flavor_line = f"🥚 **{spark_name}** " + random.choice(EASTER_EGG_LINES)
+            else:
+                flavor_line = _build_flavor_line(row["job"], spark_name, algo_hit, amount, nft_name)
+                if is_lucky:
+                    flavor_line += " 🍀 **Lucky shift — payout doubled!**"
+                if nft_name:
+                    flavor_line += " Opt in to the ASA and run `/claimnft` to collect it!"
 
             await asyncio.to_thread(complete_job, row["id"], outcome, amount, nft_asa, flavor_line)
 
@@ -687,7 +767,10 @@ class SparkJobsCog(commands.Cog):
                 )
                 await self._post_tier_upgrade(row, xp_result)
 
-            resolved.append({**row, "outcome": outcome, "amount": amount, "nft_asa": nft_asa, "flavor_line": flavor_line})
+            resolved.append({
+                **row, "outcome": outcome, "amount": amount, "nft_asa": nft_asa,
+                "flavor_line": flavor_line, "is_lucky": is_lucky, "is_egg": is_egg,
+            })
 
         return resolved
 
@@ -760,6 +843,17 @@ class SparkJobsCog(commands.Cog):
         for r in wins:
             await self._post_win_embed(r)
 
+        # Multi-hit celebration — only possible in Jobs, since Office never
+        # resolves more than one shift per seat per day. If the same wallet
+        # landed 2+ hits in this exact pass, call that out on top of the
+        # individual win embeds above.
+        wins_by_wallet: dict[str, list] = {}
+        for r in wins:
+            wins_by_wallet.setdefault(r["wallet"], []).append(r)
+        for wallet, rows in wins_by_wallet.items():
+            if len(rows) >= 2:
+                await self._post_multi_hit_celebration(rows)
+
         # Misses stay quiet — no ping, no fanfare, this is most of what
         # happens on any given pass. But grouped by owner into the same
         # colored-card treatment clock-ins get, instead of one giant plain
@@ -774,14 +868,33 @@ class SparkJobsCog(commands.Cog):
             for owner_id, rows in by_owner.items():
                 lines = []
                 for r in rows:
-                    job_emoji = JOB_EMOJIS.get(r["job"], "🔧")
-                    lines.append(f"💤 {job_emoji} {r['flavor_line']}")
+                    if r.get("is_egg"):
+                        lines.append(r["flavor_line"])  # already carries its own 🥚 prefix
+                    else:
+                        job_emoji = JOB_EMOJIS.get(r["job"], "🔧")
+                        lines.append(f"💤 {job_emoji} {r['flavor_line']}")
 
                 color = _color_for_user(owner_id)
                 for chunk in _chunk_lines(lines):
                     embed = discord.Embed(description=chunk, color=color)
                     content = f"<@{owner_id}>" if owner_id else None
                     await channel.send(content=content, embed=embed, allowed_mentions=no_ping)
+
+    async def _post_multi_hit_celebration(self, rows: list):
+        channel = self._jobs_channel()
+        if not channel:
+            return
+        discord_id = rows[0].get("discord_user_id")
+        names = ", ".join(f"**{r.get('spark_name') or r['spark_type']}**" for r in rows)
+        total_algo = round(sum(r["amount"] for r in rows if r.get("amount")), 3)
+        extra = f" — {total_algo} ALGO combined" if total_algo else ""
+        embed = discord.Embed(
+            title="🎊 Multi-Hit Day!",
+            description=f"{names} all hit in the same batch{extra}!",
+            color=0xFF66CC,
+        )
+        content = f"<@{discord_id}>" if discord_id else None
+        await channel.send(content=content, embed=embed)
 
     async def _post_win_embed(self, r: dict):
         channel = self._jobs_channel()
@@ -799,6 +912,14 @@ class SparkJobsCog(commands.Cog):
             )
             if NFT_WIN_IMAGE_URL:
                 embed.set_image(url=NFT_WIN_IMAGE_URL)
+        elif r.get("is_lucky"):
+            embed = discord.Embed(
+                title=f"🍀 LUCKY HIT (DOUBLED!) — {spark_name}",
+                description=r["flavor_line"],
+                color=0x2ECC71,
+            )
+            if ALGO_WIN_IMAGE_URL:
+                embed.set_image(url=ALGO_WIN_IMAGE_URL)
         else:
             embed = discord.Embed(
                 title=f"💰 ALGO HIT — {spark_name}",
