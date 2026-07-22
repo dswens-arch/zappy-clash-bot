@@ -884,6 +884,12 @@ OFFICE_GAMBLE_PAYOUT_MULT     = 3.0   # triple the payout range (and cap)
 # once, independent of any one person's roll. At most one active at a time.
 OFFICE_EVENT_DURATION_HOURS = 24  # spans a full day so every fixed shift-time anchor gets one shot at it
 
+# A demoted Spark's underlying base-Jobs eligibility is untouched by the
+# demotion itself, so without this it could immediately re-qualify the
+# same day it was kicked out. This blocks re-promotion for a cooldown
+# window after ANY demotion (no-show, cold streak, or duel loss).
+OFFICE_DEMOTION_COOLDOWN_HOURS = 72  # 3 days
+
 
 def get_active_office_event() -> dict | None:
     """Returns the current office-wide event if one is active, else None."""
@@ -960,6 +966,13 @@ def check_office_eligibility(asset_id: int) -> dict:
     size, a returned count below OFFICE_MIN_SHIFTS on its own means the
     floor isn't met yet — no separate count query needed.
     """
+    recent_demotion = get_recent_demotion(asset_id)
+    if recent_demotion:
+        demoted_at = datetime.fromisoformat(recent_demotion["demoted_at"])
+        cooldown_ends = demoted_at + timedelta(hours=OFFICE_DEMOTION_COOLDOWN_HOURS)
+        if datetime.now(timezone.utc) < cooldown_ends:
+            return {"eligible": False, "reason": "recently_demoted", "shifts_seen": 0, "hits_seen": 0}
+
     db = get_supabase()
     rows = (
         db.table("spark_job_log")
@@ -1064,11 +1077,35 @@ def seat_spark(spark: dict) -> dict:
     return result.data[0] if result.data else {}
 
 
-def vacate_seat(spark_asa: int) -> None:
-    """Remove a Spark from its Office seat (demotion or duel loss). The
-    Spark itself is untouched — it just falls back to base Jobs eligibility."""
+def vacate_seat(spark_asa: int, reason: str = "unknown") -> None:
+    """
+    Remove a Spark from its Office seat (demotion or duel loss). The Spark
+    itself is untouched — it just falls back to base Jobs eligibility —
+    but the demotion is logged so check_office_eligibility can enforce a
+    cooldown before it's allowed back in.
+    """
     db = get_supabase()
     db.table("spark_office_seats").delete().eq("spark_asa", spark_asa).execute()
+    db.table("spark_office_demotions").insert({
+        "spark_asa":  spark_asa,
+        "reason":     reason,
+        "demoted_at": datetime.now(timezone.utc).isoformat(),
+    }).execute()
+
+
+def get_recent_demotion(spark_asa: int) -> dict | None:
+    """Most recent demotion for a Spark, if any, regardless of age —
+    caller compares demoted_at against OFFICE_DEMOTION_COOLDOWN_HOURS."""
+    db = get_supabase()
+    result = (
+        db.table("spark_office_demotions")
+        .select("*")
+        .eq("spark_asa", spark_asa)
+        .order("demoted_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    return result.data[0] if result.data else None
 
 
 def get_eligible_sparks_for_office(wallet: str) -> dict:
