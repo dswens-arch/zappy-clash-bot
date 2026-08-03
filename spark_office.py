@@ -41,6 +41,7 @@ from database import (
     push_spark_arc19_upgrade,
     award_spark_job_xp,
     check_office_eligibility,
+    get_recent_demotion,
     get_office_seat_count,
     get_office_seat,
     get_office_seats,
@@ -58,7 +59,7 @@ from database import (
     mark_office_jobs_paid,
     create_office_payout,
     create_office_duel,
-    get_pending_duel_for_spark,
+    get_pending_duels_for_wallet,
     submit_duel_picks,
     get_expired_pending_duels,
     resolve_office_duel,
@@ -76,6 +77,10 @@ from database import (
     OFFICE_PAYOUT_RANGE,
     OFFICE_MAX_SHIFT_PAYOUT,
     OFFICE_MIN_SHIFTS_FOR_DUEL,
+    OFFICE_DEMOTION_COOLDOWN_HOURS,
+    OFFICE_MIN_SHIFTS,
+    OFFICE_WINDOW_SHIFTS,
+    OFFICE_HITS_NEEDED,
     OFFICE_DUEL_SUBMIT_HOURS,
     OFFICE_NO_SHOW_GRACE_HOURS,
     OFFICE_DEMOTION_MISS_DAYS,
@@ -124,6 +129,7 @@ PROMOTION_SWEEP_TIMES = [dtime(hour=6, minute=0, tzinfo=timezone.utc), dtime(hou
 RPS_CHOICES = ["rock", "paper", "scissors"]
 RPS_BEATS   = {"rock": "scissors", "scissors": "paper", "paper": "rock"}
 RPS_EMOJI   = {"rock": "🪨", "paper": "📄", "scissors": "✂️"}
+RPS_LABEL   = {"rock": "Rock", "paper": "Paper", "scissors": "Scissors"}
 
 INELIGIBLE_REASONS = {
     "already_seated":     "already holds an Office seat",
@@ -399,6 +405,28 @@ def _resolve_rps(challenger_picks: list, defender_picks: list) -> tuple[str, lis
     return ("challenger" if c_wins > d_wins else "defender"), rounds
 
 
+def _format_duel_rounds(rounds: list, challenger_name: str, defender_name: str) -> str:
+    """
+    One line per round instead of a packed emoji string — the old format
+    (e.g. "✂️📄📄✂️✂️📄🪨") was genuinely hard to parse, and 🪨 in
+    particular reads as a blob/cloud at small size. Word labels alongside
+    the emoji remove any ambiguity about which pick was which.
+    """
+    lines = []
+    for r in rounds:
+        c_pick = f"{RPS_EMOJI[r['challenger']]} {RPS_LABEL[r['challenger']]}"
+        d_pick = f"{RPS_EMOJI[r['defender']]} {RPS_LABEL[r['defender']]}"
+        if r["result"] == 1:
+            outcome = f"→ **{challenger_name}**"
+        elif r["result"] == -1:
+            outcome = f"→ **{defender_name}**"
+        else:
+            outcome = "→ Tie"
+        sd_tag = " *(sudden death)*" if r.get("sudden_death") else ""
+        lines.append(f"**Round {r['round']}{sd_tag}:** {c_pick} vs {d_pick} {outcome}")
+    return "\n".join(lines)
+
+
 class DuelPickView(discord.ui.View):
     """Ephemeral RPS picker — click one of 3 buttons per round, 7 rounds total."""
 
@@ -439,6 +467,43 @@ class DuelPickView(discord.ui.View):
     @discord.ui.button(label="Scissors", emoji="✂️", style=discord.ButtonStyle.secondary)
     async def scissors(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self._handle_pick(interaction, "scissors")
+
+
+class DuelChoiceSelect(discord.ui.Select):
+    """Only shown when a wallet has more than one pending duel at once —
+    the common case (exactly one) skips this entirely."""
+
+    def __init__(self, wallet: str, duels: list):
+        self.wallet = wallet
+        self.duels_by_id = {d["id"]: d for d in duels}
+        options = []
+        for d in duels:
+            if d["challenger_wallet"] == wallet:
+                name, opp = d["challenger_name"], d["defender_name"]
+            else:
+                name, opp = d["defender_name"], d["challenger_name"]
+            options.append(discord.SelectOption(label=f"{name} vs {opp}", value=str(d["id"])))
+        super().__init__(placeholder="Choose which duel to respond to", options=options[:25])
+
+    async def callback(self, interaction: discord.Interaction):
+        duel = self.duels_by_id[int(self.values[0])]
+        if duel["challenger_wallet"] == self.wallet:
+            side, name, already = "challenger", duel["challenger_name"], duel.get("challenger_picks")
+        else:
+            side, name, already = "defender", duel["defender_name"], duel.get("defender_picks")
+
+        if already:
+            await interaction.response.edit_message(content="✅ You've already submitted picks for this duel.", view=None)
+            return
+
+        view = DuelPickView(duel["id"], side, name)
+        await interaction.response.edit_message(content=view._progress_text(), view=view)
+
+
+class DuelChoiceView(discord.ui.View):
+    def __init__(self, wallet: str, duels: list):
+        super().__init__(timeout=300)
+        self.add_item(DuelChoiceSelect(wallet, duels))
 
 
 class ShiftTimeSelect(discord.ui.Select):
@@ -732,6 +797,61 @@ class SparkOfficeCog(commands.Cog):
             )
 
     # ──────────────────────────────────────────
+    # /office-progress — see how close every Spark in your wallet is to
+    # Office eligibility, without actually attempting a promotion. No ASA
+    # needed — checks your whole wallet like the bulk commands do.
+    # ──────────────────────────────────────────
+    @app_commands.command(name="office-progress", description="See how close your Sparks are to Office eligibility")
+    async def office_progress(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        user_id = str(interaction.user.id)
+        wallet = await asyncio.to_thread(get_wallet, user_id)
+        if not wallet:
+            await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+            return
+
+        sparks = await asyncio.to_thread(get_sparks_for_wallet, wallet)
+        if not sparks:
+            await interaction.followup.send("❌ No Sparks found on your wallet.", ephemeral=True)
+            return
+
+        lines = []
+        for spark in sparks:
+            asa = spark["asset_id"]
+            name = spark.get("name") or spark.get("spark_type", "Spark").capitalize()
+
+            if await asyncio.to_thread(get_office_seat, asa):
+                lines.append(f"🏢 **{name}** — already in the Office")
+                continue
+
+            demotion = await asyncio.to_thread(get_recent_demotion, asa)
+            if demotion:
+                demoted_at = datetime.fromisoformat(demotion["demoted_at"])
+                cooldown_ends = demoted_at + timedelta(hours=OFFICE_DEMOTION_COOLDOWN_HOURS)
+                now = datetime.now(timezone.utc)
+                if now < cooldown_ends:
+                    hours_left = round((cooldown_ends - now).total_seconds() / 3600, 1)
+                    lines.append(f"⏳ **{name}** — on cooldown, {hours_left}h left after a recent demotion")
+                    continue
+
+            check = await asyncio.to_thread(check_office_eligibility, asa)
+            shifts, hits = check["shifts_seen"], check["hits_seen"]
+
+            if check["eligible"]:
+                lines.append(f"✅ **{name}** — eligible now! ({hits} hits in its last {shifts} shifts)")
+            elif shifts < OFFICE_MIN_SHIFTS:
+                lines.append(f"📊 **{name}** — {shifts}/{OFFICE_MIN_SHIFTS} shifts worked (hits don't count yet)")
+            else:
+                needed = OFFICE_HITS_NEEDED - hits
+                lines.append(
+                    f"📊 **{name}** — {hits}/{OFFICE_HITS_NEEDED} hits in its last {shifts} shifts "
+                    f"(needs {needed} more)"
+                )
+
+        for chunk in _chunk_lines(lines):
+            await interaction.followup.send(chunk, ephemeral=True)
+
+    # ──────────────────────────────────────────
     # /office-shift — clocks in EVERY due, active Office seat you hold in
     # one shot. No asset_id needed — same "no picker, send everything"
     # philosophy as /spark-job.
@@ -872,17 +992,34 @@ class SparkOfficeCog(commands.Cog):
             await interaction.followup.send(chunk, ephemeral=True)
 
     # ──────────────────────────────────────────
-    # /office-duel-respond — submit picks for a pending duel
+    # /office-duel-respond — submit picks for a pending duel. No ASA
+    # needed — auto-detects which of your Sparks (if any) is in a pending
+    # duel. Only shows a picker in the rare case you've got more than one
+    # going at once.
     # ──────────────────────────────────────────
     @app_commands.command(name="office-duel-respond", description="Submit your picks for a pending Office duel")
-    @app_commands.describe(asset_id="ASA ID of the Spark on either side of the duel")
-    async def office_duel_respond(self, interaction: discord.Interaction, asset_id: int):
-        duel = await asyncio.to_thread(get_pending_duel_for_spark, asset_id)
-        if not duel:
-            await interaction.response.send_message("❌ No pending duel found for that Spark.", ephemeral=True)
+    async def office_duel_respond(self, interaction: discord.Interaction):
+        user_id = str(interaction.user.id)
+        wallet = await asyncio.to_thread(get_wallet, user_id)
+        if not wallet:
+            await interaction.response.send_message("❌ Link your wallet first with `/link`.", ephemeral=True)
             return
 
-        if asset_id == duel["challenger_asa"]:
+        duels = await asyncio.to_thread(get_pending_duels_for_wallet, wallet)
+        if not duels:
+            await interaction.response.send_message("❌ No pending duel found for your Sparks.", ephemeral=True)
+            return
+
+        if len(duels) > 1:
+            await interaction.response.send_message(
+                "You've got more than one duel going — pick which one:",
+                view=DuelChoiceView(wallet, duels),
+                ephemeral=True,
+            )
+            return
+
+        duel = duels[0]
+        if duel["challenger_wallet"] == wallet:
             side, name, already = "challenger", duel["challenger_name"], duel.get("challenger_picks")
         else:
             side, name, already = "defender", duel["defender_name"], duel.get("defender_picks")
@@ -891,7 +1028,7 @@ class SparkOfficeCog(commands.Cog):
             await interaction.response.send_message("✅ You've already submitted picks for this duel.", ephemeral=True)
             return
 
-        view = DuelPickView(duel["id"], side, name or f"ASA {asset_id}")
+        view = DuelPickView(duel["id"], side, name)
         await interaction.response.send_message(view._progress_text(), view=view, ephemeral=True)
 
     # ──────────────────────────────────────────
@@ -1524,13 +1661,10 @@ class SparkOfficeCog(commands.Cog):
                 winner_name, winner_discord_id = duel["defender_name"], duel["defender_discord_id"]
                 loser_name, loser_discord_id = duel["challenger_name"], duel["challenger_discord_id"]
 
-            round_lines = " ".join(
-                f"{RPS_EMOJI[r['challenger']]}{RPS_EMOJI[r['defender']]}" for r in rounds
-            )
+            round_lines = _format_duel_rounds(rounds, duel["challenger_name"], duel["defender_name"])
             winner_tag = f"**{winner_name}** (<@{winner_discord_id}>)" if winner_discord_id else f"**{winner_name}**"
             loser_tag  = f"**{loser_name}** (<@{loser_discord_id}>)" if loser_discord_id else f"**{loser_name}**"
-            desc = f"{winner_tag} defeats {loser_tag} and takes the seat!\n\n" \
-                   f"Rounds (challenger vs defender): {round_lines}"
+            desc = f"{winner_tag} defeats {loser_tag} and takes the seat!\n\n{round_lines}"
             if seat_grant_failed:
                 desc += "\n\n⚠️ The seat was already gone by the time this resolved — no seat granted this time."
             embed = discord.Embed(title="⚔️ Office Duel Resolved", description=desc, color=0xFFD700)
