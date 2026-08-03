@@ -58,6 +58,7 @@ class Fighter:
     guaranteed_crit_next: bool = field(default=False, init=False)  # Frog Patience: round 2 guaranteed crit
     pack_hunt_stacks:   int   = field(default=0,     init=False)   # Wolf Pack Hunt: cumulative VLT stack count
     no_attack_this_round: bool = field(default=False, init=False)  # Frog Patience: fully sits out round 1's attack
+    ability_blocked_this_round: bool = field(default=False, init=False)  # Null cancelled this fighter's ability this round — gates passive side-effects (e.g. Pack Hunt) that live outside apply_ability()
 
     # Spark battle state
     spark_triggered:    bool  = field(default=False, init=False)   # Spark ability fired this battle
@@ -505,6 +506,10 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         round_msg = []
         round_msg.append(f"🥊 **Round {round_num}** — {random.choice(ROUND_OPENERS)}")
 
+        # Reset per-round interception flags before abilities are evaluated
+        fighter_a.ability_blocked_this_round = False
+        fighter_b.ability_blocked_this_round = False
+
         # Try to trigger abilities (both fighters)
         for attacker, defender in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
             # ── Null: intercept BEFORE ability applies ──
@@ -525,6 +530,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                             defender.SPK = min(100, defender.SPK + spk_bonus)
                         defender.spark_triggered = True
                         attacker.ability_used = True  # Mark used but don't apply effect
+                        attacker.ability_blocked_this_round = True  # Also gate passive side-effects handled outside apply_ability() (e.g. Pack Hunt)
                         msg = f"\U0001f311 **NULL** intercepts! {defender.display_name}'s companion cancels {attacker.display_name}'s ability before it fires!"
                         if spk_bonus:
                             msg += f" {defender.display_name} absorbs the energy. SPK +{spk_bonus}."
@@ -603,8 +609,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     fighter_b.hp = max(0, fighter_b.hp - frenzy_bonus)
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_a.display_name} smells blood — {frenzy_bonus} bonus damage!")
 
-            # Pack Hunt — VLT rises every round the fight continues
-            if fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Pack Hunt" and fighter_b.hp > 0:
+            # Pack Hunt — VLT rises every round the fight continues (unless Null cancelled it this round)
+            if fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Pack Hunt" and fighter_b.hp > 0 and not fighter_a.ability_blocked_this_round:
                 fighter_a.pack_hunt_stacks += 1
                 gain = 10
                 fighter_a.VLT = min(100, fighter_a.VLT + gain)
@@ -666,8 +672,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     fighter_a.hp = max(0, fighter_a.hp - frenzy_bonus)
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_b.display_name} smells blood — {frenzy_bonus} bonus damage!")
 
-            # Pack Hunt — VLT rises every round the fight continues
-            if fighter_b.ability and isinstance(fighter_b.ability, dict) and fighter_b.ability.get("name") == "Pack Hunt" and fighter_a.hp > 0:
+            # Pack Hunt — VLT rises every round the fight continues (unless Null cancelled it this round)
+            if fighter_b.ability and isinstance(fighter_b.ability, dict) and fighter_b.ability.get("name") == "Pack Hunt" and fighter_a.hp > 0 and not fighter_b.ability_blocked_this_round:
                 fighter_b.pack_hunt_stacks += 1
                 gain = 10
                 fighter_b.VLT = min(100, fighter_b.VLT + gain)
