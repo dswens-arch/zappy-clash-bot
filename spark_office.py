@@ -1106,23 +1106,41 @@ class SparkOfficeCog(commands.Cog):
 
         board_lines = [f"{bar}  **{seat_count}/{OFFICE_SEAT_CAP}** seats filled{event_line}", ""]
 
+        by_owner: dict[str | None, list] = {}
         for seat in seats:
-            name  = seat.get("spark_name") or seat["spark_type"].capitalize()
-            tier  = seat.get("spark_tier")
-            shifts, hits, misses = seat["shifts_completed"], seat["hits"], seat["consecutive_misses"]
-            rate  = f"{(hits / shifts * 100):.0f}%" if shifts else "—"
-            cold_flag = " ❄️" if misses >= max(OFFICE_DEMOTION_MISS_DAYS - 2, 1) else ""
+            by_owner.setdefault(seat.get("discord_user_id"), []).append(seat)
 
-            if seat["status"] == "in_duel":
-                status = "⚔️ In a duel"
-            elif seat["spark_asa"] in working_map:
-                resolve_at = datetime.fromisoformat(working_map[seat["spark_asa"]]["resolve_at"])
-                status = f"🔧 On shift — back <t:{int(resolve_at.timestamp())}:R>"
-            else:
-                due = datetime.fromisoformat(seat["next_shift_due_at"]) if seat.get("next_shift_due_at") else now
-                status = f"💤 Resting — due <t:{int(due.timestamp())}:R>" if now < due else "⏳ Due now"
+        # Owners with more seats surface first; otherwise alphabetical by
+        # their first Spark's name, just for a stable, predictable order.
+        owner_groups = sorted(
+            by_owner.items(),
+            key=lambda kv: (-len(kv[1]), (kv[1][0].get("spark_name") or "").lower())
+        )
 
-            board_lines.append(f"🪑 **{name}** T{tier} — {status} · `{hits}/{shifts}` hits ({rate}){cold_flag}")
+        for owner_id, owner_seats in owner_groups:
+            owner_tag = f"<@{owner_id}>" if owner_id else "*Unknown owner*"
+            board_lines.append(f"__{owner_tag}__")
+
+            for seat in owner_seats:
+                name  = seat.get("spark_name") or seat["spark_type"].capitalize()
+                shifts, hits, misses = seat["shifts_completed"], seat["hits"], seat["consecutive_misses"]
+                rate  = f"{(hits / shifts * 100):.0f}%" if shifts else "—"
+                cold_flag = " ❄️" if misses >= max(OFFICE_DEMOTION_MISS_DAYS - 2, 1) else ""
+
+                if seat["status"] == "in_duel":
+                    status = "⚔️ duel"
+                elif seat["spark_asa"] in working_map:
+                    resolve_at = datetime.fromisoformat(working_map[seat["spark_asa"]]["resolve_at"])
+                    status = f"🔧 back <t:{int(resolve_at.timestamp())}:R>"
+                else:
+                    due = datetime.fromisoformat(seat["next_shift_due_at"]) if seat.get("next_shift_due_at") else now
+                    status = f"💤 due <t:{int(due.timestamp())}:R>" if now < due else "⏳ due now"
+
+                # Ideographic space (U+3000) for a visual indent — Discord
+                # collapses leading regular spaces, this doesn't.
+                board_lines.append(f"　🪑 **{name}** — {status} · `{hits}/{shifts}` ({rate}){cold_flag}")
+
+            board_lines.append("")
 
         # Embed description caps at 4096 chars — 20 short seat lines never
         # comes close, so no chunking/fields needed (embed fields cap at
