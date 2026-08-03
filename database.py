@@ -863,6 +863,13 @@ OFFICE_SPONSOR_ZAPPY_COUNT = 5    # one-time check at promotion, not locked afte
 OFFICE_SHIFT_DURATION_HOURS   = 8    # same shift length as base Jobs
 OFFICE_DAILY_COOLDOWN_HOURS   = 24   # only 1 shift/day, unlike base (no cooldown)
 OFFICE_NO_SHOW_GRACE_HOURS    = 4    # window after next_shift_due_at before it's a no-show
+
+# A brand-new seat (duel win or open-seat promotion) becomes immediately
+# due with only the standard grace on top — not much real-world time if
+# you're not watching the channel at that exact moment. First shift only
+# gets a longer window; reverts to the standard grace after that.
+OFFICE_FIRST_SHIFT_GRACE_HOURS = 12
+
 OFFICE_DEMOTION_MISS_DAYS     = 7    # consecutive misses (~days, since 1 shift/day) before demotion
 OFFICE_MIN_SHIFTS_FOR_DUEL    = 5    # a seat must have this many Office shifts before it's duel-eligible
 OFFICE_DUEL_SUBMIT_HOURS      = 1    # window to submit picks before the bot auto-rolls for you
@@ -1323,19 +1330,29 @@ def get_seats_for_noshow_demotion() -> list:
     """
     Active seats past their grace window with no 'working' shift open —
     i.e. they never clocked in for the current daily window at all.
+    A seat's very first shift (shifts_completed == 0, whether from winning
+    a duel or landing an open seat) gets OFFICE_FIRST_SHIFT_GRACE_HOURS
+    instead of the standard grace — after that first shift, normal rules.
     """
     db = get_supabase()
-    cutoff_iso = (datetime.now(timezone.utc) - timedelta(hours=OFFICE_NO_SHOW_GRACE_HOURS)).isoformat()
+    now = datetime.now(timezone.utc)
+    standard_cutoff_iso = (now - timedelta(hours=OFFICE_NO_SHOW_GRACE_HOURS)).isoformat()
     seats = (
         db.table("spark_office_seats")
         .select("*")
         .eq("status", "active")
-        .lt("next_shift_due_at", cutoff_iso)
+        .lt("next_shift_due_at", standard_cutoff_iso)
         .execute()
         .data or []
     )
     no_show = []
     for seat in seats:
+        if seat.get("shifts_completed", 0) == 0 and seat.get("seated_at"):
+            seated_at = datetime.fromisoformat(seat["seated_at"])
+            first_shift_cutoff = seated_at + timedelta(hours=OFFICE_FIRST_SHIFT_GRACE_HOURS)
+            if now < first_shift_cutoff:
+                continue  # still inside the longer first-shift grace, not a no-show yet
+
         working = (
             db.table("spark_office_log")
             .select("id")
