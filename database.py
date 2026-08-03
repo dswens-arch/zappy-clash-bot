@@ -1436,6 +1436,24 @@ def get_pending_duel_for_spark(asset_id: int) -> dict | None:
     return None
 
 
+def get_pending_duels_for_wallet(wallet: str) -> list:
+    """
+    Every pending duel where this wallet is on either side — a wallet can
+    have more than one Spark in a duel at once (one challenging, another
+    being challenged). Used so /office-duel-respond doesn't need an ASA.
+    """
+    db = get_supabase()
+    seen_ids = set()
+    duels = []
+    for col in ("challenger_wallet", "defender_wallet"):
+        result = db.table("spark_office_duels").select("*").eq(col, wallet).eq("status", "pending").execute()
+        for d in result.data or []:
+            if d["id"] not in seen_ids:
+                seen_ids.add(d["id"])
+                duels.append(d)
+    return duels
+
+
 def submit_duel_picks(duel_id: int, side: str, picks: list) -> None:
     """side is 'challenger' or 'defender'."""
     db = get_supabase()
