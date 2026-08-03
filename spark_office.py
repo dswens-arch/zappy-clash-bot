@@ -688,13 +688,20 @@ class SparkOfficeCog(commands.Cog):
             seat_count = await asyncio.to_thread(get_office_seat_count)
 
             if seat_count < OFFICE_SEAT_CAP:
-                await asyncio.to_thread(seat_spark, {**spark, "asset_id": asa})
-                newly_seated.append((asa, spark_name))
-                results.append(f"🎉 **{spark_name}** promoted into an open seat!")
-                promo_embed = self._promotion_celebration_embed(spark_name, user_id, check["hits_seen"])
-                promo_file = _attach_office_image(promo_embed, "promotion")
-                await self._post_promotion_channel(embed=promo_embed, file=promo_file)
-                continue
+                try:
+                    await asyncio.to_thread(seat_spark, {**spark, "asset_id": asa})
+                except Exception as e:
+                    # Lost a race to another seating happening at the same
+                    # moment — the DB-level cap trigger caught it. Fall
+                    # through to the duel path below instead of crashing.
+                    print(f"[spark_office] seat_spark race lost for {asa}: {e}")
+                else:
+                    newly_seated.append((asa, spark_name))
+                    results.append(f"🎉 **{spark_name}** promoted into an open seat!")
+                    promo_embed = self._promotion_celebration_embed(spark_name, user_id, check["hits_seen"])
+                    promo_file = _attach_office_image(promo_embed, "promotion")
+                    await self._post_promotion_channel(embed=promo_embed, file=promo_file)
+                    continue
 
             target = await asyncio.to_thread(get_lowest_hitrate_seat)
             target = target if (target and target["wallet"] != wallet) else None
@@ -1217,11 +1224,15 @@ class SparkOfficeCog(commands.Cog):
                 continue  # not sponsored — skip silently, eligible again next sweep
 
             if seat_count < OFFICE_SEAT_CAP:
-                await asyncio.to_thread(seat_spark, c)
-                promo_embed = self._promotion_celebration_embed(spark_name, c.get("discord_user_id"), c["hits_seen"])
-                promo_file = _attach_office_image(promo_embed, "promotion")
-                await self._post_promotion_channel(embed=promo_embed, file=promo_file)
-                continue
+                try:
+                    await asyncio.to_thread(seat_spark, c)
+                except Exception as e:
+                    print(f"[spark_office] seat_spark race lost for {c['asset_id']}: {e}")
+                else:
+                    promo_embed = self._promotion_celebration_embed(spark_name, c.get("discord_user_id"), c["hits_seen"])
+                    promo_file = _attach_office_image(promo_embed, "promotion")
+                    await self._post_promotion_channel(embed=promo_embed, file=promo_file)
+                    continue
 
             # Seats are full — spawn a duel against the current lowest
             # hit-rate seat. Can't challenge your own seat.
@@ -1477,21 +1488,32 @@ class SparkOfficeCog(commands.Cog):
             winner_asa = duel["challenger_asa"] if winner_side == "challenger" else duel["defender_asa"]
             await asyncio.to_thread(resolve_office_duel, duel["id"], winner_asa, rounds)
 
+            seat_grant_failed = False
             if winner_side == "challenger":
                 # Challenger takes the seat — defender is vacated, challenger seated in its place.
                 # Duel rows only carry names, not type/tier, so pull the Spark's current
                 # record fresh rather than guessing — it may have tiered up since the challenge.
                 challenger_spark = await asyncio.to_thread(get_spark, duel["challenger_asa"])
                 await asyncio.to_thread(vacate_seat, duel["defender_asa"], "duel_loss")
-                await asyncio.to_thread(seat_spark, {
-                    "asset_id":        duel["challenger_asa"],
-                    "wallet":          duel["challenger_wallet"],
-                    "discord_user_id": duel["challenger_discord_id"],
-                    "name":            duel["challenger_name"],
-                    "spark_type":      challenger_spark.get("spark_type", "") if challenger_spark else "",
-                    "tier":            challenger_spark.get("tier", 1) if challenger_spark else 1,
-                })
-                winner_name, loser_name = duel["challenger_name"], duel["defender_name"]
+                try:
+                    await asyncio.to_thread(seat_spark, {
+                        "asset_id":        duel["challenger_asa"],
+                        "wallet":          duel["challenger_wallet"],
+                        "discord_user_id": duel["challenger_discord_id"],
+                        "name":            duel["challenger_name"],
+                        "spark_type":      challenger_spark.get("spark_type", "") if challenger_spark else "",
+                        "tier":            challenger_spark.get("tier", 1) if challenger_spark else 1,
+                    })
+                except Exception as e:
+                    # Extremely rare: the defender's seat was already gone for
+                    # some unrelated reason (e.g. independently demoted during
+                    # the 1h duel window) and the Office is already at cap
+                    # from elsewhere. The cap trigger correctly blocks this —
+                    # the challenger won the duel but doesn't get a seat.
+                    print(f"[spark_office] duel-win seat_spark rejected for {duel['challenger_asa']}: {e}")
+                    seat_grant_failed = True
+                winner_name, winner_discord_id = duel["challenger_name"], duel["challenger_discord_id"]
+                loser_name, loser_discord_id = duel["defender_name"], duel["defender_discord_id"]
             else:
                 # Defender keeps the seat — just clear its in_duel status.
                 from database import get_supabase
@@ -1499,19 +1521,19 @@ class SparkOfficeCog(commands.Cog):
                 await asyncio.to_thread(
                     lambda: db.table("spark_office_seats").update({"status": "active"}).eq("spark_asa", duel["defender_asa"]).execute()
                 )
-                winner_name, loser_name = duel["defender_name"], duel["challenger_name"]
+                winner_name, winner_discord_id = duel["defender_name"], duel["defender_discord_id"]
+                loser_name, loser_discord_id = duel["challenger_name"], duel["challenger_discord_id"]
 
             round_lines = " ".join(
                 f"{RPS_EMOJI[r['challenger']]}{RPS_EMOJI[r['defender']]}" for r in rounds
             )
-            embed = discord.Embed(
-                title="⚔️ Office Duel Resolved",
-                description=(
-                    f"**{winner_name}** defeats **{loser_name}** and takes the seat!\n\n"
-                    f"Rounds (challenger vs defender): {round_lines}"
-                ),
-                color=0xFFD700,
-            )
+            winner_tag = f"**{winner_name}** (<@{winner_discord_id}>)" if winner_discord_id else f"**{winner_name}**"
+            loser_tag  = f"**{loser_name}** (<@{loser_discord_id}>)" if loser_discord_id else f"**{loser_name}**"
+            desc = f"{winner_tag} defeats {loser_tag} and takes the seat!\n\n" \
+                   f"Rounds (challenger vs defender): {round_lines}"
+            if seat_grant_failed:
+                desc += "\n\n⚠️ The seat was already gone by the time this resolved — no seat granted this time."
+            embed = discord.Embed(title="⚔️ Office Duel Resolved", description=desc, color=0xFFD700)
             await self._post_promotion_channel(embed=embed)
 
 
