@@ -1191,6 +1191,47 @@ class SparkOfficeCog(commands.Cog):
             await self._post_digest(resolved)
         await interaction.followup.send(f"✅ Force-resolved ASA `{asset_id}` as **{outcome.value}**.", ephemeral=True)
 
+    @app_commands.command(name="office-force-seat", description="[Admin] Manually seat a specific Spark into the Office")
+    @app_commands.describe(asset_id="Spark ASA to seat")
+    async def office_force_seat(self, interaction: discord.Interaction, asset_id: int):
+        if not await admin_check(interaction):
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        if await asyncio.to_thread(get_office_seat, asset_id):
+            await interaction.followup.send("❌ That Spark already holds a seat.", ephemeral=True)
+            return
+
+        spark = await asyncio.to_thread(get_spark, asset_id)
+        if not spark:
+            await interaction.followup.send("❌ Couldn't find that Spark.", ephemeral=True)
+            return
+
+        seat_data = {
+            "asset_id":        asset_id,
+            "wallet":          spark["wallet"],
+            "discord_user_id": spark.get("discord_user_id"),
+            "name":            spark.get("name"),
+            "spark_type":      spark.get("spark_type", ""),
+            "tier":            spark.get("tier", 1),
+        }
+        try:
+            await asyncio.to_thread(seat_spark, seat_data)
+            overflowed = False
+        except Exception:
+            # Same fallback the duel-win path uses — pushes to 21 rather
+            # than fail, since this command exists specifically for
+            # honoring a seat someone should already have.
+            await asyncio.to_thread(seat_spark, seat_data, True)
+            overflowed = True
+
+        spark_name = spark.get("name") or spark.get("spark_type", "Spark").capitalize()
+        note = " (seat count pushed to 21 — will self-correct)" if overflowed else ""
+        await interaction.followup.send(f"✅ **{spark_name}** manually seated in the Office{note}.", ephemeral=True)
+        embed = self._promotion_celebration_embed(spark_name, spark.get("discord_user_id"))
+        promo_file = _attach_office_image(embed, "promotion")
+        await self._post_promotion_channel(embed=embed, file=promo_file)
+
     # ──────────────────────────────────────────
     # Promotion channel helpers
     # ──────────────────────────────────────────
