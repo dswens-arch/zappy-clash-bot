@@ -1066,34 +1066,40 @@ def set_office_shift_time(spark_asa: int, hour: int, minute: int = 0) -> dict | 
     return result.data[0] if result.data else None
 
 
-def seat_spark(spark: dict, allow_overflow: bool = False) -> dict:
+def seat_spark(spark: dict, allow_overflow: bool = False, admin_override: bool = False) -> dict:
     """
     Promote a Spark into an open Office seat. Caller must have already
     checked eligibility, sponsorship, and seat availability.
 
     allow_overflow: ONLY ever set True by the duel-win path as a fallback
     if seating at the normal cap (20) is rejected — lets that one seating
-    push to 21 rather than deny an earned duel win. Every other call site
-    must leave this False so the cap trigger enforces 20 as normal.
+    push to 21 rather than deny an earned duel win. Every other automated
+    call site must leave this False so the cap trigger enforces 20.
+
+    admin_override: ONLY ever set True by /office-force-seat — a human
+    deliberately correcting something bypasses the cap entirely, no
+    matter what else is happening (e.g. another duel independently
+    pending at the same time). Never set this from an automated path.
     """
     db = get_supabase()
     now = datetime.now(timezone.utc)
     data = {
-        "spark_asa":         spark["asset_id"],
-        "wallet":            spark["wallet"],
-        "discord_user_id":   spark.get("discord_user_id"),
-        "spark_name":        spark.get("name"),
-        "spark_type":        spark["spark_type"],
-        "spark_tier":        spark["tier"],
-        "seated_at":         now.isoformat(),
-        "next_shift_due_at": now.isoformat(),  # eligible to clock in immediately
+        "spark_asa":          spark["asset_id"],
+        "wallet":             spark["wallet"],
+        "discord_user_id":    spark.get("discord_user_id"),
+        "spark_name":         spark.get("name"),
+        "spark_type":         spark["spark_type"],
+        "spark_tier":         spark["tier"],
+        "seated_at":          now.isoformat(),
+        "next_shift_due_at":  now.isoformat(),  # eligible to clock in immediately
         # Fixed daily anchor, locked in once at promotion — every future
         # clock-in advances to tomorrow's occurrence of THIS time, not
         # "24h from whenever you happened to click." Prevents the schedule
         # from drifting later every time you're a bit late.
-        "shift_time_utc":    now.time().isoformat(),
-        "status":            "active",
-        "duel_win_overflow": allow_overflow,
+        "shift_time_utc":     now.time().isoformat(),
+        "status":             "active",
+        "duel_win_overflow":  allow_overflow,
+        "admin_seat_override": admin_override,
     }
     result = db.table("spark_office_seats").upsert(data, on_conflict="spark_asa").execute()
     return result.data[0] if result.data else {}
