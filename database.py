@@ -924,8 +924,15 @@ def set_office_event(name: str, bonus_algo_pct: float, bonus_nft_pct: float, hou
 
 
 def get_office_seat_count() -> int:
+    """
+    Counts BOTH 'active' and 'in_duel' seats — a seat mid-duel is still
+    genuinely occupied, just contested. Counting only 'active' made the
+    Office look like it had a free slot for the ~1h a duel is pending,
+    letting something else (the sweep, a manual promotion) take a seat
+    that was never actually available.
+    """
     db = get_supabase()
-    result = db.table("spark_office_seats").select("id", count="exact").eq("status", "active").execute()
+    result = db.table("spark_office_seats").select("id", count="exact").in_("status", ["active", "in_duel"]).execute()
     return result.count or 0
 
 
@@ -1059,9 +1066,16 @@ def set_office_shift_time(spark_asa: int, hour: int, minute: int = 0) -> dict | 
     return result.data[0] if result.data else None
 
 
-def seat_spark(spark: dict) -> dict:
-    """Promote a Spark into an open Office seat. Caller must have already
-    checked eligibility, sponsorship, and seat availability."""
+def seat_spark(spark: dict, allow_overflow: bool = False) -> dict:
+    """
+    Promote a Spark into an open Office seat. Caller must have already
+    checked eligibility, sponsorship, and seat availability.
+
+    allow_overflow: ONLY ever set True by the duel-win path as a fallback
+    if seating at the normal cap (20) is rejected — lets that one seating
+    push to 21 rather than deny an earned duel win. Every other call site
+    must leave this False so the cap trigger enforces 20 as normal.
+    """
     db = get_supabase()
     now = datetime.now(timezone.utc)
     data = {
@@ -1079,6 +1093,7 @@ def seat_spark(spark: dict) -> dict:
         # from drifting later every time you're a bit late.
         "shift_time_utc":    now.time().isoformat(),
         "status":            "active",
+        "duel_win_overflow": allow_overflow,
     }
     result = db.table("spark_office_seats").upsert(data, on_conflict="spark_asa").execute()
     return result.data[0] if result.data else {}
