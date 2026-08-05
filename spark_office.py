@@ -1215,19 +1215,13 @@ class SparkOfficeCog(commands.Cog):
             "spark_type":      spark.get("spark_type", ""),
             "tier":            spark.get("tier", 1),
         }
-        try:
-            await asyncio.to_thread(seat_spark, seat_data)
-            overflowed = False
-        except Exception:
-            # Same fallback the duel-win path uses — pushes to 21 rather
-            # than fail, since this command exists specifically for
-            # honoring a seat someone should already have.
-            await asyncio.to_thread(seat_spark, seat_data, True)
-            overflowed = True
+        # admin_override=True — a human deliberately running this command
+        # bypasses the cap check entirely, regardless of what else is
+        # happening (e.g. another duel independently pending right now).
+        await asyncio.to_thread(seat_spark, seat_data, False, True)
 
         spark_name = spark.get("name") or spark.get("spark_type", "Spark").capitalize()
-        note = " (seat count pushed to 21 — will self-correct)" if overflowed else ""
-        await interaction.followup.send(f"✅ **{spark_name}** manually seated in the Office{note}.", ephemeral=True)
+        await interaction.followup.send(f"✅ **{spark_name}** manually seated in the Office.", ephemeral=True)
         embed = self._promotion_celebration_embed(spark_name, spark.get("discord_user_id"))
         promo_file = _attach_office_image(embed, "promotion")
         await self._post_promotion_channel(embed=embed, file=promo_file)
