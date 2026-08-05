@@ -1650,23 +1650,27 @@ class SparkOfficeCog(commands.Cog):
                 # record fresh rather than guessing — it may have tiered up since the challenge.
                 challenger_spark = await asyncio.to_thread(get_spark, duel["challenger_asa"])
                 await asyncio.to_thread(vacate_seat, duel["defender_asa"], "duel_loss")
+                challenger_seat_data = {
+                    "asset_id":        duel["challenger_asa"],
+                    "wallet":          duel["challenger_wallet"],
+                    "discord_user_id": duel["challenger_discord_id"],
+                    "name":            duel["challenger_name"],
+                    "spark_type":      challenger_spark.get("spark_type", "") if challenger_spark else "",
+                    "tier":            challenger_spark.get("tier", 1) if challenger_spark else 1,
+                }
                 try:
-                    await asyncio.to_thread(seat_spark, {
-                        "asset_id":        duel["challenger_asa"],
-                        "wallet":          duel["challenger_wallet"],
-                        "discord_user_id": duel["challenger_discord_id"],
-                        "name":            duel["challenger_name"],
-                        "spark_type":      challenger_spark.get("spark_type", "") if challenger_spark else "",
-                        "tier":            challenger_spark.get("tier", 1) if challenger_spark else 1,
-                    })
+                    await asyncio.to_thread(seat_spark, challenger_seat_data)
                 except Exception as e:
-                    # Extremely rare: the defender's seat was already gone for
-                    # some unrelated reason (e.g. independently demoted during
-                    # the 1h duel window) and the Office is already at cap
-                    # from elsewhere. The cap trigger correctly blocks this —
-                    # the challenger won the duel but doesn't get a seat.
-                    print(f"[spark_office] duel-win seat_spark rejected for {duel['challenger_asa']}: {e}")
-                    seat_grant_failed = True
+                    # Rare timing collision — retry once allowing a single
+                    # overflow seat (21 max) rather than deny an earned duel
+                    # win. Every other seating path never sets this flag, so
+                    # the Office still can't grow past 21 from anywhere else.
+                    print(f"[spark_office] duel-win seat_spark rejected, retrying with overflow allowed: {e}")
+                    try:
+                        await asyncio.to_thread(seat_spark, challenger_seat_data, True)
+                    except Exception as e2:
+                        print(f"[spark_office] duel-win overflow seat_spark also rejected for {duel['challenger_asa']}: {e2}")
+                        seat_grant_failed = True
                 winner_name, winner_discord_id = duel["challenger_name"], duel["challenger_discord_id"]
                 loser_name, loser_discord_id = duel["defender_name"], duel["defender_discord_id"]
             else:
