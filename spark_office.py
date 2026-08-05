@@ -774,7 +774,12 @@ class SparkOfficeCog(commands.Cog):
                 results.append(f"⏳ **{spark_name}** is eligible, but there's no valid seat to challenge right now.")
                 continue
 
-            duel = await asyncio.to_thread(create_office_duel, {**spark, "asset_id": asa}, target)
+            try:
+                duel = await asyncio.to_thread(create_office_duel, {**spark, "asset_id": asa}, target)
+            except Exception as e:
+                print(f"[spark_office] create_office_duel failed for {asa}: {e}")
+                results.append(f"⏳ **{spark_name}** is eligible, but couldn't start a duel right now — try again shortly.")
+                continue
             results.append(
                 f"⚔️ **{spark_name}** is challenging **{target.get('spark_name') or target['spark_type']}** for their seat!"
             )
@@ -1430,7 +1435,11 @@ class SparkOfficeCog(commands.Cog):
             if not target or target["wallet"] == wallet:
                 continue  # no valid target this pass — try again next sweep
 
-            duel = await asyncio.to_thread(create_office_duel, c, target)
+            try:
+                duel = await asyncio.to_thread(create_office_duel, c, target)
+            except Exception as e:
+                print(f"[spark_office] create_office_duel failed for {c['asset_id']}: {e}")
+                continue
             await self._post_duel_challenge(duel)
 
     async def _resolve_and_settle(self, rows: list, forced_outcome: str | None = None, forced_amount: float | None = None) -> list:
@@ -1671,61 +1680,77 @@ class SparkOfficeCog(commands.Cog):
     async def _process_expired_duels(self):
         expired = await asyncio.to_thread(get_expired_pending_duels)
         for duel in expired:
-            c_picks = duel.get("challenger_picks") or [random.choice(RPS_CHOICES) for _ in range(7)]
-            d_picks = duel.get("defender_picks") or [random.choice(RPS_CHOICES) for _ in range(7)]
+            try:
+                await self._resolve_one_expired_duel(duel)
+            except Exception as e:
+                # Whatever went wrong, don't let it block the rest of this
+                # batch — resolve_office_duel already ran inside the helper
+                # before anything risky, so this duel won't get re-picked-up
+                # and retried forever even if something here failed.
+                print(f"[spark_office] failed to fully process expired duel {duel.get('id')}: {e}")
 
-            winner_side, rounds = _resolve_rps(c_picks, d_picks)
-            winner_asa = duel["challenger_asa"] if winner_side == "challenger" else duel["defender_asa"]
-            await asyncio.to_thread(resolve_office_duel, duel["id"], winner_asa, rounds)
+    async def _resolve_one_expired_duel(self, duel: dict):
+        c_picks = duel.get("challenger_picks") or [random.choice(RPS_CHOICES) for _ in range(7)]
+        d_picks = duel.get("defender_picks") or [random.choice(RPS_CHOICES) for _ in range(7)]
 
-            seat_grant_failed = False
-            if winner_side == "challenger":
-                # Challenger takes the seat — defender is vacated, challenger seated in its place.
-                # Duel rows only carry names, not type/tier, so pull the Spark's current
-                # record fresh rather than guessing — it may have tiered up since the challenge.
-                challenger_spark = await asyncio.to_thread(get_spark, duel["challenger_asa"])
-                await asyncio.to_thread(vacate_seat, duel["defender_asa"], "duel_loss")
-                challenger_seat_data = {
-                    "asset_id":        duel["challenger_asa"],
-                    "wallet":          duel["challenger_wallet"],
-                    "discord_user_id": duel["challenger_discord_id"],
-                    "name":            duel["challenger_name"],
-                    "spark_type":      challenger_spark.get("spark_type", "") if challenger_spark else "",
-                    "tier":            challenger_spark.get("tier", 1) if challenger_spark else 1,
-                }
+        winner_side, rounds = _resolve_rps(c_picks, d_picks)
+        winner_asa = duel["challenger_asa"] if winner_side == "challenger" else duel["defender_asa"]
+        await asyncio.to_thread(resolve_office_duel, duel["id"], winner_asa, rounds)
+
+        seat_grant_failed = False
+        if winner_side == "challenger":
+            # Challenger takes the seat — defender is vacated, challenger seated in its place.
+            # Duel rows only carry names, not type/tier, so pull the Spark's current
+            # record fresh rather than guessing — it may have tiered up since the challenge.
+            challenger_spark = await asyncio.to_thread(get_spark, duel["challenger_asa"])
+            await asyncio.to_thread(vacate_seat, duel["defender_asa"], "duel_loss")
+            challenger_seat_data = {
+                "asset_id":        duel["challenger_asa"],
+                "wallet":          duel["challenger_wallet"],
+                "discord_user_id": duel["challenger_discord_id"],
+                "name":            duel["challenger_name"],
+                "spark_type":      challenger_spark.get("spark_type", "") if challenger_spark else "",
+                "tier":            challenger_spark.get("tier", 1) if challenger_spark else 1,
+            }
+            try:
+                await asyncio.to_thread(seat_spark, challenger_seat_data)
+            except Exception as e:
+                # Rare timing collision — retry once allowing a single
+                # overflow seat (21 max) rather than deny an earned duel
+                # win. Every other seating path never sets this flag, so
+                # the Office still can't grow past 21 from anywhere else.
+                print(f"[spark_office] duel-win seat_spark rejected, retrying with overflow allowed: {e}")
                 try:
-                    await asyncio.to_thread(seat_spark, challenger_seat_data)
-                except Exception as e:
-                    # Rare timing collision — retry once allowing a single
-                    # overflow seat (21 max) rather than deny an earned duel
-                    # win. Every other seating path never sets this flag, so
-                    # the Office still can't grow past 21 from anywhere else.
-                    print(f"[spark_office] duel-win seat_spark rejected, retrying with overflow allowed: {e}")
-                    try:
-                        await asyncio.to_thread(seat_spark, challenger_seat_data, True)
-                    except Exception as e2:
-                        print(f"[spark_office] duel-win overflow seat_spark also rejected for {duel['challenger_asa']}: {e2}")
-                        seat_grant_failed = True
-                winner_name, winner_discord_id = duel["challenger_name"], duel["challenger_discord_id"]
-                loser_name, loser_discord_id = duel["defender_name"], duel["defender_discord_id"]
-            else:
-                # Defender keeps the seat — just clear its in_duel status.
+                    await asyncio.to_thread(seat_spark, challenger_seat_data, True)
+                except Exception as e2:
+                    print(f"[spark_office] duel-win overflow seat_spark also rejected for {duel['challenger_asa']}: {e2}")
+                    seat_grant_failed = True
+            winner_name, winner_discord_id = duel["challenger_name"], duel["challenger_discord_id"]
+            loser_name, loser_discord_id = duel["defender_name"], duel["defender_discord_id"]
+        else:
+            # Defender keeps the seat — just clear its in_duel status.
+            try:
                 from database import get_supabase
                 db = await asyncio.to_thread(get_supabase)
                 await asyncio.to_thread(
                     lambda: db.table("spark_office_seats").update({"status": "active"}).eq("spark_asa", duel["defender_asa"]).execute()
                 )
-                winner_name, winner_discord_id = duel["defender_name"], duel["defender_discord_id"]
-                loser_name, loser_discord_id = duel["challenger_name"], duel["challenger_discord_id"]
+            except Exception as e:
+                # Duel is already resolved either way — worst case the
+                # defender's seat stays flagged 'in_duel' until something
+                # else touches it, but nothing here should crash the batch.
+                print(f"[spark_office] defender reactivation failed for {duel['defender_asa']}: {e}")
+            winner_name, winner_discord_id = duel["defender_name"], duel["defender_discord_id"]
+            loser_name, loser_discord_id = duel["challenger_name"], duel["challenger_discord_id"]
 
-            round_lines = _format_duel_rounds(rounds, duel["challenger_name"], duel["defender_name"])
-            winner_tag = f"**{winner_name}** (<@{winner_discord_id}>)" if winner_discord_id else f"**{winner_name}**"
-            loser_tag  = f"**{loser_name}** (<@{loser_discord_id}>)" if loser_discord_id else f"**{loser_name}**"
-            desc = f"{winner_tag} defeats {loser_tag} and takes the seat!\n\n{round_lines}"
-            if seat_grant_failed:
-                desc += "\n\n⚠️ The seat was already gone by the time this resolved — no seat granted this time."
-            embed = discord.Embed(title="⚔️ Office Duel Resolved", description=desc, color=0xFFD700)
-            await self._post_promotion_channel(embed=embed)
+        round_lines = _format_duel_rounds(rounds, duel["challenger_name"], duel["defender_name"])
+        winner_tag = f"**{winner_name}** (<@{winner_discord_id}>)" if winner_discord_id else f"**{winner_name}**"
+        loser_tag  = f"**{loser_name}** (<@{loser_discord_id}>)" if loser_discord_id else f"**{loser_name}**"
+        desc = f"{winner_tag} defeats {loser_tag} and takes the seat!\n\n{round_lines}"
+        if seat_grant_failed:
+            desc += "\n\n⚠️ The seat was already gone by the time this resolved — no seat granted this time."
+        embed = discord.Embed(title="⚔️ Office Duel Resolved", description=desc, color=0xFFD700)
+        await self._post_promotion_channel(embed=embed)
 
 
 async def setup(bot: commands.Bot):
