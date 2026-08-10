@@ -160,7 +160,7 @@ class VoltballCog(commands.Cog):
     # formation every time it's resolved, so someone with only one real
     # team can still test full matches/seasons.
     # ─────────────────────────────────────────────
-    @app_commands.command(name="voltball_add_cpu_team", description="[Admin] Add a CPU opponent for solo testing — no wallet needed, auto-fields a fresh roster every week.")
+    @app_commands.command(name="voltball_add_cpu_team", description="[Admin] Add a CPU opponent for solo testing — fields a random roster weekly.")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(team_name="Name for the CPU team", hero_type="Optional — pins its coach signature (random if omitted)")
     async def voltball_add_cpu_team(self, interaction: discord.Interaction, team_name: str, hero_type: str = None):
