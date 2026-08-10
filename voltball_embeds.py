@@ -80,6 +80,9 @@ def build_lineups_embed(season: dict, week: int, week_lineups: list[dict]) -> di
 
     for entry in week_lineups:
         lineup = entry["lineup"]
+        if entry.get("is_cpu"):
+            embed.add_field(name=f"🤖 {entry['team_name']} ({entry['hero_type']})", value="*CPU team — fields a fresh random roster at resolution time.*", inline=False)
+            continue
         if not lineup:
             embed.add_field(name=f"⏳ {entry['team_name']} ({entry['hero_type']})", value="*No lineup submitted yet.*", inline=False)
             continue
@@ -115,8 +118,15 @@ def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
         lineup_a = lineup_lookup.get(pairing["team_a_id"])
         lineup_b = lineup_lookup.get(pairing["team_b_id"])
 
-        form_a = lineup_a["formation"] if lineup_a else "No lineup (auto-fielded, penalized)"
-        form_b = lineup_b["formation"] if lineup_b else "No lineup (auto-fielded, penalized)"
+        if team_a.get("is_cpu"):
+            form_a = "CPU — random roster/formation"
+        else:
+            form_a = lineup_a["formation"] if lineup_a else "No lineup (auto-fielded, penalized)"
+
+        if team_b.get("is_cpu"):
+            form_b = "CPU — random roster/formation"
+        else:
+            form_b = lineup_b["formation"] if lineup_b else "No lineup (auto-fielded, penalized)"
 
         embed.add_field(
             name=f"{team_a['team_name']} vs {team_b['team_name']}",
