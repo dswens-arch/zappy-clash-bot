@@ -138,18 +138,27 @@ def set_guild_config(guild_id: str, announcement_channel_id: str | None = None, 
 
 
 def get_active_season(guild_id: str) -> dict | None:
-    """Returns the active season row for this guild, or None if none is active."""
+    """
+    Returns the active season row for this guild, or None if none is active.
+    NOTE: deliberately NOT using .single() here — PostgREST's .single()
+    raises PGRST116 ("Cannot coerce the result to a single JSON object")
+    when zero rows match, rather than returning None. That's the correct,
+    documented behavior for real Supabase/PostgREST — the mock client used
+    during development incorrectly returned None for an empty result,
+    which is why this bug wasn't caught until testing against the real DB.
+    Using the same plain-list pattern as get_team_by_owner instead, which
+    handles zero rows gracefully.
+    """
     db = get_supabase()
-    row = (
+    result = (
         db.table("voltball_seasons")
         .select("*")
         .eq("guild_id", guild_id)
         .eq("status", "active")
-        .single()
         .execute()
-        .data
     )
-    return row
+    rows = result.data or []
+    return rows[0] if rows else None
 
 
 def get_upcoming_season(guild_id: str) -> dict | None:
