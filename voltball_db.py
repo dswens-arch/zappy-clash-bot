@@ -103,6 +103,7 @@ def get_week_lineups(season_id: str, week_number: int) -> list[dict]:
             "team_id": t["id"],
             "team_name": t["team_name"],
             "hero_type": t["hero_type"],
+            "is_cpu": t.get("is_cpu", False),
             "lineup": lineup_by_team.get(t["id"]),
         }
         for t in teams
@@ -188,6 +189,39 @@ def get_team_by_owner(guild_id: str, owner_discord_id: str, season_id: str) -> d
     )
     rows = result.data or []
     return rows[0] if rows else None
+
+
+def create_cpu_team(guild_id: str, season_id: str, team_name: str, hero_type: str = None) -> dict:
+    """
+    Creates a CPU opponent — no wallet, no real coach. Exists purely so
+    someone can test the full match/season loop solo without needing a
+    second real wallet+Hero. owner_discord_id is set to a fixed sentinel
+    ('CPU:<team_name>') rather than left null, since voltball_teams.
+    owner_discord_id is NOT NULL and the uniqueness constraint is scoped
+    per (guild, owner, season) — folding team_name into the sentinel
+    keeps multiple CPU teams from colliding on that constraint.
+
+    hero_type defaults to a RANDOM Hero (not always the same one) if not
+    specified — spreads test coverage across different coach signatures
+    rather than only ever exercising Wolf's.
+    """
+    import random
+    from voltball_engine import HERO_SIGNATURES
+
+    db = get_supabase()
+    row = {
+        "guild_id": guild_id,
+        "owner_discord_id": f"CPU:{team_name}",
+        "wallet_address": None,
+        "team_name": team_name,
+        "hero_asset_id": None,
+        "hero_type": hero_type or random.choice(list(HERO_SIGNATURES.keys())),
+        "is_collab_hero": False,
+        "is_cpu": True,
+        "season_id": season_id,
+    }
+    result = db.table("voltball_teams").insert(row).execute()
+    return result.data[0]
 
 
 def create_team(guild_id: str, owner_discord_id: str, wallet_address: str, team_name: str,
