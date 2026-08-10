@@ -250,6 +250,7 @@ HEAD_VLT_BONUS = {
     "Rubber Ducky":     10,
     "Pot Lid":          12,
     "Trash Can Lid":    12,
+    "Colander":         12,  # kitchen-item tier, same as Pot Lid / Trash Can Lid — was falling through to the generic 10 fallback before this fix (12 real Zappies affected)
     "Dino Hat":         12,
     "Bear Hat":         12,
     "Cat Hat":          12,
