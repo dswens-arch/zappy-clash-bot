@@ -21,13 +21,13 @@ from datetime import datetime, timezone
 
 from voltball_engine import resolve_match, FORMATIONS, HERO_SIGNATURES
 from voltball_lineup_service import (
-    get_wallet_zappies, get_hero_ownership, get_locked_lineup_team, build_fallback_team, LineupValidationError,
+    get_wallet_zappies, get_hero_ownership, get_locked_lineup_team, build_fallback_team, build_cpu_team, LineupValidationError,
 )
 from algorand_lookup import fetch_zappy_traits
 from voltball_lineup_view import build_lineup_picker
 from voltball_db import (
     get_active_season, get_upcoming_season, get_team_by_owner, get_team_by_id, get_teams_for_season,
-    get_lineup, get_week_lineups, create_team, get_standings, update_standings_after_match,
+    get_lineup, get_week_lineups, create_team, create_cpu_team, get_standings, update_standings_after_match,
     get_guild_config, set_guild_config, create_season, list_seasons, wipe_season,
 )
 from voltball_schedule import save_schedule, get_week_pairings, get_bye_team
@@ -151,6 +151,30 @@ class VoltballCog(commands.Cog):
         await interaction.followup.send(
             f"🏈 **{team_name}** registered — coached by **{hero['hero_type']}**! "
             f"Use `/voltball_lineup` before the weekly deadline to set your formation.",
+            ephemeral=True,
+        )
+
+    # ─────────────────────────────────────────────
+    # /voltball_add_cpu_team (admin) — a standing solo-test opponent.
+    # No wallet, no real coach: auto-fields a fresh random roster and
+    # formation every time it's resolved, so someone with only one real
+    # team can still test full matches/seasons.
+    # ─────────────────────────────────────────────
+    @app_commands.command(name="voltball_add_cpu_team", description="[Admin] Add a CPU opponent for solo testing — no wallet needed, auto-fields a fresh roster every week.")
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.describe(team_name="Name for the CPU team", hero_type="Optional — pins its coach signature (random if omitted)")
+    async def voltball_add_cpu_team(self, interaction: discord.Interaction, team_name: str, hero_type: str = None):
+        await interaction.response.defer(ephemeral=True)
+
+        season = get_upcoming_season(str(interaction.guild_id))
+        if not season:
+            await interaction.followup.send("There's no season open for registration — create one first with `/voltball_season_create`.", ephemeral=True)
+            return
+
+        team = create_cpu_team(str(interaction.guild_id), season["id"], team_name, hero_type)
+        await interaction.followup.send(
+            f"🤖 CPU team **{team_name}** added — coached by **{team['hero_type']}**. "
+            f"It doesn't need `/voltball_lineup` — it auto-fields a fresh random roster and formation every week.",
             ephemeral=True,
         )
 
@@ -508,19 +532,25 @@ class VoltballCog(commands.Cog):
         for pairing in pairings:
             team_a_row = get_team_by_id(pairing["team_a_id"])
             team_b_row = get_team_by_id(pairing["team_b_id"])
-            lineup_a = get_lineup(pairing["team_a_id"], week)
-            lineup_b = get_lineup(pairing["team_b_id"], week)
 
             try:
-                if lineup_a:
-                    team_a = await get_locked_lineup_team(lineup_a, team_a_row["hero_type"], team_a_row["wallet_address"])
+                if team_a_row.get("is_cpu"):
+                    team_a = build_cpu_team(team_a_row["hero_type"])
                 else:
-                    team_a = await build_fallback_team(team_a_row["wallet_address"], team_a_row["hero_type"])
+                    lineup_a = get_lineup(pairing["team_a_id"], week)
+                    if lineup_a:
+                        team_a = await get_locked_lineup_team(lineup_a, team_a_row["hero_type"], team_a_row["wallet_address"])
+                    else:
+                        team_a = await build_fallback_team(team_a_row["wallet_address"], team_a_row["hero_type"])
 
-                if lineup_b:
-                    team_b = await get_locked_lineup_team(lineup_b, team_b_row["hero_type"], team_b_row["wallet_address"])
+                if team_b_row.get("is_cpu"):
+                    team_b = build_cpu_team(team_b_row["hero_type"])
                 else:
-                    team_b = await build_fallback_team(team_b_row["wallet_address"], team_b_row["hero_type"])
+                    lineup_b = get_lineup(pairing["team_b_id"], week)
+                    if lineup_b:
+                        team_b = await get_locked_lineup_team(lineup_b, team_b_row["hero_type"], team_b_row["wallet_address"])
+                    else:
+                        team_b = await build_fallback_team(team_b_row["wallet_address"], team_b_row["hero_type"])
             except LineupValidationError as e:
                 print(f"[voltball] Week {week}: error building teams for {team_a_row['team_name']} vs {team_b_row['team_name']}: {e}")
                 continue
