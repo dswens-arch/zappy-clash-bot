@@ -224,3 +224,43 @@ async def build_fallback_team(wallet_address: str, hero_type: str | None) -> Tea
                        roster=roster, position_map=position_map)
     team.auto_lineup_penalty = True
     return team
+
+
+def build_cpu_team(hero_type: str | None = None, formation: str | None = None) -> Team:
+    """
+    Builds a CPU opponent's roster fresh from the REAL Zappy collection —
+    no wallet needed. Used for CPU teams (voltball_teams.is_cpu = True),
+    which exist specifically so someone can test solo without a second
+    real wallet/Hero: register one real team, add a CPU team, and every
+    resolution the CPU side gets a brand-new random 7-Zappy roster in a
+    randomly-chosen formation (unless formation is pinned), no lineup
+    submission required.
+
+    NOT the same as build_fallback_team() — that's a real coach's own
+    holdings scored with a penalty for skipping their lineup. This is a
+    standing opponent that was never meant to have holdings at all.
+    """
+    import random
+    from zappy_collection import ZAPPY_COLLECTION
+    from stats_engine import calculate_stats
+
+    chosen_formation = formation or random.choice(list(FORMATIONS.keys()))
+    sample_ids = random.sample(list(ZAPPY_COLLECTION.keys()), ROSTER_SIZE)
+
+    roster = []
+    for aid in sample_ids:
+        entry = ZAPPY_COLLECTION[aid]
+        traits = {k: entry[k] for k in ["background", "body", "earring", "eyes", "eyewear", "head", "mouth", "skin"]}
+        stats = calculate_stats(traits)
+        roster.append(ZappyPlayer(asset_id=aid, name=entry["name"], VLT=stats["VLT"], INS=stats["INS"], SPK=stats["SPK"]))
+
+    position_map = {}
+    counts = FORMATIONS[chosen_formation]
+    idx = 0
+    for pos, n in counts.items():
+        for _ in range(n):
+            position_map[roster[idx].asset_id] = pos
+            idx += 1
+
+    return build_team(name="", coach_hero_type=hero_type, formation=chosen_formation,
+                       roster=roster, position_map=position_map)
