@@ -22,6 +22,7 @@ included since accumulation makes mistakes harder to undo any other way.
 import discord
 from voltball_engine import FORMATIONS, POSITIONS
 from voltball_lineup_service import submit_lineup, LineupValidationError
+from voltball_position_fit import POSITION_STAT
 
 PER_PAGE = 25
 
@@ -96,7 +97,12 @@ class _SubmitButton(discord.ui.Button):
 
         for item in view.children:
             item.disabled = True
-        await interaction.message.edit(view=view)
+        # NOTE: interaction.message.edit() fails with a 404 "Unknown Message"
+        # after response.defer(ephemeral=True) — an ephemeral/component
+        # interaction's message can only be edited through the interaction's
+        # own webhook, not a raw message.edit() call. edit_original_response()
+        # is the correct method here.
+        await interaction.edit_original_response(view=view)
         await interaction.followup.send(f"✅ Lineup locked in — running **{view.formation}** this week.", ephemeral=True)
 
 
@@ -139,13 +145,19 @@ class LineupPickerView(discord.ui.View):
             remaining = count - len(self.selections[position])
             if remaining <= 0:
                 continue  # this position is already full — no select needed
+            # Sort this position's candidates by the stat it actually cares
+            # about (VLT for Striker, SPK for Mid, INS for Guard), highest
+            # first — was previously left in wallet-return order, so the
+            # best fits for a given position could be buried anywhere.
+            stat_key = POSITION_STAT[position]
+            sorted_for_position = sorted(page_available, key=lambda z: z[stat_key], reverse=True)
             options = [
                 discord.SelectOption(
                     label=z["name"][:100],
                     description=f"VLT {z['VLT']} · INS {z['INS']} · SPK {z['SPK']}",
                     value=str(z["asset_id"]),
                 )
-                for z in page_available[:25]
+                for z in sorted_for_position[:25]
             ]
             max_values = min(remaining, len(options)) if options else 1
             self.add_item(_PositionSelect(position, options, max_values))
@@ -177,9 +189,24 @@ class LineupPickerView(discord.ui.View):
 def build_lineup_picker(guild_id: str, team_id: str, season_id: str, week_number: int,
                          formation: str, wallet_address: str, held_zappies: list[dict],
                          user_id: int) -> tuple[str, "LineupPickerView"]:
-    """Convenience constructor — returns (initial_message_content, view)."""
+    """
+    Convenience constructor — returns (initial_message_content, view).
+
+    Sorts held_zappies by each Zappy's single strongest stat (its best
+    fit for ANY position) before pagination, so if someone holds more
+    than 25 Zappies, the most broadly useful ones land on page 1 instead
+    of whatever order the wallet API happened to return. This is an
+    approximation, not a per-position sort (a Zappy's best-overall stat
+    might not be the one a specific position needs) — within any given
+    page, each position's own dropdown is re-sorted by its own relevant
+    stat (see LineupPickerView._build_components), so the practical
+    effect is: strong Zappies surface early, and whichever page they're
+    on, each dropdown still ranks them correctly for that position.
+    """
     total = sum(FORMATIONS[formation].values())
-    view = LineupPickerView(guild_id, team_id, season_id, week_number, formation, wallet_address, held_zappies, user_id)
+    ranked = sorted(held_zappies, key=lambda z: max(z["VLT"], z["INS"], z["SPK"]), reverse=True)
+    view = LineupPickerView(guild_id, team_id, season_id, week_number, formation, wallet_address, ranked, user_id)
     page_info = f" (page 1/{view.max_page + 1})" if view.max_page > 0 else ""
-    content = f"**{formation}** formation{page_info} — 0/{total} assigned."
+    warning = f"\n⚠️ You hold {len(ranked)} Zappies — use Prev/Next to see them all." if view.max_page > 0 else ""
+    content = f"**{formation}** formation{page_info} — 0/{total} assigned.{warning}"
     return content, view
