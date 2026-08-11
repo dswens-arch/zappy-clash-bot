@@ -35,6 +35,11 @@ import os
 ADMIN_ROLE_NAME  = os.environ.get("ADMIN_ROLE_NAME", "Admin")
 AUCTION_CHANNEL  = int(os.environ.get("AUCTION_CHANNEL", 0)) or None  # Optional dedicated channel
 
+# Anti-snipe: if a bid lands within this many seconds of ends_at, push ends_at
+# out by this many seconds. Defaults to a 5-minute window / 5-minute extension.
+ANTI_SNIPE_THRESHOLD_SECONDS  = int(os.environ.get("ANTI_SNIPE_THRESHOLD_SECONDS", 300))
+ANTI_SNIPE_EXTENSION_SECONDS  = int(os.environ.get("ANTI_SNIPE_EXTENSION_SECONDS", 300))
+
 # ─────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────
@@ -413,6 +418,24 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
             "bid_amount":       amount,
         }).execute()
 
+        # Anti-snipe: if this bid landed inside the threshold window before
+        # ends_at, push ends_at out by the extension amount. Only ever
+        # extends — never shortens — so it's safe to enable on an auction
+        # that's already mid-flight.
+        snipe_extended = False
+        ends_at_dt = datetime.fromisoformat(auction["ends_at"].replace("Z", "+00:00"))
+        now_dt = datetime.now(timezone.utc)
+        seconds_left = (ends_at_dt - now_dt).total_seconds()
+
+        if 0 < seconds_left <= ANTI_SNIPE_THRESHOLD_SECONDS:
+            from datetime import timedelta
+            new_ends_at = now_dt + timedelta(seconds=ANTI_SNIPE_EXTENSION_SECONDS)
+            db.table("clash_auctions").update(
+                {"ends_at": new_ends_at.isoformat()}
+            ).eq("id", auction["id"]).execute()
+            auction["ends_at"] = new_ends_at.isoformat()
+            snipe_extended = True
+
         # Notify previous high bidder (ephemeral DM-style — best effort)
         if top_bid and top_bid["discord_user_id"] != str(interaction.user.id):
             try:
@@ -433,22 +456,31 @@ def setup_auction_commands(bot: discord.Client, tree: app_commands.CommandTree, 
             if ch:
                 target = ch
 
+        description_lines = [
+            f"**{interaction.user.display_name}** has taken the lead!",
+            f"Current high bid: **{amount:,} ALGO**",
+            f"⏱️ {format_time_remaining(auction['ends_at'])} remaining",
+        ]
+        if snipe_extended:
+            description_lines.append(
+                f"⏰ **Anti-snipe triggered!** Auction extended by "
+                f"{ANTI_SNIPE_EXTENSION_SECONDS // 60} minutes."
+            )
+
         public_embed = discord.Embed(
             title=f"💰 New High Bid — {auction['nft_name']}",
-            description=(
-                f"**{interaction.user.display_name}** has taken the lead!\n"
-                f"Current high bid: **{amount:,} ALGO**\n"
-                f"⏱️ {format_time_remaining(auction['ends_at'])} remaining"
-            ),
+            description="\n".join(description_lines),
             color=discord.Color.gold(),
         )
         if auction.get("image_url"):
             public_embed.set_thumbnail(url=auction["image_url"])
 
         await target.send(embed=public_embed)
-        await interaction.followup.send(
-            f"✅ Bid of **{amount:,} ALGO** placed. You're the high bidder!", ephemeral=True
-        )
+
+        confirm_msg = f"✅ Bid of **{amount:,} ALGO** placed. You're the high bidder!"
+        if snipe_extended:
+            confirm_msg += f"\n⏰ Your bid triggered anti-snipe — auction extended by {ANTI_SNIPE_EXTENSION_SECONDS // 60} minutes."
+        await interaction.followup.send(confirm_msg, ephemeral=True)
 
     # ── /auction info ─────────────────────────────────────────────────────────
     @auction_group.command(name="info", description="Show the current auction status")
