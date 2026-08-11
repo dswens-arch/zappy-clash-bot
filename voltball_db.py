@@ -176,6 +176,29 @@ def get_upcoming_season(guild_id: str) -> dict | None:
     return rows[0] if rows else None
 
 
+def get_open_season(guild_id: str) -> dict | None:
+    """
+    Returns any non-complete season for this guild — upcoming, active, OR
+    playoffs. Used by /voltball_add_cpu_team, which (unlike team
+    registration) should work any time a season exists and hasn't
+    finished, not only during the pre-start registration window. Only
+    one non-complete season should ever exist per guild at a time
+    (voltball_season_create already blocks creating a second one while
+    one is upcoming/active), so this doesn't need status-priority
+    ordering — there should only ever be zero or one match.
+    """
+    db = get_supabase()
+    result = (
+        db.table("voltball_seasons")
+        .select("*")
+        .eq("guild_id", guild_id)
+        .in_("status", ["upcoming", "active", "playoffs"])
+        .execute()
+    )
+    rows = result.data or []
+    return rows[0] if rows else None
+
+
 def get_team_by_owner(guild_id: str, owner_discord_id: str, season_id: str) -> dict | None:
     """Returns this coach's team for the given season, or None if not registered."""
     db = get_supabase()
@@ -225,12 +248,18 @@ def create_cpu_team(guild_id: str, season_id: str, team_name: str, hero_type: st
 
 
 def create_team(guild_id: str, owner_discord_id: str, wallet_address: str, team_name: str,
-                 hero_asset_id: int, hero_type: str, is_collab_hero: bool, season_id: str) -> dict:
+                 hero_asset_id: int | None, hero_type: str | None, is_collab_hero: bool, season_id: str) -> dict:
     """
     Inserts a new team. Relies on the DB-level UNIQUE constraints (one team
     per coach per season, one team per Hero NFT per season) to reject
     duplicates — catch the resulting exception in the caller rather than
     pre-checking here, since that's a race-free way to enforce it.
+
+    hero_asset_id/hero_type may both be None — a Hero is optional, not
+    required, to register a team (see voltball_cog.py's registration
+    flow). Postgres UNIQUE constraints treat NULL as distinct from any
+    other value, so multiple "No Coach" teams (all NULL hero_asset_id)
+    coexist fine without tripping the per-Hero uniqueness rule.
     """
     db = get_supabase()
     row = {
