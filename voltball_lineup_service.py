@@ -27,7 +27,7 @@ from typing import Optional
 from algorand_lookup import verify_wallet_owns_zappy, fetch_zappy_traits
 from database import get_supabase
 from voltball_engine import (
-    FORMATIONS, POSITIONS, ROSTER_SIZE, NO_LINEUP_DEFAULT_FORMATION,
+    FORMATIONS, POSITIONS, ROSTER_SIZE, NO_LINEUP_DEFAULT_FORMATION, TEMPO_MIN, TEMPO_MAX, TEMPO_STEP, TEMPO_DEFAULT, clamp_tempo,
     ZappyPlayer, build_team, Team,
 )
 
@@ -133,12 +133,24 @@ async def validate_lineup(wallet_address: str, formation: str, position_map: dic
 
 
 async def submit_lineup(guild_id: str, team_id: str, season_id: str, week_number: int,
-                         formation: str, position_map: dict, wallet_address: str) -> dict:
+                         formation: str, position_map: dict, wallet_address: str,
+                         tempo: float = TEMPO_DEFAULT) -> dict:
     """
     Validates then upserts a lineup row. Raises LineupValidationError on
     any rule violation — callers (the Discord command) should catch that
     and send the message back to the user, not a raw traceback.
+
+    tempo is validated here but NOT threaded into the Team object
+    validate_lineup() builds — that Team is only used to confirm the
+    roster/formation are legal, never resolved into a match. tempo only
+    matters at actual match-resolution time, via get_locked_lineup_team().
     """
+    if not (TEMPO_MIN <= tempo <= TEMPO_MAX):
+        raise LineupValidationError(f"Tempo must be between {TEMPO_MIN} and {TEMPO_MAX} — you sent {tempo}.")
+    snapped = clamp_tempo(tempo)
+    if abs(snapped - tempo) > 1e-9:
+        raise LineupValidationError(f"Tempo must be in {TEMPO_STEP} increments — {tempo} isn't valid (try {snapped}).")
+
     team = await validate_lineup(wallet_address, formation, position_map)  # raises on failure
 
     row = {
@@ -146,6 +158,7 @@ async def submit_lineup(guild_id: str, team_id: str, season_id: str, week_number
         "season_id": season_id,
         "week_number": week_number,
         "formation": formation,
+        "tempo": tempo,
         # Storing name alongside asset_id (not just bare ids) — a public
         # scouting report (/voltball_lineups) needs to show every team's
         # roster names cheaply, without re-fetching stats/holdings for
@@ -187,7 +200,7 @@ async def get_locked_lineup_team(lineup_row: dict, hero_type: str, wallet_addres
             position_map[aid] = pos
 
     return build_team(name="", coach_hero_type=hero_type, formation=lineup_row["formation"],
-                       roster=roster, position_map=position_map)
+                       roster=roster, position_map=position_map, tempo=lineup_row.get("tempo", TEMPO_DEFAULT))
 
 
 async def build_fallback_team(wallet_address: str, hero_type: str | None) -> Team | None:
@@ -226,7 +239,7 @@ async def build_fallback_team(wallet_address: str, hero_type: str | None) -> Tea
     return team
 
 
-def build_cpu_team(hero_type: str | None = None, formation: str | None = None) -> Team:
+def build_cpu_team(hero_type: str | None = None, formation: str | None = None, tempo: float | None = None) -> Team:
     """
     Builds a CPU opponent's roster fresh from the REAL Zappy collection —
     no wallet needed. Used for CPU teams (voltball_teams.is_cpu = True),
@@ -235,6 +248,11 @@ def build_cpu_team(hero_type: str | None = None, formation: str | None = None) -
     resolution the CPU side gets a brand-new random 7-Zappy roster in a
     randomly-chosen formation (unless formation is pinned), no lineup
     submission required.
+
+    tempo is randomized across the full 1-10 range (on the 0.5 step) the
+    same way formation is (unless pinned) — same reasoning as
+    create_cpu_team()'s hero_type randomization: spreads test coverage
+    across the whole dial rather than only ever exercising the midpoint.
 
     NOT the same as build_fallback_team() — that's a real coach's own
     holdings scored with a penalty for skipping their lineup. This is a
@@ -245,6 +263,11 @@ def build_cpu_team(hero_type: str | None = None, formation: str | None = None) -
     from stats_engine import calculate_stats
 
     chosen_formation = formation or random.choice(list(FORMATIONS.keys()))
+    if tempo is not None:
+        chosen_tempo = tempo
+    else:
+        steps = int(round((TEMPO_MAX - TEMPO_MIN) / TEMPO_STEP))
+        chosen_tempo = TEMPO_MIN + random.randint(0, steps) * TEMPO_STEP
     sample_ids = random.sample(list(ZAPPY_COLLECTION.keys()), ROSTER_SIZE)
 
     roster = []
@@ -263,4 +286,4 @@ def build_cpu_team(hero_type: str | None = None, formation: str | None = None) -
             idx += 1
 
     return build_team(name="", coach_hero_type=hero_type, formation=chosen_formation,
-                       roster=roster, position_map=position_map)
+                       roster=roster, position_map=position_map, tempo=chosen_tempo)
