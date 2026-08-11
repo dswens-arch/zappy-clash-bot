@@ -162,6 +162,29 @@ def get_active_season(guild_id: str) -> dict | None:
     return rows[0] if rows else None
 
 
+def get_active_or_playoff_season(guild_id: str) -> dict | None:
+    """
+    Returns the season for this guild if it's in 'active' OR 'playoffs'
+    status -- both are genuinely "the season is live" states. Commands
+    like /voltball_standings and /voltball_lineups used to check
+    get_active_season() alone, which meant they'd incorrectly report
+    "no active season" during the exact weeks (playoffs) people would
+    most want to check them. Only one season should ever be in either
+    status at a time per guild (season_create blocks opening a second
+    while one is open), so no status-priority ordering is needed here.
+    """
+    db = get_supabase()
+    result = (
+        db.table("voltball_seasons")
+        .select("*")
+        .eq("guild_id", guild_id)
+        .in_("status", ["active", "playoffs"])
+        .execute()
+    )
+    rows = result.data or []
+    return rows[0] if rows else None
+
+
 def get_upcoming_season(guild_id: str) -> dict | None:
     """Returns the upcoming (not-yet-started) season for this guild, if any — used by /voltball_season_start."""
     db = get_supabase()
@@ -295,6 +318,27 @@ def get_standings(season_id: str) -> list[dict]:
     for r in rows:
         r["team_name"] = (r.get("voltball_teams") or {}).get("team_name", "Unknown Team")
     return rows
+
+
+def get_playoff_round_winners(season_id: str, week_number: int) -> list[str]:
+    """
+    Returns the winner_team_id of every playoff match resolved in a given
+    week — used to seed the next round (e.g., collect both semifinal
+    winners to build the championship pairing). Order isn't meaningful
+    here: a 2-team final doesn't care which winner lands in team_a vs
+    team_b, so no attempt is made to preserve semifinal seed order.
+    """
+    db = get_supabase()
+    rows = (
+        db.table("voltball_matches")
+        .select("winner_team_id")
+        .eq("season_id", season_id)
+        .eq("week_number", week_number)
+        .eq("is_playoff", True)
+        .execute()
+        .data
+    ) or []
+    return [r["winner_team_id"] for r in rows]
 
 
 def update_standings_after_match(season_id: str, winner_team_id: str, loser_team_id: str,
