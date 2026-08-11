@@ -102,14 +102,53 @@ QUARTERS = 4
 
 # ─────────────────────────────────────────────
 # Fixed formations — the ONLY 3 legal position splits
+# QB is constant across all three (1 always) — same real-football
+# convention this whole design already borrows from (Striker/Mid/Guard
+# counts shift by formation, QB doesn't). Purely additive: the Striker/
+# Mid/Guard counts are UNCHANGED from before QB existed, so the
+# existing formation-pairing balance from voltball_tune.py's grid
+# search isn't disturbed by this addition — verify with simulation
+# before trusting that claim, not just by inspection (see the
+# post-implementation simulation run).
 # ─────────────────────────────────────────────
 FORMATIONS = {
-    "OFFENSE":  {"Striker": 5, "Mid": 1, "Guard": 1},
-    "BALANCED": {"Striker": 3, "Mid": 2, "Guard": 2},
-    "DEFENSE":  {"Striker": 1, "Mid": 2, "Guard": 4},
+    "OFFENSE":  {"QB": 1, "Striker": 5, "Mid": 1, "Guard": 1},
+    "BALANCED": {"QB": 1, "Striker": 3, "Mid": 2, "Guard": 2},
+    "DEFENSE":  {"QB": 1, "Striker": 1, "Mid": 2, "Guard": 4},
 }
-ROSTER_SIZE = 7
-POSITIONS = ("Striker", "Mid", "Guard")
+ROSTER_SIZE = 8
+POSITIONS = ("QB", "Striker", "Mid", "Guard")
+
+# QB reuses SPK (no new stat, no re-deriving anything from trait data
+# across the collection) — but unlike Mid, which pools SPK additively,
+# QB's SPK drives a MULTIPLIER on the whole team's Base_Offense. A
+# strong QB lifts everything; a weak one drags it down. Calibrated
+# against the REAL collection's measured SPK distribution (mean 54.61,
+# stdev 11.93, p10=43, p90=74, p99=91, min 26 / max 100 across all
+# 1,678 Zappies) — not a guessed range.
+#
+# The FIRST calibration attempt (rate=0.004, clamp [0.85,1.15]) was
+# simulated before shipping and found to be badly overtuned: a modest,
+# common gap (SPK 65 vs 45) produced an 87% win rate, and an extreme
+# gap hit 100% — QB alone was fully overwhelming formation, tempo, and
+# every random event combined, the opposite of "one input among
+# several." Retuned by simulating a grid of (rate, clamp) pairs against
+# three gap sizes (a common ~20-point gap, a p90-vs-p10 gap, and an
+# extreme p99-vs-floor gap) until the shape looked right: a common gap
+# is a real-but-modest edge (~56%), a strong gap matters more (~62%),
+# and even the rare extreme case (~73%) leaves real room for the
+# weaker-QB side to still win. At rate=0.0006: mean SPK (54.61) gives
+# exactly 1.0 (baseline unchanged), p90 (74) gives ~1.012, p99 (91)
+# gives ~1.022, the absolute floor (26) gives ~0.983 before clamping.
+QB_BASELINE_SPK = 54.61
+QB_MULT_RATE = 0.0006
+QB_MULT_MIN = 0.95
+QB_MULT_MAX = 1.05
+
+
+def qb_multiplier(qb_spk: float) -> float:
+    mult = 1.0 + (qb_spk - QB_BASELINE_SPK) * QB_MULT_RATE
+    return max(QB_MULT_MIN, min(QB_MULT_MAX, mult))
 
 # ─────────────────────────────────────────────
 # Random event odds + magnitudes, rolled once per
@@ -302,7 +341,7 @@ class Team:
     name:            str
     coach_hero_type: Optional[str]
     formation:       str                          # one of FORMATIONS keys
-    assignments:     dict                          # {"Striker": [ZappyPlayer,...], "Mid": [...], "Guard": [...]}
+    assignments:     dict                          # {"QB": [ZappyPlayer], "Striker": [...], "Mid": [...], "Guard": [...]}
     tempo:           float = TEMPO_DEFAULT          # 1.0 (Controlled) - 10.0 (Aggressive)
 
     # Match-state (not set at construction)
@@ -342,10 +381,10 @@ def build_team(name: str, coach_hero_type: Optional[str], formation: str,
                 roster: list[ZappyPlayer], position_map: dict, tempo: float = TEMPO_DEFAULT) -> Team:
     """
     Convenience builder.
-    position_map: {asset_id: "Striker"|"Mid"|"Guard"} for all 7 roster Zappies.
+    position_map: {asset_id: "QB"|"Striker"|"Mid"|"Guard"} for all ROSTER_SIZE roster Zappies.
     """
     by_id = {z.asset_id: z for z in roster}
-    assignments = {"Striker": [], "Mid": [], "Guard": []}
+    assignments = {pos: [] for pos in POSITIONS}
     for asset_id, pos in position_map.items():
         if pos not in POSITIONS:
             raise ValueError(f"Invalid position '{pos}' for asset {asset_id}")
@@ -407,6 +446,7 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
 
     quarter_voltage = (base_offense * (1 - defense_reduction) + turnover_bonus) * offense_team.momentum_multiplier
     quarter_voltage *= consts["EV_MULT"]
+    quarter_voltage *= qb_multiplier(offense_team.pool("QB", "SPK"))
 
     if offense_team.auto_lineup_penalty:
         quarter_voltage *= NO_LINEUP_PENALTY
@@ -589,9 +629,9 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         winner, loser = team_b, team_a
     else:
         total_a = sum(team_a.pool(p, s) for p, s in
-                      [("Striker", "VLT"), ("Mid", "SPK"), ("Guard", "INS")])
+                      [("QB", "SPK"), ("Striker", "VLT"), ("Mid", "SPK"), ("Guard", "INS")])
         total_b = sum(team_b.pool(p, s) for p, s in
-                      [("Striker", "VLT"), ("Mid", "SPK"), ("Guard", "INS")])
+                      [("QB", "SPK"), ("Striker", "VLT"), ("Mid", "SPK"), ("Guard", "INS")])
         roll_a = random.randint(1, max(1, total_a))
         roll_b = random.randint(1, max(1, total_b))
         log.append(f"⚡ **TIE — Fate decides!** {team_a.name} rolls {roll_a}, {team_b.name} rolls {roll_b}.")
@@ -621,18 +661,20 @@ if __name__ == "__main__":
         return [ZappyPlayer(asset_id=i, name=f"{prefix}{i}", VLT=vlt, INS=ins, SPK=spk) for i in range(n)]
 
     # Team A: Balanced formation, Wolf coach
-    roster_a = make_roster("A", 7, vlt=65, ins=52, spk=52)
-    pos_map_a = {0: "Striker", 1: "Striker", 2: "Striker",
-                 3: "Mid", 4: "Mid",
-                 5: "Guard", 6: "Guard"}
+    roster_a = make_roster("A", 8, vlt=65, ins=52, spk=52)
+    pos_map_a = {0: "QB",
+                 1: "Striker", 2: "Striker", 3: "Striker",
+                 4: "Mid", 5: "Mid",
+                 6: "Guard", 7: "Guard"}
     team_a = build_team("Thunder Coasts", "Wolf", "BALANCED", roster_a, pos_map_a)
 
     # Team B: Defense formation, Frog coach — deliberately mismatched vs Wolf's
     # Striker-flavored theme to prove the signature play still applies.
-    roster_b = make_roster("B", 7, vlt=68, ins=45, spk=50)
-    pos_map_b = {0: "Striker",
-                 1: "Mid", 2: "Mid",
-                 3: "Guard", 4: "Guard", 5: "Guard", 6: "Guard"}
+    roster_b = make_roster("B", 8, vlt=68, ins=45, spk=50)
+    pos_map_b = {0: "QB",
+                 1: "Striker",
+                 2: "Mid", 3: "Mid",
+                 4: "Guard", 5: "Guard", 6: "Guard", 7: "Guard"}
     team_b = build_team("Volt Runners", "Frog", "DEFENSE", roster_b, pos_map_b)
 
     result = resolve_match(team_a, team_b)
