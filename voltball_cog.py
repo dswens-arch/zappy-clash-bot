@@ -3,10 +3,17 @@ voltball_cog.py
 ----------------
 Discord commands + weekly resolution job for Voltball.
 
+Team registration and weekly lineup-setting are website-only now
+(register-team.ts / submit-lineup.ts + lineup.html) — /voltball_team_register
+and /voltball_lineup were removed from here once the site's equivalents
+were verified working end to end, including Hero-optional registration,
+the Tempo dial, and QB. voltball_lineup_view.py (the old interactive
+picker UI) is now unused by this file — left in place, not deleted,
+since nothing currently requires removing it.
+
 Fully wired: wallet ownership/stats via algorand_lookup.py (through
 voltball_lineup_service.py), team/season/standings via voltball_db.py
-(get_supabase() from database.py), and the lineup picker UI via
-voltball_lineup_view.py.
+(get_supabase() from database.py).
 
 The one remaining stub is the weekly resolution job's schedule/pairing
 logic (round-robin schedule generation) and the specific bot/guild
@@ -19,18 +26,17 @@ from discord import app_commands
 from discord.ext import commands, tasks
 from datetime import datetime, timezone
 
-from voltball_engine import resolve_match, FORMATIONS, HERO_SIGNATURES, TEMPO_MIN, TEMPO_MAX, TEMPO_DEFAULT, clamp_tempo, tempo_label
+from voltball_engine import resolve_match, HERO_SIGNATURES
 from voltball_lineup_service import (
-    get_wallet_zappies, get_hero_ownership, get_locked_lineup_team, build_fallback_team, build_cpu_team, LineupValidationError,
+    get_wallet_zappies, get_locked_lineup_team, build_fallback_team, build_cpu_team, LineupValidationError,
 )
 from algorand_lookup import fetch_zappy_traits
-from voltball_lineup_view import build_lineup_picker
 from voltball_db import (
-    get_active_season, get_upcoming_season, get_open_season, get_team_by_owner, get_team_by_id, get_teams_for_season,
-    get_lineup, get_week_lineups, create_team, create_cpu_team, get_standings, update_standings_after_match,
+    get_active_or_playoff_season, get_upcoming_season, get_open_season, get_team_by_owner, get_team_by_id, get_teams_for_season,
+    get_lineup, get_week_lineups, create_cpu_team, get_standings, get_playoff_round_winners, update_standings_after_match,
     get_guild_config, set_guild_config, create_season, list_seasons, wipe_season,
 )
-from voltball_schedule import save_schedule, get_week_pairings, get_bye_team
+from voltball_schedule import save_schedule, save_playoff_round, get_week_pairings, get_bye_team
 from voltball_embeds import build_match_embed, build_standings_embed, build_lineups_embed, build_matchup_preview_embed
 from voltball_position_fit import get_position_fit, rank_collection_for_position, label_for_held_zappy
 from database import get_supabase, get_wallet
@@ -78,85 +84,6 @@ class VoltballCog(commands.Cog):
         )
 
     # ─────────────────────────────────────────────
-    # /voltball_team_register
-    # ─────────────────────────────────────────────
-    @app_commands.command(name="voltball_team_register", description="Register a Voltball team — requires holding a Hero or collab NFT.")
-    @app_commands.describe(team_name="Your team's name", wallet_address="Your Algorand wallet address (defaults to your linked wallet if you have one)")
-    async def voltball_team_register(self, interaction: discord.Interaction, team_name: str, wallet_address: str = None):
-        await interaction.response.defer(ephemeral=True)
-
-        if not wallet_address:
-            wallet_address = get_wallet(str(interaction.user.id))
-            if not wallet_address:
-                await interaction.followup.send(
-                    "No linked wallet found — provide a `wallet_address`, or link your wallet first.",
-                    ephemeral=True,
-                )
-                return
-
-        # Teams register during the "upcoming" window, before the schedule is generated.
-        season = get_upcoming_season(str(interaction.guild_id))
-        if not season:
-            await interaction.followup.send("There's no season currently open for registration.", ephemeral=True)
-            return
-
-        existing = get_team_by_owner(str(interaction.guild_id), str(interaction.user.id), season["id"])
-        if existing:
-            await interaction.followup.send(f"You already have a team this season: **{existing['team_name']}**.", ephemeral=True)
-            return
-
-        try:
-            heroes = await get_hero_ownership(wallet_address)
-        except LineupValidationError as e:
-            await interaction.followup.send(f"⚠️ {e}", ephemeral=True)
-            return
-
-        if len(heroes) > 1:
-            options = [discord.SelectOption(label=f"{h['hero_type']} (#{h['asset_id']})", value=str(h["asset_id"])) for h in heroes[:25]]
-            view = _HeroPickView(options, heroes, team_name, wallet_address, str(interaction.guild_id), season["id"], interaction.user.id)
-            await interaction.followup.send("You hold multiple Heroes — which one coaches this team?", view=view, ephemeral=True)
-            return
-
-        # Zero Heroes is no longer a rejection — a Hero is a real edge
-        # (its signature play), not a requirement. hero=None registers
-        # a "No Coach" team: same roster/formation/tempo rules, no
-        # signature play bonus. See voltball_engine.py's Team.signature
-        # property, which already returns None gracefully for a None
-        # coach_hero_type — this needed no engine changes at all.
-        hero = heroes[0] if heroes else None
-        await self._register_team(interaction, team_name, wallet_address, hero, str(interaction.guild_id), season["id"])
-
-    async def _register_team(self, interaction: discord.Interaction, team_name: str, wallet_address: str,
-                              hero: dict | None, guild_id: str, season_id: str):
-        try:
-            create_team(
-                guild_id=guild_id,
-                owner_discord_id=str(interaction.user.id),
-                wallet_address=wallet_address,
-                team_name=team_name,
-                hero_asset_id=hero["asset_id"] if hero else None,
-                hero_type=hero["hero_type"] if hero else None,
-                is_collab_hero=hero.get("is_collab", False) if hero else False,
-                season_id=season_id,
-            )
-        except Exception:
-            # Most likely one of the UNIQUE constraints (dupe coach or dupe Hero this season) --
-            # a hero-less team has no Hero-uniqueness collision to worry about, just the coach one.
-            collision_detail = f"{hero['hero_type']} may already be coaching a team this season, or you " if hero else "You "
-            await interaction.followup.send(
-                f"Couldn't register that team — {collision_detail}already have one registered.",
-                ephemeral=True,
-            )
-            return
-
-        coach_line = f"coached by **{hero['hero_type']}**" if hero else "**No Coach** — unaffiliated, no signature play"
-        await interaction.followup.send(
-            f"🏈 **{team_name}** registered — {coach_line}! "
-            f"Use `/voltball_lineup` before the weekly deadline to set your formation.",
-            ephemeral=True,
-        )
-
-    # ─────────────────────────────────────────────
     # /voltball_add_cpu_team (admin) — a standing solo-test opponent.
     # No wallet, no real coach: auto-fields a fresh random roster and
     # formation every time it's resolved, so someone with only one real
@@ -190,66 +117,11 @@ class VoltballCog(commands.Cog):
 
         await interaction.followup.send(
             f"🤖 CPU team **{team_name}** added — coached by **{team['hero_type']}**. "
-            f"It doesn't need `/voltball_lineup` — it auto-fields a fresh random roster and formation every week."
+            f"It doesn't need a lineup set on the site — it auto-fields a fresh random roster and formation every week."
             f"{schedule_note}",
             ephemeral=True,
         )
 
-    # ─────────────────────────────────────────────
-    # /voltball_lineup
-    # ─────────────────────────────────────────────
-    @app_commands.command(name="voltball_lineup", description="Set your Voltball formation, tempo, and position assignments for this week.")
-    @app_commands.describe(
-        formation="OFFENSE / BALANCED / DEFENSE",
-        tempo="1 (most Controlled) to 10 (most Aggressive), 0.5 increments — defaults to 5.5 (Standard)",
-    )
-    @app_commands.choices(formation=[
-        app_commands.Choice(name="Offense (1 QB / 5 Striker / 1 Mid / 1 Guard)", value="OFFENSE"),
-        app_commands.Choice(name="Balanced (1 QB / 3 Striker / 2 Mid / 2 Guard)", value="BALANCED"),
-        app_commands.Choice(name="Defense (1 QB / 1 Striker / 2 Mid / 4 Guard)", value="DEFENSE"),
-    ])
-    async def voltball_lineup(self, interaction: discord.Interaction, formation: app_commands.Choice[str],
-                               tempo: app_commands.Range[float, TEMPO_MIN, TEMPO_MAX] = None):
-        await interaction.response.defer(ephemeral=True)
-        tempo_value = clamp_tempo(tempo) if tempo is not None else TEMPO_DEFAULT
-
-        season = get_active_season(str(interaction.guild_id))
-        if not season:
-            await interaction.followup.send("There's no active Voltball season right now.", ephemeral=True)
-            return
-
-        team_row = get_team_by_owner(str(interaction.guild_id), str(interaction.user.id), season["id"])
-        if not team_row:
-            await interaction.followup.send("You don't have a registered Voltball team yet — use `/voltball_team_register` first.", ephemeral=True)
-            return
-
-        try:
-            held = await get_wallet_zappies(team_row["wallet_address"])
-        except LineupValidationError as e:
-            await interaction.followup.send(f"⚠️ {e}", ephemeral=True)
-            return
-
-        if len(held) < 7:
-            await interaction.followup.send(
-                f"You need at least 7 Zappies in your wallet to field a Voltball roster — you currently hold {len(held)}.",
-                ephemeral=True,
-            )
-            return
-
-        content, view = build_lineup_picker(
-            guild_id=str(interaction.guild_id),
-            team_id=team_row["id"],
-            season_id=season["id"],
-            week_number=season["current_week"],
-            formation=formation.value,
-            wallet_address=team_row["wallet_address"],
-            held_zappies=held,
-            user_id=interaction.user.id,
-            tempo=tempo_value,
-        )
-        await interaction.followup.send(content, view=view, ephemeral=True)
-
-    # ─────────────────────────────────────────────
     # ─────────────────────────────────────────────
     # /voltball_config (admin)
     # ─────────────────────────────────────────────
@@ -287,7 +159,7 @@ class VoltballCog(commands.Cog):
     async def voltball_season_create(self, interaction: discord.Interaction, name: str, week_count: int = 16, is_test: bool = False):
         await interaction.response.defer(ephemeral=True)
 
-        existing = get_upcoming_season(str(interaction.guild_id)) or get_active_season(str(interaction.guild_id))
+        existing = get_upcoming_season(str(interaction.guild_id)) or get_active_or_playoff_season(str(interaction.guild_id))
         if existing:
             await interaction.followup.send(
                 f"There's already a season in progress: **{existing['name']}** ({existing['status']}). "
@@ -299,7 +171,7 @@ class VoltballCog(commands.Cog):
         season = create_season(str(interaction.guild_id), name, week_count, is_test=is_test)
         test_note = " (marked as a **test season** — wipeable, not a permanent record)" if is_test else ""
         await interaction.followup.send(
-            f"🏈 Season **{name}** created{test_note}. Teams can now register with `/voltball_team_register`. "
+            f"🏈 Season **{name}** created{test_note}. Teams can now register on the site. "
             f"Run `/voltball_season_start` once everyone's in to lock the schedule and begin.",
             ephemeral=True,
         )
@@ -314,9 +186,9 @@ class VoltballCog(commands.Cog):
     async def voltball_resolve_week(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
-        season = get_active_season(str(interaction.guild_id))
+        season = get_active_or_playoff_season(str(interaction.guild_id))
         if not season:
-            await interaction.followup.send("No active season to resolve — run `/voltball_season_start` first.", ephemeral=True)
+            await interaction.followup.send("No active or playoff season to resolve — run `/voltball_season_start` first.", ephemeral=True)
             return
 
         week_before = season["current_week"]
@@ -444,7 +316,7 @@ class VoltballCog(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if not wallet_address:
-            season = get_active_season(str(interaction.guild_id)) or get_upcoming_season(str(interaction.guild_id))
+            season = get_active_or_playoff_season(str(interaction.guild_id)) or get_upcoming_season(str(interaction.guild_id))
             team_row = get_team_by_owner(str(interaction.guild_id), str(interaction.user.id), season["id"]) if season else None
             if team_row:
                 wallet_address = team_row["wallet_address"]
@@ -486,7 +358,7 @@ class VoltballCog(commands.Cog):
     async def voltball_lineups(self, interaction: discord.Interaction):
         await interaction.response.defer()  # NOT ephemeral — this is public by design
 
-        season = get_active_season(str(interaction.guild_id))
+        season = get_active_or_playoff_season(str(interaction.guild_id))
         if not season:
             await interaction.followup.send("There's no active Voltball season right now.")
             return
@@ -502,7 +374,7 @@ class VoltballCog(commands.Cog):
     async def voltball_standings(self, interaction: discord.Interaction):
         await interaction.response.defer()
 
-        season = get_active_season(str(interaction.guild_id))
+        season = get_active_or_playoff_season(str(interaction.guild_id))
         if not season:
             await interaction.followup.send("There's no active Voltball season right now.")
             return
@@ -521,7 +393,7 @@ class VoltballCog(commands.Cog):
         """Runs daily; only actually resolves on each guild's configured weekly deadline day."""
         now = datetime.now(timezone.utc)
         db = get_supabase()
-        seasons = db.table("voltball_seasons").select("*").eq("status", "active").execute().data or []
+        seasons = db.table("voltball_seasons").select("*").in_("status", ["active", "playoffs"]).execute().data or []
 
         for season in seasons:
             config = get_guild_config(season["guild_id"])
@@ -537,9 +409,24 @@ class VoltballCog(commands.Cog):
         standings, and posts match + standings embeds if a channel is
         configured. Shared by the scheduled loop and the manual
         /voltball_resolve_week admin command — same logic either way.
+
+        Also drives the playoff state machine: once the regular season's
+        last week resolves, seeds a top-4 bracket (1v4 / 2v3) from
+        standings; once the semifinal week resolves, seeds the
+        championship from the two winners; once the championship
+        resolves, marks the season complete. See week_count math below
+        — playoff weeks are always week_count+1 (semis) and week_count+2
+        (final), never regenerated, never overlapping regular-season
+        week numbers.
         """
         db = get_supabase()
         week = season["current_week"]
+        week_count = season["week_count"]
+        is_playoff_week = season["status"] == "playoffs"
+        round_label = None
+        if is_playoff_week:
+            round_label = "Semifinal" if week == week_count + 1 else "Championship"
+
         pairings = get_week_pairings(season["id"], week)
         channel = None
         if config["announcement_channel_id"]:
@@ -550,7 +437,7 @@ class VoltballCog(commands.Cog):
             team_lookup = {t["id"]: t for t in teams}
             week_lineups = get_week_lineups(season["id"], week)
             lineup_lookup = {e["team_id"]: e["lineup"] for e in week_lineups}
-            preview_embed = build_matchup_preview_embed(season, week, pairings, team_lookup, lineup_lookup)
+            preview_embed = build_matchup_preview_embed(season, week, pairings, team_lookup, lineup_lookup, round_label=round_label)
             await channel.send(embed=preview_embed)
 
         for pairing in pairings:
@@ -580,14 +467,14 @@ class VoltballCog(commands.Cog):
                 continue
 
             if team_a is None and team_b is None:
-                print(f"[voltball] Week {week}: {team_a_row['team_name']} vs {team_b_row['team_name']} — both sides forfeit (fewer than 7 Zappies held), no match recorded.")
+                print(f"[voltball] Week {week}: {team_a_row['team_name']} vs {team_b_row['team_name']} — both sides forfeit (fewer than 8 Zappies held), no match recorded.")
                 continue
             if team_a is None:
-                print(f"[voltball] Week {week}: {team_a_row['team_name']} forfeits (fewer than 7 Zappies held) — {team_b_row['team_name']} advances, no match recorded.")
+                print(f"[voltball] Week {week}: {team_a_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_b_row['team_name']} advances, no match recorded.")
                 update_standings_after_match(season["id"], team_b_row["id"], team_a_row["id"], 0, 0)
                 continue
             if team_b is None:
-                print(f"[voltball] Week {week}: {team_b_row['team_name']} forfeits (fewer than 7 Zappies held) — {team_a_row['team_name']} advances, no match recorded.")
+                print(f"[voltball] Week {week}: {team_b_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_a_row['team_name']} advances, no match recorded.")
                 update_standings_after_match(season["id"], team_a_row["id"], team_b_row["id"], 0, 0)
                 continue
 
@@ -602,6 +489,7 @@ class VoltballCog(commands.Cog):
             db.table("voltball_matches").insert({
                 "season_id": season["id"],
                 "week_number": week,
+                "is_playoff": is_playoff_week,
                 "team_a_id": team_a_row["id"],
                 "team_b_id": team_b_row["id"],
                 "team_a_score": result["score_a"],
@@ -616,15 +504,46 @@ class VoltballCog(commands.Cog):
             )
 
             if channel:
-                embed = build_match_embed(result, week, is_playoff=season["status"] == "playoffs")
+                embed = build_match_embed(result, week, is_playoff=is_playoff_week)
                 await channel.send(embed=embed)
 
         bye_team_id = get_bye_team(season["id"], week)
         if bye_team_id:
             print(f"[voltball] Week {week}: {bye_team_id} has the bye.")
 
-        new_week = week + 1
-        new_status = "playoffs" if new_week > season["week_count"] else "active"
+        # ── Playoff bracket state machine ──
+        if not is_playoff_week:
+            new_week = week + 1
+            if new_week > week_count:
+                # Regular season just finished -- seed the top-4 bracket from standings.
+                standings_rows = get_standings(season["id"])
+                if len(standings_rows) < 4:
+                    new_status = "complete"
+                    print(f"[voltball] Season {season['id']}: regular season ended with only {len(standings_rows)} team(s) — skipping playoffs (need 4), marking complete.")
+                else:
+                    seed = [r["team_id"] for r in standings_rows[:4]]
+                    save_playoff_round(season["id"], new_week, [(seed[0], seed[3]), (seed[1], seed[2])])  # 1v4, 2v3
+                    new_status = "playoffs"
+            else:
+                new_status = "active"
+        elif week == week_count + 1:
+            # Semifinals just resolved -- seed the championship from the two winners.
+            winners = get_playoff_round_winners(season["id"], week)
+            new_week = week_count + 2
+            new_status = "playoffs"
+            if len(winners) == 2:
+                save_playoff_round(season["id"], new_week, [(winners[0], winners[1])])
+            else:
+                # Shouldn't normally happen (a forfeited semifinal never writes
+                # a voltball_matches row, so it wouldn't produce a winner here)
+                # -- don't generate a broken championship pairing if it does;
+                # leave the season sitting in "playoffs" for manual review.
+                print(f"[voltball] Season {season['id']}: expected 2 semifinal winners, got {len(winners)} — not generating a championship pairing. Needs manual review.")
+        else:
+            # This was the championship (week_count + 2) -- season is over.
+            new_week = week + 1
+            new_status = "complete"
+
         db.table("voltball_seasons").update({"current_week": new_week, "status": new_status}).eq("id", season["id"]).execute()
 
         if channel:
@@ -677,51 +596,6 @@ class _SeasonWipeConfirmView(discord.ui.View):
         for item in self.children:
             item.disabled = True
         await interaction.response.edit_message(content="Cancelled — nothing was deleted.", view=self)
-
-
-class _HeroPickView(discord.ui.View):
-    """Shown when a coach holds multiple Heroes — lets them pick which one coaches this team."""
-    def __init__(self, options, heroes, team_name, wallet_address, guild_id, season_id, user_id):
-        super().__init__(timeout=120)
-        self.heroes_by_id = {str(h["asset_id"]): h for h in heroes}
-        self.team_name = team_name
-        self.wallet_address = wallet_address
-        self.guild_id = guild_id
-        self.season_id = season_id
-        self.user_id = user_id
-        self.select = discord.ui.Select(placeholder="Choose your coach", options=options)
-        self.select.callback = self._on_select
-        self.add_item(self.select)
-
-    async def _on_select(self, interaction: discord.Interaction):
-        if interaction.user.id != self.user_id:
-            await interaction.response.send_message("This isn't your team registration.", ephemeral=True)
-            return
-        await interaction.response.defer(ephemeral=True)
-        hero = self.heroes_by_id[self.select.values[0]]
-
-        try:
-            create_team(
-                guild_id=self.guild_id,
-                owner_discord_id=str(interaction.user.id),
-                wallet_address=self.wallet_address,
-                team_name=self.team_name,
-                hero_asset_id=hero["asset_id"],
-                hero_type=hero["hero_type"],
-                is_collab_hero=hero.get("is_collab", False),
-                season_id=self.season_id,
-            )
-        except Exception:
-            await interaction.followup.send(
-                f"Couldn't register that team — {hero['hero_type']} may already be coaching a team this season.",
-                ephemeral=True,
-            )
-            return
-
-        await interaction.followup.send(
-            f"🏈 **{self.team_name}** registered — coached by **{hero['hero_type']}**!",
-            ephemeral=True,
-        )
 
 
 async def setup(bot: commands.Bot):
