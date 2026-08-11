@@ -204,9 +204,9 @@ class VoltballCog(commands.Cog):
         tempo="1 (most Controlled) to 10 (most Aggressive), 0.5 increments — defaults to 5.5 (Standard)",
     )
     @app_commands.choices(formation=[
-        app_commands.Choice(name="Offense (5 Striker / 1 Mid / 1 Guard)", value="OFFENSE"),
-        app_commands.Choice(name="Balanced (3 Striker / 2 Mid / 2 Guard)", value="BALANCED"),
-        app_commands.Choice(name="Defense (1 Striker / 2 Mid / 4 Guard)", value="DEFENSE"),
+        app_commands.Choice(name="Offense (1 QB / 5 Striker / 1 Mid / 1 Guard)", value="OFFENSE"),
+        app_commands.Choice(name="Balanced (1 QB / 3 Striker / 2 Mid / 2 Guard)", value="BALANCED"),
+        app_commands.Choice(name="Defense (1 QB / 1 Striker / 2 Mid / 4 Guard)", value="DEFENSE"),
     ])
     async def voltball_lineup(self, interaction: discord.Interaction, formation: app_commands.Choice[str],
                                tempo: app_commands.Range[float, TEMPO_MIN, TEMPO_MAX] = None):
@@ -371,7 +371,7 @@ class VoltballCog(commands.Cog):
             sig = HERO_SIGNATURES.get(hero_type)
             embed = discord.Embed(
                 title=f"🦸 {result['name']} (#{asa})",
-                description=f"This is a **Hero** — a coach, not a roster Zappy, so it doesn't fill a Striker/Mid/Guard slot.",
+                description=f"This is a **Hero** — a coach, not a roster Zappy, so it doesn't fill a QB/Striker/Mid/Guard slot.",
                 color=discord.Color.gold(),
             )
             s = result["stats"]
@@ -416,6 +416,7 @@ class VoltballCog(commands.Cog):
     @app_commands.command(name="voltball_scout", description="See the best Zappies collection-wide for a position — useful before buying.")
     @app_commands.describe(position="Which position to rank Zappies for")
     @app_commands.choices(position=[
+        app_commands.Choice(name="QB (SPK multiplier)", value="QB"),
         app_commands.Choice(name="Striker (VLT offense)", value="Striker"),
         app_commands.Choice(name="Mid (SPK playmaking)", value="Mid"),
         app_commands.Choice(name="Guard (INS defense)", value="Guard"),
@@ -424,7 +425,7 @@ class VoltballCog(commands.Cog):
         await interaction.response.defer()  # public — this is marketplace research, not personal info
 
         top = rank_collection_for_position(position.value, top_n=15)
-        stat_key = {"Striker": "VLT", "Mid": "SPK", "Guard": "INS"}[position.value]
+        stat_key = {"QB": "SPK", "Striker": "VLT", "Mid": "SPK", "Guard": "INS"}[position.value]
 
         lines = [f"{i+1}. **{z['name']}** (#{z['asset_id']}) — {z[stat_key]} ({z['percentile']}th percentile)" for i, z in enumerate(top)]
         embed = discord.Embed(
