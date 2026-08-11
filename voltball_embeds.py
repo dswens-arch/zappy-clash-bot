@@ -110,7 +110,7 @@ def build_lineups_embed(season: dict, week: int, week_lineups: list[dict]) -> di
 
 
 def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
-                                  team_lookup: dict, lineup_lookup: dict) -> discord.Embed:
+                                  team_lookup: dict, lineup_lookup: dict, round_label: str | None = None) -> discord.Embed:
     """
     "This Week's Matchups" — posted automatically once the weekly
     deadline passes and lineups lock, BEFORE match results are resolved.
@@ -119,11 +119,15 @@ def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
 
     team_lookup: {team_id: team_row}
     lineup_lookup: {team_id: lineup_row or None}
+    round_label: "Semifinal" / "Championship" for playoff rounds, None
+    for a regular-season week — swaps the title so a playoff round reads
+    as the occasion it is, not just "Week 17."
     """
+    title = f"🏆 {round_label}" if round_label else f"⚔️ Week {week} Matchups"
     embed = discord.Embed(
-        title=f"⚔️ Week {week} Matchups",
+        title=title,
         description="Lineups are locked — here's who's facing who.",
-        color=discord.Color.orange(),
+        color=discord.Color.gold() if round_label else discord.Color.orange(),
     )
 
     for pairing in pairings:
