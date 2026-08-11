@@ -25,6 +25,16 @@ from stats_engine import calculate_stats
 
 POSITION_STAT = {"Striker": "VLT", "Mid": "SPK", "Guard": "INS"}
 
+# QB shares Mid's stat (SPK) but is deliberately kept OUT of POSITION_STAT
+# above — see get_qb_fit()'s docstring for why folding it into the 3-way
+# "best_position" comparison would create a meaningless tie. This
+# separate mapping is only for rank_collection_for_position() below,
+# which has no such ambiguity: browsing "top Zappies for QB" is a
+# straightforward SPK sort, same underlying list as "top for Mid" but
+# worth surfacing under its own label since real coaches think of them
+# as different roles even when the stat happens to be identical.
+RANK_STAT = {**POSITION_STAT, "QB": "SPK"}
+
 TIER_THRESHOLDS = [
     (90, "Elite"),
     (70, "Strong"),
@@ -80,6 +90,24 @@ class _CollectionStats:
 _collection = _CollectionStats()
 
 
+def get_qb_fit(spk: int) -> dict:
+    """
+    QB fit — same SPK percentile machinery as Mid (they share a stat),
+    but deliberately kept OUT of get_position_fit()'s 3-way comparison
+    rather than added as a 4th entry there. Reason: Mid and QB use the
+    identical stat, so a Zappy's Mid percentile and QB percentile are
+    always numerically equal — folding QB into "best_position" would
+    just create an arbitrary tie-break between two positions that use
+    Zappies completely differently (Mid pools additively, QB multiplies
+    the whole team's offense), not a real comparison. Which one's
+    actually better for a specific roster is a genuine roster-
+    construction trade-off the coach should make, not something a
+    single percentile number should silently resolve for them.
+    """
+    pct = _collection.percentile("SPK", spk)
+    return {"stat": "SPK", "value": spk, "percentile": pct, "tier": _tier_for_percentile(pct)}
+
+
 def get_position_fit(vlt: int, ins: int, spk: int) -> dict:
     """
     Returns fit info for all 3 positions plus which one this Zappy is
@@ -103,7 +131,7 @@ def rank_collection_for_position(position: str, top_n: int = 15) -> list[dict]:
     /voltball_scout — browsing the full collection before buying, not
     just what you already hold.
     """
-    stat = POSITION_STAT[position]
+    stat = RANK_STAT[position]
     all_z = _collection.all_zappies()
     ranked = sorted(all_z, key=lambda z: (-z[stat], z["asset_id"]))
     top = ranked[:top_n]
