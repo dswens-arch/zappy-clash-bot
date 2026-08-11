@@ -24,13 +24,20 @@ from voltball_engine import FORMATIONS, POSITIONS, TEMPO_DEFAULT, tempo_label
 from voltball_lineup_service import submit_lineup, LineupValidationError
 from voltball_position_fit import POSITION_STAT
 
+# Separate from position_fit.py's POSITION_STAT on purpose — that one is
+# scoped to the 3-way Striker/Mid/Guard "which position is this Zappy
+# best at" comparison (see get_qb_fit()'s docstring for why QB isn't
+# folded in there). This dropdown just needs to know which stat sorts
+# each lane's picker, including QB, so it gets its own mapping.
+LANE_STAT = {**POSITION_STAT, "QB": "SPK"}
+
 PER_PAGE = 25
 
 
 class _PositionSelect(discord.ui.Select):
     def __init__(self, position: str, options: list[discord.SelectOption], max_values: int):
         self.position = position
-        theme = {"Striker": "VLT offense", "Mid": "SPK playmaking", "Guard": "INS defense"}[position]
+        theme = {"QB": "SPK multiplier", "Striker": "VLT offense", "Mid": "SPK playmaking", "Guard": "INS defense"}[position]
         super().__init__(
             placeholder=f"Add to {position} ({theme}) — {max_values} slot(s) left",
             min_values=1,
@@ -152,7 +159,7 @@ class LineupPickerView(discord.ui.View):
             # about (VLT for Striker, SPK for Mid, INS for Guard), highest
             # first — was previously left in wallet-return order, so the
             # best fits for a given position could be buried anywhere.
-            stat_key = POSITION_STAT[position]
+            stat_key = LANE_STAT[position]
             sorted_for_position = sorted(page_available, key=lambda z: z[stat_key], reverse=True)
             options = [
                 discord.SelectOption(
