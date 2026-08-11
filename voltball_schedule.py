@@ -94,11 +94,35 @@ def save_schedule(season_id: str, team_ids: list[str], week_count: int, shuffle_
     return rows
 
 
+def save_playoff_round(season_id: str, week_number: int, pairings: list[tuple[str, str]]):
+    """
+    Writes a single playoff round's pairings — 2 semifinal matchups, or
+    the 1 championship matchup. Unlike save_schedule(), this is called
+    incrementally, once per round, as each round's outcome determines
+    the next: semifinal winners aren't known until the semifinal week
+    actually resolves, so the championship pairing can't be generated
+    up front the way the regular season's full schedule can.
+    """
+    rows = [
+        {"season_id": season_id, "week_number": week_number, "team_a_id": a, "team_b_id": b, "is_playoff": True}
+        for a, b in pairings
+    ]
+    db = get_supabase()
+    if rows:
+        db.table("voltball_schedule").insert(rows).execute()
+    return rows
+
+
 def get_week_pairings(season_id: str, week_number: int) -> list[dict]:
     """
     Returns this week's real matchups (byes excluded) as
     [{"team_a_id": ..., "team_b_id": ...}, ...] for the weekly resolution
     job to build Team objects and call resolve_match() against.
+
+    Deliberately does NOT filter by is_playoff — regular season weeks
+    are always 1..week_count and playoff weeks are always week_count+1
+    (semis) / week_count+2 (final), so week numbers never collide
+    between phases. A given week is unambiguously one or the other.
     """
     db = get_supabase()
     rows = (
@@ -106,7 +130,6 @@ def get_week_pairings(season_id: str, week_number: int) -> list[dict]:
         .select("team_a_id, team_b_id")
         .eq("season_id", season_id)
         .eq("week_number", week_number)
-        .eq("is_playoff", False)
         .execute()
         .data
     ) or []
