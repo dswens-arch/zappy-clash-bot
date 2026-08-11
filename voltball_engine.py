@@ -131,6 +131,99 @@ GUARD_SHUTDOWN_CHANCE     = 0.03  # opponent's defense_reduction against you is 
 
 
 # ─────────────────────────────────────────────
+# Tempo — a second per-week dial alongside Formation.
+# Deliberately ASYMMETRIC, not a coinflip triangle: a naive "bigger
+# swings both ways, same average" version is mathematically a no-op
+# decision (see design discussion, citing Sirlin's RPS-design writing —
+# equal-payoff RPS options are provably interchangeable, so they don't
+# add a real choice). AGGRESSIVE trades a WORSE average outcome for
+# bigger swings — a real bet, meant for an underdog. CONTROLLED trades
+# a BETTER average outcome for smaller swings — protects a lead.
+# STANDARD is today's math, byte-for-byte unchanged (all multipliers
+# are 1.0, so _tempo_event_constants("STANDARD") reproduces the exact
+# original constants).
+#
+# Deliberately does NOT touch OFFENSE_WEIGHT / PLAYMAKING_WEIGHT /
+# DEFENSE_RATE / DEFENSE_CAP / TURNOVER_RATE. Those are the tuned core
+# formula (see voltball_tune.py's real-collection-data grid search) —
+# changing them here would silently re-break the balance work that
+# already took a full retune pass once (the 97%-Defense-wins incident).
+# turnover_bonus specifically is also excluded on separate grounds: it's
+# a deterministic per-quarter value (own_guard_pool * TURNOVER_RATE),
+# not a random swing — scaling it by tempo would just be a disguised
+# flat buff/debuff, not real variance. Tempo only touches the RANDOM
+# EVENT layer: the chance and magnitude of Lightning/Cold Streak/Trick
+# Play/Momentum Swing/Interception/Shutdown.
+# ─────────────────────────────────────────────
+TEMPO_MIN = 1.0
+TEMPO_MAX = 10.0
+TEMPO_STEP = 0.5
+TEMPO_DEFAULT = 5.5  # midpoint -- reproduces the old STANDARD math almost exactly (see below)
+
+# A continuous 1-10 dial, 1 = most Controlled, 10 = most Aggressive, in
+# 0.5 increments. Linearly interpolated between the same two endpoint
+# multiplier pairs the original 3-preset version used -- this is a
+# direct generalization, not a redesign of the underlying math, which
+# is why the midpoint (5.5) reproduces the old STANDARD behavior:
+# ev_mult interpolates to exactly 1.0 at 5.5, swing_mult to ~1.05 (not
+# exactly 1.0 -- a ~5% deviation that's not worth a piecewise function
+# to eliminate, since the whole point of a continuous dial is that
+# "STANDARD" no longer needs to be a byte-exact preserved case).
+_TEMPO_ENDPOINTS = {
+    "ev_mult":    (1.06, 0.94),   # (at TEMPO_MIN=Controlled, at TEMPO_MAX=Aggressive)
+    "swing_mult": (0.5, 1.6),
+}
+
+
+def clamp_tempo(value: float) -> float:
+    """Clamps to [TEMPO_MIN, TEMPO_MAX] and snaps to the nearest 0.5 step."""
+    value = max(TEMPO_MIN, min(TEMPO_MAX, value))
+    return round(value / TEMPO_STEP) * TEMPO_STEP
+
+
+def tempo_label(value: float) -> str:
+    """Human-readable bucket for a numeric tempo value, for embeds/display."""
+    if value <= 3.0:
+        return "Controlled"
+    if value >= 8.0:
+        return "Aggressive"
+    return "Standard"
+
+
+def _lerp(t: float, lo: float, hi: float) -> float:
+    frac = (t - TEMPO_MIN) / (TEMPO_MAX - TEMPO_MIN)
+    return lo + (hi - lo) * frac
+
+
+def _tempo_event_constants(tempo: float) -> dict:
+    """
+    Returns event chance/magnitude constants scaled for a given numeric
+    tempo (1-10). See TEMPO endpoints above for the ev_mult/swing_mult
+    design rationale (separate knobs for average vs. variance, since a
+    single uniform event-scaling knob doesn't control the average
+    reliably -- the event mix is upside-heavy by construction, verified
+    by simulation during development).
+    """
+    tempo = clamp_tempo(tempo)
+    swing_mult = _lerp(tempo, *_TEMPO_ENDPOINTS["swing_mult"])
+    ev_mult = _lerp(tempo, *_TEMPO_ENDPOINTS["ev_mult"])
+    s = swing_mult
+    return {
+        "STRIKER_LIGHTNING_CHANCE":   min(1.0, STRIKER_LIGHTNING_CHANCE * s),
+        "STRIKER_LIGHTNING_BONUS":    STRIKER_LIGHTNING_BONUS * s,
+        "STRIKER_COLDSTREAK_CHANCE":  min(1.0, STRIKER_COLDSTREAK_CHANCE * s),
+        "STRIKER_COLDSTREAK_PENALTY": min(1.0, STRIKER_COLDSTREAK_PENALTY * s),
+        "MID_TRICKPLAY_CHANCE":       min(1.0, MID_TRICKPLAY_CHANCE * s),
+        "MID_MOMENTUM_CHANCE":        min(1.0, MID_MOMENTUM_CHANCE * s),
+        "MID_MOMENTUM_MULT":          1.0 + (MID_MOMENTUM_MULT - 1.0) * s,
+        "GUARD_INTERCEPTION_CHANCE":  min(1.0, GUARD_INTERCEPTION_CHANCE * s),
+        "GUARD_INTERCEPTION_RATE":    GUARD_INTERCEPTION_RATE * s,
+        "GUARD_SHUTDOWN_CHANCE":      min(1.0, GUARD_SHUTDOWN_CHANCE * s),
+        "EV_MULT":                    ev_mult,
+    }
+
+
+# ─────────────────────────────────────────────
 # Coach Signature Plays — formation-agnostic.
 # Every effect below is sized to land around a
 # ~7-9 point total match-average edge (comparable
@@ -210,6 +303,7 @@ class Team:
     coach_hero_type: Optional[str]
     formation:       str                          # one of FORMATIONS keys
     assignments:     dict                          # {"Striker": [ZappyPlayer,...], "Mid": [...], "Guard": [...]}
+    tempo:           float = TEMPO_DEFAULT          # 1.0 (Controlled) - 10.0 (Aggressive)
 
     # Match-state (not set at construction)
     momentum_multiplier: float = field(default=1.0, init=False)
@@ -220,6 +314,8 @@ class Team:
     def __post_init__(self):
         if self.formation not in FORMATIONS:
             raise ValueError(f"Unknown formation: {self.formation}")
+        if not (TEMPO_MIN <= self.tempo <= TEMPO_MAX):
+            raise ValueError(f"tempo must be between {TEMPO_MIN} and {TEMPO_MAX}, got {self.tempo}")
         expected = FORMATIONS[self.formation]
         total = sum(len(v) for v in self.assignments.values())
         if total != ROSTER_SIZE:
@@ -243,7 +339,7 @@ class Team:
 
 
 def build_team(name: str, coach_hero_type: Optional[str], formation: str,
-                roster: list[ZappyPlayer], position_map: dict) -> Team:
+                roster: list[ZappyPlayer], position_map: dict, tempo: float = TEMPO_DEFAULT) -> Team:
     """
     Convenience builder.
     position_map: {asset_id: "Striker"|"Mid"|"Guard"} for all 7 roster Zappies.
@@ -254,7 +350,7 @@ def build_team(name: str, coach_hero_type: Optional[str], formation: str,
         if pos not in POSITIONS:
             raise ValueError(f"Invalid position '{pos}' for asset {asset_id}")
         assignments[pos].append(by_id[asset_id])
-    return Team(name=name, coach_hero_type=coach_hero_type, formation=formation, assignments=assignments)
+    return Team(name=name, coach_hero_type=coach_hero_type, formation=formation, assignments=assignments, tempo=tempo)
 
 
 def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
@@ -265,6 +361,8 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
     in resolve_match, since several of them need cross-team information.
     """
     log = []
+
+    consts = _tempo_event_constants(offense_team.tempo)
 
     striker_pool = offense_team.pool("Striker", "VLT")
     mid_pool     = offense_team.pool("Mid", "SPK")
@@ -278,36 +376,37 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
         log.append(f"  🐊 **DEATH ROLL** — {defense_team.name}'s coach locks {offense_team.name} out of their big play this quarter!")
     else:
         # ── Striker events ──
-        if random.random() < STRIKER_LIGHTNING_CHANCE:
-            striker_component *= (1 + STRIKER_LIGHTNING_BONUS)
+        if random.random() < consts["STRIKER_LIGHTNING_CHANCE"]:
+            striker_component *= (1 + consts["STRIKER_LIGHTNING_BONUS"])
             log.append(f"  ⚡ **LIGHTNING STRIKE** — {offense_team.name}'s Striker lane catches fire!")
-        elif random.random() < STRIKER_COLDSTREAK_CHANCE:
-            striker_component *= (1 - STRIKER_COLDSTREAK_PENALTY)
+        elif random.random() < consts["STRIKER_COLDSTREAK_CHANCE"]:
+            striker_component *= (1 - consts["STRIKER_COLDSTREAK_PENALTY"])
             log.append(f"  ❄️ **COLD STREAK** — {offense_team.name}'s Strikers go quiet this quarter.")
 
         # ── Mid events ──
-        if random.random() < MID_TRICKPLAY_CHANCE:
+        if random.random() < consts["MID_TRICKPLAY_CHANCE"]:
             mid_component *= 2.0
             log.append(f"  🎭 **TRICK PLAY** — {offense_team.name}'s Mids double up their playmaking!")
-        elif random.random() < MID_MOMENTUM_CHANCE:
-            offense_team.momentum_multiplier *= MID_MOMENTUM_MULT
+        elif random.random() < consts["MID_MOMENTUM_CHANCE"]:
+            offense_team.momentum_multiplier *= consts["MID_MOMENTUM_MULT"]
             log.append(f"  📈 **MOMENTUM SWING** — {offense_team.name} carries a hot hand into the rest of the match!")
 
     base_offense = striker_component + mid_component
 
     # ── Guard events ── (not subject to events_denied — that only covers the offense_team's own attacking events above)
-    shutdown = (not events_denied) and random.random() < GUARD_SHUTDOWN_CHANCE
+    shutdown = (not events_denied) and random.random() < consts["GUARD_SHUTDOWN_CHANCE"]
     defense_reduction = 0.0 if shutdown else min(opp_guard_pool * DEFENSE_RATE, DEFENSE_CAP)
     if shutdown:
         log.append(f"  🛑 **SHUTDOWN** — {offense_team.name} plays right through {defense_team.name}'s defense!")
 
     turnover_bonus = own_guard_pool * TURNOVER_RATE
-    if not events_denied and random.random() < GUARD_INTERCEPTION_CHANCE:
-        extra = own_guard_pool * GUARD_INTERCEPTION_RATE
+    if not events_denied and random.random() < consts["GUARD_INTERCEPTION_CHANCE"]:
+        extra = own_guard_pool * consts["GUARD_INTERCEPTION_RATE"]
         turnover_bonus += extra
         log.append(f"  🥊 **INTERCEPTION** — {offense_team.name}'s Guards force a turnover and cash it in!")
 
     quarter_voltage = (base_offense * (1 - defense_reduction) + turnover_bonus) * offense_team.momentum_multiplier
+    quarter_voltage *= consts["EV_MULT"]
 
     if offense_team.auto_lineup_penalty:
         quarter_voltage *= NO_LINEUP_PENALTY
