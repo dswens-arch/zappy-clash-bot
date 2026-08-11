@@ -20,7 +20,7 @@ included since accumulation makes mistakes harder to undo any other way.
 """
 
 import discord
-from voltball_engine import FORMATIONS, POSITIONS
+from voltball_engine import FORMATIONS, POSITIONS, TEMPO_DEFAULT, tempo_label
 from voltball_lineup_service import submit_lineup, LineupValidationError
 from voltball_position_fit import POSITION_STAT
 
@@ -90,6 +90,7 @@ class _SubmitButton(discord.ui.Button):
                 formation=view.formation,
                 position_map=position_map,
                 wallet_address=view.wallet_address,
+                tempo=view.tempo,
             )
         except LineupValidationError as e:
             await interaction.followup.send(f"⚠️ {e}", ephemeral=True)
@@ -103,18 +104,20 @@ class _SubmitButton(discord.ui.Button):
         # own webhook, not a raw message.edit() call. edit_original_response()
         # is the correct method here.
         await interaction.edit_original_response(view=view)
-        await interaction.followup.send(f"✅ Lineup locked in — running **{view.formation}** this week.", ephemeral=True)
+        await interaction.followup.send(f"✅ Lineup locked in — running **{view.formation}** / **tempo {view.tempo:g} ({tempo_label(view.tempo)})** this week.", ephemeral=True)
 
 
 class LineupPickerView(discord.ui.View):
     def __init__(self, guild_id: str, team_id: str, season_id: str, week_number: int,
-                 formation: str, wallet_address: str, held_zappies: list[dict], user_id: int):
+                 formation: str, wallet_address: str, held_zappies: list[dict], user_id: int,
+                 tempo: float = TEMPO_DEFAULT):
         super().__init__(timeout=300)
         self.guild_id = guild_id
         self.team_id = team_id
         self.season_id = season_id
         self.week_number = week_number
         self.formation = formation
+        self.tempo = tempo
         self.wallet_address = wallet_address
         self.held_zappies = held_zappies
         self.user_id = user_id
@@ -181,14 +184,14 @@ class LineupPickerView(discord.ui.View):
         page_info = f" (page {self.page + 1}/{self.max_page + 1})" if self.max_page > 0 else ""
         breakdown = " · ".join(f"{pos} {len(self.selections[pos])}/{count}" for pos, count in self.needed.items())
         await interaction.response.edit_message(
-            content=f"**{self.formation}** formation{page_info} — {total_selected}/{total_needed} assigned ({breakdown}).",
+            content=f"**{self.formation}** / **tempo {self.tempo:g} ({tempo_label(self.tempo)})**{page_info} — {total_selected}/{total_needed} assigned ({breakdown}).",
             view=self,
         )
 
 
 def build_lineup_picker(guild_id: str, team_id: str, season_id: str, week_number: int,
                          formation: str, wallet_address: str, held_zappies: list[dict],
-                         user_id: int) -> tuple[str, "LineupPickerView"]:
+                         user_id: int, tempo: float = TEMPO_DEFAULT) -> tuple[str, "LineupPickerView"]:
     """
     Convenience constructor — returns (initial_message_content, view).
 
@@ -205,8 +208,8 @@ def build_lineup_picker(guild_id: str, team_id: str, season_id: str, week_number
     """
     total = sum(FORMATIONS[formation].values())
     ranked = sorted(held_zappies, key=lambda z: max(z["VLT"], z["INS"], z["SPK"]), reverse=True)
-    view = LineupPickerView(guild_id, team_id, season_id, week_number, formation, wallet_address, ranked, user_id)
+    view = LineupPickerView(guild_id, team_id, season_id, week_number, formation, wallet_address, ranked, user_id, tempo=tempo)
     page_info = f" (page 1/{view.max_page + 1})" if view.max_page > 0 else ""
     warning = f"\n⚠️ You hold {len(ranked)} Zappies — use Prev/Next to see them all." if view.max_page > 0 else ""
-    content = f"**{formation}** formation{page_info} — 0/{total} assigned.{warning}"
+    content = f"**{formation}** / **tempo {tempo:g} ({tempo_label(tempo)})**{page_info} — 0/{total} assigned.{warning}"
     return content, view
