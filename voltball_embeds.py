@@ -64,7 +64,7 @@ def build_match_embed(result: dict, week: int, is_playoff: bool = False) -> disc
     return embed
 
 
-POSITION_ORDER = ["Striker", "Mid", "Guard"]
+POSITION_ORDER = ["QB", "Striker", "Mid", "Guard"]
 
 
 def _format_roster_names(lineup: dict) -> str:
