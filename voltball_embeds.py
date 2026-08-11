@@ -8,8 +8,20 @@ duplicating formatting logic.
 """
 
 import discord
+from voltball_engine import tempo_label
 
 QUARTER_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
+
+
+def _coach_label(hero_type: str | None) -> str:
+    """'No Coach' for a Hero-less team — same label used site-wide (website + Discord)."""
+    return hero_type if hero_type else "No Coach"
+
+
+def _tempo_display(lineup: dict) -> str:
+    """'6.5 (Standard)' — numeric value plus human bucket, defaulting for pre-Tempo rows."""
+    t = lineup.get("tempo", 5.5)
+    return f"{t:g} ({tempo_label(t)})"
 
 
 def build_match_embed(result: dict, week: int, is_playoff: bool = False) -> discord.Embed:
@@ -80,14 +92,16 @@ def build_lineups_embed(season: dict, week: int, week_lineups: list[dict]) -> di
 
     for entry in week_lineups:
         lineup = entry["lineup"]
+        coach = _coach_label(entry["hero_type"])
         if entry.get("is_cpu"):
-            embed.add_field(name=f"🤖 {entry['team_name']} ({entry['hero_type']})", value="*CPU team — fields a fresh random roster at resolution time.*", inline=False)
+            embed.add_field(name=f"🤖 {entry['team_name']} ({coach})", value="*CPU team — fields a fresh random roster at resolution time.*", inline=False)
             continue
         if not lineup:
-            embed.add_field(name=f"⏳ {entry['team_name']} ({entry['hero_type']})", value="*No lineup submitted yet.*", inline=False)
+            embed.add_field(name=f"⏳ {entry['team_name']} ({coach})", value="*No lineup submitted yet.*", inline=False)
             continue
+        tempo = _tempo_display(lineup)
         embed.add_field(
-            name=f"🏈 {entry['team_name']} ({entry['hero_type']}) — {lineup['formation']}",
+            name=f"🏈 {entry['team_name']} ({coach}) — {lineup['formation']} / {tempo}",
             value=_format_roster_names(lineup),
             inline=False,
         )
@@ -119,18 +133,18 @@ def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
         lineup_b = lineup_lookup.get(pairing["team_b_id"])
 
         if team_a.get("is_cpu"):
-            form_a = "CPU — random roster/formation"
+            form_a = "CPU — random roster/formation/tempo"
         else:
-            form_a = lineup_a["formation"] if lineup_a else "No lineup (auto-fielded, penalized)"
+            form_a = f"{lineup_a['formation']} / {_tempo_display(lineup_a)}" if lineup_a else "No lineup (auto-fielded, penalized)"
 
         if team_b.get("is_cpu"):
-            form_b = "CPU — random roster/formation"
+            form_b = "CPU — random roster/formation/tempo"
         else:
-            form_b = lineup_b["formation"] if lineup_b else "No lineup (auto-fielded, penalized)"
+            form_b = f"{lineup_b['formation']} / {_tempo_display(lineup_b)}" if lineup_b else "No lineup (auto-fielded, penalized)"
 
         embed.add_field(
             name=f"{team_a['team_name']} vs {team_b['team_name']}",
-            value=f"**{team_a['team_name']}** ({team_a['hero_type']}): {form_a}\n**{team_b['team_name']}** ({team_b['hero_type']}): {form_b}",
+            value=f"**{team_a['team_name']}** ({_coach_label(team_a['hero_type'])}): {form_a}\n**{team_b['team_name']}** ({_coach_label(team_b['hero_type'])}): {form_b}",
             inline=False,
         )
 
