@@ -19,14 +19,14 @@ from discord import app_commands
 from discord.ext import commands, tasks
 from datetime import datetime, timezone
 
-from voltball_engine import resolve_match, FORMATIONS, HERO_SIGNATURES
+from voltball_engine import resolve_match, FORMATIONS, HERO_SIGNATURES, TEMPO_MIN, TEMPO_MAX, TEMPO_DEFAULT, clamp_tempo, tempo_label
 from voltball_lineup_service import (
     get_wallet_zappies, get_hero_ownership, get_locked_lineup_team, build_fallback_team, build_cpu_team, LineupValidationError,
 )
 from algorand_lookup import fetch_zappy_traits
 from voltball_lineup_view import build_lineup_picker
 from voltball_db import (
-    get_active_season, get_upcoming_season, get_team_by_owner, get_team_by_id, get_teams_for_season,
+    get_active_season, get_upcoming_season, get_open_season, get_team_by_owner, get_team_by_id, get_teams_for_season,
     get_lineup, get_week_lineups, create_team, create_cpu_team, get_standings, update_standings_after_match,
     get_guild_config, set_guild_config, create_season, list_seasons, wipe_season,
 )
@@ -111,45 +111,47 @@ class VoltballCog(commands.Cog):
             await interaction.followup.send(f"⚠️ {e}", ephemeral=True)
             return
 
-        if not heroes:
-            await interaction.followup.send(
-                "No Hero or collab NFT found in that wallet — Hero ownership is required to coach a Voltball team.",
-                ephemeral=True,
-            )
-            return
-
         if len(heroes) > 1:
             options = [discord.SelectOption(label=f"{h['hero_type']} (#{h['asset_id']})", value=str(h["asset_id"])) for h in heroes[:25]]
             view = _HeroPickView(options, heroes, team_name, wallet_address, str(interaction.guild_id), season["id"], interaction.user.id)
             await interaction.followup.send("You hold multiple Heroes — which one coaches this team?", view=view, ephemeral=True)
             return
 
-        await self._register_team(interaction, team_name, wallet_address, heroes[0], str(interaction.guild_id), season["id"])
+        # Zero Heroes is no longer a rejection — a Hero is a real edge
+        # (its signature play), not a requirement. hero=None registers
+        # a "No Coach" team: same roster/formation/tempo rules, no
+        # signature play bonus. See voltball_engine.py's Team.signature
+        # property, which already returns None gracefully for a None
+        # coach_hero_type — this needed no engine changes at all.
+        hero = heroes[0] if heroes else None
+        await self._register_team(interaction, team_name, wallet_address, hero, str(interaction.guild_id), season["id"])
 
     async def _register_team(self, interaction: discord.Interaction, team_name: str, wallet_address: str,
-                              hero: dict, guild_id: str, season_id: str):
+                              hero: dict | None, guild_id: str, season_id: str):
         try:
             create_team(
                 guild_id=guild_id,
                 owner_discord_id=str(interaction.user.id),
                 wallet_address=wallet_address,
                 team_name=team_name,
-                hero_asset_id=hero["asset_id"],
-                hero_type=hero["hero_type"],
-                is_collab_hero=hero.get("is_collab", False),
+                hero_asset_id=hero["asset_id"] if hero else None,
+                hero_type=hero["hero_type"] if hero else None,
+                is_collab_hero=hero.get("is_collab", False) if hero else False,
                 season_id=season_id,
             )
-        except Exception as e:
-            # Most likely one of the UNIQUE constraints (dupe coach or dupe Hero this season)
+        except Exception:
+            # Most likely one of the UNIQUE constraints (dupe coach or dupe Hero this season) --
+            # a hero-less team has no Hero-uniqueness collision to worry about, just the coach one.
+            collision_detail = f"{hero['hero_type']} may already be coaching a team this season, or you " if hero else "You "
             await interaction.followup.send(
-                f"Couldn't register that team — {hero['hero_type']} may already be coaching a team this season, "
-                f"or you already have one registered.",
+                f"Couldn't register that team — {collision_detail}already have one registered.",
                 ephemeral=True,
             )
             return
 
+        coach_line = f"coached by **{hero['hero_type']}**" if hero else "**No Coach** — unaffiliated, no signature play"
         await interaction.followup.send(
-            f"🏈 **{team_name}** registered — coached by **{hero['hero_type']}**! "
+            f"🏈 **{team_name}** registered — {coach_line}! "
             f"Use `/voltball_lineup` before the weekly deadline to set your formation.",
             ephemeral=True,
         )
@@ -166,30 +168,50 @@ class VoltballCog(commands.Cog):
     async def voltball_add_cpu_team(self, interaction: discord.Interaction, team_name: str, hero_type: str = None):
         await interaction.response.defer(ephemeral=True)
 
-        season = get_upcoming_season(str(interaction.guild_id))
+        season = get_open_season(str(interaction.guild_id))
         if not season:
-            await interaction.followup.send("There's no season open for registration — create one first with `/voltball_season_create`.", ephemeral=True)
+            await interaction.followup.send("There's no season to add a CPU team to — create one first with `/voltball_season_create`.", ephemeral=True)
             return
 
         team = create_cpu_team(str(interaction.guild_id), season["id"], team_name, hero_type)
+
+        if season["status"] == "upcoming":
+            schedule_note = ""
+        else:
+            # The schedule is generated ONCE by /voltball_season_start, from
+            # whoever was registered at that moment — a team added after that
+            # point isn't retroactively inserted into voltball_schedule, so
+            # it won't get an actual weekly pairing until the next season.
+            schedule_note = (
+                "\n⚠️ This season is already **" + season["status"] + "** — the schedule was locked in at "
+                "`/voltball_season_start` and isn't regenerated. This CPU team is registered, but it won't "
+                "show up in `/voltball_resolve_week` pairings this season."
+            )
+
         await interaction.followup.send(
             f"🤖 CPU team **{team_name}** added — coached by **{team['hero_type']}**. "
-            f"It doesn't need `/voltball_lineup` — it auto-fields a fresh random roster and formation every week.",
+            f"It doesn't need `/voltball_lineup` — it auto-fields a fresh random roster and formation every week."
+            f"{schedule_note}",
             ephemeral=True,
         )
 
     # ─────────────────────────────────────────────
     # /voltball_lineup
     # ─────────────────────────────────────────────
-    @app_commands.command(name="voltball_lineup", description="Set your Voltball formation and position assignments for this week.")
-    @app_commands.describe(formation="OFFENSE / BALANCED / DEFENSE")
+    @app_commands.command(name="voltball_lineup", description="Set your Voltball formation, tempo, and position assignments for this week.")
+    @app_commands.describe(
+        formation="OFFENSE / BALANCED / DEFENSE",
+        tempo="1 (most Controlled) to 10 (most Aggressive), 0.5 increments — defaults to 5.5 (Standard)",
+    )
     @app_commands.choices(formation=[
         app_commands.Choice(name="Offense (5 Striker / 1 Mid / 1 Guard)", value="OFFENSE"),
         app_commands.Choice(name="Balanced (3 Striker / 2 Mid / 2 Guard)", value="BALANCED"),
         app_commands.Choice(name="Defense (1 Striker / 2 Mid / 4 Guard)", value="DEFENSE"),
     ])
-    async def voltball_lineup(self, interaction: discord.Interaction, formation: app_commands.Choice[str]):
+    async def voltball_lineup(self, interaction: discord.Interaction, formation: app_commands.Choice[str],
+                               tempo: app_commands.Range[float, TEMPO_MIN, TEMPO_MAX] = None):
         await interaction.response.defer(ephemeral=True)
+        tempo_value = clamp_tempo(tempo) if tempo is not None else TEMPO_DEFAULT
 
         season = get_active_season(str(interaction.guild_id))
         if not season:
@@ -223,6 +245,7 @@ class VoltballCog(commands.Cog):
             wallet_address=team_row["wallet_address"],
             held_zappies=held,
             user_id=interaction.user.id,
+            tempo=tempo_value,
         )
         await interaction.followup.send(content, view=view, ephemeral=True)
 
