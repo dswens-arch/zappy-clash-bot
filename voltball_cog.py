@@ -37,7 +37,7 @@ from voltball_db import (
     get_guild_config, set_guild_config, create_season, list_seasons, wipe_season,
 )
 from voltball_schedule import save_schedule, save_playoff_round, get_week_pairings, get_bye_team
-from voltball_embeds import build_match_embed, build_standings_embed, build_lineups_embed, build_matchup_preview_embed
+from voltball_embeds import build_match_embed, build_standings_embed, build_champion_embed, build_lineups_embed, build_matchup_preview_embed
 from voltball_position_fit import get_position_fit, rank_collection_for_position, label_for_held_zappy
 from database import get_supabase, get_wallet
 
@@ -440,6 +440,9 @@ class VoltballCog(commands.Cog):
             preview_embed = build_matchup_preview_embed(season, week, pairings, team_lookup, lineup_lookup, round_label=round_label)
             await channel.send(embed=preview_embed)
 
+        is_championship_week = is_playoff_week and week == week_count + 2
+        champion_name = None  # captured below if this is the championship and it resolves cleanly
+
         for pairing in pairings:
             team_a_row = get_team_by_id(pairing["team_a_id"])
             team_b_row = get_team_by_id(pairing["team_b_id"])
@@ -472,10 +475,14 @@ class VoltballCog(commands.Cog):
             if team_a is None:
                 print(f"[voltball] Week {week}: {team_a_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_b_row['team_name']} advances, no match recorded.")
                 update_standings_after_match(season["id"], team_b_row["id"], team_a_row["id"], 0, 0)
+                if is_championship_week:
+                    champion_name = team_b_row["team_name"]
                 continue
             if team_b is None:
                 print(f"[voltball] Week {week}: {team_b_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_a_row['team_name']} advances, no match recorded.")
                 update_standings_after_match(season["id"], team_a_row["id"], team_b_row["id"], 0, 0)
+                if is_championship_week:
+                    champion_name = team_a_row["team_name"]
                 continue
 
             team_a.name = team_a_row["team_name"]
@@ -485,6 +492,9 @@ class VoltballCog(commands.Cog):
 
             winner_id = team_a_row["id"] if result["winner"] == team_a.name else team_b_row["id"]
             loser_id = team_b_row["id"] if winner_id == team_a_row["id"] else team_a_row["id"]
+
+            if is_championship_week:
+                champion_name = team_a_row["team_name"] if winner_id == team_a_row["id"] else team_b_row["team_name"]
 
             db.table("voltball_matches").insert({
                 "season_id": season["id"],
@@ -547,6 +557,8 @@ class VoltballCog(commands.Cog):
         db.table("voltball_seasons").update({"current_week": new_week, "status": new_status}).eq("id", season["id"]).execute()
 
         if channel:
+            if new_status == "complete" and champion_name:
+                await channel.send(embed=build_champion_embed(season, champion_name))
             updated_season = {**season, "current_week": new_week, "status": new_status}
             standings_rows = get_standings(season["id"])
             standings_embed = build_standings_embed(updated_season, standings_rows)
