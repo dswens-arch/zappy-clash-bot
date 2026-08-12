@@ -168,6 +168,20 @@ GUARD_INTERCEPTION_CHANCE = 0.09  # bonus turnover on top of normal turnover_bon
 GUARD_INTERCEPTION_RATE   = 0.05  # extra % of own Guard pool added as bonus points
 GUARD_SHUTDOWN_CHANCE     = 0.03  # opponent's defense_reduction against you is voided this quarter
 
+# Injury -- rolled ONCE PER PLAYED ZAPPY, per match (not per quarter,
+# unlike every other event above). 4% at Standard tempo (5.5) was
+# chosen by working the actual expected-value math before picking a
+# number: at 8 Zappies played/team/week, 4% gives ~28% chance of at
+# least one injury in a given week and ~3-4 expected over a 10-week
+# season -- present and real enough to make bench depth matter, without
+# firing essentially every week. Scaled by the same swing_mult as the
+# other events (Aggressive tempo = real injury risk on top of bigger
+# score swings, Controlled = safer on both fronts), via
+# _tempo_event_constants below. CPU teams skip this roll entirely (see
+# Team.is_cpu) -- they re-roll a fresh random roster every week, so
+# there's no continuity for an injury to attach to.
+INJURY_CHANCE_BASE = 0.04
+
 
 # ─────────────────────────────────────────────
 # Tempo — a second per-week dial alongside Formation.
@@ -258,6 +272,7 @@ def _tempo_event_constants(tempo: float) -> dict:
         "GUARD_INTERCEPTION_CHANCE":  min(1.0, GUARD_INTERCEPTION_CHANCE * s),
         "GUARD_INTERCEPTION_RATE":    GUARD_INTERCEPTION_RATE * s,
         "GUARD_SHUTDOWN_CHANCE":      min(1.0, GUARD_SHUTDOWN_CHANCE * s),
+        "INJURY_CHANCE":              min(1.0, INJURY_CHANCE_BASE * s),
         "EV_MULT":                    ev_mult,
     }
 
@@ -343,6 +358,7 @@ class Team:
     formation:       str                          # one of FORMATIONS keys
     assignments:     dict                          # {"QB": [ZappyPlayer], "Striker": [...], "Mid": [...], "Guard": [...]}
     tempo:           float = TEMPO_DEFAULT          # 1.0 (Controlled) - 10.0 (Aggressive)
+    is_cpu:          bool = False                   # CPU teams skip injury rolls -- see roll_injuries()
 
     # Match-state (not set at construction)
     momentum_multiplier: float = field(default=1.0, init=False)
@@ -378,7 +394,7 @@ class Team:
 
 
 def build_team(name: str, coach_hero_type: Optional[str], formation: str,
-                roster: list[ZappyPlayer], position_map: dict, tempo: float = TEMPO_DEFAULT) -> Team:
+                roster: list[ZappyPlayer], position_map: dict, tempo: float = TEMPO_DEFAULT, is_cpu: bool = False) -> Team:
     """
     Convenience builder.
     position_map: {asset_id: "QB"|"Striker"|"Mid"|"Guard"} for all ROSTER_SIZE roster Zappies.
@@ -389,7 +405,7 @@ def build_team(name: str, coach_hero_type: Optional[str], formation: str,
         if pos not in POSITIONS:
             raise ValueError(f"Invalid position '{pos}' for asset {asset_id}")
         assignments[pos].append(by_id[asset_id])
-    return Team(name=name, coach_hero_type=coach_hero_type, formation=formation, assignments=assignments, tempo=tempo)
+    return Team(name=name, coach_hero_type=coach_hero_type, formation=formation, assignments=assignments, tempo=tempo, is_cpu=is_cpu)
 
 
 def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
@@ -555,6 +571,26 @@ def _apply_signature(quarter_num: int, team: "Team", opponent: "Team",
     return 0.0, [], None
 
 
+def roll_injuries(team: "Team") -> list["ZappyPlayer"]:
+    """
+    Rolls injury chance once per rostered Zappy, post-match -- not
+    per-quarter like the other events, since availability is a
+    match-level outcome (hurt or not), not something that escalates or
+    resets within a single game. Skipped entirely for CPU teams (see
+    Team.is_cpu) -- they re-roll a fresh random roster every week, so
+    there's no continuity for an injury to attach to.
+    """
+    if team.is_cpu:
+        return []
+    consts = _tempo_event_constants(team.tempo)
+    injured = []
+    for players in team.assignments.values():
+        for z in players:
+            if random.random() < consts["INJURY_CHANCE"]:
+                injured.append(z)
+    return injured
+
+
 def resolve_match(team_a: Team, team_b: Team) -> dict:
     """Resolves a full 4-quarter Voltball match between two teams."""
     log = [f"🏟️ **VOLTBALL MATCH** — {team_a.name} ({team_a.formation}) vs. {team_b.name} ({team_b.formation})", ""]
@@ -640,6 +676,13 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
     log.append(f"🏆 **FINAL: {team_a.name} {score_a} — {score_b} {team_b.name}**")
     log.append(f"🏆 **{winner.name} wins!**")
 
+    injured_a = roll_injuries(team_a)
+    injured_b = roll_injuries(team_b)
+    for z in injured_a:
+        log.append(f"  🤕 **INJURY** — {team_a.name}'s {z.name} goes down, out next week.")
+    for z in injured_b:
+        log.append(f"  🤕 **INJURY** — {team_b.name}'s {z.name} goes down, out next week.")
+
     return {
         "team_a": team_a.name,
         "team_b": team_b.name,
@@ -648,6 +691,8 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         "winner": winner.name,
         "loser": loser.name,
         "quarters": quarter_breakdown,
+        "injured_a": [{"asset_id": z.asset_id, "name": z.name} for z in injured_a],
+        "injured_b": [{"asset_id": z.asset_id, "name": z.name} for z in injured_b],
         "log": log,
         "log_text": "\n".join(log),
     }
