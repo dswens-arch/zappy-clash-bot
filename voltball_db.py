@@ -377,3 +377,46 @@ def update_standings_after_match(season_id: str, winner_team_id: str, loser_team
             "streak": new_streak,
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }).execute()
+
+
+def record_injuries(team_id: str, season_id: str, injured: list[dict], injured_week: int):
+    """
+    Writes one row per injured Zappy from a resolved match. injured is
+    the "injured_a"/"injured_b" list resolve_match() returns:
+    [{"asset_id": ..., "name": ...}, ...]. out_week is always
+    injured_week + 1 -- flat 1-week duration, see voltball_schema.sql's
+    voltball_injuries comment for why. A no-op if injured is empty (the
+    common case -- most matches injure nobody).
+    """
+    if not injured:
+        return
+    db = get_supabase()
+    rows = [
+        {
+            "team_id": team_id,
+            "season_id": season_id,
+            "asset_id": entry["asset_id"],
+            "injured_week": injured_week,
+            "out_week": injured_week + 1,
+        }
+        for entry in injured
+    ]
+    db.table("voltball_injuries").insert(rows).execute()
+
+
+def get_injured_asset_ids(team_id: str, week_number: int) -> set[int]:
+    """
+    Returns the set of asset_ids unavailable for this team THIS week
+    (out_week == week_number) -- used both to block them in
+    validate_lineup() and to gray them out in the site's picker.
+    """
+    db = get_supabase()
+    rows = (
+        db.table("voltball_injuries")
+        .select("asset_id")
+        .eq("team_id", team_id)
+        .eq("out_week", week_number)
+        .execute()
+        .data
+    ) or []
+    return {r["asset_id"] for r in rows}
