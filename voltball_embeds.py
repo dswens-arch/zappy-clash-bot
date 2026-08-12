@@ -83,14 +83,25 @@ def build_lineups_embed(season: dict, week: int, week_lineups: list[dict]) -> di
     current week, visible to the whole server as soon as it's submitted
     (not hidden until matches resolve). Teams that haven't set a lineup
     yet still show up, flagged as pending.
+
+    Discord hard-caps embeds at 25 fields, and this adds one field per
+    team — capped at MAX_FIELDS with a "+N more, see the site" note if
+    exceeded, rather than letting a big season silently throw a Discord
+    API error. scout.html has no such limit, so it stays the authoritative
+    full list regardless of season size; this command is a quick-glance
+    convenience, not the only place to check.
     """
+    MAX_FIELDS = 24  # leaves room for the "+N more" field itself
+
     embed = discord.Embed(
         title=f"📋 Week {week} Lineups — {season['name']}",
         description="Every coach's formation and roster this week — set before the deadline, visible the moment it's locked in.",
         color=discord.Color.blurple(),
     )
 
-    for entry in week_lineups:
+    shown, overflow = week_lineups[:MAX_FIELDS], week_lineups[MAX_FIELDS:]
+
+    for entry in shown:
         lineup = entry["lineup"]
         coach = _coach_label(entry["hero_type"])
         if entry.get("is_cpu"):
@@ -103,6 +114,13 @@ def build_lineups_embed(season: dict, week: int, week_lineups: list[dict]) -> di
         embed.add_field(
             name=f"🏈 {entry['team_name']} ({coach}) — {lineup['formation']} / {tempo}",
             value=_format_roster_names(lineup),
+            inline=False,
+        )
+
+    if overflow:
+        embed.add_field(
+            name=f"+ {len(overflow)} more team{'s' if len(overflow) > 1 else ''}",
+            value="See the full breakdown on Scout — no size limit there.",
             inline=False,
         )
 
