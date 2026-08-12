@@ -155,6 +155,21 @@ def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
     return embed
 
 
+def build_champion_embed(season: dict, champion_name: str) -> discord.Embed:
+    """
+    Posted once, the moment the championship game resolves — distinct
+    from the routine weekly standings post, since "we just crowned a
+    champion" deserves its own announcement, not just another line in
+    an ordinary-looking standings table that happens to be the last one.
+    """
+    embed = discord.Embed(
+        title=f"🏆 {season['name']} Champion",
+        description=f"# 👑 {champion_name}\n\nCongratulations — the season is complete!",
+        color=discord.Color.gold(),
+    )
+    return embed
+
+
 def build_standings_embed(season: dict, rows: list[dict]) -> discord.Embed:
     """
     Standings embed — same builder used by both the weekly auto-post
