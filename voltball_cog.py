@@ -33,7 +33,7 @@ from voltball_lineup_service import (
 from algorand_lookup import fetch_zappy_traits
 from voltball_db import (
     get_active_or_playoff_season, get_upcoming_season, get_open_season, get_team_by_owner, get_team_by_id, get_teams_for_season,
-    get_lineup, get_week_lineups, create_cpu_team, get_standings, get_playoff_round_winners, update_standings_after_match,
+    get_lineup, get_week_lineups, create_cpu_team, get_standings, get_playoff_round_winners, update_standings_after_match, record_injuries,
     get_guild_config, set_guild_config, create_season, list_seasons, wipe_season,
 )
 from voltball_schedule import save_schedule, save_playoff_round, get_week_pairings, get_bye_team
@@ -455,7 +455,7 @@ class VoltballCog(commands.Cog):
                     if lineup_a:
                         team_a = await get_locked_lineup_team(lineup_a, team_a_row["hero_type"], team_a_row["wallet_address"])
                     else:
-                        team_a = await build_fallback_team(team_a_row["wallet_address"], team_a_row["hero_type"])
+                        team_a = await build_fallback_team(team_a_row["wallet_address"], team_a_row["hero_type"], team_id=team_a_row["id"], week_number=week)
 
                 if team_b_row.get("is_cpu"):
                     team_b = build_cpu_team(team_b_row["hero_type"])
@@ -464,7 +464,7 @@ class VoltballCog(commands.Cog):
                     if lineup_b:
                         team_b = await get_locked_lineup_team(lineup_b, team_b_row["hero_type"], team_b_row["wallet_address"])
                     else:
-                        team_b = await build_fallback_team(team_b_row["wallet_address"], team_b_row["hero_type"])
+                        team_b = await build_fallback_team(team_b_row["wallet_address"], team_b_row["hero_type"], team_id=team_b_row["id"], week_number=week)
             except LineupValidationError as e:
                 print(f"[voltball] Week {week}: error building teams for {team_a_row['team_name']} vs {team_b_row['team_name']}: {e}")
                 continue
@@ -512,6 +512,9 @@ class VoltballCog(commands.Cog):
                 season["id"], winner_id, loser_id,
                 max(result["score_a"], result["score_b"]), min(result["score_a"], result["score_b"]),
             )
+
+            record_injuries(team_a_row["id"], season["id"], result["injured_a"], week)
+            record_injuries(team_b_row["id"], season["id"], result["injured_b"], week)
 
             if channel:
                 embed = build_match_embed(result, week, is_playoff=is_playoff_week)
