@@ -26,6 +26,7 @@ from typing import Optional
 
 from algorand_lookup import verify_wallet_owns_zappy, fetch_zappy_traits
 from database import get_supabase
+from voltball_db import get_injured_asset_ids
 from voltball_engine import (
     FORMATIONS, POSITIONS, ROSTER_SIZE, NO_LINEUP_DEFAULT_FORMATION, TEMPO_MIN, TEMPO_MAX, TEMPO_STEP, TEMPO_DEFAULT, clamp_tempo,
     ZappyPlayer, build_team, Team,
@@ -85,13 +86,20 @@ async def get_hero_ownership(wallet_address: str) -> list[dict]:
     return heroes + collabs
 
 
-async def validate_lineup(wallet_address: str, formation: str, position_map: dict) -> Team:
+async def validate_lineup(wallet_address: str, formation: str, position_map: dict,
+                           team_id: str | None = None, week_number: int | None = None) -> Team:
     """
     Validates a proposed lineup against LIVE wallet holdings. Returns a
     built Team ready for resolve_match(), or raises LineupValidationError
     with a Discord-displayable message.
 
-    position_map: {asset_id: "Striker"|"Mid"|"Guard"}
+    position_map: {asset_id: "QB"|"Striker"|"Mid"|"Guard"}
+
+    team_id/week_number are optional -- when both are given, also
+    rejects any asset_id currently injured (out_week == week_number for
+    this team). Optional rather than required because this function is
+    also usable for pure holdings/shape validation without a specific
+    team+week context in mind.
     """
     if formation not in FORMATIONS:
         raise LineupValidationError(f"'{formation}' isn't a valid formation. Choose OFFENSE, BALANCED, or DEFENSE.")
@@ -103,7 +111,7 @@ async def validate_lineup(wallet_address: str, formation: str, position_map: dic
 
     for asset_id, pos in position_map.items():
         if pos not in POSITIONS:
-            raise LineupValidationError(f"'{pos}' isn't a valid position (asset {asset_id}). Use Striker, Mid, or Guard.")
+            raise LineupValidationError(f"'{pos}' isn't a valid position (asset {asset_id}). Use QB, Striker, Mid, or Guard.")
 
     expected_counts = FORMATIONS[formation]
     actual_counts = {p: 0 for p in POSITIONS}
@@ -123,6 +131,15 @@ async def validate_lineup(wallet_address: str, formation: str, position_map: dic
             f"These Zappies aren't in your wallet right now: {missing}. "
             f"Lineups are checked against live holdings, not a saved roster."
         )
+
+    if team_id is not None and week_number is not None:
+        injured_ids = get_injured_asset_ids(team_id, week_number)
+        injured_in_lineup = [aid for aid in position_map if aid in injured_ids]
+        if injured_in_lineup:
+            names = ", ".join(held_by_id[aid]["name"] for aid in injured_in_lineup)
+            raise LineupValidationError(
+                f"Injured this week, can't play: {names}. Pick someone else for that slot — they're back next week."
+            )
 
     roster = [
         ZappyPlayer(asset_id=z["asset_id"], name=z["name"], VLT=z["VLT"], INS=z["INS"], SPK=z["SPK"])
@@ -151,7 +168,7 @@ async def submit_lineup(guild_id: str, team_id: str, season_id: str, week_number
     if abs(snapped - tempo) > 1e-9:
         raise LineupValidationError(f"Tempo must be in {TEMPO_STEP} increments — {tempo} isn't valid (try {snapped}).")
 
-    team = await validate_lineup(wallet_address, formation, position_map)  # raises on failure
+    team = await validate_lineup(wallet_address, formation, position_map, team_id=team_id, week_number=week_number)  # raises on failure
 
     row = {
         "team_id": team_id,
@@ -180,6 +197,18 @@ async def get_locked_lineup_team(lineup_row: dict, hero_type: str, wallet_addres
     checked at lock time; this re-fetches current stats to score the
     match (asset_id is authoritative, the stored "name" is only for
     display elsewhere, e.g. /voltball_lineups).
+
+    KNOWN EDGE CASE, not handled: injury eligibility is only checked at
+    submission time (see validate_lineup). If a coach submits a future
+    week's lineup before an earlier week resolves, and one of their
+    already-selected Zappies gets injured in that earlier week's match,
+    this function has no way to know that and will still field them.
+    Deliberately not fixed here — retroactively invalidating part of an
+    already-locked lineup raises its own questions (auto-fill the gap?
+    reject the whole lineup and apply the no-lineup penalty instead?)
+    that don't have an obviously-right answer, and the practical
+    likelihood of someone submitting multiple weeks ahead is low enough
+    that this isn't worth guessing at a resolution for right now.
     """
     assignments = lineup_row["assignments"]
     held = await get_wallet_zappies(wallet_address)
@@ -203,7 +232,8 @@ async def get_locked_lineup_team(lineup_row: dict, hero_type: str, wallet_addres
                        roster=roster, position_map=position_map, tempo=lineup_row.get("tempo", TEMPO_DEFAULT))
 
 
-async def build_fallback_team(wallet_address: str, hero_type: str | None) -> Team | None:
+async def build_fallback_team(wallet_address: str, hero_type: str | None,
+                               team_id: str | None = None, week_number: int | None = None) -> Team | None:
     """
     Auto-fields a team from CURRENT wallet holdings when a coach never
     submitted a lineup. Uses the first ROSTER_SIZE held Zappies (by
@@ -211,11 +241,21 @@ async def build_fallback_team(wallet_address: str, hero_type: str | None) -> Tea
     formation, and flags the team with auto_lineup_penalty=True so the
     engine applies the "no game plan" scoring penalty.
 
-    Returns None if the wallet doesn't hold at least ROSTER_SIZE Zappies
-    right now — that's a genuine forfeit case (can't field even a weak
-    team), which callers should handle separately from the penalty case.
+    Excludes currently-injured asset_ids from the candidate pool when
+    team_id/week_number are given — otherwise a coach who submits a
+    lineup gets blocked from playing an injured Zappy, but one who
+    never submits at all could have it auto-fielded anyway, which would
+    be a real inconsistency, not just a missed nice-to-have.
+
+    Returns None if the wallet doesn't hold at least ROSTER_SIZE
+    non-injured Zappies right now — that's a genuine forfeit case
+    (can't field even a weak team), which callers should handle
+    separately from the penalty case.
     """
     held = await get_wallet_zappies(wallet_address)
+    if team_id is not None and week_number is not None:
+        injured_ids = get_injured_asset_ids(team_id, week_number)
+        held = [z for z in held if z["asset_id"] not in injured_ids]
     if len(held) < ROSTER_SIZE:
         return None
 
@@ -286,4 +326,4 @@ def build_cpu_team(hero_type: str | None = None, formation: str | None = None, t
             idx += 1
 
     return build_team(name="", coach_hero_type=hero_type, formation=chosen_formation,
-                       roster=roster, position_map=position_map, tempo=chosen_tempo)
+                       roster=roster, position_map=position_map, tempo=chosen_tempo, is_cpu=True)
