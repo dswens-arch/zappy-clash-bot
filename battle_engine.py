@@ -58,6 +58,9 @@ class Fighter:
     guaranteed_crit_next: bool = field(default=False, init=False)  # Frog Patience: round 2 guaranteed crit
     pack_hunt_stacks:   int   = field(default=0,     init=False)   # Wolf Pack Hunt: cumulative VLT stack count
     no_attack_this_round: bool = field(default=False, init=False)  # Frog Patience: fully sits out round 1's attack
+    abduction_fire_round: Optional[int] = field(default=None, init=False)  # Alien Abduction: pre-rolled round (1 or 2), resolved once
+    locked_stat:          Optional[str] = field(default=None, init=False)  # Alien Abduction: which stat is zeroed this round
+    locked_stat_value:    int           = field(default=0,    init=False)  # Alien Abduction: original value to restore after the round
     ability_blocked_this_round: bool = field(default=False, init=False)  # Null cancelled this fighter's ability this round — gates passive side-effects (e.g. Pack Hunt) that live outside apply_ability()
 
     # Spark battle state
@@ -128,6 +131,17 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     return int(damage), is_crit, flavor_note
 
 
+def _resolve_abduction_round(fighter: Fighter) -> int:
+    """
+    Alien's Abduction: 30% chance to fire round 1, 70% chance to fire round 2.
+    Resolved once and cached so repeated checks (e.g. Null interception,
+    then the real apply_ability call) agree on the same chosen round.
+    """
+    if fighter.abduction_fire_round is None:
+        fighter.abduction_fire_round = 1 if random.random() < 0.30 else 2
+    return fighter.abduction_fire_round
+
+
 def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[bool, str]:
     """
     Try to trigger a fighter's special ability.
@@ -148,6 +162,8 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
     if trigger == round_num:
         should_trigger = True
     elif trigger == "random" and random.random() < 0.40:   # 40% chance per round
+        should_trigger = True
+    elif trigger == "weighted_1_2" and round_num == _resolve_abduction_round(fighter):
         should_trigger = True
     elif trigger == "passive":
         should_trigger = True   # Passive abilities always active, handled elsewhere
@@ -214,6 +230,13 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         original_spk = opponent.SPK
         opponent.SPK = 5
         return True, f"😇 **HOLY GROUND!** {opponent.display_name}'s crits are blocked. {fighter.display_name}'s Spark fires guaranteed!"
+
+    elif name == "Abduction":
+        strongest = max(("VLT", "INS", "SPK"), key=lambda s: getattr(opponent, s))
+        opponent.locked_stat = strongest
+        opponent.locked_stat_value = getattr(opponent, strongest)
+        setattr(opponent, strongest, 0)
+        return True, f"👽 **ABDUCTION!** {fighter.display_name} beams away {opponent.display_name}'s {strongest} — gone for the round!"
 
     elif name == "Antler Clash":
         debuff = 15
@@ -520,7 +543,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 # Check if ability would fire this round
                 would_fire = (
                     trigger == round_num or
-                    (trigger == "random" and not attacker.ability_used)
+                    (trigger == "random" and not attacker.ability_used) or
+                    (trigger == "weighted_1_2" and round_num == _resolve_abduction_round(attacker))
                 )
                 if would_fire and defender.spark_type == "null" and defender.spark_tier > 0 and not defender.spark_triggered:
                     cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[defender.spark_tier]
@@ -731,6 +755,13 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
 
         # HP status
         round_msg.append(f"  HP: **{fighter_a.display_name}** {fighter_a.hp} · **{fighter_b.display_name}** {fighter_b.hp}")
+
+        # Abduction: restore the locked stat now that the round is fully resolved
+        for f in (fighter_a, fighter_b):
+            if f.locked_stat is not None:
+                setattr(f, f.locked_stat, f.locked_stat_value)
+                f.locked_stat = None
+                f.locked_stat_value = 0
 
         round_logs.append("\n".join(round_msg))
         log.extend(round_msg)
