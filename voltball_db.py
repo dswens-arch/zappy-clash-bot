@@ -47,13 +47,20 @@ def list_seasons(guild_id: str) -> list[dict]:
 def wipe_season(season_id: str):
     """
     Deletes EVERYTHING tied to a season — teams, lineups, matches,
-    standings, schedule, and the season row itself. No permanent record
-    survives. Used for test seasons, or scrapping a season that needs a
-    clean restart. Irreversible — the caller (Discord command) should
-    confirm with the admin before calling this.
+    standings, schedule, injuries, and the season row itself. No
+    permanent record survives. Used for test seasons, or scrapping a
+    season that needs a clean restart. Irreversible — the caller
+    (Discord command) should confirm with the admin before calling this.
+
+    voltball_injuries must be deleted before voltball_teams -- it has a
+    team_id foreign key, and Postgres will reject the teams delete with
+    a 23503 violation otherwise. (This table was added after this
+    function was first written, for the injury feature, and got missed
+    in this list at the time -- caught via a real wipe failing in
+    production, not by inspection.)
     """
     db = get_supabase()
-    for table in ["voltball_matches", "voltball_standings", "voltball_lineups", "voltball_schedule", "voltball_teams"]:
+    for table in ["voltball_matches", "voltball_standings", "voltball_lineups", "voltball_schedule", "voltball_injuries", "voltball_teams"]:
         db.table(table).delete().eq("season_id", season_id).execute()
     db.table("voltball_seasons").delete().eq("id", season_id).execute()
 
