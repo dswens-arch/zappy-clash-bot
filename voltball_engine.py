@@ -433,18 +433,18 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
         # ── Striker events ──
         if random.random() < consts["STRIKER_LIGHTNING_CHANCE"]:
             striker_component *= (1 + consts["STRIKER_LIGHTNING_BONUS"])
-            log.append(f"  ⚡ **LIGHTNING STRIKE** — {offense_team.name}'s Striker lane catches fire!")
+            log.append(f"  ⚡ **LIGHTNING STRIKE** — {offense_team.name}'s Strikers break off a huge gain!")
         elif random.random() < consts["STRIKER_COLDSTREAK_CHANCE"]:
             striker_component *= (1 - consts["STRIKER_COLDSTREAK_PENALTY"])
-            log.append(f"  ❄️ **COLD STREAK** — {offense_team.name}'s Strikers go quiet this quarter.")
+            log.append(f"  ❄️ **COLD STREAK** — {offense_team.name}'s Strikers get stuffed at the line this quarter.")
 
         # ── Mid events ──
         if random.random() < consts["MID_TRICKPLAY_CHANCE"]:
             mid_component *= 2.0
-            log.append(f"  🎭 **TRICK PLAY** — {offense_team.name}'s Mids double up their playmaking!")
+            log.append(f"  🎭 **TRICK PLAY** — {offense_team.name}'s Mids catch the defense off guard for a huge gain!")
         elif random.random() < consts["MID_MOMENTUM_CHANCE"]:
             offense_team.momentum_multiplier *= consts["MID_MOMENTUM_MULT"]
-            log.append(f"  📈 **MOMENTUM SWING** — {offense_team.name} carries a hot hand into the rest of the match!")
+            log.append(f"  📈 **MOMENTUM SWING** — {offense_team.name} seizes the momentum and doesn't look back!")
 
     base_offense = striker_component + mid_component
 
@@ -452,13 +452,13 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
     shutdown = (not events_denied) and random.random() < consts["GUARD_SHUTDOWN_CHANCE"]
     defense_reduction = 0.0 if shutdown else min(opp_guard_pool * DEFENSE_RATE, DEFENSE_CAP)
     if shutdown:
-        log.append(f"  🛑 **SHUTDOWN** — {offense_team.name} plays right through {defense_team.name}'s defense!")
+        log.append(f"  🛑 **SHUTDOWN** — {offense_team.name} blows right past {defense_team.name}'s defense, untouched!")
 
     turnover_bonus = own_guard_pool * TURNOVER_RATE
     if not events_denied and random.random() < consts["GUARD_INTERCEPTION_CHANCE"]:
         extra = own_guard_pool * consts["GUARD_INTERCEPTION_RATE"]
         turnover_bonus += extra
-        log.append(f"  🥊 **INTERCEPTION** — {offense_team.name}'s Guards force a turnover and cash it in!")
+        log.append(f"  🥊 **INTERCEPTION** — {offense_team.name}'s Guards pick it off and take it to the house!")
 
     quarter_voltage = (base_offense * (1 - defense_reduction) + turnover_bonus) * offense_team.momentum_multiplier
     quarter_voltage *= consts["EV_MULT"]
