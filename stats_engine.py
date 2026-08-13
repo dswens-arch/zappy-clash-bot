@@ -343,6 +343,7 @@ HERO_STATS = {
     "Buck":       {"VLT": 88, "INS": 82, "SPK": 65, "ability": {"name": "Antler Clash", "desc": "Reduces opponent's VLT by 15 starting round 1. The longer the fight, the less damage they can deal.", "trigger_round": 1}},
     "Snake":      {"VLT": 78, "INS": 72, "SPK": 80, "ability": {"name": "Venom Bite", "desc": "Poisons the opponent starting round 1 — they lose 25 HP at the start of every remaining round, regardless of INS.", "trigger_round": 1}},
     "Shark":      {"VLT": 90, "INS": 65, "SPK": 88, "ability": {"name": "Feeding Frenzy", "desc": "Bonus damage scales with how much HP the opponent has already lost. The lower they are, the harder Shark hits.", "trigger_round": "every"}},
+    "Alien":      {"VLT": 78, "INS": 88, "SPK": 72, "ability": {"name": "Abduction", "desc": "30% chance to strike round 1, 70% chance to wait for round 2. Whenever it fires, locks out the opponent's strongest stat for that round.", "trigger_round": "weighted_1_2"}},
 }
 
 COLLAB_STATS = {
