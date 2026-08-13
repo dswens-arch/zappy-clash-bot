@@ -443,7 +443,26 @@ class VoltballCog(commands.Cog):
         is_championship_week = is_playoff_week and week == week_count + 2
         champion_name = None  # captured below if this is the championship and it resolves cleanly
 
+        # Duplicate-match guard: if a bot restart (e.g. mid-deploy)
+        # interrupted a previous resolution attempt partway through this
+        # exact week, some pairings may already have a recorded match --
+        # re-resolving them here would double-count standings for both
+        # teams. Fetched once up front rather than once per pairing.
+        already_resolved_rows = (
+            db.table("voltball_matches")
+            .select("team_a_id, team_b_id")
+            .eq("season_id", season["id"])
+            .eq("week_number", week)
+            .execute()
+            .data
+        ) or []
+        already_resolved = {(m["team_a_id"], m["team_b_id"]) for m in already_resolved_rows}
+
         for pairing in pairings:
+            if (pairing["team_a_id"], pairing["team_b_id"]) in already_resolved:
+                print(f"[voltball] Week {week}: {pairing['team_a_id']} vs {pairing['team_b_id']} already has a recorded match this week — skipping (duplicate-match guard, likely an interrupted prior resolution).")
+                continue
+
             team_a_row = get_team_by_id(pairing["team_a_id"])
             team_b_row = get_team_by_id(pairing["team_b_id"])
 
@@ -556,6 +575,26 @@ class VoltballCog(commands.Cog):
             # This was the championship (week_count + 2) -- season is over.
             new_week = week + 1
             new_status = "complete"
+
+        if new_status == "complete" and not champion_name:
+            # The championship pairing was skipped by the duplicate-match
+            # guard above (already resolved in an earlier, interrupted
+            # run) -- champion_name only gets set when a match resolves
+            # DURING this run's loop, so look it up from the actual
+            # recorded match instead of silently dropping the announcement.
+            champ_match = (
+                db.table("voltball_matches")
+                .select("winner_team_id")
+                .eq("season_id", season["id"])
+                .eq("week_number", week)
+                .eq("is_playoff", True)
+                .execute()
+                .data
+            )
+            if champ_match:
+                champ_team = get_team_by_id(champ_match[0]["winner_team_id"])
+                if champ_team:
+                    champion_name = champ_team["team_name"]
 
         db.table("voltball_seasons").update({"current_week": new_week, "status": new_status}).eq("id", season["id"]).execute()
 
