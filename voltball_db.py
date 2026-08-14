@@ -47,20 +47,24 @@ def list_seasons(guild_id: str) -> list[dict]:
 def wipe_season(season_id: str):
     """
     Deletes EVERYTHING tied to a season — teams, lineups, matches,
-    standings, schedule, injuries, and the season row itself. No
-    permanent record survives. Used for test seasons, or scrapping a
-    season that needs a clean restart. Irreversible — the caller
-    (Discord command) should confirm with the admin before calling this.
+    standings, schedule, injuries, season-allocated stats, and the
+    season row itself. No permanent record survives. Used for test
+    seasons, or scrapping a season that needs a clean restart.
+    Irreversible — the caller (Discord command) should confirm with the
+    admin before calling this.
 
     voltball_injuries must be deleted before voltball_teams -- it has a
     team_id foreign key, and Postgres will reject the teams delete with
     a 23503 violation otherwise. (This table was added after this
     function was first written, for the injury feature, and got missed
     in this list at the time -- caught via a real wipe failing in
-    production, not by inspection.)
+    production, not by inspection.) voltball_season_zappy_stats has no
+    such FK (just a season_id column), so it doesn't need to be deleted
+    in any particular order -- added proactively here when the table was
+    introduced, rather than waiting to hit the same class of bug twice.
     """
     db = get_supabase()
-    for table in ["voltball_matches", "voltball_standings", "voltball_lineups", "voltball_schedule", "voltball_injuries", "voltball_teams"]:
+    for table in ["voltball_matches", "voltball_standings", "voltball_lineups", "voltball_schedule", "voltball_injuries", "voltball_season_zappy_stats", "voltball_teams"]:
         db.table(table).delete().eq("season_id", season_id).execute()
     db.table("voltball_seasons").delete().eq("id", season_id).execute()
 
@@ -427,3 +431,49 @@ def get_injured_asset_ids(team_id: str, week_number: int) -> set[int]:
         .data
     ) or []
     return {r["asset_id"] for r in rows}
+
+
+def save_season_zappy_stats(season_id: str, allocations: dict[int, dict]):
+    """
+    Batch-inserts the full season allocation (see
+    voltball_season_stats.py's allocate_season_stats()) -- one row per
+    Zappy in the real collection, ~1,678 rows in a single insert.
+    Called once, at /voltball_season_start. Every asset_id in the
+    collection gets a row regardless of whether it's currently held or
+    roster-eligible -- who holds what can change mid-season (trades,
+    sales), and stats shouldn't need recomputing when that happens.
+    """
+    db = get_supabase()
+    rows = [
+        {
+            "season_id": season_id,
+            "asset_id": asset_id,
+            "rarity_tier": alloc["rarity_tier"],
+            "band": alloc["band"],
+            "peer_asset_id": alloc["peer_asset_id"],
+            "VLT": alloc["VLT"],
+            "INS": alloc["INS"],
+            "SPK": alloc["SPK"],
+        }
+        for asset_id, alloc in allocations.items()
+    ]
+    # Supabase/PostgREST batch inserts have a practical size limit -- chunk
+    # to be safe rather than risk one oversized request for ~1,678 rows.
+    CHUNK = 500
+    for i in range(0, len(rows), CHUNK):
+        db.table("voltball_season_zappy_stats").insert(rows[i:i + CHUNK]).execute()
+
+
+def get_season_zappy_stats(season_id: str, asset_ids: list[int] | None = None) -> dict[int, dict]:
+    """
+    Returns {asset_id: {"VLT":.., "INS":.., "SPK":.., "band":..}} for this
+    season. Pass asset_ids to scope the query to a specific wallet's
+    holdings (cheaper than pulling the whole ~1,678-row table); omit it
+    to get everything.
+    """
+    db = get_supabase()
+    query = db.table("voltball_season_zappy_stats").select("asset_id, VLT, INS, SPK, band").eq("season_id", season_id)
+    if asset_ids is not None:
+        query = query.in_("asset_id", asset_ids)
+    rows = query.execute().data or []
+    return {r["asset_id"]: {"VLT": r["VLT"], "INS": r["INS"], "SPK": r["SPK"], "band": r["band"]} for r in rows}
