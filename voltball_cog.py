@@ -34,9 +34,11 @@ from algorand_lookup import fetch_zappy_traits
 from voltball_db import (
     get_active_or_playoff_season, get_upcoming_season, get_open_season, get_team_by_owner, get_team_by_id, get_teams_for_season,
     get_lineup, get_week_lineups, create_cpu_team, get_standings, get_playoff_round_winners, update_standings_after_match, record_injuries,
-    get_guild_config, set_guild_config, create_season, list_seasons, wipe_season,
+    get_guild_config, set_guild_config, create_season, list_seasons, wipe_season, save_season_zappy_stats,
 )
 from voltball_schedule import save_schedule, save_playoff_round, get_week_pairings, get_bye_team
+from voltball_season_stats import allocate_season_stats
+from voltball_rarity import get_rarity_tier
 from voltball_embeds import build_match_embed, build_standings_embed, build_champion_embed, build_lineups_embed, build_matchup_preview_embed
 from voltball_position_fit import get_position_fit, rank_collection_for_position, label_for_held_zappy
 from database import get_supabase, get_wallet
@@ -97,10 +99,21 @@ class VoltballCog(commands.Cog):
 
         team_ids = [t["id"] for t in teams]
         rows = save_schedule(season["id"], team_ids, season["week_count"])
+
+        # Season-wide stat allocation -- see voltball_season_stats.py for
+        # the full design. Runs once here, for the ENTIRE real collection
+        # (not just held/roster-eligible Zappies), same one-shot timing as
+        # the schedule itself. ~1,678 Zappies -- a real but bounded amount
+        # of work, acceptable to run synchronously here since this is a
+        # once-per-season operation, not a hot path.
+        allocations = allocate_season_stats()
+        save_season_zappy_stats(season["id"], allocations)
+
         db.table("voltball_seasons").update({"status": "active", "current_week": 1}).eq("id", season["id"]).execute()
 
         await interaction.followup.send(
-            f"🏈 Schedule locked in — {len(teams)} teams, {season['week_count']} weeks, {len(rows)} total matchups. Season is live.",
+            f"🏈 Schedule locked in — {len(teams)} teams, {season['week_count']} weeks, {len(rows)} total matchups. "
+            f"Season stats allocated for all {len(allocations)} Zappies. Season is live.",
             ephemeral=True,
         )
 
@@ -293,6 +306,12 @@ class VoltballCog(commands.Cog):
             f"**{pos}** ({info['stat']} {info['value']}) — {info['tier']}, {info['percentile']}th percentile"
             for pos, info in fit["positions"].items()
         ]
+        try:
+            tier = get_rarity_tier(asa)
+            tier_label = {1: "Tier 1 (rarest ~10%)", 2: "Tier 2 (mid ~30%)", 3: "Tier 3 (common ~60%)"}[tier]
+            lines.append(f"\n**Rarity:** {tier_label}")
+        except KeyError:
+            pass  # not in the roster-eligible collection scope get_rarity_tier covers -- shouldn't happen for a real roster Zappy, but don't fail the whole lookup over it
         embed = discord.Embed(
             title=f"{result['name']} (#{asa})",
             description=f"Best fit: **{fit['positions'][fit['best_position']]['tier']} {fit['best_position']}**\n\n" + "\n".join(lines),
@@ -319,11 +338,18 @@ class VoltballCog(commands.Cog):
 
         top = rank_collection_for_position(position.value, top_n=15)
         stat_key = {"QB": "SPK", "Striker": "VLT", "Mid": "SPK", "Guard": "INS"}[position.value]
+        tier_short = {1: "T1", 2: "T2", 3: "T3"}
 
-        lines = [f"{i+1}. **{z['name']}** (#{z['asset_id']}) — {z[stat_key]} ({z['percentile']}th percentile)" for i, z in enumerate(top)]
+        lines = []
+        for i, z in enumerate(top):
+            try:
+                tier_tag = f" · {tier_short[get_rarity_tier(z['asset_id'])]}"
+            except KeyError:
+                tier_tag = ""
+            lines.append(f"{i+1}. **{z['name']}** (#{z['asset_id']}) — {z[stat_key]} ({z['percentile']}th percentile){tier_tag}")
         embed = discord.Embed(
             title=f"🔍 Top Zappies for {position.value}",
-            description="\n".join(lines) + "\n\n*Cross-reference these asset IDs on your marketplace of choice.*",
+            description="\n".join(lines) + "\n\n*T1/T2/T3 = rarity tier (T1 rarest ~10%). Cross-reference these asset IDs on your marketplace of choice.*",
             color=discord.Color.teal(),
         )
         await interaction.followup.send(embed=embed)
@@ -336,8 +362,9 @@ class VoltballCog(commands.Cog):
     async def voltball_my_zappies(self, interaction: discord.Interaction, wallet_address: str = None):
         await interaction.response.defer(ephemeral=True)
 
+        season = get_active_or_playoff_season(str(interaction.guild_id)) or get_upcoming_season(str(interaction.guild_id))
+
         if not wallet_address:
-            season = get_active_or_playoff_season(str(interaction.guild_id)) or get_upcoming_season(str(interaction.guild_id))
             team_row = get_team_by_owner(str(interaction.guild_id), str(interaction.user.id), season["id"]) if season else None
             if team_row:
                 wallet_address = team_row["wallet_address"]
@@ -347,8 +374,12 @@ class VoltballCog(commands.Cog):
                 await interaction.followup.send("No linked wallet or registered team found — provide a `wallet_address`.", ephemeral=True)
                 return
 
+        # season stats only apply once a season has actually started (active/playoffs) --
+        # an "upcoming" season hasn't run allocation yet (that happens at /voltball_season_start).
+        season_id = season["id"] if season and season["status"] in ("active", "playoffs") else None
+
         try:
-            held = await get_wallet_zappies(wallet_address)
+            held = await get_wallet_zappies(wallet_address, season_id=season_id)
         except LineupValidationError as e:
             await interaction.followup.send(f"⚠️ {e}", ephemeral=True)
             return
@@ -489,22 +520,22 @@ class VoltballCog(commands.Cog):
 
             try:
                 if team_a_row.get("is_cpu"):
-                    team_a = build_cpu_team(team_a_row["hero_type"])
+                    team_a = build_cpu_team(team_a_row["hero_type"], season_id=season["id"])
                 else:
                     lineup_a = get_lineup(pairing["team_a_id"], week)
                     if lineup_a:
-                        team_a = await get_locked_lineup_team(lineup_a, team_a_row["hero_type"], team_a_row["wallet_address"])
+                        team_a = await get_locked_lineup_team(lineup_a, team_a_row["hero_type"], team_a_row["wallet_address"], season_id=season["id"])
                     else:
-                        team_a = await build_fallback_team(team_a_row["wallet_address"], team_a_row["hero_type"], team_id=team_a_row["id"], week_number=week)
+                        team_a = await build_fallback_team(team_a_row["wallet_address"], team_a_row["hero_type"], team_id=team_a_row["id"], week_number=week, season_id=season["id"])
 
                 if team_b_row.get("is_cpu"):
-                    team_b = build_cpu_team(team_b_row["hero_type"])
+                    team_b = build_cpu_team(team_b_row["hero_type"], season_id=season["id"])
                 else:
                     lineup_b = get_lineup(pairing["team_b_id"], week)
                     if lineup_b:
-                        team_b = await get_locked_lineup_team(lineup_b, team_b_row["hero_type"], team_b_row["wallet_address"])
+                        team_b = await get_locked_lineup_team(lineup_b, team_b_row["hero_type"], team_b_row["wallet_address"], season_id=season["id"])
                     else:
-                        team_b = await build_fallback_team(team_b_row["wallet_address"], team_b_row["hero_type"], team_id=team_b_row["id"], week_number=week)
+                        team_b = await build_fallback_team(team_b_row["wallet_address"], team_b_row["hero_type"], team_id=team_b_row["id"], week_number=week, season_id=season["id"])
             except LineupValidationError as e:
                 print(f"[voltball] Week {week}: error building teams for {team_a_row['team_name']} vs {team_b_row['team_name']}: {e}")
                 continue
