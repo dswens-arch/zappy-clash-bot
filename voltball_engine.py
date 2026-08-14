@@ -119,6 +119,16 @@ FORMATIONS = {
 ROSTER_SIZE = 8
 POSITIONS = ("QB", "Striker", "Mid", "Guard")
 
+# Internal keys (POSITIONS above) are never renamed -- they're baked
+# into FORMATIONS, position_map, and every already-stored
+# voltball_lineups.assignments JSONB row. This mapping exists purely
+# for human-readable log text, matching the website's own DISPLAY_NAME
+# constant exactly (lineup.html/scout.html/results.html) -- without it,
+# match highlights said "Strikers"/"Mids" while every roster panel on
+# the site said "Surge Back"/"Conductor", a real inconsistency a real
+# person actually got confused by, not just a theoretical one.
+DISPLAY_NAME = {"QB": "QB", "Striker": "Surge Back", "Mid": "Conductor", "Guard": "Guard"}
+
 # QB reuses SPK (no new stat, no re-deriving anything from trait data
 # across the collection) — but unlike Mid, which pools SPK additively,
 # QB's SPK drives a MULTIPLIER on the whole team's Base_Offense. A
@@ -428,20 +438,20 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
     mid_component     = mid_pool * PLAYMAKING_WEIGHT
 
     if events_denied:
-        log.append(f"  🐊 **DEATH ROLL** — {defense_team.name}'s coach locks {offense_team.name} out of their big play this quarter!")
+        log.append(f"  🐊 **DEATH ROLL** — {defense_team.name}'s defense stuffs {offense_team.name} before the play even develops!")
     else:
         # ── Striker events ──
         if random.random() < consts["STRIKER_LIGHTNING_CHANCE"]:
             striker_component *= (1 + consts["STRIKER_LIGHTNING_BONUS"])
-            log.append(f"  ⚡ **LIGHTNING STRIKE** — {offense_team.name}'s Strikers break off a huge gain!")
+            log.append(f"  ⚡ **LIGHTNING STRIKE** — {offense_team.name}'s {DISPLAY_NAME['Striker']}s break off a huge gain!")
         elif random.random() < consts["STRIKER_COLDSTREAK_CHANCE"]:
             striker_component *= (1 - consts["STRIKER_COLDSTREAK_PENALTY"])
-            log.append(f"  ❄️ **COLD STREAK** — {offense_team.name}'s Strikers get stuffed at the line this quarter.")
+            log.append(f"  ❄️ **COLD STREAK** — {offense_team.name}'s {DISPLAY_NAME['Striker']}s get stuffed at the line this quarter.")
 
         # ── Mid events ──
         if random.random() < consts["MID_TRICKPLAY_CHANCE"]:
             mid_component *= 2.0
-            log.append(f"  🎭 **TRICK PLAY** — {offense_team.name}'s Mids catch the defense off guard for a huge gain!")
+            log.append(f"  🎭 **TRICK PLAY** — {offense_team.name}'s {DISPLAY_NAME['Mid']}s catch the defense off guard for a huge gain!")
         elif random.random() < consts["MID_MOMENTUM_CHANCE"]:
             offense_team.momentum_multiplier *= consts["MID_MOMENTUM_MULT"]
             log.append(f"  📈 **MOMENTUM SWING** — {offense_team.name} seizes the momentum and doesn't look back!")
@@ -458,7 +468,7 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
     if not events_denied and random.random() < consts["GUARD_INTERCEPTION_CHANCE"]:
         extra = own_guard_pool * consts["GUARD_INTERCEPTION_RATE"]
         turnover_bonus += extra
-        log.append(f"  🥊 **INTERCEPTION** — {offense_team.name}'s Guards pick it off and take it to the house!")
+        log.append(f"  🥊 **INTERCEPTION** — {offense_team.name}'s {DISPLAY_NAME['Guard']}s pick it off and take it to the house!")
 
     quarter_voltage = (base_offense * (1 - defense_reduction) + turnover_bonus) * offense_team.momentum_multiplier
     quarter_voltage *= consts["EV_MULT"]
@@ -537,7 +547,7 @@ def _apply_signature(quarter_num: int, team: "Team", opponent: "Team",
 
     if sig_type == "flat_chance":
         if random.random() < sig["chance"]:
-            log.append(f"  🦸 **{label}** — a lucky bounce goes {team.name}'s way (+{sig['bonus']}).")
+            log.append(f"  🦸 **{label}** — {team.name} catches a break and cashes in (+{sig['bonus']}).")
             return sig["bonus"], log, "self"
         return 0.0, [], None
 
@@ -624,11 +634,11 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         if a_denies_b and team_a.signature and team_a.signature["type"] == "deny_chance":
             bonus = team_a.signature["bonus"]
             voltage_a += bonus
-            log.append(f"  🦸 **{team_a.signature['label']}** — {team_a.name} capitalizes on the lockdown (+{bonus}).")
+            log.append(f"  🦸 **{team_a.signature['label']}** — {team_a.name} forces a takeaway and cashes in a bonus drive (+{bonus}).")
         if b_denies_a and team_b.signature and team_b.signature["type"] == "deny_chance":
             bonus = team_b.signature["bonus"]
             voltage_b += bonus
-            log.append(f"  🦸 **{team_b.signature['label']}** — {team_b.name} capitalizes on the lockdown (+{bonus}).")
+            log.append(f"  🦸 **{team_b.signature['label']}** — {team_b.name} forces a takeaway and cashes in a bonus drive (+{bonus}).")
 
         voltage_a, voltage_b = round(voltage_a, 1), round(voltage_b, 1)
         score_a += voltage_a
