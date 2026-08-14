@@ -232,11 +232,10 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         return True, f"😇 **HOLY GROUND!** {opponent.display_name}'s crits are blocked. {fighter.display_name}'s Spark fires guaranteed!"
 
     elif name == "Abduction":
-        strongest = max(("VLT", "INS", "SPK"), key=lambda s: getattr(opponent, s))
-        opponent.locked_stat = strongest
-        opponent.locked_stat_value = getattr(opponent, strongest)
-        setattr(opponent, strongest, 0)
-        return True, f"👽 **ABDUCTION!** {fighter.display_name} beams away {opponent.display_name}'s {strongest} — gone for the round!"
+        opponent.locked_stat = "VLT"
+        opponent.locked_stat_value = opponent.VLT
+        opponent.VLT = 0
+        return True, f"👽 **ABDUCTION!** {fighter.display_name} beams away {opponent.display_name}'s VLT — gone for the round!"
 
     elif name == "Antler Clash":
         debuff = 15
