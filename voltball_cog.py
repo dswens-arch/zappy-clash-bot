@@ -42,6 +42,27 @@ from voltball_position_fit import get_position_fit, rank_collection_for_position
 from database import get_supabase, get_wallet
 
 
+def _lineup_snapshot(team) -> dict:
+    """
+    Captures exactly what a team played this match -- formation, tempo,
+    and full roster with stats -- straight from the resolved Team
+    object. Used to populate voltball_matches.team_a_lineup/
+    team_b_lineup for the site's Results/recap page. Deliberately NOT
+    derived from voltball_lineups after the fact -- see the schema
+    comment on why (CPU teams never write a row there at all, and an
+    auto-filled no-lineup-penalty team played something different from
+    whatever they may have submitted).
+    """
+    return {
+        "formation": team.formation,
+        "tempo": team.tempo,
+        "assignments": {
+            pos: [{"asset_id": z.asset_id, "name": z.name, "VLT": z.VLT, "INS": z.INS, "SPK": z.SPK} for z in players]
+            for pos, players in team.assignments.items()
+        },
+    }
+
+
 class VoltballCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -525,6 +546,10 @@ class VoltballCog(commands.Cog):
                 "team_b_score": result["score_b"],
                 "winner_team_id": winner_id,
                 "log_text": result["log_text"],
+                "quarters": result["quarters"],
+                "log_lines": result["log"],
+                "team_a_lineup": _lineup_snapshot(team_a),
+                "team_b_lineup": _lineup_snapshot(team_b),
             }).execute()
 
             update_standings_after_match(
