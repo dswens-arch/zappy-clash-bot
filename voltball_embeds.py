@@ -52,7 +52,7 @@ def build_match_embed(result: dict, week: int, is_playoff: bool = False) -> disc
 
     highlights = [
         line.strip() for line in result["log"]
-        if any(marker in line for marker in ["⚡", "❄️", "🎭", "📈", "🛑", "🥊", "🦸", "📋", "🤕", "TIE"])
+        if any(marker in line for marker in ["⚡", "❄️", "🎭", "📈", "🛑", "🥊", "🦸", "📋", "🤕", "🐊", "TIE"])
     ]
     if highlights:
         # Cap length so one wild match doesn't blow past Discord's field limit
