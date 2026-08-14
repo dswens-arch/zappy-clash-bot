@@ -42,11 +42,19 @@ class LineupValidationError(Exception):
         return self.message
 
 
-async def get_wallet_zappies(wallet_address: str) -> list[dict]:
+async def get_wallet_zappies(wallet_address: str, season_id: str | None = None) -> list[dict]:
     """
     Returns roster-eligible Zappies (main collection only — not Heroes/collabs)
     with full VLT/INS/SPK stats attached. One indexer call (cached 12h inside
     algorand_lookup) plus local-table stat lookups per held Zappy.
+
+    season_id is optional — when given, overrides each Zappy's permanent
+    trait-derived stats with this season's ALLOCATED stats instead (see
+    voltball_season_stats.py). Falls back to permanent stats for any
+    asset_id not found in the allocation table -- shouldn't normally
+    happen (allocation covers the entire real collection at season
+    start), but a Zappy minted AFTER a season already started would have
+    no allocation row, and this shouldn't hard-fail a lineup over that.
     """
     wallet_data = await verify_wallet_owns_zappy(wallet_address)
     if wallet_data.get("error"):
@@ -58,13 +66,20 @@ async def get_wallet_zappies(wallet_address: str) -> list[dict]:
 
     full_results = await asyncio.gather(*(fetch_zappy_traits(z["asset_id"]) for z in zappy_entries))
 
+    season_stats = {}
+    if season_id:
+        from voltball_db import get_season_zappy_stats
+        season_stats = get_season_zappy_stats(season_id, asset_ids=[z["asset_id"] for z in zappy_entries])
+
     output = []
     for z in full_results:
         if z is None:
             continue  # shouldn't happen for held assets, but fetch_zappy_traits can return None
-        stats = z["stats"]
+        asset_id = z["asset_id"]
+        allocated = season_stats.get(asset_id)
+        stats = allocated if allocated else z["stats"]
         output.append({
-            "asset_id": z["asset_id"],
+            "asset_id": asset_id,
             "name": z["name"],
             "VLT": stats["VLT"],
             "INS": stats["INS"],
@@ -87,7 +102,7 @@ async def get_hero_ownership(wallet_address: str) -> list[dict]:
 
 
 async def validate_lineup(wallet_address: str, formation: str, position_map: dict,
-                           team_id: str | None = None, week_number: int | None = None) -> Team:
+                           team_id: str | None = None, week_number: int | None = None, season_id: str | None = None) -> Team:
     """
     Validates a proposed lineup against LIVE wallet holdings. Returns a
     built Team ready for resolve_match(), or raises LineupValidationError
@@ -100,6 +115,11 @@ async def validate_lineup(wallet_address: str, formation: str, position_map: dic
     this team). Optional rather than required because this function is
     also usable for pure holdings/shape validation without a specific
     team+week context in mind.
+
+    season_id is optional -- when given, roster stats reflect THIS
+    SEASON's allocated values (see voltball_season_stats.py) instead of
+    permanent trait-derived ones. Omitting it falls back to permanent
+    stats, same as before season allocation existed.
     """
     if formation not in FORMATIONS:
         raise LineupValidationError(f"'{formation}' isn't a valid formation. Choose OFFENSE, BALANCED, or DEFENSE.")
@@ -123,7 +143,7 @@ async def validate_lineup(wallet_address: str, formation: str, position_map: dic
                 f"{formation} formation requires {want} {pos}(s) — you assigned {actual_counts[pos]}."
             )
 
-    held = await get_wallet_zappies(wallet_address)
+    held = await get_wallet_zappies(wallet_address, season_id=season_id)
     held_by_id = {z["asset_id"]: z for z in held}
     missing = [aid for aid in position_map if aid not in held_by_id]
     if missing:
@@ -190,7 +210,7 @@ async def submit_lineup(guild_id: str, team_id: str, season_id: str, week_number
     return result.data[0]
 
 
-async def get_locked_lineup_team(lineup_row: dict, hero_type: str, wallet_address: str) -> Team:
+async def get_locked_lineup_team(lineup_row: dict, hero_type: str, wallet_address: str, season_id: str | None = None) -> Team:
     """
     Rebuilds a Team object from a stored lineup row plus a FRESH stat
     lookup — used by the weekly resolution job. Ownership was already
@@ -211,7 +231,7 @@ async def get_locked_lineup_team(lineup_row: dict, hero_type: str, wallet_addres
     that this isn't worth guessing at a resolution for right now.
     """
     assignments = lineup_row["assignments"]
-    held = await get_wallet_zappies(wallet_address)
+    held = await get_wallet_zappies(wallet_address, season_id=season_id)
     held_by_id = {z["asset_id"]: z for z in held}
 
     roster = []
@@ -233,7 +253,7 @@ async def get_locked_lineup_team(lineup_row: dict, hero_type: str, wallet_addres
 
 
 async def build_fallback_team(wallet_address: str, hero_type: str | None,
-                               team_id: str | None = None, week_number: int | None = None) -> Team | None:
+                               team_id: str | None = None, week_number: int | None = None, season_id: str | None = None) -> Team | None:
     """
     Auto-fields a team from CURRENT wallet holdings when a coach never
     submitted a lineup. Uses the first ROSTER_SIZE held Zappies (by
@@ -247,12 +267,16 @@ async def build_fallback_team(wallet_address: str, hero_type: str | None,
     never submits at all could have it auto-fielded anyway, which would
     be a real inconsistency, not just a missed nice-to-have.
 
+    season_id is optional -- when given, roster stats reflect this
+    season's allocated values instead of permanent trait-derived ones,
+    same as validate_lineup/get_locked_lineup_team.
+
     Returns None if the wallet doesn't hold at least ROSTER_SIZE
     non-injured Zappies right now — that's a genuine forfeit case
     (can't field even a weak team), which callers should handle
     separately from the penalty case.
     """
-    held = await get_wallet_zappies(wallet_address)
+    held = await get_wallet_zappies(wallet_address, season_id=season_id)
     if team_id is not None and week_number is not None:
         injured_ids = get_injured_asset_ids(team_id, week_number)
         held = [z for z in held if z["asset_id"] not in injured_ids]
@@ -279,13 +303,13 @@ async def build_fallback_team(wallet_address: str, hero_type: str | None,
     return team
 
 
-def build_cpu_team(hero_type: str | None = None, formation: str | None = None, tempo: float | None = None) -> Team:
+def build_cpu_team(hero_type: str | None = None, formation: str | None = None, tempo: float | None = None, season_id: str | None = None) -> Team:
     """
     Builds a CPU opponent's roster fresh from the REAL Zappy collection —
     no wallet needed. Used for CPU teams (voltball_teams.is_cpu = True),
     which exist specifically so someone can test solo without a second
     real wallet/Hero: register one real team, add a CPU team, and every
-    resolution the CPU side gets a brand-new random 7-Zappy roster in a
+    resolution the CPU side gets a brand-new random 8-Zappy roster in a
     randomly-chosen formation (unless formation is pinned), no lineup
     submission required.
 
@@ -293,6 +317,14 @@ def build_cpu_team(hero_type: str | None = None, formation: str | None = None, t
     same way formation is (unless pinned) — same reasoning as
     create_cpu_team()'s hero_type randomization: spreads test coverage
     across the whole dial rather than only ever exercising the midpoint.
+
+    season_id is optional -- when given, sampled Zappies use THIS
+    season's allocated stats instead of permanent trait-derived ones,
+    same as every other stat-reading path. Falls back to permanent
+    stats for any asset_id not found in the allocation (shouldn't
+    normally happen -- allocation covers the whole collection -- but a
+    CPU team is exactly the kind of thing that should degrade
+    gracefully rather than hard-fail over an edge case).
 
     NOT the same as build_fallback_team() — that's a real coach's own
     holdings scored with a penalty for skipping their lineup. This is a
@@ -310,11 +342,20 @@ def build_cpu_team(hero_type: str | None = None, formation: str | None = None, t
         chosen_tempo = TEMPO_MIN + random.randint(0, steps) * TEMPO_STEP
     sample_ids = random.sample(list(ZAPPY_COLLECTION.keys()), ROSTER_SIZE)
 
+    season_stats = {}
+    if season_id:
+        from voltball_db import get_season_zappy_stats
+        season_stats = get_season_zappy_stats(season_id, asset_ids=sample_ids)
+
     roster = []
     for aid in sample_ids:
         entry = ZAPPY_COLLECTION[aid]
-        traits = {k: entry[k] for k in ["background", "body", "earring", "eyes", "eyewear", "head", "mouth", "skin"]}
-        stats = calculate_stats(traits)
+        allocated = season_stats.get(aid)
+        if allocated:
+            stats = allocated
+        else:
+            traits = {k: entry[k] for k in ["background", "body", "earring", "eyes", "eyewear", "head", "mouth", "skin"]}
+            stats = calculate_stats(traits)
         roster.append(ZappyPlayer(asset_id=aid, name=entry["name"], VLT=stats["VLT"], INS=stats["INS"], SPK=stats["SPK"]))
 
     position_map = {}
