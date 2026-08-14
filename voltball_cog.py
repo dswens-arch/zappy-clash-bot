@@ -99,21 +99,10 @@ class VoltballCog(commands.Cog):
 
         team_ids = [t["id"] for t in teams]
         rows = save_schedule(season["id"], team_ids, season["week_count"])
-
-        # Season-wide stat allocation -- see voltball_season_stats.py for
-        # the full design. Runs once here, for the ENTIRE real collection
-        # (not just held/roster-eligible Zappies), same one-shot timing as
-        # the schedule itself. ~1,678 Zappies -- a real but bounded amount
-        # of work, acceptable to run synchronously here since this is a
-        # once-per-season operation, not a hot path.
-        allocations = allocate_season_stats()
-        save_season_zappy_stats(season["id"], allocations)
-
         db.table("voltball_seasons").update({"status": "active", "current_week": 1}).eq("id", season["id"]).execute()
 
         await interaction.followup.send(
-            f"🏈 Schedule locked in — {len(teams)} teams, {season['week_count']} weeks, {len(rows)} total matchups. "
-            f"Season stats allocated for all {len(allocations)} Zappies. Season is live.",
+            f"🏈 Schedule locked in — {len(teams)} teams, {season['week_count']} weeks, {len(rows)} total matchups. Season is live.",
             ephemeral=True,
         )
 
@@ -203,9 +192,19 @@ class VoltballCog(commands.Cog):
             return
 
         season = create_season(str(interaction.guild_id), name, week_count, is_test=is_test)
+
+        # Season-wide stat allocation -- see voltball_season_stats.py.
+        # Runs here, at CREATE time, not at season_start -- so coaches
+        # can see their real season-allocated stats the moment they
+        # register, and actually prepare before the season locks in,
+        # rather than only finding out once week 1 already starts.
+        allocations = allocate_season_stats()
+        save_season_zappy_stats(season["id"], allocations)
+
         test_note = " (marked as a **test season** — wipeable, not a permanent record)" if is_test else ""
         await interaction.followup.send(
-            f"🏈 Season **{name}** created{test_note}. Teams can now register on the site. "
+            f"🏈 Season **{name}** created{test_note}. Season stats allocated for all {len(allocations)} Zappies — "
+            f"teams can register on the site now and see their real numbers right away. "
             f"Run `/voltball_season_start` once everyone's in to lock the schedule and begin.",
             ephemeral=True,
         )
@@ -374,9 +373,10 @@ class VoltballCog(commands.Cog):
                 await interaction.followup.send("No linked wallet or registered team found — provide a `wallet_address`.", ephemeral=True)
                 return
 
-        # season stats only apply once a season has actually started (active/playoffs) --
-        # an "upcoming" season hasn't run allocation yet (that happens at /voltball_season_start).
-        season_id = season["id"] if season and season["status"] in ("active", "playoffs") else None
+        # season stats now get allocated at /voltball_season_create, so
+        # they exist (and should show) from 'upcoming' onward, not just
+        # once the season is active/playoffs.
+        season_id = season["id"] if season and season["status"] in ("upcoming", "active", "playoffs") else None
 
         try:
             held = await get_wallet_zappies(wallet_address, season_id=season_id)
