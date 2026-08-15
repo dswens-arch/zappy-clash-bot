@@ -419,13 +419,21 @@ def build_team(name: str, coach_hero_type: Optional[str], formation: str,
 
 
 def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
-                   events_denied: bool = False) -> dict:
+                   events_denied: bool = False, team_key: str = None) -> dict:
     """
     Computes one team's base Quarter Voltage against one opponent — formation
     math + random events only. Coach signature plays are layered on afterward
     in resolve_match, since several of them need cross-team information.
+
+    team_key ("a"/"b", optional): only used to tag the parallel `events` list
+    below with which side an event belongs to, for consumers that want
+    structured data (site/Discord recap) instead of parsing `log` strings.
+    Has zero effect on the score math — purely a labeling convenience.
     """
     log = []
+    events = []  # structured mirror of `log`, flavor-only (no `delta` — see
+                 # resolve_match's docstring note on why quarter-level events
+                 # don't get an isolable per-line point delta).
 
     consts = _tempo_event_constants(offense_team.tempo)
 
@@ -439,22 +447,32 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
 
     if events_denied:
         log.append(f"  🐊 **DEATH ROLL** — {defense_team.name}'s defense stuffs {offense_team.name} before the play even develops!")
+        events.append({"quarter": quarter_num, "kind": "denied", "icon": "🐊", "team": team_key,
+                        "text": f"{defense_team.name}'s defense stuffs {offense_team.name} before the play even develops.", "delta": None})
     else:
         # ── Striker events ──
         if random.random() < consts["STRIKER_LIGHTNING_CHANCE"]:
             striker_component *= (1 + consts["STRIKER_LIGHTNING_BONUS"])
             log.append(f"  ⚡ **LIGHTNING STRIKE** — {offense_team.name}'s {DISPLAY_NAME['Striker']}s break off a huge gain!")
+            events.append({"quarter": quarter_num, "kind": "lightning", "icon": "⚡", "team": team_key,
+                            "text": f"{offense_team.name}'s {DISPLAY_NAME['Striker']}s break off a huge gain.", "delta": None})
         elif random.random() < consts["STRIKER_COLDSTREAK_CHANCE"]:
             striker_component *= (1 - consts["STRIKER_COLDSTREAK_PENALTY"])
             log.append(f"  ❄️ **COLD STREAK** — {offense_team.name}'s {DISPLAY_NAME['Striker']}s get stuffed at the line this quarter.")
+            events.append({"quarter": quarter_num, "kind": "coldstreak", "icon": "❄️", "team": team_key,
+                            "text": f"{offense_team.name}'s {DISPLAY_NAME['Striker']}s get stuffed at the line.", "delta": None})
 
         # ── Mid events ──
         if random.random() < consts["MID_TRICKPLAY_CHANCE"]:
             mid_component *= 2.0
             log.append(f"  🎭 **TRICK PLAY** — {offense_team.name}'s {DISPLAY_NAME['Mid']}s catch the defense off guard for a huge gain!")
+            events.append({"quarter": quarter_num, "kind": "trickplay", "icon": "🎭", "team": team_key,
+                            "text": f"{offense_team.name}'s {DISPLAY_NAME['Mid']}s catch the defense off guard.", "delta": None})
         elif random.random() < consts["MID_MOMENTUM_CHANCE"]:
             offense_team.momentum_multiplier *= consts["MID_MOMENTUM_MULT"]
             log.append(f"  📈 **MOMENTUM SWING** — {offense_team.name} seizes the momentum and doesn't look back!")
+            events.append({"quarter": quarter_num, "kind": "momentum", "icon": "📈", "team": team_key,
+                            "text": f"{offense_team.name} seizes the momentum and doesn't look back.", "delta": None})
 
     base_offense = striker_component + mid_component
 
@@ -463,12 +481,16 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
     defense_reduction = 0.0 if shutdown else min(opp_guard_pool * DEFENSE_RATE, DEFENSE_CAP)
     if shutdown:
         log.append(f"  🛑 **SHUTDOWN** — {offense_team.name} blows right past {defense_team.name}'s defense, untouched!")
+        events.append({"quarter": quarter_num, "kind": "shutdown", "icon": "🛑", "team": team_key,
+                        "text": f"{offense_team.name} blows right past {defense_team.name}'s defense, untouched.", "delta": None})
 
     turnover_bonus = own_guard_pool * TURNOVER_RATE
     if not events_denied and random.random() < consts["GUARD_INTERCEPTION_CHANCE"]:
         extra = own_guard_pool * consts["GUARD_INTERCEPTION_RATE"]
         turnover_bonus += extra
         log.append(f"  🥊 **INTERCEPTION** — {offense_team.name}'s {DISPLAY_NAME['Guard']}s pick it off and take it to the house!")
+        events.append({"quarter": quarter_num, "kind": "interception", "icon": "🥊", "team": team_key,
+                        "text": f"{offense_team.name}'s {DISPLAY_NAME['Guard']}s pick it off and take it to the house.", "delta": None})
 
     quarter_voltage = (base_offense * (1 - defense_reduction) + turnover_bonus) * offense_team.momentum_multiplier
     quarter_voltage *= consts["EV_MULT"]
@@ -477,10 +499,13 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
     if offense_team.auto_lineup_penalty:
         quarter_voltage *= NO_LINEUP_PENALTY
         log.append(f"  📋 {offense_team.name} never submitted a game plan this week — playing disorganized.")
+        events.append({"quarter": quarter_num, "kind": "penalty", "icon": "📋", "team": team_key,
+                        "text": f"{offense_team.name} never submitted a game plan this week — playing disorganized.", "delta": None})
 
     return {
         "voltage": quarter_voltage,
         "log": log,
+        "events": events,
         "striker_component": striker_component,
         "mid_component": mid_component,
         "turnover_bonus": turnover_bonus,
@@ -602,8 +627,36 @@ def roll_injuries(team: "Team") -> list["ZappyPlayer"]:
 
 
 def resolve_match(team_a: Team, team_b: Team) -> dict:
-    """Resolves a full 4-quarter Voltball match between two teams."""
+    """
+    Resolves a full 4-quarter Voltball match between two teams.
+
+    Alongside the existing Discord-flavored `log`/`log_text`, this also
+    returns a structured `events` list for consumers (site playback,
+    future recap generation) that need machine-readable data instead of
+    parsing markdown strings.
+
+    IMPORTANT — why most events carry `delta: None`:
+    Voltage is NOT football scoring. A quarter's score is one continuous
+    formula (pools -> defense reduction -> turnover bonus -> momentum ->
+    tempo EV -> QB multiplier), and most in-quarter events (Lightning
+    Strike, Trick Play, Interception, etc.) scale a COMPONENT of that
+    formula, not a standalone point total — the same event is worth a
+    different number of points depending on the rest of the formula that
+    quarter. There is no honest single number to attach to "Lightning
+    Strike" the way a touchdown is always worth 7. Giving these a fake
+    delta would just reintroduce the exact bug this was built to fix
+    (text and score visibly disagreeing) one level down.
+
+    Coach SIGNATURE plays are the one category that genuinely IS a clean,
+    isolated add/subtract on top of the formula (see HERO_SIGNATURES) —
+    those get a real `delta` and are the natural "big play" moment for a
+    UI to spotlight, same role a scoring play fills in real football.
+
+    The actual score reveal happens once per quarter, matching the
+    formula's real granularity — see `quarter_totals` in the return dict.
+    """
     log = [f"🏟️ **VOLTBALL MATCH** — {team_a.name} ({team_a.formation}) vs. {team_b.name} ({team_b.formation})", ""]
+    events = []
 
     score_a, score_b = 0.0, 0.0
     quarter_breakdown = []
@@ -615,8 +668,10 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         a_denies_b = team_a.signature and team_a.signature["type"] == "deny_chance" and random.random() < team_a.signature["chance"]
         b_denies_a = team_b.signature and team_b.signature["type"] == "deny_chance" and random.random() < team_b.signature["chance"]
 
-        result_a = _base_quarter(q, team_a, team_b, events_denied=b_denies_a)
-        result_b = _base_quarter(q, team_b, team_a, events_denied=a_denies_b)
+        result_a = _base_quarter(q, team_a, team_b, events_denied=b_denies_a, team_key="a")
+        result_b = _base_quarter(q, team_b, team_a, events_denied=a_denies_b, team_key="b")
+        events.extend(result_a["events"])
+        events.extend(result_b["events"])
 
         sig_delta_a, sig_log_a, target_a = _apply_signature(q, team_a, team_b, result_a, result_b, score_a, score_b)
         sig_delta_b, sig_log_b, target_b = _apply_signature(q, team_b, team_a, result_b, result_a, score_b, score_a)
@@ -629,16 +684,35 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         if target_b == "opponent":
             voltage_a = max(0.0, voltage_a - sig_delta_b)
 
+        # Signature plays are the one event type with a clean, isolated
+        # delta — tag them so the UI can spotlight them like a scoring play.
+        if sig_delta_a and target_a == "self":
+            events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "a",
+                            "text": f"{team_a.name} — {team_a.signature['label']}.", "delta": round(sig_delta_a, 1)})
+        elif sig_delta_a and target_a == "opponent":
+            events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "b",
+                            "text": f"{team_a.name}'s {team_a.signature['label']} wears down {team_b.name}.", "delta": round(-sig_delta_a, 1)})
+        if sig_delta_b and target_b == "self":
+            events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "b",
+                            "text": f"{team_b.name} — {team_b.signature['label']}.", "delta": round(sig_delta_b, 1)})
+        elif sig_delta_b and target_b == "opponent":
+            events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "a",
+                            "text": f"{team_b.name}'s {team_b.signature['label']} wears down {team_a.name}.", "delta": round(-sig_delta_b, 1)})
+
         # Death Roll's capitalize-on-lockdown bonus, applied directly since it
         # depends on the deny roll made earlier this quarter, not on _apply_signature.
         if a_denies_b and team_a.signature and team_a.signature["type"] == "deny_chance":
             bonus = team_a.signature["bonus"]
             voltage_a += bonus
             log.append(f"  🦸 **{team_a.signature['label']}** — {team_a.name} forces a takeaway and cashes in a bonus drive (+{bonus}).")
+            events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "a",
+                            "text": f"{team_a.name} forces a takeaway and cashes in a bonus drive.", "delta": round(bonus, 1)})
         if b_denies_a and team_b.signature and team_b.signature["type"] == "deny_chance":
             bonus = team_b.signature["bonus"]
             voltage_b += bonus
             log.append(f"  🦸 **{team_b.signature['label']}** — {team_b.name} forces a takeaway and cashes in a bonus drive (+{bonus}).")
+            events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "b",
+                            "text": f"{team_b.name} forces a takeaway and cashes in a bonus drive.", "delta": round(bonus, 1)})
 
         voltage_a, voltage_b = round(voltage_a, 1), round(voltage_b, 1)
         score_a += voltage_a
@@ -665,8 +739,22 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
             else:
                 score_b = round(score_b + bonus, 1)
             log.append(f"  🦸 **{team.signature['label']}** — {team.name} refuses to let Quarter {worst_idx+1} sink them (+{bonus}).")
+            events.append({"quarter": worst_idx + 1, "kind": "signature", "icon": "🦸",
+                            "team": "a" if team is team_a else "b",
+                            "text": f"{team.name} refuses to let Quarter {worst_idx+1} sink them.", "delta": round(bonus, 1)})
 
     score_a, score_b = round(score_a, 1), round(score_b, 1)
+
+    # Cumulative running score at the end of each quarter, computed AFTER the
+    # Nine Lives correction above so it can never drift from the real final
+    # score — this is what a UI should reveal once per quarter, not a
+    # per-event bump (see docstring).
+    quarter_totals = []
+    cum_a, cum_b = 0.0, 0.0
+    for qb in quarter_breakdown:
+        cum_a += qb["team_a_voltage"]
+        cum_b += qb["team_b_voltage"]
+        quarter_totals.append({"quarter": qb["quarter"], "team_a_total": round(cum_a, 1), "team_b_total": round(cum_b, 1)})
 
     # ── Winner (tie -> weighted fate roll, same spirit as battle_engine) ──
     if score_a > score_b:
@@ -682,6 +770,8 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         roll_b = random.randint(1, max(1, total_b))
         log.append(f"⚡ **TIE — Fate decides!** {team_a.name} rolls {roll_a}, {team_b.name} rolls {roll_b}.")
         winner, loser = (team_a, team_b) if roll_a >= roll_b else (team_b, team_a)
+        events.append({"quarter": None, "kind": "tie_breaker", "icon": "⚡", "team": None,
+                        "text": f"Tied — fate decides. {team_a.name} rolls {roll_a}, {team_b.name} rolls {roll_b}.", "delta": None})
 
     log.append(f"🏆 **FINAL: {team_a.name} {score_a} — {score_b} {team_b.name}**")
     log.append(f"🏆 **{winner.name} wins!**")
@@ -690,8 +780,12 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
     injured_b = roll_injuries(team_b)
     for z in injured_a:
         log.append(f"  🤕 **INJURY** — {team_a.name}'s {z.name} goes down, out next week.")
+        events.append({"quarter": None, "kind": "injury", "icon": "🤕", "team": "a",
+                        "text": f"{team_a.name}'s {z.name} goes down, out next week.", "delta": None})
     for z in injured_b:
         log.append(f"  🤕 **INJURY** — {team_b.name}'s {z.name} goes down, out next week.")
+        events.append({"quarter": None, "kind": "injury", "icon": "🤕", "team": "b",
+                        "text": f"{team_b.name}'s {z.name} goes down, out next week.", "delta": None})
 
     return {
         "team_a": team_a.name,
@@ -701,6 +795,8 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         "winner": winner.name,
         "loser": loser.name,
         "quarters": quarter_breakdown,
+        "quarter_totals": quarter_totals,
+        "events": events,
         "injured_a": [{"asset_id": z.asset_id, "name": z.name} for z in injured_a],
         "injured_b": [{"asset_id": z.asset_id, "name": z.name} for z in injured_b],
         "log": log,
