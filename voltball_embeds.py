@@ -24,6 +24,50 @@ def _tempo_display(lineup: dict) -> str:
     return f"{t:g} ({tempo_label(t)})"
 
 
+def build_kickoff_embed(team_a_name: str, team_b_name: str, week: int, is_playoff: bool, link: str) -> discord.Embed:
+    """
+    Posted immediately at resolution time — the match is already fully
+    computed (see resolve_match), this just announces when the site's
+    playback will start and gives the link. The 5-minute wait is real:
+    the site gates on the same `playback_starts_at` timestamp stored on
+    the match row, so everyone who clicks in from here sees the same
+    beats land at the same time, not a private replay per viewer.
+    """
+    title_prefix = "🏆 PLAYOFF MATCH" if is_playoff else "🏈 Voltball"
+    embed = discord.Embed(
+        title=f"{title_prefix} — Week {week}",
+        description=(
+            f"**{team_a_name}** vs **{team_b_name}** kicks off in 5 minutes.\n\n"
+            f"[▶ Watch Live]({link})"
+        ),
+        color=discord.Color.gold() if is_playoff else discord.Color.blue(),
+    )
+    return embed
+
+
+def build_recap_post_embed(recap: dict, team_a_name: str, team_b_name: str,
+                             team_a_score: float, team_b_score: float,
+                             week: int, is_playoff: bool, replay_link: str) -> discord.Embed:
+    """
+    Posted once the site's live playback would have finished (see the
+    `post_ready_recaps` loop in voltball_cog.py) -- the "after the game"
+    post, distinct from the "kicks off in 5" one above. Uses the same
+    `recap` dict build_recap() computed at resolution time, so this text
+    can never disagree with what the site's own recap panel shows.
+    """
+    title_prefix = "🏆 PLAYOFF FINAL" if is_playoff else "🏈 Final"
+    embed = discord.Embed(
+        title=f"{title_prefix} — Week {week}",
+        description=(
+            f"**{team_a_name} {team_a_score} — {team_b_score} {team_b_name}**\n\n"
+            f"{recap['recap_text']}\n\n"
+            f"[⏮ Watch Replay]({replay_link})"
+        ),
+        color=discord.Color.gold() if is_playoff else discord.Color.blue(),
+    )
+    return embed
+
+
 def build_match_embed(result: dict, week: int, is_playoff: bool = False) -> discord.Embed:
     """
     Broadcast-style embed for a single resolved match: final score,
