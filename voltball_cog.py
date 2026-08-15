@@ -27,6 +27,7 @@ from discord.ext import commands, tasks
 from datetime import datetime, timezone
 
 from voltball_engine import resolve_match, HERO_SIGNATURES
+from voltball_recap import build_recap
 from voltball_lineup_service import (
     get_wallet_zappies, get_locked_lineup_team, build_fallback_team, build_cpu_team, LineupValidationError,
 )
@@ -560,6 +561,7 @@ class VoltballCog(commands.Cog):
             team_b.name = team_b_row["team_name"]
 
             result = resolve_match(team_a, team_b)
+            recap = build_recap(result, team_a, team_b)
 
             winner_id = team_a_row["id"] if result["winner"] == team_a.name else team_b_row["id"]
             loser_id = team_b_row["id"] if winner_id == team_a_row["id"] else team_a_row["id"]
@@ -581,6 +583,7 @@ class VoltballCog(commands.Cog):
                 "log_lines": result["log"],
                 "events": result["events"],
                 "quarter_totals": result["quarter_totals"],
+                "recap": recap,
                 "team_a_lineup": _lineup_snapshot(team_a),
                 "team_b_lineup": _lineup_snapshot(team_b),
             }).execute()
