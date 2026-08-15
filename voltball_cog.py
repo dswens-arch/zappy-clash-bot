@@ -579,6 +579,8 @@ class VoltballCog(commands.Cog):
                 "log_text": result["log_text"],
                 "quarters": result["quarters"],
                 "log_lines": result["log"],
+                "events": result["events"],
+                "quarter_totals": result["quarter_totals"],
                 "team_a_lineup": _lineup_snapshot(team_a),
                 "team_b_lineup": _lineup_snapshot(team_b),
             }).execute()
