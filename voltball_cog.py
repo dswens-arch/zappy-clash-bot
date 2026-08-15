@@ -24,7 +24,7 @@ config for which day + channel to post to — those depend on decisions
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from voltball_engine import resolve_match, HERO_SIGNATURES
 from voltball_recap import build_recap
@@ -40,9 +40,54 @@ from voltball_db import (
 from voltball_schedule import save_schedule, save_playoff_round, get_week_pairings, get_bye_team
 from voltball_season_stats import allocate_season_stats
 from voltball_rarity import get_rarity_tier
-from voltball_embeds import build_match_embed, build_standings_embed, build_champion_embed, build_lineups_embed, build_matchup_preview_embed
+from voltball_embeds import (
+    build_match_embed, build_standings_embed, build_champion_embed, build_lineups_embed,
+    build_matchup_preview_embed, build_kickoff_embed, build_recap_post_embed,
+)
 from voltball_position_fit import get_position_fit, rank_collection_for_position, label_for_held_zappy
 from database import get_supabase, get_wallet
+
+# Public site root -- used to build the "Watch Live" / "Watch Replay" links
+# posted to Discord. Update here if the GitHub Pages URL ever changes.
+SITE_BASE_URL = "https://dswens-arch.github.io/voltball-site/"
+
+# How long after resolution the "kicks off in 5 minutes" post promises --
+# this is a REAL wait, not decorative: it's the same value written to
+# playback_starts_at on the match row, which the site's live playback
+# gates on so every viewer sees the same beats at the same time.
+PLAYBACK_KICKOFF_DELAY_SECONDS = 300
+
+# Mirrors results.html's step() pacing constants exactly, so the delayed
+# recap post lands roughly when the site's playback actually finishes.
+# If you tune the pacing in results.html, update these too -- same
+# "must stay in sync" pattern as the highlight-marker lists elsewhere in
+# this codebase (see the module docstring gotchas). A few seconds of
+# drift either way is harmless; this only decides when to post, it
+# never affects what gets posted.
+_QHEADER_SECONDS = 0.7
+_QEND_SECONDS = 0.6
+_EVENT_SECONDS = 3.8
+_SIGNATURE_EVENT_SECONDS = 5.2
+_PLAYBACK_BUFFER_SECONDS = 8.0  # safety margin so the recap never beats the last event onscreen
+
+
+def estimate_playback_seconds(result: dict) -> float:
+    """How long the site's live playback will take to run through this
+    match's events at 1x speed -- see the pacing-constants comment above."""
+    events = result.get("events", [])
+    total = 0.0
+    for q in range(1, 5):
+        total += _QHEADER_SECONDS
+        for e in events:
+            if e.get("quarter") == q:
+                total += _SIGNATURE_EVENT_SECONDS if e.get("kind") == "signature" else _EVENT_SECONDS
+        total += _QEND_SECONDS
+    post_events = [e for e in events if e.get("quarter") is None]
+    if post_events:
+        total += _QHEADER_SECONDS
+        for e in post_events:
+            total += _SIGNATURE_EVENT_SECONDS if e.get("kind") == "signature" else _EVENT_SECONDS
+    return total + _PLAYBACK_BUFFER_SECONDS
 
 
 def _lineup_snapshot(team) -> dict:
@@ -70,9 +115,11 @@ class VoltballCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.weekly_resolution.start()
+        self.post_ready_recaps.start()
 
     def cog_unload(self):
         self.weekly_resolution.cancel()
+        self.post_ready_recaps.cancel()
 
     # ─────────────────────────────────────────────
     # /voltball_season_start (admin) — generates the full schedule ONCE
@@ -569,7 +616,11 @@ class VoltballCog(commands.Cog):
             if is_championship_week:
                 champion_name = team_a_row["team_name"] if winner_id == team_a_row["id"] else team_b_row["team_name"]
 
-            db.table("voltball_matches").insert({
+            now = datetime.now(timezone.utc)
+            playback_starts_at = now + timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS)
+            recap_post_at = playback_starts_at + timedelta(seconds=estimate_playback_seconds(result))
+
+            match_row = db.table("voltball_matches").insert({
                 "season_id": season["id"],
                 "week_number": week,
                 "is_playoff": is_playoff_week,
@@ -586,7 +637,10 @@ class VoltballCog(commands.Cog):
                 "recap": recap,
                 "team_a_lineup": _lineup_snapshot(team_a),
                 "team_b_lineup": _lineup_snapshot(team_b),
-            }).execute()
+                "playback_starts_at": playback_starts_at.isoformat(),
+                "recap_post_at": recap_post_at.isoformat(),
+                "recap_posted_at": None,
+            }).execute().data[0]
 
             update_standings_after_match(
                 season["id"], winner_id, loser_id,
@@ -597,8 +651,23 @@ class VoltballCog(commands.Cog):
             record_injuries(team_b_row["id"], season["id"], result["injured_b"], week)
 
             if channel:
-                embed = build_match_embed(result, week, is_playoff=is_playoff_week)
-                await channel.send(embed=embed)
+                # Reusable link — site resolves "current" to whichever
+                # resolved-but-not-yet-recapped match has the soonest
+                # playback_starts_at (see results.html). Assumes one game
+                # airs at a time; if two ever resolve in the same run,
+                # both kickoff posts point at the earlier one until it's
+                # recapped, then "current" rolls to the next. Fine for a
+                # one-at-a-time cadence, worth revisiting if that changes.
+                # The final "Watch Replay" post below still links the
+                # specific match_id, since it needs to keep working once
+                # this game is no longer "current".
+                link = f"{SITE_BASE_URL}results.html?live=current"
+                kickoff_embed = build_kickoff_embed(team_a_row["team_name"], team_b_row["team_name"], week, is_playoff_week, link)
+                await channel.send(embed=kickoff_embed)
+                # The full recap (score, highlights, "watch replay" link)
+                # posts later, once playback would actually be done -- see
+                # post_ready_recaps. Posting it now would spoil the "live"
+                # framing the kickoff message just promised.
 
         bye_team_id = get_bye_team(season["id"], week)
         if bye_team_id:
@@ -669,6 +738,71 @@ class VoltballCog(commands.Cog):
 
     @weekly_resolution.before_loop
     async def before_weekly_resolution(self):
+        await self.bot.wait_until_ready()
+
+    # ─────────────────────────────────────────────
+    # Delayed "after the game" recap post.
+    #
+    # Deliberately NOT an asyncio.sleep() timer started right after
+    # resolution -- that approach loses the scheduled post silently on
+    # any bot restart/redeploy during the wait (Railway redeploys happen;
+    # this bot restarts more often than a 5-minute-plus wait can safely
+    # assume it won't). Instead, timing lives in the DB
+    # (recap_post_at, set once at resolution time) and this loop polls
+    # for matches whose time has come -- same durable-state pattern as
+    # the duplicate-match guard in _resolve_season_week, and it survives
+    # a restart at any point without double-posting or dropping a post.
+    # ─────────────────────────────────────────────
+    @tasks.loop(seconds=20)
+    async def post_ready_recaps(self):
+        db = get_supabase()
+        now_iso = datetime.now(timezone.utc).isoformat()
+
+        due = (
+            db.table("voltball_matches")
+            .select("*")
+            .is_("recap_posted_at", "null")
+            .not_.is_("recap_post_at", "null")
+            .lte("recap_post_at", now_iso)
+            .execute()
+            .data
+        ) or []
+
+        for match in due:
+            try:
+                season_row = db.table("voltball_seasons").select("guild_id").eq("id", match["season_id"]).execute().data
+                if not season_row:
+                    continue
+                config = get_guild_config(season_row[0]["guild_id"])
+                if not config or not config.get("announcement_channel_id"):
+                    continue
+                channel = self.bot.get_channel(int(config["announcement_channel_id"]))
+                if not channel:
+                    continue
+
+                team_a_row = get_team_by_id(match["team_a_id"])
+                team_b_row = get_team_by_id(match["team_b_id"])
+                if not team_a_row or not team_b_row:
+                    continue
+
+                link = f"{SITE_BASE_URL}results.html?live={match['id']}"
+                recap = match.get("recap") or {"recap_text": "Full recap unavailable for this match."}
+                embed = build_recap_post_embed(
+                    recap, team_a_row["team_name"], team_b_row["team_name"],
+                    match["team_a_score"], match["team_b_score"],
+                    match["week_number"], match["is_playoff"], link,
+                )
+                await channel.send(embed=embed)
+            except Exception as e:
+                # One bad match shouldn't block the rest of the due batch,
+                # and shouldn't get silently retried forever either -- log
+                # and mark it posted so it doesn't wedge the loop.
+                print(f"[voltball] Failed to post delayed recap for match {match.get('id')}: {e}")
+            finally:
+                db.table("voltball_matches").update({"recap_posted_at": now_iso}).eq("id", match["id"]).execute()
+
+    @post_ready_recaps.before_loop
+    async def before_post_ready_recaps(self):
         await self.bot.wait_until_ready()
 
 
