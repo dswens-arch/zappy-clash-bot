@@ -85,7 +85,11 @@ class MarketSyncCog(commands.Cog):
             print(f"[market_sync] Failed to fetch Downbad listings: {e}")
             return
 
-        listings = data.get("listings", [])
+        # The authenticated /v1/ endpoint returns a bare list, unlike the
+        # old unauthenticated /public/v1/ one which wrapped it in
+        # {"listings": [...]}. Handle both shapes defensively rather than
+        # assuming this stays a bare list forever.
+        listings = data if isinstance(data, list) else data.get("listings", [])
         rows = [
             {
                 "asset_id": l["asset_id"],
