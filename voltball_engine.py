@@ -16,19 +16,30 @@ FORMAT
     Formation (and which specific Zappies fill which slot) can change every
     match — it is NOT locked to the roster long-term.
 
-  - Positions drive pooled team stats:
-        Striker -> VLT pool (offense)
-        Mid     -> SPK pool (playmaking / crit)
-        Guard   -> INS pool (defense + turnovers)
+  - Positions drive pooled team stats — each position has a PRIMARY stat
+    (70% weight share) and a SECONDARY stat (30% weight share), rotating
+    VLT -> SPK -> INS -> VLT so every stat matters somewhere as a primary
+    and somewhere else as a secondary assist:
+        Striker -> VLT pool (primary, offense) + SPK pool (secondary)
+        Mid     -> SPK pool (primary, playmaking/crit) + INS pool (secondary)
+        Guard   -> INS pool (primary, defense + turnovers) + VLT pool (secondary)
+    Secondary weights are MEAN-NORMALIZED against the real collection's
+    actual VLT/INS/SPK averages (verified: mean VLT 34.95, INS 49.03,
+    SPK 54.61 -- a real ~20pt skew), not a flat 70/30 of the old weight
+    number. A flat split was checked and would have silently inflated
+    Striker output ~17% because SPK's mean is so much higher than VLT's.
 
   - A match is 4 QUARTERS. Each quarter, mostly-deterministic scoring:
 
-        striker_component = Striker VLT pool * OFFENSE_WEIGHT
-        mid_component     = Mid SPK pool     * PLAYMAKING_WEIGHT
+        striker_component = Striker VLT pool * OFFENSE_WEIGHT_PRIMARY
+                             + Striker SPK pool * OFFENSE_WEIGHT_SECONDARY
+        mid_component     = Mid SPK pool * PLAYMAKING_WEIGHT_PRIMARY
+                             + Mid INS pool * PLAYMAKING_WEIGHT_SECONDARY
         base_offense      = striker_component + mid_component
 
         defense_reduction = min(Opponent Guard INS pool * DEFENSE_RATE, DEFENSE_CAP)
-        turnover_bonus    = Own Guard INS pool * TURNOVER_RATE
+        turnover_bonus    = Own Guard INS pool * TURNOVER_RATE_PRIMARY
+                             + Own Guard VLT pool * TURNOVER_RATE_SECONDARY
 
         quarter_voltage   = base_offense * (1 - defense_reduction) + turnover_bonus
 
@@ -66,11 +77,14 @@ from typing import Optional
 # (see voltball_tune.py) to keep all 3 formations
 # within ~1-3% of 50/50 against each other.
 # ─────────────────────────────────────────────
-OFFENSE_WEIGHT     = 0.17   # Striker VLT pool -> base offense
-PLAYMAKING_WEIGHT  = 0.11   # Mid SPK pool -> base offense
-DEFENSE_RATE       = 0.0005 # per opponent Guard INS point -> % reduction (0.05%/pt)
-DEFENSE_CAP        = 0.25   # defense can never fully zero out an opponent
-TURNOVER_RATE       = 0.10  # own Guard INS pool -> bonus Voltage (steal-to-score)
+OFFENSE_WEIGHT_PRIMARY    = 0.119   # Striker VLT pool -> base offense (primary, 70% value share)
+OFFENSE_WEIGHT_SECONDARY  = 0.0326  # Striker SPK pool -> base offense (secondary, 30% value share, mean-normalized vs real collection VLT/SPK averages)
+PLAYMAKING_WEIGHT_PRIMARY   = 0.077   # Mid SPK pool -> base offense (primary, 70% value share)
+PLAYMAKING_WEIGHT_SECONDARY = 0.0368  # Mid INS pool -> base offense (secondary, 30% value share, mean-normalized)
+DEFENSE_RATE       = 0.0005 # per opponent Guard INS point -> % reduction (0.05%/pt) -- unchanged, cross-team mechanic, not part of this change
+DEFENSE_CAP        = 0.25   # defense can never fully zero out an opponent -- unchanged
+TURNOVER_RATE_PRIMARY   = 0.070   # own Guard INS pool -> bonus Voltage (primary, 70% value share)
+TURNOVER_RATE_SECONDARY = 0.0421  # own Guard VLT pool -> bonus Voltage (secondary, 30% value share, mean-normalized -- largest correction of the three since VLT's mean is furthest from INS's)
 # Retuned against REAL Zappy stat distributions (VLT avg 34.9, INS avg 49.0,
 # SPK avg 54.5 across the actual 1585-Zappy collection), not the synthetic
 # ~65/52/52-per-stat rosters used in the original tuning pass. That first
@@ -206,13 +220,17 @@ INJURY_CHANCE_BASE = 0.04
 # are 1.0, so _tempo_event_constants("STANDARD") reproduces the exact
 # original constants).
 #
-# Deliberately does NOT touch OFFENSE_WEIGHT / PLAYMAKING_WEIGHT /
-# DEFENSE_RATE / DEFENSE_CAP / TURNOVER_RATE. Those are the tuned core
-# formula (see voltball_tune.py's real-collection-data grid search) —
-# changing them here would silently re-break the balance work that
-# already took a full retune pass once (the 97%-Defense-wins incident).
+# Deliberately does NOT touch OFFENSE_WEIGHT_PRIMARY/SECONDARY,
+# PLAYMAKING_WEIGHT_PRIMARY/SECONDARY, DEFENSE_RATE, DEFENSE_CAP, or
+# TURNOVER_RATE_PRIMARY/SECONDARY. Those are the tuned core formula (see
+# voltball_tune.py's real-collection-data grid search, and the
+# mean-normalized secondary-stat calibration that added the _PRIMARY/
+# _SECONDARY split) — changing them here would silently re-break balance
+# work that already took two separate calibration passes (the
+# 97%-Defense-wins incident, then the two-stat-per-position addition).
 # turnover_bonus specifically is also excluded on separate grounds: it's
-# a deterministic per-quarter value (own_guard_pool * TURNOVER_RATE),
+# a deterministic per-quarter value (own_guard_pool * TURNOVER_RATE_PRIMARY
+# + own_guard_secondary_pool * TURNOVER_RATE_SECONDARY),
 # not a random swing — scaling it by tempo would just be a disguised
 # flat buff/debuff, not real variance. Tempo only touches the RANDOM
 # EVENT layer: the chance and magnitude of Lightning/Cold Streak/Trick
@@ -442,8 +460,16 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
     own_guard_pool = offense_team.pool("Guard", "INS")
     opp_guard_pool = defense_team.pool("Guard", "INS")
 
-    striker_component = striker_pool * OFFENSE_WEIGHT
-    mid_component     = mid_pool * PLAYMAKING_WEIGHT
+    # Secondary stats -- rotation is VLT -> SPK -> INS -> VLT, so every
+    # stat is a primary somewhere and a secondary assist somewhere else.
+    striker_secondary_pool = offense_team.pool("Striker", "SPK")
+    mid_secondary_pool     = offense_team.pool("Mid", "INS")
+    own_guard_secondary_pool = offense_team.pool("Guard", "VLT")
+
+    striker_component = (striker_pool * OFFENSE_WEIGHT_PRIMARY
+                          + striker_secondary_pool * OFFENSE_WEIGHT_SECONDARY)
+    mid_component     = (mid_pool * PLAYMAKING_WEIGHT_PRIMARY
+                          + mid_secondary_pool * PLAYMAKING_WEIGHT_SECONDARY)
 
     if events_denied:
         log.append(f"  🐊 **DEATH ROLL** — {defense_team.name}'s defense stuffs {offense_team.name} before the play even develops!")
@@ -484,7 +510,8 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
         events.append({"quarter": quarter_num, "kind": "shutdown", "icon": "🛑", "team": team_key,
                         "text": f"{offense_team.name} blows right past {defense_team.name}'s defense, untouched.", "delta": None})
 
-    turnover_bonus = own_guard_pool * TURNOVER_RATE
+    turnover_bonus = (own_guard_pool * TURNOVER_RATE_PRIMARY
+                       + own_guard_secondary_pool * TURNOVER_RATE_SECONDARY)
     if not events_denied and random.random() < consts["GUARD_INTERCEPTION_CHANCE"]:
         extra = own_guard_pool * consts["GUARD_INTERCEPTION_RATE"]
         turnover_bonus += extra
