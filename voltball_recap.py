@@ -214,7 +214,15 @@ def build_recap(result: dict, team_a, team_b) -> dict:
     winner_highlight = highlight_a if winner_key == "a" else highlight_b
     winner_phrase = _highlight_phrase(winner_name, winner_highlight)
 
-    tp_phrase = tp["text"].rstrip(".") if tp else None
+    # tp['text'] is always a complete sentence (it ends in a period, whether
+    # it came from a signature event's text or the quarter-swing fallback
+    # phrasing below). Earlier versions tried to strip the period and
+    # splice phrases like "flipped the match" onto the end of it as if it
+    # were a fragment -- that reads as a run-on since it's a full clause,
+    # not a fragment (e.g. "oyster refuses to let Quarter 1 sink them
+    # flipped the match."). Presenting it as its own sentence avoids that
+    # regardless of what the underlying event text happens to say.
+    turning_point_sentence = f"The turning point: {tp['text']} " if tp else ""
 
     if changes == 0:
         tone = "wire_to_wire"
@@ -227,14 +235,14 @@ def build_recap(result: dict, team_a, team_b) -> dict:
         tone = "back_and_forth"
         text = (
             f"The lead changed hands {changes} times before {winner_name} pulled it out by {margin}. "
-            + (f"{tp_phrase} was the moment that decided it. " if tp_phrase else "")
+            + turning_point_sentence
             + f"Final: {winner_name} {max(score_a,score_b)}, {loser_name} {min(score_a,score_b)}."
         )
     else:
         tone = "comeback"
         text = (
             f"{winner_name} trailed for part of the game before turning it around. "
-            + (f"{tp_phrase} flipped the match. " if tp_phrase else "")
+            + turning_point_sentence
             + f"Final: {winner_name} {max(score_a,score_b)}, {loser_name} {min(score_a,score_b)}, a {margin}-Voltage margin."
         )
 
