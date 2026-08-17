@@ -718,6 +718,26 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         score_a += voltage_a
         score_b += voltage_b
 
+        # Guaranteed per-quarter commentary line. Random flavor events
+        # (Lightning Strike, Trick Play, etc.) don't fire every quarter --
+        # a quarter can legitimately have zero of them, which otherwise
+        # leaves nothing but a bare score tally with no explanation of why
+        # it landed there. This is always derived from the real voltage_a/
+        # voltage_b just computed above, purely qualitative (no invented
+        # number), so it can never disagree with the score the way a fake
+        # per-event delta would.
+        margin = abs(voltage_a - voltage_b)
+        bigger = max(voltage_a, voltage_b, 0.01)
+        ratio = margin / bigger
+        if ratio < 0.12:
+            summary_team, summary_text = None, f"An even quarter — {team_a.name} and {team_b.name} trade blows."
+        else:
+            leader, leader_key = (team_a, "a") if voltage_a >= voltage_b else (team_b, "b")
+            summary_team = leader_key
+            summary_text = f"{leader.name} dominates the quarter." if ratio >= 0.35 else f"{leader.name} edges the quarter."
+        events.append({"quarter": q, "kind": "quarter_summary", "icon": "📊", "team": summary_team,
+                        "text": summary_text, "delta": None})
+
         log.extend(result_a["log"])
         log.extend(sig_log_a)
         log.extend(result_b["log"])
@@ -741,7 +761,7 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
             log.append(f"  🦸 **{team.signature['label']}** — {team.name} refuses to let Quarter {worst_idx+1} sink them (+{bonus}).")
             events.append({"quarter": worst_idx + 1, "kind": "signature", "icon": "🦸",
                             "team": "a" if team is team_a else "b",
-                            "text": f"{team.name} refuses to let Quarter {worst_idx+1} sink them.", "delta": round(bonus, 1)})
+                            "text": f"{team.name}'s {team.signature['label']} refuses to let Quarter {worst_idx+1} sink them.", "delta": round(bonus, 1)})
 
     score_a, score_b = round(score_a, 1), round(score_b, 1)
 
