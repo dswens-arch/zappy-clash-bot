@@ -38,6 +38,7 @@ from spark_jobs  import SparkJobsCog
 from spark_office import SparkOfficeCog
 from voltball_cog import VoltballCog
 from voltball_db import set_guild_config
+from market_sync import MarketSyncCog
 
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
@@ -3819,6 +3820,10 @@ async def on_ready():
 
     await bot.add_cog(VoltballCog(bot))
     print("⚡ Voltball cog loaded")
+
+    await bot.add_cog(MarketSyncCog(bot))
+    print("⚡ Market sync cog loaded")
+
     # Pre-set the announcement channel for this guild so /voltball_config
     # doesn't need to be run manually before testing. Safe to call every
     # startup — it's an upsert, so re-running it just confirms the same
