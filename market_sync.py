@@ -53,7 +53,7 @@ DOWNBAD_LISTINGS_URL = "https://market-api.downbad.farm/v1/collection/zappies-re
 # see the module docstring on "poll on the slowest interval your product
 # can live with." Adjust if that turns out to feel too slow/fast in
 # practice; nothing else depends on this specific number.
-SYNC_INTERVAL_MINUTES = 20
+SYNC_INTERVAL_MINUTES = 60
 
 
 class MarketSyncCog(commands.Cog):
