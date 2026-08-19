@@ -8,7 +8,7 @@ ZAPPY_COLLECTION = {
     2588544715: {
         'name': 'Zappy #309',
         'unit_name': 'ZAPP0309',
-        'image_url': 'https://ipfs.io/ipfs/bafkreien2bftvtkb42tgobeipdstqg565bc5kr7hikiwlnpdd7ixrxffo4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588544715.jpg',
         'background': 'Yellow',
         'body': 'Crocodile Suit',
         'earring': 'Pepper',
@@ -21,7 +21,7 @@ ZAPPY_COLLECTION = {
     2588552401: {
         'name': 'Zappy #975',
         'unit_name': 'ZAPP0975',
-        'image_url': 'https://ipfs.io/ipfs/bafkreickt5so4gw3faxbdlu7oymba3iidnncbtwjuxdwj2elsldh4xce7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588552401.jpg',
         'background': 'Green',
         'body': 'Polo Overalls',
         'earring': 'Left Ring',
@@ -34,7 +34,7 @@ ZAPPY_COLLECTION = {
     2588552591: {
         'name': 'Zappy #339',
         'unit_name': 'ZAPP0339',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiao7cog34fwr7xmdr6ph64uk62txrexnrddnregbeauogo4nxhrda',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588552591.jpg',
         'background': 'Chroma',
         'body': 'Crocodile Suit',
         'earring': 'Number One',
@@ -47,7 +47,7 @@ ZAPPY_COLLECTION = {
     2588552676: {
         'name': 'Zappy #431',
         'unit_name': 'ZAPP0431',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid2qncp6sxaabcbflqlmqc2ablbmkovow4vwr7bztoastun2vh5iy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588552676.jpg',
         'background': 'Green',
         'body': 'Hoodie',
         'earring': 'Knife',
@@ -60,7 +60,7 @@ ZAPPY_COLLECTION = {
     2588552788: {
         'name': 'Zappy #981',
         'unit_name': 'ZAPP0981',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigej4gl7zasghgudwv76pf7e5abseirfmigfs2xpwft234l5qf6je',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588552788.jpg',
         'background': 'Blue',
         'body': 'School Outfit',
         'earring': 'Rainbow',
@@ -73,7 +73,7 @@ ZAPPY_COLLECTION = {
     2588553006: {
         'name': 'Zappy #1783',
         'unit_name': 'ZAPP1783',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic6q3qhrmj52bojblv6dby76ugfodikst5ldasnln3644ye65nrdq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588553006.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Left Ring',
@@ -86,7 +86,7 @@ ZAPPY_COLLECTION = {
     2588553516: {
         'name': 'Zappy #1889',
         'unit_name': 'ZAPP1889',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihtlqbwj22co3znkoaabgcis4qrin5aywgujadg7slvawgmqed2qu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588553516.jpg',
         'background': 'Red',
         'body': 'Scarf',
         'earring': 'Hashtag',
@@ -99,7 +99,7 @@ ZAPPY_COLLECTION = {
     2588553757: {
         'name': 'Zappy #375',
         'unit_name': 'ZAPP0375',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifl6nbzttxyhfadpxumbxccxbjlj4afz4ec2awjecypglgettn4dm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588553757.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Pepper',
@@ -112,7 +112,7 @@ ZAPPY_COLLECTION = {
     2588553928: {
         'name': 'Zappy #514',
         'unit_name': 'ZAPP0514',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiexfq2htu7irvw6blo37re526vxiijst6lyywhr3sf7xdkuchaiam',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588553928.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Sad',
@@ -125,7 +125,7 @@ ZAPPY_COLLECTION = {
     2588610746: {
         'name': 'Zappy #1265',
         'unit_name': 'ZAPP1265',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic5unst24tyflqkxw4q2ql4mzfrv6bmwhkbeofll6waiu6hchznza',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588610746.jpg',
         'background': 'Yellow',
         'body': 'Armband',
         'earring': 'Skull',
@@ -138,7 +138,7 @@ ZAPPY_COLLECTION = {
     2588620969: {
         'name': 'Zappy #412',
         'unit_name': 'ZAPP0412',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicj3e3qx7wibfhpxyo2dujob3dsuttngb2uyaqtab57ehjxigaege',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588620969.jpg',
         'background': 'Purple',
         'body': 'Armor',
         'earring': 'Star',
@@ -151,7 +151,7 @@ ZAPPY_COLLECTION = {
     2588621886: {
         'name': 'Zappy #2079',
         'unit_name': 'ZAPP2079',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicsfj4qnrwlag47z7ncwfe7wkcm7r2hkr3x4j5vwhgjcuptsh6qcy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588621886.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Lightning',
@@ -164,7 +164,7 @@ ZAPPY_COLLECTION = {
     2588622080: {
         'name': 'Zappy #1817',
         'unit_name': 'ZAPP1817',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieqg5uy7svrh2j467cdrhemno2a7n5c6kjg57di4us3534g37afsi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588622080.jpg',
         'background': 'Blue',
         'body': 'Naked',
         'earring': 'Daisy',
@@ -177,7 +177,7 @@ ZAPPY_COLLECTION = {
     2588622269: {
         'name': 'Zappy #2017',
         'unit_name': 'ZAPP2017',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigp5ii6tidgpk6zoye22bj2wjbzppg6fhre7d4xsryqhpxlf4os7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588622269.jpg',
         'background': 'Red',
         'body': 'Clouds',
         'earring': 'Party Popper',
@@ -190,7 +190,7 @@ ZAPPY_COLLECTION = {
     2588622490: {
         'name': 'Zappy #2222',
         'unit_name': 'ZAPP2222',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiasd6vccx3xk66ll6jy2abqfsn7shh7qexpclaznxn3swbdxnwzly',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588622490.jpg',
         'background': 'Orange',
         'body': 'Tracksuit Top',
         'earring': 'Ghost',
@@ -203,7 +203,7 @@ ZAPPY_COLLECTION = {
     2588622776: {
         'name': 'Zappy #940',
         'unit_name': 'ZAPP0940',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieptmctkhv2iu5lcb5lv4chcb2ooqignousttseoc5knfieek656a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588622776.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Happy',
@@ -216,7 +216,7 @@ ZAPPY_COLLECTION = {
     2588623384: {
         'name': 'Zappy #1974',
         'unit_name': 'ZAPP1974',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiblbcgrhmha3auprjrkjbp5ciis4svdxlzcmc4tlk7earuuqlaidm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588623384.jpg',
         'background': 'Blue',
         'body': 'Bowling Shirt',
         'earring': 'Party Popper',
@@ -229,7 +229,7 @@ ZAPPY_COLLECTION = {
     2588623607: {
         'name': 'Zappy #360',
         'unit_name': 'ZAPP0360',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiajuj4kvaxaykmy3v5q7u6j5d5ydalgnz5dfgefmf7ar7bi4fr7va',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588623607.jpg',
         'background': 'Yellow',
         'body': 'Daisy Shirt',
         'earring': 'Daisy',
@@ -242,7 +242,7 @@ ZAPPY_COLLECTION = {
     2588623678: {
         'name': 'Zappy #1730',
         'unit_name': 'ZAPP1730',
-        'image_url': 'https://ipfs.io/ipfs/bafkreico422orgejsmqn2dqo5chqdozi5o4boc6ernpiajcis2kzgfp7je',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588623678.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Party Popper',
@@ -255,7 +255,7 @@ ZAPPY_COLLECTION = {
     2588623987: {
         'name': 'Zappy #728',
         'unit_name': 'ZAPP0728',
-        'image_url': 'https://ipfs.io/ipfs/bafkreign344yebowovkcidxesfmwd6q62njyjpxa5vmysjsev6irayedn4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588623987.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Number One',
@@ -268,7 +268,7 @@ ZAPPY_COLLECTION = {
     2588624155: {
         'name': 'Zappy #1522',
         'unit_name': 'ZAPP1522',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicseqbj3jbicfbyztugkmrdsbk6ckglt77ehuijqjmzgmpkqdatou',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588624155.jpg',
         'background': 'Chroma',
         'body': 'Basic Jacket',
         'earring': 'Sad',
@@ -281,7 +281,7 @@ ZAPPY_COLLECTION = {
     2588624281: {
         'name': 'Zappy #365',
         'unit_name': 'ZAPP0365',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigrjxiev4ez6ey7tfn5cdpyfscczo2ovplc5liijrf5u3r6dhhm4a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588624281.jpg',
         'background': 'Green',
         'body': 'Ribbon Tie',
         'earring': 'Sad',
@@ -294,7 +294,7 @@ ZAPPY_COLLECTION = {
     2588624435: {
         'name': 'Zappy #785',
         'unit_name': 'ZAPP0785',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiacssuzzdbn4sodfgq6n4fdx3r6x3iq2mmkxzutvdblwddksasvya',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588624435.jpg',
         'background': 'Chroma',
         'body': 'Naked',
         'earring': 'Party Popper',
@@ -307,7 +307,7 @@ ZAPPY_COLLECTION = {
     2588624735: {
         'name': 'Zappy #1390',
         'unit_name': 'ZAPP1390',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih5u4smxvzrzeamec4idb2altajfvogu2x7zjcyxlr2eic6bnkqf4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588624735.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Pepper',
@@ -320,7 +320,7 @@ ZAPPY_COLLECTION = {
     2588624910: {
         'name': 'Zappy #1533',
         'unit_name': 'ZAPP1533',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiabuaeemei6ru3rtv7jhch7z2cnqhk6luycsj55cksmrfllj7xbf4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588624910.jpg',
         'background': 'Chroma',
         'body': 'Hoodie',
         'earring': 'Happy',
@@ -333,7 +333,7 @@ ZAPPY_COLLECTION = {
     2588625984: {
         'name': 'Zappy #315',
         'unit_name': 'ZAPP0315',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicdfzfmabmfmdifnuyi7ssiiiyllfh7e7g4wxt7bre7dz4po5xgmq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588625984.jpg',
         'background': 'Purple',
         'body': 'Basic Jacket',
         'earring': 'None',
@@ -346,7 +346,7 @@ ZAPPY_COLLECTION = {
     2588626489: {
         'name': 'Zappy #528',
         'unit_name': 'ZAPP0528',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiatik4cwrp5b3dqfvtjf5pi5r5t72vr5c5qssqko5dpmwk3xg7i2u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588626489.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'Carton Cup',
@@ -359,7 +359,7 @@ ZAPPY_COLLECTION = {
     2588626946: {
         'name': 'Zappy #1443',
         'unit_name': 'ZAPP1443',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihab5kxvkfd6af5ljqjl4ufbzkccoxlhi647eem3y55mxgr6rllzu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588626946.jpg',
         'background': 'Green',
         'body': 'Overalls',
         'earring': 'Skull',
@@ -372,7 +372,7 @@ ZAPPY_COLLECTION = {
     2588627171: {
         'name': 'Zappy #1744',
         'unit_name': 'ZAPP1744',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic3o5yxofxa7yybu6vrnayqs3xel64sacatyip5t7eneuhjg657me',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588627171.jpg',
         'background': 'Blue',
         'body': 'Kimono',
         'earring': 'Sad',
@@ -385,7 +385,7 @@ ZAPPY_COLLECTION = {
     2588627325: {
         'name': 'Zappy #1539',
         'unit_name': 'ZAPP1539',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig4nq64d7htunamsnsevbjiapj2jyoe6byen33fbc2gvb5mk6pawe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588627325.jpg',
         'background': 'Red',
         'body': 'Rabbit Suit',
         'earring': 'Left Helix',
@@ -398,7 +398,7 @@ ZAPPY_COLLECTION = {
     2588627601: {
         'name': 'Zappy #1963',
         'unit_name': 'ZAPP1963',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiavdonnnc46ohspgsvk4kmc2ukkzei3uqxz743e5czahy6bbabdci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588627601.jpg',
         'background': 'Yellow',
         'body': 'Ribbon Tie',
         'earring': 'Bananas',
@@ -411,7 +411,7 @@ ZAPPY_COLLECTION = {
     2588627892: {
         'name': 'Zappy #985',
         'unit_name': 'ZAPP0985',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifh3aqdgi3xvmkwasswwgaqfzlehtzhqdzlofgznxfmjnrargqb44',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588627892.jpg',
         'background': 'Blue',
         'body': 'Armor',
         'earring': 'Pepper',
@@ -424,7 +424,7 @@ ZAPPY_COLLECTION = {
     2588628267: {
         'name': 'Zappy #1711',
         'unit_name': 'ZAPP1711',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiag4ptytbozp4b3igiq4qpcdmjx54tgm4ppgorpdzo7eq4anbohza',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588628267.jpg',
         'background': 'Yellow',
         'body': 'Polo Shirt',
         'earring': 'Diamond',
@@ -437,7 +437,7 @@ ZAPPY_COLLECTION = {
     2588628679: {
         'name': 'Zappy #1532',
         'unit_name': 'ZAPP1532',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgqganb6kcrl2fy4r5r7hwrh3wetfwyjm43sd6ayy4cwdl3azoym',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588628679.jpg',
         'background': 'Yellow',
         'body': 'Hooded Jacket',
         'earring': 'Serious',
@@ -450,7 +450,7 @@ ZAPPY_COLLECTION = {
     2588629051: {
         'name': 'Zappy #318',
         'unit_name': 'ZAPP0318',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib5jfxgwsigbmrdsqjaozxeqpno6rudmt22o4hrozlvvywq3imp7a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588629051.jpg',
         'background': 'Green',
         'body': 'School Outfit',
         'earring': 'Happy',
@@ -463,7 +463,7 @@ ZAPPY_COLLECTION = {
     2588629202: {
         'name': 'Zappy #842',
         'unit_name': 'ZAPP0842',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia5fyjkoppavduxi3knvhxyf3ewcar3fczsk763xhcpafcm4zu5fy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588629202.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Zappies',
@@ -476,7 +476,7 @@ ZAPPY_COLLECTION = {
     2588629416: {
         'name': 'Zappy #529',
         'unit_name': 'ZAPP0529',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibwunjjt3opu67naoyhcywfhsqahqa5c6yqgxsq4at3gdgdmvorli',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588629416.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Right Ring',
@@ -489,7 +489,7 @@ ZAPPY_COLLECTION = {
     2588629916: {
         'name': 'Zappy #1269',
         'unit_name': 'ZAPP1269',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicwr2dhlkxoqetem3gltbao6kcbwi5bxgpbms74c42el6f2et27ru',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588629916.jpg',
         'background': 'Purple',
         'body': 'Space Suit',
         'earring': 'None',
@@ -502,7 +502,7 @@ ZAPPY_COLLECTION = {
     2588630056: {
         'name': 'Zappy #1523',
         'unit_name': 'ZAPP1523',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie7iwjnys2bmcjgg4rfjd35ywmxl5w57lrlipphcwcjm4badbquhm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588630056.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Zappies',
@@ -515,7 +515,7 @@ ZAPPY_COLLECTION = {
     2588630504: {
         'name': 'Zappy #1072',
         'unit_name': 'ZAPP1072',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicv5uw5mi7we6ssdzfkms25zsyoh54rxgj2gzuq3lwvraeub6dyte',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588630504.jpg',
         'background': 'Purple',
         'body': 'Kimono',
         'earring': 'None',
@@ -528,7 +528,7 @@ ZAPPY_COLLECTION = {
     2588630727: {
         'name': 'Zappy #2144',
         'unit_name': 'ZAPP2144',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihic4yipzzccrfvgjor47sxmn2lw5ccm4yey56jnenhvtxwskj6vu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588630727.jpg',
         'background': 'Orange',
         'body': 'Striped Sweater',
         'earring': 'Lightning',
@@ -541,7 +541,7 @@ ZAPPY_COLLECTION = {
     2588630896: {
         'name': 'Zappy #1229',
         'unit_name': 'ZAPP1229',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkbg6ogrn2ewl3unb6mgyapsxe7mo23qd7byr2z3qzwhrhinj6ym',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588630896.jpg',
         'background': 'Orange',
         'body': 'Choker',
         'earring': 'Right Ring',
@@ -554,7 +554,7 @@ ZAPPY_COLLECTION = {
     2588631179: {
         'name': 'Zappy #2074',
         'unit_name': 'ZAPP2074',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiau3s6lawqpmohx3zqnhxofzcpnzifg67ryuzaculsspbztpqndbq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588631179.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Twin Rings',
@@ -567,7 +567,7 @@ ZAPPY_COLLECTION = {
     2588631391: {
         'name': 'Zappy #1092',
         'unit_name': 'ZAPP1092',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiamjxxjxctz6kace3hovmpnb3vub6by6d6fd3u7g64r5fofzhbd3m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588631391.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Left Ring',
@@ -580,7 +580,7 @@ ZAPPY_COLLECTION = {
     2588631541: {
         'name': 'Zappy #381',
         'unit_name': 'ZAPP0381',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifn2adkxiaz4yjhjgdygkoevqaqfie3whvnpingyev66ppogou74e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588631541.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Skull',
@@ -593,7 +593,7 @@ ZAPPY_COLLECTION = {
     2588631806: {
         'name': 'Zappy #1695',
         'unit_name': 'ZAPP1695',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicyi2agsxsiixjyu7fhjcfdgrnr33n4lyc5zm4ans4w56ads7ac4q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588631806.jpg',
         'background': 'Orange',
         'body': 'Basic Jacket',
         'earring': 'Serious',
@@ -606,7 +606,7 @@ ZAPPY_COLLECTION = {
     2588632265: {
         'name': 'Zappy #564',
         'unit_name': 'ZAPP0564',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiaasbipwahyukxceeoumw6oyhlnnxph6wmyrv7hhgkzxsd4efwioe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588632265.jpg',
         'background': 'Chroma',
         'body': 'Tracksuit Top',
         'earring': 'Zappies',
@@ -619,7 +619,7 @@ ZAPPY_COLLECTION = {
     2588632499: {
         'name': 'Zappy #853',
         'unit_name': 'ZAPP0853',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidpobaev6ei7hjk3ygrho4n6d4l3osrkrmkyuk4ehqw5qsf23sz3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588632499.jpg',
         'background': 'Green',
         'body': 'Scarf',
         'earring': 'Skull',
@@ -632,7 +632,7 @@ ZAPPY_COLLECTION = {
     2588632712: {
         'name': 'Zappy #1653',
         'unit_name': 'ZAPP1653',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkqhqpax43omirzdudguk3c7z655yhtx5svo7afqy5paxow2kt34',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588632712.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'Daisy',
@@ -645,7 +645,7 @@ ZAPPY_COLLECTION = {
     2588632835: {
         'name': 'Zappy #1537',
         'unit_name': 'ZAPP1537',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnbxcn2ymydbe5n7tvdprvm66ioltnnfkeapzojzzwfw3fqhrdje',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588632835.jpg',
         'background': 'Green',
         'body': 'Fur Coat',
         'earring': 'Knife',
@@ -658,7 +658,7 @@ ZAPPY_COLLECTION = {
     2588633262: {
         'name': 'Zappy #371',
         'unit_name': 'ZAPP0371',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif5z52mr37yp6ubfq6wmfjrvbqeaexzwz4rrhlbhwlp4ihla7sxce',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588633262.jpg',
         'background': 'Green',
         'body': 'Kimono',
         'earring': 'Party Popper',
@@ -671,7 +671,7 @@ ZAPPY_COLLECTION = {
     2588633472: {
         'name': 'Zappy #1862',
         'unit_name': 'ZAPP1862',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihak6icmjnfydpbvtt22gs26mdtj2bvintjx6upz2hedg23lfcbum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588633472.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'Left Helix',
@@ -684,7 +684,7 @@ ZAPPY_COLLECTION = {
     2588633873: {
         'name': 'Zappy #1753',
         'unit_name': 'ZAPP1753',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidq4kgmge4xw7hbss5cs4es4vnvyw4jtliztkspsg3fd7vnev2age',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588633873.jpg',
         'background': 'Purple',
         'body': 'Suit',
         'earring': 'Right Helix',
@@ -697,7 +697,7 @@ ZAPPY_COLLECTION = {
     2588634225: {
         'name': 'Zappy #1914',
         'unit_name': 'ZAPP1914',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihxme7eajnf6nwzgbvaire2w27euluotxblwcetvh7le2atmnaseu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588634225.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Zappies',
@@ -710,7 +710,7 @@ ZAPPY_COLLECTION = {
     2588634887: {
         'name': 'Zappy #1962',
         'unit_name': 'ZAPP1962',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidduo53ocvfbkapddvziaa5efkefsk7gnwggv4bm5msipqnwf4g54',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588634887.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Serious',
@@ -723,7 +723,7 @@ ZAPPY_COLLECTION = {
     2588636010: {
         'name': 'Zappy #347',
         'unit_name': 'ZAPP0347',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicofmq5eatzyljfkxaykss67rmbyqt5hezvgpnb2hkuw6mgh6ugai',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588636010.jpg',
         'background': 'Chroma',
         'body': 'Wool Collar Jacket',
         'earring': 'Pepper',
@@ -736,7 +736,7 @@ ZAPPY_COLLECTION = {
     2588636573: {
         'name': 'Zappy #1398',
         'unit_name': 'ZAPP1398',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibxlcqhxnlcij7b2djgyimbrd3prvdztjbzq2kcrnjkcevvb5jkcm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588636573.jpg',
         'background': 'Green',
         'body': 'Dino Suit',
         'earring': 'Sunrise',
@@ -749,7 +749,7 @@ ZAPPY_COLLECTION = {
     2588636955: {
         'name': 'Zappy #1890',
         'unit_name': 'ZAPP1890',
-        'image_url': 'https://ipfs.io/ipfs/bafybeihr6xxaxcmrcelfqylkxiusftmw6tuavuabwus5fl4l7nttsih5ni',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588636955.jpg',
         'background': 'Yellow',
         'body': 'Choker',
         'earring': 'Party Popper',
@@ -762,7 +762,7 @@ ZAPPY_COLLECTION = {
     2588637270: {
         'name': 'Zappy #843',
         'unit_name': 'ZAPP0843',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia7eflpedwao72ztc2vmykskkb5kyvwrbp4uuqovqclhhyrdodt74',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588637270.jpg',
         'background': 'Orange',
         'body': 'Rabbit Suit',
         'earring': 'Daisy',
@@ -775,7 +775,7 @@ ZAPPY_COLLECTION = {
     2588637409: {
         'name': 'Zappy #313',
         'unit_name': 'ZAPP0313',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiej4zpxub57zatsu73eapqg2uejta6tc7skp34h6cmrjxgz7tnws4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588637409.jpg',
         'background': 'Red',
         'body': 'Muscle Suit',
         'earring': 'Right Helix',
@@ -788,7 +788,7 @@ ZAPPY_COLLECTION = {
     2588637851: {
         'name': 'Zappy #874',
         'unit_name': 'ZAPP0874',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidid7b7foz66b5fyppjxbqrvilg5ds7uwrfx7o3wo62hdgdvg65z4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588637851.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Twin Rings',
@@ -801,7 +801,7 @@ ZAPPY_COLLECTION = {
     2588638752: {
         'name': 'Zappy #979',
         'unit_name': 'ZAPP0979',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaeaksinuewhe6y6jwepaiko7pjv4ezccpnppempyr6metobnkrvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588638752.jpg',
         'background': 'Purple',
         'body': 'Warning Tape',
         'earring': 'Pyramid',
@@ -814,7 +814,7 @@ ZAPPY_COLLECTION = {
     2588639641: {
         'name': 'Zappy #1774',
         'unit_name': 'ZAPP1774',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiedte52t2neyjeaofrdf3r5jtpreobhfsca5zhbklst2oipi4olva',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588639641.jpg',
         'background': 'Red',
         'body': 'Suit',
         'earring': 'Diamond',
@@ -827,7 +827,7 @@ ZAPPY_COLLECTION = {
     2588640906: {
         'name': 'Zappy #439',
         'unit_name': 'ZAPP0439',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidomdzzxfqbqfaiotzzjdwme24hj5ia46buty3kt6oicpfpyyv6w4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588640906.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'Sunrise',
@@ -840,7 +840,7 @@ ZAPPY_COLLECTION = {
     2588641845: {
         'name': 'Zappy #1524',
         'unit_name': 'ZAPP1524',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie63xwo633et2kiyl67v77any62xd76s6nlosfxesu6n4va6o7apy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588641845.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Lightning',
@@ -853,7 +853,7 @@ ZAPPY_COLLECTION = {
     2588643092: {
         'name': 'Zappy #839',
         'unit_name': 'ZAPP0839',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiccnufkojml5pjlxgzbfc3qlhc5ivhtnqgzmmbnmxaqydecegzqq4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588643092.jpg',
         'background': 'Purple',
         'body': 'Striped Sweater',
         'earring': 'Knife',
@@ -866,7 +866,7 @@ ZAPPY_COLLECTION = {
     2588644390: {
         'name': 'Zappy #1735',
         'unit_name': 'ZAPP1735',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiffzsxuquhlzjj36sz224ofrw7bgz4myjmzrutbxruy3e7hipdysi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588644390.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Left Helix',
@@ -879,7 +879,7 @@ ZAPPY_COLLECTION = {
     2588644931: {
         'name': 'Zappy #520',
         'unit_name': 'ZAPP0520',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib7jlgdks6hbun6fiynh5cfn4fzsxg2lqlu5om2sqqstukyfuszm4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588644931.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'Left Ring',
@@ -892,7 +892,7 @@ ZAPPY_COLLECTION = {
     2588645135: {
         'name': 'Zappy #1434',
         'unit_name': 'ZAPP1434',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigh5bojyjegkaeaet5lx5dj43s6kaaqvqh2sr7bi56dzm3vadxw7e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588645135.jpg',
         'background': 'Green',
         'body': 'Hoodie',
         'earring': 'Rainbow',
@@ -905,7 +905,7 @@ ZAPPY_COLLECTION = {
     2588645365: {
         'name': 'Zappy #1250',
         'unit_name': 'ZAPP1250',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieexr4rmo2kw6nj2bwfxugft4dq2nyoothgvka5to34dhfpyp2td4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588645365.jpg',
         'background': 'Red',
         'body': 'School Outfit',
         'earring': 'Lightning',
@@ -918,7 +918,7 @@ ZAPPY_COLLECTION = {
     2588645734: {
         'name': 'Zappy #422',
         'unit_name': 'ZAPP0422',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigv3xnunr2uda5nn7o6v5lhmkcvdswiyp3pmlarsczext5lnavatq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588645734.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Right Helix',
@@ -931,7 +931,7 @@ ZAPPY_COLLECTION = {
     2588645882: {
         'name': 'Zappy #525',
         'unit_name': 'ZAPP0525',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidodgkxmmquq7robjowospunm2d4vvojtvknp7uu5gfirjh4ou66q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588645882.jpg',
         'background': 'Green',
         'body': 'Hoodie',
         'earring': 'Right Helix',
@@ -944,7 +944,7 @@ ZAPPY_COLLECTION = {
     2588646148: {
         'name': 'Zappy #733',
         'unit_name': 'ZAPP0733',
-        'image_url': 'https://ipfs.io/ipfs/bafybeictbjew5suaxdlpxrp44zu7ru7d2risn6jrjprkandpnvboowqcw4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588646148.jpg',
         'background': 'Chroma',
         'body': 'Bear Suit',
         'earring': 'Serious',
@@ -957,7 +957,7 @@ ZAPPY_COLLECTION = {
     2588646548: {
         'name': 'Zappy #1953',
         'unit_name': 'ZAPP1953',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicbqodor6yhn2miim6vcoysqreuvqfjiuekpxk4abbbyo7ebrjdmu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588646548.jpg',
         'background': 'Purple',
         'body': 'Dino Suit',
         'earring': 'Pepper',
@@ -970,7 +970,7 @@ ZAPPY_COLLECTION = {
     2588646821: {
         'name': 'Zappy #2221',
         'unit_name': 'ZAPP2221',
-        'image_url': 'https://ipfs.io/ipfs/bafybeignftbsdao44c2bagbwthulz43cjkvihpcn6yljorxifomgj4va6a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588646821.jpg',
         'background': 'Chroma',
         'body': 'Basic Jacket',
         'earring': 'Strawberry',
@@ -983,7 +983,7 @@ ZAPPY_COLLECTION = {
     2588647246: {
         'name': 'Zappy #1154',
         'unit_name': 'ZAPP1154',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid4fjmdhys5uflwbxaglc2wxkaklt6fnuuvx6tzqt32ww4arpiiea',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588647246.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Hashtag',
@@ -996,7 +996,7 @@ ZAPPY_COLLECTION = {
     2588647423: {
         'name': 'Zappy #1157',
         'unit_name': 'ZAPP1157',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigvosnqmicm5vakg5fznqsarxscotahsnbxqn2yrz76f4zzvfhuny',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588647423.jpg',
         'background': 'Blue',
         'body': 'Tracksuit Top',
         'earring': 'Ghost',
@@ -1009,7 +1009,7 @@ ZAPPY_COLLECTION = {
     2588648130: {
         'name': 'Zappy #1538',
         'unit_name': 'ZAPP1538',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifbnw67hd7o7p5rlpf6fudn5jqtlfkchzi3ak7vvdgaqmxomhazcy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588648130.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Daisy',
@@ -1022,7 +1022,7 @@ ZAPPY_COLLECTION = {
     2588648706: {
         'name': 'Zappy #2007',
         'unit_name': 'ZAPP2007',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihwqphjjgksdsrs655x6tdm2edfcy4kwbnxunbtcoudjbmk6jss4i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588648706.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Number One',
@@ -1035,7 +1035,7 @@ ZAPPY_COLLECTION = {
     2588648855: {
         'name': 'Zappy #977',
         'unit_name': 'ZAPP0977',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihqiga5ecvh3wmschngurhhrcjiov7a6hxdbzgc3zg3f47cobrhbu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588648855.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Ghost',
@@ -1048,7 +1048,7 @@ ZAPPY_COLLECTION = {
     2588649583: {
         'name': 'Zappy #1078',
         'unit_name': 'ZAPP1078',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifo6yn35o27vj3t72d34zwlfxbjck2qv6kzp5yb53yvegybow6lum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588649583.jpg',
         'background': 'Blue',
         'body': 'Rabbit Suit',
         'earring': 'Ghost',
@@ -1061,7 +1061,7 @@ ZAPPY_COLLECTION = {
     2588650499: {
         'name': 'Zappy #809',
         'unit_name': 'ZAPP0809',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifp62jjikbmhiv3oltw3g4cxynyu4haxtt3pvzqriijgog4vfft4m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588650499.jpg',
         'background': 'Blue',
         'body': 'Leather Vest',
         'earring': 'Left Ring',
@@ -1074,7 +1074,7 @@ ZAPPY_COLLECTION = {
     2588650706: {
         'name': 'Zappy #965',
         'unit_name': 'ZAPP0965',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiax5y6s4smmcjjzijrgbflmkqvn2x72es77otea6i3z6ur2x37ebe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588650706.jpg',
         'background': 'Green',
         'body': 'Oversize Sweater',
         'earring': 'Twin Rings',
@@ -1087,7 +1087,7 @@ ZAPPY_COLLECTION = {
     2588651716: {
         'name': 'Zappy #805',
         'unit_name': 'ZAPP0805',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidrqiwaqbpwfavqcd7ljoc2jxsqamid5tmaixi5kclxpnjvbscl6m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588651716.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Skull',
@@ -1100,7 +1100,7 @@ ZAPPY_COLLECTION = {
     2588653654: {
         'name': 'Zappy #1508',
         'unit_name': 'ZAPP1508',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieszson6x367bmth5zq54ul4zrz7hyhlyur3siw5t7j7bhvlq4oya',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588653654.jpg',
         'background': 'Orange',
         'body': 'Polo Overalls',
         'earring': 'Sunrise',
@@ -1113,7 +1113,7 @@ ZAPPY_COLLECTION = {
     2588654224: {
         'name': 'Zappy #1960',
         'unit_name': 'ZAPP1960',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidhomqqgdnlxen7pi6oxby7sviykiqu6mljcsk47y3l7qyc3c6wcm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588654224.jpg',
         'background': 'Yellow',
         'body': 'Lifesaver',
         'earring': 'Zappies',
@@ -1126,7 +1126,7 @@ ZAPPY_COLLECTION = {
     2588656431: {
         'name': 'Zappy #510',
         'unit_name': 'ZAPP0510',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih4bg2dkyiiafkyzkddz4ja6c3e2cl7q2wnrjo4gq5mn6wvjqgwfi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588656431.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Diamond',
@@ -1139,7 +1139,7 @@ ZAPPY_COLLECTION = {
     2588656655: {
         'name': 'Zappy #372',
         'unit_name': 'ZAPP0372',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiar7pkniazftzcvreqzvj3ih3k5rkkk4ww2nhptrhuv4myf5dfftu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588656655.jpg',
         'background': 'Yellow',
         'body': 'Trench Coat',
         'earring': 'Skull',
@@ -1152,7 +1152,7 @@ ZAPPY_COLLECTION = {
     2588656972: {
         'name': 'Zappy #1081',
         'unit_name': 'ZAPP1081',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibtwitc7tbskohba27ahacxqsdq5wze7kltblr6lk47wycv46atwy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588656972.jpg',
         'background': 'Orange',
         'body': 'Striped Shirt',
         'earring': 'Ghost',
@@ -1165,7 +1165,7 @@ ZAPPY_COLLECTION = {
     2588657434: {
         'name': 'Zappy #2095',
         'unit_name': 'ZAPP2095',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidjv4mnkwsvpjgnyoeyp2gqyfmlrwxyydsdaw27vsv7wd7pgfcanq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588657434.jpg',
         'background': 'Orange',
         'body': 'Fur Coat',
         'earring': 'Happy',
@@ -1178,7 +1178,7 @@ ZAPPY_COLLECTION = {
     2588657778: {
         'name': 'Zappy #1495',
         'unit_name': 'ZAPP1495',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidy6yryck76g5ylxncghm24h3v5muvicox4re3un25gp4fkza4m7i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588657778.jpg',
         'background': 'Purple',
         'body': 'Rabbit Suit',
         'earring': 'Daisy',
@@ -1191,7 +1191,7 @@ ZAPPY_COLLECTION = {
     2588657902: {
         'name': 'Zappy #1432',
         'unit_name': 'ZAPP1432',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaqgfw3hr7lishmjslllrtbvgfviwn4r5zbrhsdvvyo7tb3ltu5f4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588657902.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Serious',
@@ -1204,7 +1204,7 @@ ZAPPY_COLLECTION = {
     2588658154: {
         'name': 'Zappy #1619',
         'unit_name': 'ZAPP1619',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid5ec4q5vxghf4wjelx6lz2jdupmuukpigstmpod7of5x6ckotrbu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588658154.jpg',
         'background': 'Red',
         'body': 'Colorful Jacket',
         'earring': 'Right Helix',
@@ -1217,7 +1217,7 @@ ZAPPY_COLLECTION = {
     2588658364: {
         'name': 'Zappy #353',
         'unit_name': 'ZAPP0353',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiheb6cxbdr3czcinmhigjqc6fvbru25bfw6mclftmp4kzf5ogp7eu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588658364.jpg',
         'background': 'Chroma',
         'body': 'Scarf',
         'earring': 'Carton Cup',
@@ -1230,7 +1230,7 @@ ZAPPY_COLLECTION = {
     2588658968: {
         'name': 'Zappy #1266',
         'unit_name': 'ZAPP1266',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihcqjd6qj5zwmr6yfmcnaw6lvfbzuisd3nuoyfdukhyqlp4a4gjvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588658968.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Serious',
@@ -1243,7 +1243,7 @@ ZAPPY_COLLECTION = {
     2588659850: {
         'name': 'Zappy #796',
         'unit_name': 'ZAPP0796',
-        'image_url': 'https://ipfs.io/ipfs/bafybeihee2ig2eloqfk6q3enrft747qte4n67belmssvaoz3iyo5hr5gcy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588659850.jpg',
         'background': 'Chroma',
         'body': 'Cat Suit',
         'earring': 'Skull',
@@ -1256,7 +1256,7 @@ ZAPPY_COLLECTION = {
     2588660123: {
         'name': 'Zappy #1765',
         'unit_name': 'ZAPP1765',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigeemuxyqvnraj33t2ph3qyjgfjfongyhlq4q6rbbcpkexzn7gxfu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588660123.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Lightning',
@@ -1269,7 +1269,7 @@ ZAPPY_COLLECTION = {
     2588660310: {
         'name': 'Zappy #551',
         'unit_name': 'ZAPP0551',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicz6cmchu6ghpu47nlolbzd7xoedmghllbdyep4kgb7577wstuehu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588660310.jpg',
         'background': 'Purple',
         'body': 'Cat Suit',
         'earring': 'Right Helix',
@@ -1282,7 +1282,7 @@ ZAPPY_COLLECTION = {
     2588660521: {
         'name': 'Zappy #2052',
         'unit_name': 'ZAPP2052',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiez7pysmocqkdao47jrek2c4lrz2hs4cl7en7ntb4gsakftl2xy6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588660521.jpg',
         'background': 'Yellow',
         'body': 'Dino Suit',
         'earring': 'Rainbow',
@@ -1295,7 +1295,7 @@ ZAPPY_COLLECTION = {
     2588661089: {
         'name': 'Zappy #810',
         'unit_name': 'ZAPP0810',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigqeoyzsugh42vjzl7udusc2iyna366tdajpqbsfy3qu2umpxayfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588661089.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Star',
@@ -1308,7 +1308,7 @@ ZAPPY_COLLECTION = {
     2588661162: {
         'name': 'Zappy #357',
         'unit_name': 'ZAPP0357',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib7wid37qibf67ue7v62mk7ltzngiafvvf7x5xiw2e2xgbskmwrba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588661162.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Sunrise',
@@ -1321,7 +1321,7 @@ ZAPPY_COLLECTION = {
     2588661772: {
         'name': 'Zappy #1551',
         'unit_name': 'ZAPP1551',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiejciqvwts454sxjapzy5inh24xwecfrjyjyv7kpcx6rowpthbjje',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588661772.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Skull',
@@ -1334,7 +1334,7 @@ ZAPPY_COLLECTION = {
     2588662410: {
         'name': 'Zappy #481',
         'unit_name': 'ZAPP0481',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigas5fw3say5qfsfh2346q6ifaidnr4tg7em7l2pkmwq4mrbvcule',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588662410.jpg',
         'background': 'Yellow',
         'body': 'Scarf',
         'earring': 'Rainbow',
@@ -1347,7 +1347,7 @@ ZAPPY_COLLECTION = {
     2588662509: {
         'name': 'Zappy #1083',
         'unit_name': 'ZAPP1083',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie23q3e4nukai33gfrwyallywxwnxe2cmbqy2yq4hmlx6lc6foorq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588662509.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Sad',
@@ -1360,7 +1360,7 @@ ZAPPY_COLLECTION = {
     2588662869: {
         'name': 'Zappy #502',
         'unit_name': 'ZAPP0502',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidaw6ruxvotzezyfr7rgahfvdjgo3tzlikrr5voilwu3tsqpfrcpq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588662869.jpg',
         'background': 'Orange',
         'body': 'Basic Jacket',
         'earring': 'None',
@@ -1373,7 +1373,7 @@ ZAPPY_COLLECTION = {
     2588663179: {
         'name': 'Zappy #1758',
         'unit_name': 'ZAPP1758',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigvhoaqq42jxq5d4lbf63try43xhfaeeuhihxx5r4ng5rmr5oebw4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588663179.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Double Helix',
@@ -1386,7 +1386,7 @@ ZAPPY_COLLECTION = {
     2588663958: {
         'name': 'Zappy #373',
         'unit_name': 'ZAPP0373',
-        'image_url': 'https://ipfs.io/ipfs/bafkreico2i7ulo2lvwanh7jlbeeu2wr7v7n247wrmbq4l2u54ew6pdpcu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588663958.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Number One',
@@ -1399,7 +1399,7 @@ ZAPPY_COLLECTION = {
     2588664891: {
         'name': 'Zappy #1637',
         'unit_name': 'ZAPP1637',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibsj2wvjhspgjp5pt4qkp24jdciccz2m5menj2lipikii4mw6thj4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588664891.jpg',
         'background': 'Yellow',
         'body': 'Striped Sweater',
         'earring': 'Diamond',
@@ -1412,7 +1412,7 @@ ZAPPY_COLLECTION = {
     2588665722: {
         'name': 'Zappy #2072',
         'unit_name': 'ZAPP2072',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7edwxq52usj3wfx4vtdnw2snpmdhsa7cykqbtiuacy6x4hsabeq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588665722.jpg',
         'background': 'Yellow',
         'body': 'Armband',
         'earring': 'Pyramid',
@@ -1425,7 +1425,7 @@ ZAPPY_COLLECTION = {
     2588666306: {
         'name': 'Zappy #1254',
         'unit_name': 'ZAPP1254',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifpvdfuczdii5thpdilufj5fuebvpnxx3qvjnr22bbsmc75l43joa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588666306.jpg',
         'background': 'Orange',
         'body': 'Hawaiian Shirt',
         'earring': 'Hashtag',
@@ -1438,7 +1438,7 @@ ZAPPY_COLLECTION = {
     2588666877: {
         'name': 'Zappy #363',
         'unit_name': 'ZAPP0363',
-        'image_url': 'https://ipfs.io/ipfs/bafkreier4ld3dscpjosjjo4mid6xuguauzw4x6n7deh2gg7hst2fcv4kce',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588666877.jpg',
         'background': 'Green',
         'body': 'School Outfit',
         'earring': 'Happy',
@@ -1451,7 +1451,7 @@ ZAPPY_COLLECTION = {
     2588667135: {
         'name': 'Zappy #1021',
         'unit_name': 'ZAPP1021',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiajoxkbfi7jsivt7qiig45y6wm5lajnxvwcacmn2hg4mvij4gykzy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588667135.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Happy',
@@ -1464,7 +1464,7 @@ ZAPPY_COLLECTION = {
     2588667533: {
         'name': 'Zappy #2048',
         'unit_name': 'ZAPP2048',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifn4zx6wbuyv47jpbrdsrtjszpaxrfwxvn6sthm3jllwxfljdfjkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588667533.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Happy',
@@ -1477,7 +1477,7 @@ ZAPPY_COLLECTION = {
     2588667725: {
         'name': 'Zappy #1375',
         'unit_name': 'ZAPP1375',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignrci2h5sw22m6dmbxysudeqhh3ia5dqudpgxkwvzdmnuanc4j2y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588667725.jpg',
         'background': 'Yellow',
         'body': 'School Outfit',
         'earring': 'Right Ring',
@@ -1490,7 +1490,7 @@ ZAPPY_COLLECTION = {
     2588667943: {
         'name': 'Zappy #836',
         'unit_name': 'ZAPP0836',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiarzpch4suoxfz4btgikli4pxqpkgwnia6sjhzkbw7ixghhewtwbe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588667943.jpg',
         'background': 'Chroma',
         'body': 'Cat Suit',
         'earring': 'Left Ring',
@@ -1503,7 +1503,7 @@ ZAPPY_COLLECTION = {
     2588668375: {
         'name': 'Zappy #1271',
         'unit_name': 'ZAPP1271',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigabbzxmo3mj23i5jhvk6ncvsbnzbo45fjnoupwkoofp4aehwgene',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588668375.jpg',
         'background': 'Purple',
         'body': 'Daisy Shirt',
         'earring': 'Happy',
@@ -1516,7 +1516,7 @@ ZAPPY_COLLECTION = {
     2588668760: {
         'name': 'Zappy #345',
         'unit_name': 'ZAPP0345',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicobnr7fft26h4unhgd3k22ywk2uxedkb77p7c6gvubduliit4z3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588668760.jpg',
         'background': 'Blue',
         'body': 'Ribbon Tie',
         'earring': 'Left Helix',
@@ -1529,7 +1529,7 @@ ZAPPY_COLLECTION = {
     2588668810: {
         'name': 'Zappy #2126',
         'unit_name': 'ZAPP2126',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzfusaqhmswxfq7z7l7bh6f62gsuog26slahbpqcgjzzfyoist7e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588668810.jpg',
         'background': 'Orange',
         'body': 'Trash Can',
         'earring': 'Hashtag',
@@ -1542,7 +1542,7 @@ ZAPPY_COLLECTION = {
     2588669008: {
         'name': 'Zappy #716',
         'unit_name': 'ZAPP0716',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiafrbit665b4shldrrm4jz43koldzztxq5whu3rogz5ptdd4g7kmu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588669008.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Zappies',
@@ -1555,7 +1555,7 @@ ZAPPY_COLLECTION = {
     2588669407: {
         'name': 'Zappy #1766',
         'unit_name': 'ZAPP1766',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidnhelk4vh5e7mhltr3r6qbwx4ftt4ua4lxwh4lek4uovo4kdhucm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588669407.jpg',
         'background': 'Orange',
         'body': 'Armor',
         'earring': 'Ghost',
@@ -1568,7 +1568,7 @@ ZAPPY_COLLECTION = {
     2588669520: {
         'name': 'Zappy #1528',
         'unit_name': 'ZAPP1528',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib7im7qrbu7rvmusoiqylqg4suciknsxgrvcbcjwh3dnlb4i376uq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588669520.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Ghost',
@@ -1581,7 +1581,7 @@ ZAPPY_COLLECTION = {
     2588669704: {
         'name': 'Zappy #1372',
         'unit_name': 'ZAPP1372',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih35ndoq7gaadgnsd7ruaufpugy47frywg57y62eycf24jaxa3eca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588669704.jpg',
         'background': 'Purple',
         'body': 'Rabbit Suit',
         'earring': 'Twin Rings',
@@ -1594,7 +1594,7 @@ ZAPPY_COLLECTION = {
     2588670188: {
         'name': 'Zappy #1079',
         'unit_name': 'ZAPP1079',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibtut5xt3gjwm32erqsvgs4k35isdlbstozx2jfattddgmvihse7e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588670188.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Twin Rings',
@@ -1607,7 +1607,7 @@ ZAPPY_COLLECTION = {
     2588670791: {
         'name': 'Zappy #1165',
         'unit_name': 'ZAPP1165',
-        'image_url': 'https://ipfs.io/ipfs/bafybeieulkci2cwurbqc742qemhcidlxrnzdnurhraol2zlzotlyhp6qju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588670791.jpg',
         'background': 'Chroma',
         'body': 'Striped Shirt',
         'earring': 'Happy',
@@ -1620,7 +1620,7 @@ ZAPPY_COLLECTION = {
     2588670980: {
         'name': 'Zappy #1247',
         'unit_name': 'ZAPP1247',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihxldlrps432a6vpjwv2j2svsjuaxruzvhwjrl54z743q5cip6rn4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588670980.jpg',
         'background': 'Purple',
         'body': 'Muscle Suit',
         'earring': 'Party Popper',
@@ -1633,7 +1633,7 @@ ZAPPY_COLLECTION = {
     2588671282: {
         'name': 'Zappy #1509',
         'unit_name': 'ZAPP1509',
-        'image_url': 'https://ipfs.io/ipfs/bafkreies6xb4o5eu2hrvtrx6q26nzwlzb4xkwgesyto6b5klms5w526qha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588671282.jpg',
         'background': 'Green',
         'body': 'Daisy Shirt',
         'earring': 'Double Helix',
@@ -1646,7 +1646,7 @@ ZAPPY_COLLECTION = {
     2588671410: {
         'name': 'Zappy #1168',
         'unit_name': 'ZAPP1168',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifmtscyafvkgrqpgfdt4ufa3g7g54irvrh4xiqlzu4ni4lk5egevq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588671410.jpg',
         'background': 'Blue',
         'body': 'Kimono',
         'earring': 'Twin Rings',
@@ -1659,7 +1659,7 @@ ZAPPY_COLLECTION = {
     2588671550: {
         'name': 'Zappy #413',
         'unit_name': 'ZAPP0413',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig5via2eld6fgib5d7r3k4s3jbtd6ml5qp273jybteozoycvzmhhu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588671550.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Pyramid',
@@ -1672,7 +1672,7 @@ ZAPPY_COLLECTION = {
     2588671830: {
         'name': 'Zappy #845',
         'unit_name': 'ZAPP0845',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibizhqh5ddurvfvclclpkonyi3g6zx7vts224z25klcic5626ap5y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588671830.jpg',
         'background': 'Orange',
         'body': 'Fanny Pack',
         'earring': 'Happy',
@@ -1685,7 +1685,7 @@ ZAPPY_COLLECTION = {
     2588672323: {
         'name': 'Zappy #1112',
         'unit_name': 'ZAPP1112',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidx7uptopclszddnm5u5wxpuipoqkxp7xm3s52642uptksnpedet4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588672323.jpg',
         'background': 'Green',
         'body': 'Fanny Pack',
         'earring': 'Star',
@@ -1698,7 +1698,7 @@ ZAPPY_COLLECTION = {
     2588672649: {
         'name': 'Zappy #1142',
         'unit_name': 'ZAPP1142',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicvuzlzxpr6n4qgx6ihtrr3lejdghaqxsuopgwwlvysk7jvttmq3y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588672649.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Strawberry',
@@ -1711,7 +1711,7 @@ ZAPPY_COLLECTION = {
     2588672876: {
         'name': 'Zappy #806',
         'unit_name': 'ZAPP0806',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidxieevsa7lkmrpkgxm6zecbvotxcplfzomqntfym25nprwosbtc4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588672876.jpg',
         'background': 'Purple',
         'body': 'Armband',
         'earring': 'Sunrise',
@@ -1724,7 +1724,7 @@ ZAPPY_COLLECTION = {
     2588673165: {
         'name': 'Zappy #526',
         'unit_name': 'ZAPP0526',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihv2fz2tjsfvlmjbv7oq2qb5w6wyuatudmooderxkf2fg3ne5vcyq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588673165.jpg',
         'background': 'Red',
         'body': 'Choker',
         'earring': 'Skull',
@@ -1737,7 +1737,7 @@ ZAPPY_COLLECTION = {
     2588673621: {
         'name': 'Zappy #354',
         'unit_name': 'ZAPP0354',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifupop3sn6bvu65xcji2dp6duqxabcx34zdys7ilfu723yfecktue',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588673621.jpg',
         'background': 'Blue',
         'body': 'Suit',
         'earring': 'Lightning',
@@ -1750,7 +1750,7 @@ ZAPPY_COLLECTION = {
     2588674691: {
         'name': 'Zappy #1964',
         'unit_name': 'ZAPP1964',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiajheay4dvq27xhkilksendkrekp5vkzl2lixjvz72fqcrnzjkt3e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588674691.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Rainbow',
@@ -1763,7 +1763,7 @@ ZAPPY_COLLECTION = {
     2588675474: {
         'name': 'Zappy #2215',
         'unit_name': 'ZAPP2215',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigwfuocl7l52lpiq7tkbf55tyu2gfefttddnklxuxlfdoumkvej3q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588675474.jpg',
         'background': 'Orange',
         'body': 'Oversize Sweater',
         'earring': 'Bananas',
@@ -1776,7 +1776,7 @@ ZAPPY_COLLECTION = {
     2588676035: {
         'name': 'Zappy #1987',
         'unit_name': 'ZAPP1987',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidfuoay47opkxudveywz7y65mfydmxc4prt3tgsvuar2prc636coi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588676035.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Pepper',
@@ -1789,7 +1789,7 @@ ZAPPY_COLLECTION = {
     2588676667: {
         'name': 'Zappy #974',
         'unit_name': 'ZAPP0974',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibeks2nws6q4skc5sk4n3mklbylxrli4hpgenwrqhgebcmhkt3ou4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588676667.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Right Helix',
@@ -1802,7 +1802,7 @@ ZAPPY_COLLECTION = {
     2588676894: {
         'name': 'Zappy #1386',
         'unit_name': 'ZAPP1386',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicv6frktxh3ggm7pfg6vskj6lm4t6uic7kgdevbmjy7g6upt33loi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588676894.jpg',
         'background': 'Green',
         'body': 'Overalls',
         'earring': 'Lightning',
@@ -1815,7 +1815,7 @@ ZAPPY_COLLECTION = {
     2588677085: {
         'name': 'Zappy #1981',
         'unit_name': 'ZAPP1981',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiggfelkheorjkxngzdl46xipax3f4qqohi6zjuwflie7e7blie5ce',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588677085.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'Right Ring',
@@ -1828,7 +1828,7 @@ ZAPPY_COLLECTION = {
     2588677412: {
         'name': 'Zappy #1123',
         'unit_name': 'ZAPP1123',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicmpyrku4sgsy2hwz56snnngqcc6a6uvpeda4qop5xtkjobonqnte',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588677412.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Zappies',
@@ -1841,7 +1841,7 @@ ZAPPY_COLLECTION = {
     2588677571: {
         'name': 'Zappy #358',
         'unit_name': 'ZAPP0358',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifm7q6dfradcvukk4hlyarqupfqcxgr3bsxxv457ym6pohhenwley',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588677571.jpg',
         'background': 'Purple',
         'body': 'Daisy Shirt',
         'earring': 'Serious',
@@ -1854,7 +1854,7 @@ ZAPPY_COLLECTION = {
     2588677804: {
         'name': 'Zappy #343',
         'unit_name': 'ZAPP0343',
-        'image_url': 'https://ipfs.io/ipfs/bafkreievgbdhsm7tj5vc2iurnk5qjavivagh7m3zzob4x622fbj5nitd44',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588677804.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Number One',
@@ -1867,7 +1867,7 @@ ZAPPY_COLLECTION = {
     2588678336: {
         'name': 'Zappy #1121',
         'unit_name': 'ZAPP1121',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiax4igqeh2pg24ngh45f3efm2ucjcgcoezxl2ba7nokkvl5xxhavm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588678336.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'None',
@@ -1880,7 +1880,7 @@ ZAPPY_COLLECTION = {
     2588678410: {
         'name': 'Zappy #1767',
         'unit_name': 'ZAPP1767',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig2o2wo6gtujnnlp7g55a5bot4u5taerh4krhbzdhfspawehban5m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588678410.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Party Popper',
@@ -1893,7 +1893,7 @@ ZAPPY_COLLECTION = {
     2588678665: {
         'name': 'Zappy #797',
         'unit_name': 'ZAPP0797',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidhfhggwdt33ckazayj35e4efkgd5vcz44qd474txnmc63rfxtsja',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588678665.jpg',
         'background': 'Purple',
         'body': 'Fanny Pack',
         'earring': 'Diamond',
@@ -1906,7 +1906,7 @@ ZAPPY_COLLECTION = {
     2588679074: {
         'name': 'Zappy #1977',
         'unit_name': 'ZAPP1977',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiezb4rftcni5ihiu6uj33jxedxk3ci6seh2rbqai3k2zrhfrqk6k4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588679074.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Pepper',
@@ -1919,7 +1919,7 @@ ZAPPY_COLLECTION = {
     2588679616: {
         'name': 'Zappy #509',
         'unit_name': 'ZAPP0509',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifevx4tfo5ohziv34tmoftpvnjtvutcamdg7u6svziz3lkm5hwd3q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588679616.jpg',
         'background': 'Orange',
         'body': 'Wool Collar Jacket',
         'earring': 'Star',
@@ -1932,7 +1932,7 @@ ZAPPY_COLLECTION = {
     2588680630: {
         'name': 'Zappy #989',
         'unit_name': 'ZAPP0989',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiappkqxu7wm2tvywuqq6sgwvjbfnbdady3ooy2nmwzbirxezqirwi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588680630.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Hashtag',
@@ -1945,7 +1945,7 @@ ZAPPY_COLLECTION = {
     2588681309: {
         'name': 'Zappy #1404',
         'unit_name': 'ZAPP1404',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibw5zaidudveqpp2vhts6wjhqw6k2etdujxdoqkpk5c7gl4vuakhq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588681309.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Skull',
@@ -1958,7 +1958,7 @@ ZAPPY_COLLECTION = {
     2588681481: {
         'name': 'Zappy #560',
         'unit_name': 'ZAPP0560',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnxjp3yx42jcu7liw3b2kpjkezaagoh7etmmr5f4g73whdujnxdm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588681481.jpg',
         'background': 'Red',
         'body': 'Rabbit Suit',
         'earring': 'Daisy',
@@ -1971,7 +1971,7 @@ ZAPPY_COLLECTION = {
     2588681777: {
         'name': 'Zappy #1912',
         'unit_name': 'ZAPP1912',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiba6bh3xocfqy5rpiwlfkk7u7mcjpwqwosj5thjzjhr2l75sgkalq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588681777.jpg',
         'background': 'Chroma',
         'body': 'Scarf',
         'earring': 'Serious',
@@ -1984,7 +1984,7 @@ ZAPPY_COLLECTION = {
     2588682005: {
         'name': 'Zappy #978',
         'unit_name': 'ZAPP0978',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiekmhxtgfx54j3uittuoim5l4dosvvh6hrtnkqpeunqzoupy5zwoa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588682005.jpg',
         'background': 'Green',
         'body': 'Overalls',
         'earring': 'Zappies',
@@ -1997,7 +1997,7 @@ ZAPPY_COLLECTION = {
     2588682205: {
         'name': 'Zappy #639',
         'unit_name': 'ZAPP0639',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif2o4ew5nko2j57bffit3ehz4eg5tlrbc6jmrguzoxtrdcvs6mjc4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588682205.jpg',
         'background': 'Green',
         'body': 'Basic Jacket',
         'earring': 'None',
@@ -2010,7 +2010,7 @@ ZAPPY_COLLECTION = {
     2588682912: {
         'name': 'Zappy #1262',
         'unit_name': 'ZAPP1262',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihaxbxnpto4rsgt77xk3wmtmkx6e6vijhojmia5w6qu2e2pkkklua',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588682912.jpg',
         'background': 'Orange',
         'body': 'Striped Shirt',
         'earring': 'Right Helix',
@@ -2023,7 +2023,7 @@ ZAPPY_COLLECTION = {
     2588683081: {
         'name': 'Zappy #784',
         'unit_name': 'ZAPP0784',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifq56qejbo7xtyqtxcfzljaf6q75tnhh75iuqd6gdhftwhqefxh74',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588683081.jpg',
         'background': 'Green',
         'body': 'Fanny Pack',
         'earring': 'Left Ring',
@@ -2036,7 +2036,7 @@ ZAPPY_COLLECTION = {
     2588683514: {
         'name': 'Zappy #802',
         'unit_name': 'ZAPP0802',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig4rqdfxtrzloctikrzbdzzzct22a7e34nxf7bjej4oodt4c7qqnm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588683514.jpg',
         'background': 'Green',
         'body': 'Trench Coat',
         'earring': 'Pyramid',
@@ -2049,7 +2049,7 @@ ZAPPY_COLLECTION = {
     2588683777: {
         'name': 'Zappy #1222',
         'unit_name': 'ZAPP1222',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidsvie5szzzgbmk445tgrd5jxbafziirsdv4jrwqoyqh23gt2fxgi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588683777.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Hashtag',
@@ -2062,7 +2062,7 @@ ZAPPY_COLLECTION = {
     2588683975: {
         'name': 'Zappy #1521',
         'unit_name': 'ZAPP1521',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbchn5p4ipaxqssnegqmo5vpfubzeqtxptj2ukoph666nl3iuhtm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588683975.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Bananas',
@@ -2075,7 +2075,7 @@ ZAPPY_COLLECTION = {
     2588684232: {
         'name': 'Zappy #2086',
         'unit_name': 'ZAPP2086',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihwn3buaw7auhrqayjymvsbwtqhwtwzdv7ar3seg77iuc2kkbmhyq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588684232.jpg',
         'background': 'Purple',
         'body': 'Fur Coat',
         'earring': 'Rainbow',
@@ -2088,7 +2088,7 @@ ZAPPY_COLLECTION = {
     2588684535: {
         'name': 'Zappy #321',
         'unit_name': 'ZAPP0321',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiezevnnxhpxvnmpdi2rnetkfn4266gaqwm6ubmx2fya62jb466iki',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588684535.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Sunrise',
@@ -2101,7 +2101,7 @@ ZAPPY_COLLECTION = {
     2588684675: {
         'name': 'Zappy #822',
         'unit_name': 'ZAPP0822',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibrrvsqtwc2hsdwvthldwaejlf57qymyln2ty4fagxs4lmmftci4q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588684675.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Carton Cup',
@@ -2114,7 +2114,7 @@ ZAPPY_COLLECTION = {
     2588684875: {
         'name': 'Zappy #829',
         'unit_name': 'ZAPP0829',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidry5mueuo22d7v625xxqhbaesxqp4a5jofycjbeu3gsgzxpthmkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588684875.jpg',
         'background': 'Purple',
         'body': 'Hoodie',
         'earring': 'Right Ring',
@@ -2127,7 +2127,7 @@ ZAPPY_COLLECTION = {
     2588685037: {
         'name': 'Zappy #1752',
         'unit_name': 'ZAPP1752',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiamsuwbapqv6kgl4zvhlm2kasxvcivojxi7mfqi2r7r4q6bpbe55m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588685037.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'None',
@@ -2140,7 +2140,7 @@ ZAPPY_COLLECTION = {
     2588685734: {
         'name': 'Zappy #1018',
         'unit_name': 'ZAPP1018',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidl2kx6lrf3ws6kp7hytlnosj6xvmybamqdxfptq4nr7rdzaeuw5u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588685734.jpg',
         'background': 'Yellow',
         'body': 'Polo Shirt',
         'earring': 'Strawberry',
@@ -2153,7 +2153,7 @@ ZAPPY_COLLECTION = {
     2588687482: {
         'name': 'Zappy #1442',
         'unit_name': 'ZAPP1442',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifjqkhbw2rohugrtiz4c6nq7xxwq6sa6cf3e5gjtbj56wp53fqagi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588687482.jpg',
         'background': 'Blue',
         'body': 'School Outfit',
         'earring': 'Rainbow',
@@ -2166,7 +2166,7 @@ ZAPPY_COLLECTION = {
     2588687983: {
         'name': 'Zappy #1975',
         'unit_name': 'ZAPP1975',
-        'image_url': 'https://ipfs.io/ipfs/bafkreienfdc3vwp3x7b7ff6jmj53mzi2pgv5dpp6wjalaq5rjwlftz5lea',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588687983.jpg',
         'background': 'Yellow',
         'body': 'Armor',
         'earring': 'Pepper',
@@ -2179,7 +2179,7 @@ ZAPPY_COLLECTION = {
     2588688314: {
         'name': 'Zappy #986',
         'unit_name': 'ZAPP0986',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifxu7yt4cdhnpa4hqbnwptsk7wg6rou4nn3jsewsjpzkfsa7by35q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588688314.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Skull',
@@ -2192,7 +2192,7 @@ ZAPPY_COLLECTION = {
     2588688483: {
         'name': 'Zappy #333',
         'unit_name': 'ZAPP0333',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicxa2cmahpzdpry3xjna6eeiavul6q7262a3jtzz7krxcgsjvriki',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588688483.jpg',
         'background': 'Yellow',
         'body': 'Ribbon Tie',
         'earring': 'Pepper',
@@ -2205,7 +2205,7 @@ ZAPPY_COLLECTION = {
     2588689428: {
         'name': 'Zappy #1557',
         'unit_name': 'ZAPP1557',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaogqd4lxneqcrsozokfemled5ov3knwqxyybuwso47vqivvrxsxi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588689428.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Knife',
@@ -2218,7 +2218,7 @@ ZAPPY_COLLECTION = {
     2588689940: {
         'name': 'Zappy #1071',
         'unit_name': 'ZAPP1071',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibeupy6f3b7yxgis5xeu55dh7adyuv4nvgg2u2lecknotoxg5dnsm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588689940.jpg',
         'background': 'Green',
         'body': 'Fanny Pack',
         'earring': 'Ghost',
@@ -2231,7 +2231,7 @@ ZAPPY_COLLECTION = {
     2588690080: {
         'name': 'Zappy #1575',
         'unit_name': 'ZAPP1575',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiedqlsgaw6d6uebwgejdqer4g5xq3fufd53ik2zaimytsivrcywnu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588690080.jpg',
         'background': 'Red',
         'body': 'Daisy Shirt',
         'earring': 'Serious',
@@ -2244,7 +2244,7 @@ ZAPPY_COLLECTION = {
     2588690539: {
         'name': 'Zappy #380',
         'unit_name': 'ZAPP0380',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidzhwoxqxxlmfrw6ez2c3jjhvoue2r4236d3idfjkzrg2wnnkeotu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588690539.jpg',
         'background': 'Purple',
         'body': 'Fanny Pack',
         'earring': 'Sunrise',
@@ -2257,7 +2257,7 @@ ZAPPY_COLLECTION = {
     2588690773: {
         'name': 'Zappy #346',
         'unit_name': 'ZAPP0346',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifkm22rqqsy7dz4dy2h2bcmihcbxdfhu3cil5hyyzqq3t2ulx62te',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588690773.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Carton Cup',
@@ -2270,7 +2270,7 @@ ZAPPY_COLLECTION = {
     2588691166: {
         'name': 'Zappy #340',
         'unit_name': 'ZAPP0340',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihcbvomagw4mm4luzcgqpkc3ilzjigh3djqawouhcgzx5inch735m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2588691166.jpg',
         'background': 'Blue',
         'body': 'Oversize Sweater',
         'earring': 'Diamond',
@@ -2283,7 +2283,7 @@ ZAPPY_COLLECTION = {
     2601204551: {
         'name': 'Zappy #81',
         'unit_name': 'ZAPP0081',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgoaowkabs4xm2oenqilxc7ffgxeroq5ydi3nwtizjpnxv7y7spi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601204551.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Party Popper',
@@ -2296,7 +2296,7 @@ ZAPPY_COLLECTION = {
     2601226303: {
         'name': 'Zappy #1780',
         'unit_name': 'ZAPP1780',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicpwp4ie5vbyvrzvegrvaeo5yzchad6em2weqlyazaal245yzn22y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601226303.jpg',
         'background': 'Orange',
         'body': 'Hoodie',
         'earring': 'Sad',
@@ -2309,7 +2309,7 @@ ZAPPY_COLLECTION = {
     2601327528: {
         'name': 'Zappy #137',
         'unit_name': 'ZAPP0137',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigeycv5q7sfzikkplgddbl2qi7vs7fcxheh5v6wimcsykvsjuejd4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601327528.jpg',
         'background': 'Red',
         'body': 'Rabbit Suit',
         'earring': 'None',
@@ -2322,7 +2322,7 @@ ZAPPY_COLLECTION = {
     2601343919: {
         'name': 'Zappy #233',
         'unit_name': 'ZAPP0233',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibb4e3tynyktrrfa5j7tqd6gy3pat2nqhu5mg2xqz5nalnoduhk6y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601343919.jpg',
         'background': 'Orange',
         'body': 'Lifesaver',
         'earring': 'Ghost',
@@ -2335,7 +2335,7 @@ ZAPPY_COLLECTION = {
     2601343995: {
         'name': 'Zappy #658',
         'unit_name': 'ZAPP0658',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigxay4a6qzpjwu4oebz4yzcqohzn2efhftvulfpbxtvyh35xbcqca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601343995.jpg',
         'background': 'Orange',
         'body': 'Warning Tape',
         'earring': 'Sunrise',
@@ -2348,7 +2348,7 @@ ZAPPY_COLLECTION = {
     2601344818: {
         'name': 'Zappy #329',
         'unit_name': 'ZAPP0329',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidraocm5elenjs4j7fdvt7crn6mnpcmki7x3f55kbhgoekcryuh6i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601344818.jpg',
         'background': 'Green',
         'body': 'Clouds',
         'earring': 'Happy',
@@ -2361,7 +2361,7 @@ ZAPPY_COLLECTION = {
     2601345089: {
         'name': 'Zappy #575',
         'unit_name': 'ZAPP0575',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia2nyi3imac2u47f4gihennicop2jox5u44jjsdgtqdku7vnair6e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601345089.jpg',
         'background': 'Yellow',
         'body': 'Polo Shirt',
         'earring': 'Pepper',
@@ -2374,7 +2374,7 @@ ZAPPY_COLLECTION = {
     2601345286: {
         'name': 'Zappy #512',
         'unit_name': 'ZAPP0512',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihznq37hiux2ueo2hpahglcoa4324yhewwpakbpsuqlztoead4te4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601345286.jpg',
         'background': 'Yellow',
         'body': 'Suit',
         'earring': 'Sad',
@@ -2387,7 +2387,7 @@ ZAPPY_COLLECTION = {
     2601345732: {
         'name': 'Zappy #462',
         'unit_name': 'ZAPP0462',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibm55m32q5bvb2wgdnstbsdykhh5734tnt6cfrun6h262bcp5cavy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601345732.jpg',
         'background': 'Yellow',
         'body': 'Hooded Jacket',
         'earring': 'Knife',
@@ -2400,7 +2400,7 @@ ZAPPY_COLLECTION = {
     2601345898: {
         'name': 'Zappy #590',
         'unit_name': 'ZAPP0590',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifkybm3kghl3azgggpa3b5od6gtlehhecnq2txea2nyyuudcgxb3e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601345898.jpg',
         'background': 'Orange',
         'body': 'Bowling Shirt',
         'earring': 'Happy',
@@ -2413,7 +2413,7 @@ ZAPPY_COLLECTION = {
     2601346333: {
         'name': 'Zappy #319',
         'unit_name': 'ZAPP0319',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiffala3s4oyjw32ib5yrbojxabqtsmiifezzovbwjm7jdjkq2tvt4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601346333.jpg',
         'background': 'Chroma',
         'body': 'Striped Shirt',
         'earring': 'Strawberry',
@@ -2426,7 +2426,7 @@ ZAPPY_COLLECTION = {
     2601346559: {
         'name': 'Zappy #289',
         'unit_name': 'ZAPP0289',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigguvipqmvczjgejkzix7tamoc22ojqsz3o2dhjozx67ls3dahkri',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601346559.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Lightning',
@@ -2439,7 +2439,7 @@ ZAPPY_COLLECTION = {
     2601346999: {
         'name': 'Zappy #279',
         'unit_name': 'ZAPP0279',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigdf6e4zl2wojsuu5coasnj7gp36kpncnesk46e7zdrjatedchhsy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601346999.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'Bananas',
@@ -2452,7 +2452,7 @@ ZAPPY_COLLECTION = {
     2601347385: {
         'name': 'Zappy #234',
         'unit_name': 'ZAPP0234',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiauuntsahkrb25qf3fpjjld66awhwr7bmamwsup565syccfb562jy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601347385.jpg',
         'background': 'Green',
         'body': 'Bear Suit',
         'earring': 'Carton Cup',
@@ -2465,7 +2465,7 @@ ZAPPY_COLLECTION = {
     2601347547: {
         'name': 'Zappy #351',
         'unit_name': 'ZAPP0351',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihntvqhjrfnd3zrixrbf4nzhl3kgh3bwx4cgewhtmjx54kywznpr4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601347547.jpg',
         'background': 'Purple',
         'body': 'Trash Can',
         'earring': 'Knife',
@@ -2478,7 +2478,7 @@ ZAPPY_COLLECTION = {
     2601347726: {
         'name': 'Zappy #683',
         'unit_name': 'ZAPP0683',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignktqeocyyurjlxqrhyt6wjsxozwr4fbwi5emg6sxp27codhhhfu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601347726.jpg',
         'background': 'Purple',
         'body': 'Hoodie',
         'earring': 'Left Helix',
@@ -2491,7 +2491,7 @@ ZAPPY_COLLECTION = {
     2601347878: {
         'name': 'Zappy #159',
         'unit_name': 'ZAPP0159',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihjlw6wbteojfcjgrryq6nc3p4zdsxfiptgmudxrowzyxgqifmrcm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601347878.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Daisy',
@@ -2504,7 +2504,7 @@ ZAPPY_COLLECTION = {
     2601348341: {
         'name': 'Zappy #182',
         'unit_name': 'ZAPP0182',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnd5ew2rdgjfkjeayo536ogxaa66fd3jpufhip6dtk32afl2v73u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601348341.jpg',
         'background': 'Red',
         'body': 'Hawaiian Shirt',
         'earring': 'Happy',
@@ -2517,7 +2517,7 @@ ZAPPY_COLLECTION = {
     2601348501: {
         'name': 'Zappy #578',
         'unit_name': 'ZAPP0578',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiblga6vvhmqakw3fmacz7ecfs7lo4kob46v4spb4zdsi3ldkbea3e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601348501.jpg',
         'background': 'Blue',
         'body': 'Tracksuit Top',
         'earring': 'Knife',
@@ -2530,7 +2530,7 @@ ZAPPY_COLLECTION = {
     2601348701: {
         'name': 'Zappy #416',
         'unit_name': 'ZAPP0416',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkcdwes6py4lhl3wjgcurrwgqcc45qbbbap3fvyx3xs36y7lzxti',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601348701.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Right Helix',
@@ -2543,7 +2543,7 @@ ZAPPY_COLLECTION = {
     2601349138: {
         'name': 'Zappy #240',
         'unit_name': 'ZAPP0240',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiekki2s6o3fzq4rpvi6vrz3luacr32z2bkvbno76lu4ljyjgkouku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601349138.jpg',
         'background': 'Yellow',
         'body': 'Tracksuit Top',
         'earring': 'Bananas',
@@ -2556,7 +2556,7 @@ ZAPPY_COLLECTION = {
     2601349345: {
         'name': 'Zappy #600',
         'unit_name': 'ZAPP0600',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie3dbvit2hodohcwnxq36sl65zwgnv23u4pzm4dbjubfsniainsdy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601349345.jpg',
         'background': 'Orange',
         'body': 'Basic Jacket',
         'earring': 'Carton Cup',
@@ -2569,7 +2569,7 @@ ZAPPY_COLLECTION = {
     2601349576: {
         'name': 'Zappy #524',
         'unit_name': 'ZAPP0524',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidqxilkkyyuaedkjczy6gnbnjsv24wqytkrqdma7flefwkug2pd7i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601349576.jpg',
         'background': 'Orange',
         'body': 'Trench Coat',
         'earring': 'Bananas',
@@ -2582,7 +2582,7 @@ ZAPPY_COLLECTION = {
     2601408613: {
         'name': 'Zappy #445',
         'unit_name': 'ZAPP0445',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidgxbxpzetc3b3tubvqresjqdqz52b4pf242ywb5uhgoir672iwjm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601408613.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Sunrise',
@@ -2595,7 +2595,7 @@ ZAPPY_COLLECTION = {
     2601408749: {
         'name': 'Zappy #1131',
         'unit_name': 'ZAPP1131',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiag6czi4bjnbssmcyisze775ow7l7lyrbd36ve3hzwhogkjxszsfq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601408749.jpg',
         'background': 'Green',
         'body': 'School Outfit',
         'earring': 'Double Helix',
@@ -2608,7 +2608,7 @@ ZAPPY_COLLECTION = {
     2601408785: {
         'name': 'Zappy #83',
         'unit_name': 'ZAPP0083',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidb5bvafwufzrbucu7wk2dz7kuedgl5jj3kwgpudchvdntuodiywy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601408785.jpg',
         'background': 'Blue',
         'body': 'Cat Suit',
         'earring': 'Daisy',
@@ -2621,7 +2621,7 @@ ZAPPY_COLLECTION = {
     2601408867: {
         'name': 'Zappy #804',
         'unit_name': 'ZAPP0804',
-        'image_url': 'https://ipfs.io/ipfs/bafkreichexbls3ofncdmuhhxrekor2litv7k7yndb62iqadrdgeolsxx6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601408867.jpg',
         'background': 'Red',
         'body': 'Puffer Coat',
         'earring': 'Serious',
@@ -2634,7 +2634,7 @@ ZAPPY_COLLECTION = {
     2601408893: {
         'name': 'Zappy #482',
         'unit_name': 'ZAPP0482',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibw47dzf3de22t6vyywyqil56y62ucqkxsjuu57amzinshtmtvpbm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601408893.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Party Popper',
@@ -2647,7 +2647,7 @@ ZAPPY_COLLECTION = {
     2601409256: {
         'name': 'Zappy #947',
         'unit_name': 'ZAPP0947',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihqwzglnagk67ftcvsv257pgfv6sn53s2jbjgabmi3c7qg2zpme3i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601409256.jpg',
         'background': 'Yellow',
         'body': 'Fanny Pack',
         'earring': 'Left Helix',
@@ -2660,7 +2660,7 @@ ZAPPY_COLLECTION = {
     2601409264: {
         'name': 'Zappy #501',
         'unit_name': 'ZAPP0501',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibbwhd4ohbdnr7dzzj7ofuvvp3x7hyo4cbb7y3qwi5cp2blf4liwu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601409264.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'Right Helix',
@@ -2673,7 +2673,7 @@ ZAPPY_COLLECTION = {
     2601409334: {
         'name': 'Zappy #1027',
         'unit_name': 'ZAPP1027',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibdrw664xhrj2rwyirzo6gixwmjxaemsod62cri6zvar7znmklixa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601409334.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'Hashtag',
@@ -2686,7 +2686,7 @@ ZAPPY_COLLECTION = {
     2601409434: {
         'name': 'Zappy #475',
         'unit_name': 'ZAPP0475',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaxtmzfv53fvv2fvaui2zxlzpm7oqpoypztlotxvzhog2jtw7m6ne',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601409434.jpg',
         'background': 'Green',
         'body': 'Polo Overalls',
         'earring': 'None',
@@ -2699,7 +2699,7 @@ ZAPPY_COLLECTION = {
     2601409489: {
         'name': 'Zappy #849',
         'unit_name': 'ZAPP0849',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidekk2dlgjt2qvb5uojbalzklj4j5bklvtx6evgnqf7fzwzfpo2qm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601409489.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Number One',
@@ -2712,7 +2712,7 @@ ZAPPY_COLLECTION = {
     2601409526: {
         'name': 'Zappy #80',
         'unit_name': 'ZAPP0080',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifm3jdozd4og43yh5xq5amack7wto5eb563egfs3bdj5uvuq3wprm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601409526.jpg',
         'background': 'Green',
         'body': 'Basic Jacket',
         'earring': 'Right Helix',
@@ -2725,7 +2725,7 @@ ZAPPY_COLLECTION = {
     2601409625: {
         'name': 'Zappy #1196',
         'unit_name': 'ZAPP1196',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieackejbvfu6iofkqyhzpdv7p6fz46mvkci5dd6ochwpum5k7qcpy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601409625.jpg',
         'background': 'Green',
         'body': 'Oversize Sweater',
         'earring': 'Left Helix',
@@ -2738,7 +2738,7 @@ ZAPPY_COLLECTION = {
     2601409701: {
         'name': 'Zappy #139',
         'unit_name': 'ZAPP0139',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibfkp56czrbffohyv7wtuvqpofafmepvx2anivqpfm42pys6efxh4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601409701.jpg',
         'background': 'Blue',
         'body': 'Wool Collar Jacket',
         'earring': 'Bananas',
@@ -2751,7 +2751,7 @@ ZAPPY_COLLECTION = {
     2601410091: {
         'name': 'Zappy #876',
         'unit_name': 'ZAPP0876',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiei5ry47alna5yn7juucg5dk3x447vafllyxgqq3clwffvpfe3moa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410091.jpg',
         'background': 'Red',
         'body': 'Basic Jacket',
         'earring': 'Bananas',
@@ -2764,7 +2764,7 @@ ZAPPY_COLLECTION = {
     2601410205: {
         'name': 'Zappy #494',
         'unit_name': 'ZAPP0494',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiftuhijnpenla7vp3fax4x3s45pdw6ef452pwawww2umbbwiy45lu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410205.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Strawberry',
@@ -2777,7 +2777,7 @@ ZAPPY_COLLECTION = {
     2601410314: {
         'name': 'Zappy #207',
         'unit_name': 'ZAPP0207',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihst4vor4iwot4ahhkxoxo7w3ct3adtneh5q6oum4jtb4h7ev6rem',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410314.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Lightning',
@@ -2790,7 +2790,7 @@ ZAPPY_COLLECTION = {
     2601410315: {
         'name': 'Zappy #1258',
         'unit_name': 'ZAPP1258',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiecweamlt7ggzmqyd3mjsg6z5hwdfsrxmhodj25uwoosa2sptnoki',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410315.jpg',
         'background': 'Purple',
         'body': 'Hawaiian Shirt',
         'earring': 'None',
@@ -2803,7 +2803,7 @@ ZAPPY_COLLECTION = {
     2601410370: {
         'name': 'Zappy #456',
         'unit_name': 'ZAPP0456',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiamset7cjz5pbras76uqi6emy5uxoawadtmrqzn6jkrjuxdozrn5u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410370.jpg',
         'background': 'Purple',
         'body': 'Turtleneck Sweater',
         'earring': 'Twin Rings',
@@ -2816,7 +2816,7 @@ ZAPPY_COLLECTION = {
     2601410416: {
         'name': 'Zappy #918',
         'unit_name': 'ZAPP0918',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigihghnesx3oxtdvptxbd5wwbhzubfztopcw4dr7uciacbqpxxo7i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410416.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Bananas',
@@ -2829,7 +2829,7 @@ ZAPPY_COLLECTION = {
     2601410460: {
         'name': 'Zappy #218',
         'unit_name': 'ZAPP0218',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigfncsj62nokdt7bxllpczrae6szv6zfxxndt3fwwvcjqb2ibtshm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410460.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Double Helix',
@@ -2842,7 +2842,7 @@ ZAPPY_COLLECTION = {
     2601410465: {
         'name': 'Zappy #1238',
         'unit_name': 'ZAPP1238',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihvwmbe37v3apuwziwcf3gstkgx5osshu6e3omqwrqnjckpdc7gna',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410465.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Pepper',
@@ -2855,7 +2855,7 @@ ZAPPY_COLLECTION = {
     2601410784: {
         'name': 'Zappy #1010',
         'unit_name': 'ZAPP1010',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiajordvz4cbw7dwxzt2kq3iewa5ad6ks2dqzupivser7glkfecwyy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410784.jpg',
         'background': 'Red',
         'body': 'Choker',
         'earring': 'Sad',
@@ -2868,7 +2868,7 @@ ZAPPY_COLLECTION = {
     2601410809: {
         'name': 'Zappy #579',
         'unit_name': 'ZAPP0579',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifickpazuniqggnqn763e64zikbi7p6ltopfj7gaxgeqk3dcki7nq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410809.jpg',
         'background': 'Blue',
         'body': 'Trash Can',
         'earring': 'Sad',
@@ -2881,7 +2881,7 @@ ZAPPY_COLLECTION = {
     2601410916: {
         'name': 'Zappy #1156',
         'unit_name': 'ZAPP1156',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifdebd7lo245kssmubkowoswn6c7d633efraz2rpaek7tz7b2t4yi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601410916.jpg',
         'background': 'Green',
         'body': 'Colorful Jacket',
         'earring': 'Skull',
@@ -2894,7 +2894,7 @@ ZAPPY_COLLECTION = {
     2601411202: {
         'name': 'Zappy #540',
         'unit_name': 'ZAPP0540',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic236wdhyi55np5ovksi5flepsrfcipwuvctwym5vghoulqzf2ixa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601411202.jpg',
         'background': 'Blue',
         'body': 'Striped Sweater',
         'earring': 'Knife',
@@ -2907,7 +2907,7 @@ ZAPPY_COLLECTION = {
     2601411817: {
         'name': 'Zappy #1172',
         'unit_name': 'ZAPP1172',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicxws2ixgnohui7gjfj77k245n56qxh6e4hhjj3tbefnjuhxh57ra',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601411817.jpg',
         'background': 'Red',
         'body': 'Kimono',
         'earring': 'Rainbow',
@@ -2920,7 +2920,7 @@ ZAPPY_COLLECTION = {
     2601411859: {
         'name': 'Zappy #167',
         'unit_name': 'ZAPP0167',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid6stb7jxkfssiwktsqict6pjeunbbpnlmoiwhbv4frk62pg2r2bu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601411859.jpg',
         'background': 'Green',
         'body': 'Bear Suit',
         'earring': 'Pepper',
@@ -2933,7 +2933,7 @@ ZAPPY_COLLECTION = {
     2601412029: {
         'name': 'Zappy #1097',
         'unit_name': 'ZAPP1097',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieksonmi5dqwhrcnbqqdnl7jyahmsdedb2b3tkn43xxtmg7gzwffi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412029.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Lightning',
@@ -2946,7 +2946,7 @@ ZAPPY_COLLECTION = {
     2601412061: {
         'name': 'Zappy #314',
         'unit_name': 'ZAPP0314',
-        'image_url': 'https://ipfs.io/ipfs/bafkreietrxu2wqjs2svxsdamivna3yv4plovp3pjzgkt3f2wzaejokl5pm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412061.jpg',
         'background': 'Orange',
         'body': 'Polo Overalls',
         'earring': 'Right Helix',
@@ -2959,7 +2959,7 @@ ZAPPY_COLLECTION = {
     2601412192: {
         'name': 'Zappy #732',
         'unit_name': 'ZAPP0732',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiheiz2vuhv2mwqsbvoizp44ovtpmcngv2xt5vabqiudcmtlikwwja',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412192.jpg',
         'background': 'Chroma',
         'body': 'Space Suit',
         'earring': 'Left Helix',
@@ -2972,7 +2972,7 @@ ZAPPY_COLLECTION = {
     2601412214: {
         'name': 'Zappy #145',
         'unit_name': 'ZAPP0145',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifobghqq75cz3ylb3cwis5eg7653z7gffcgasfwoqwlh22bu7hrsu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412214.jpg',
         'background': 'Purple',
         'body': 'Lifesaver',
         'earring': 'Left Helix',
@@ -2985,7 +2985,7 @@ ZAPPY_COLLECTION = {
     2601412559: {
         'name': 'Zappy #1198',
         'unit_name': 'ZAPP1198',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicjlsczeugkop3y6k2df4iptnisj27wc5j4ksh4fn6gkczqwusxoi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412559.jpg',
         'background': 'Blue',
         'body': 'Muscle Suit',
         'earring': 'Number One',
@@ -2998,7 +2998,7 @@ ZAPPY_COLLECTION = {
     2601412580: {
         'name': 'Zappy #306',
         'unit_name': 'ZAPP0306',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie76opp7wj6avtxckmrau7htxtr3mat7bp4mc3qyrgbr4wk2utmdm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412580.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Strawberry',
@@ -3011,7 +3011,7 @@ ZAPPY_COLLECTION = {
     2601412803: {
         'name': 'Zappy #926',
         'unit_name': 'ZAPP0926',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibddsrkhuhbhfqbynfdki74p2afmxiat4bewyyqwudvkext5cshuu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412803.jpg',
         'background': 'Yellow',
         'body': 'Puffer Coat',
         'earring': 'Left Ring',
@@ -3024,7 +3024,7 @@ ZAPPY_COLLECTION = {
     2601412818: {
         'name': 'Zappy #504',
         'unit_name': 'ZAPP0504',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigee3kp4pmgmvsb2cao5suny6xrrgx44fiiilbzziy2fhjff4fzm4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412818.jpg',
         'background': 'Yellow',
         'body': 'Lifesaver',
         'earring': 'Pyramid',
@@ -3037,7 +3037,7 @@ ZAPPY_COLLECTION = {
     2601412889: {
         'name': 'Zappy #741',
         'unit_name': 'ZAPP0741',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid5lynjyctvlh3vvj2f7ilybagbbsksecr35odd3hp7arwigkpsfa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412889.jpg',
         'background': 'Yellow',
         'body': 'School Outfit',
         'earring': 'Double Helix',
@@ -3050,7 +3050,7 @@ ZAPPY_COLLECTION = {
     2601412923: {
         'name': 'Zappy #153',
         'unit_name': 'ZAPP0153',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigasqlszvv6hun6co3oavftnt5uq46yjqy6kxvr7l3l4f6lssqgfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412923.jpg',
         'background': 'Blue',
         'body': 'Armband',
         'earring': 'Skull',
@@ -3063,7 +3063,7 @@ ZAPPY_COLLECTION = {
     2601412925: {
         'name': 'Zappy #730',
         'unit_name': 'ZAPP0730',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigbgrhm33bcyt7lc6ox4m554yam75npy2o2qp4xrsqlp42phdffaa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601412925.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Daisy',
@@ -3076,7 +3076,7 @@ ZAPPY_COLLECTION = {
     2601413265: {
         'name': 'Zappy #366',
         'unit_name': 'ZAPP0366',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiemuqeunrutkposou4lexktyc7wep6avp5okno6hpxhpavxbqb42y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601413265.jpg',
         'background': 'Purple',
         'body': 'Trench Coat',
         'earring': 'Zappies',
@@ -3089,7 +3089,7 @@ ZAPPY_COLLECTION = {
     2601413273: {
         'name': 'Zappy #1095',
         'unit_name': 'ZAPP1095',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiclxaj6bzfay6wokkj46nt6tj3dtx26ndevfzn3suenejfcgzi2ni',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601413273.jpg',
         'background': 'Purple',
         'body': 'Lifesaver',
         'earring': 'Ghost',
@@ -3102,7 +3102,7 @@ ZAPPY_COLLECTION = {
     2601914620: {
         'name': 'Zappy #1302',
         'unit_name': 'ZAPP1302',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidy7s4uwpv27kn56z74saxyfk2ej4h5u4kamveah4r6o5yury4dxm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2601914620.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Left Helix',
@@ -3115,7 +3115,7 @@ ZAPPY_COLLECTION = {
     2614743551: {
         'name': 'Zappy #1304',
         'unit_name': 'ZAPP1304',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidzkqpadcxnh2jjklkhgssia6bfpapbd42xjcno5srhkhwmlix744',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614743551.jpg',
         'background': 'Blue',
         'body': 'Suit',
         'earring': 'Ghost',
@@ -3128,7 +3128,7 @@ ZAPPY_COLLECTION = {
     2614744348: {
         'name': 'Zappy #292',
         'unit_name': 'ZAPP0292',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigahc6ov645zadivxp6ralo5sflsgjuitkctn65bwwz7wnjdyyx4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614744348.jpg',
         'background': 'Blue',
         'body': 'Cat Suit',
         'earring': 'Star',
@@ -3141,7 +3141,7 @@ ZAPPY_COLLECTION = {
     2614745301: {
         'name': 'Zappy #1754',
         'unit_name': 'ZAPP1754',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidljglhvbspekrhkygkrzr5tfgpzgvja5u2kmc7cnshznym7qwhze',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614745301.jpg',
         'background': 'Red',
         'body': 'Scarf',
         'earring': 'Party Popper',
@@ -3154,7 +3154,7 @@ ZAPPY_COLLECTION = {
     2614745440: {
         'name': 'Zappy #1795',
         'unit_name': 'ZAPP1795',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnes3w32ocellslbecreu7p3nhfqcmbwe4efhvuzta6umtymdxf4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614745440.jpg',
         'background': 'Blue',
         'body': 'Sleeveless Shirt',
         'earring': 'Diamond',
@@ -3167,7 +3167,7 @@ ZAPPY_COLLECTION = {
     2614745575: {
         'name': 'Zappy #1581',
         'unit_name': 'ZAPP1581',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigtztnediwala4kna4wa5vzdxqobvglj3gvkcvzbuu47wozxj62dm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614745575.jpg',
         'background': 'Red',
         'body': 'Choker',
         'earring': 'Bananas',
@@ -3180,7 +3180,7 @@ ZAPPY_COLLECTION = {
     2614745727: {
         'name': 'Zappy #1015',
         'unit_name': 'ZAPP1015',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidl5ecxf3f7vy7ubgrkvpg6axqniuwidldjpr43hvwcz5vib22u4e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614745727.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Rainbow',
@@ -3193,7 +3193,7 @@ ZAPPY_COLLECTION = {
     2614750352: {
         'name': 'Zappy #1674',
         'unit_name': 'ZAPP1674',
-        'image_url': 'https://ipfs.io/ipfs/bafybeidioanw5zki4troovgl56lnrtdotpqykz6a7xaykorb5saaodgpbe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614750352.jpg',
         'background': 'Chroma',
         'body': 'Suit',
         'earring': 'Bananas',
@@ -3206,7 +3206,7 @@ ZAPPY_COLLECTION = {
     2614750662: {
         'name': 'Zappy #960',
         'unit_name': 'ZAPP0960',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihvymlixrrss53b2y5k76w2combrz43dvyeq52wftqhje744lemkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614750662.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'Twin Rings',
@@ -3219,7 +3219,7 @@ ZAPPY_COLLECTION = {
     2614750929: {
         'name': 'Zappy #1555',
         'unit_name': 'ZAPP1555',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidv2hr6dpqqwuh43iebidggbymvb2prgum3p437t3av3hndvntbjy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614750929.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Sunrise',
@@ -3232,7 +3232,7 @@ ZAPPY_COLLECTION = {
     2614751152: {
         'name': 'Zappy #1194',
         'unit_name': 'ZAPP1194',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie6gubhp265hry7nducfqp4ry3ikar5575fh2rvmcladedi3kfejq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614751152.jpg',
         'background': 'Blue',
         'body': 'Armband',
         'earring': 'Ghost',
@@ -3245,7 +3245,7 @@ ZAPPY_COLLECTION = {
     2614751230: {
         'name': 'Zappy #2075',
         'unit_name': 'ZAPP2075',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7w43iutbu3kmx2hq7llqxfjp7ln3nkfxzkp3u3xzr35fxkawpne',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614751230.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Party Popper',
@@ -3258,7 +3258,7 @@ ZAPPY_COLLECTION = {
     2614876821: {
         'name': 'Zappy #2147',
         'unit_name': 'ZAPP2147',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie7fm4xsn73mgksuopk7cdbsp4muypofpufqsqkysegmbasm6a7e4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614876821.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Bananas',
@@ -3271,7 +3271,7 @@ ZAPPY_COLLECTION = {
     2614877180: {
         'name': 'Zappy #25',
         'unit_name': 'ZAPP0025',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihazhgzax2wff7ozwx5tdr3l2yizcl5yxclumfoj755cg23vxpr5q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614877180.jpg',
         'background': 'Orange',
         'body': 'Kimono',
         'earring': 'Party Popper',
@@ -3284,7 +3284,7 @@ ZAPPY_COLLECTION = {
     2614877444: {
         'name': 'Zappy #1292',
         'unit_name': 'ZAPP1292',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihcj65gatxhatmpquvokoavz54k42ocafm2ohp52qpwpfchs2cukq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614877444.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'Pepper',
@@ -3297,7 +3297,7 @@ ZAPPY_COLLECTION = {
     2614881070: {
         'name': 'Zappy #877',
         'unit_name': 'ZAPP0877',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigjgnguktyodosmgulegtk6p7wur5jtzqhraq3v6pv4g76wsdd7vi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614881070.jpg',
         'background': 'Green',
         'body': 'Scarf',
         'earring': 'Right Helix',
@@ -3310,7 +3310,7 @@ ZAPPY_COLLECTION = {
     2614881391: {
         'name': 'Zappy #968',
         'unit_name': 'ZAPP0968',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiefkp7y3z7d54kb3r2giwkblnnliv7ijljsuc3zjftlajurtbdkzm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614881391.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Left Helix',
@@ -3323,7 +3323,7 @@ ZAPPY_COLLECTION = {
     2614881526: {
         'name': 'Zappy #163',
         'unit_name': 'ZAPP0163',
-        'image_url': 'https://ipfs.io/ipfs/bafybeifq3agsjfhy2gimuiddgtxbmiyuvldiheeti5umgiwvf3cm4j62vy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614881526.jpg',
         'background': 'Chroma',
         'body': 'Leather Vest',
         'earring': 'Hashtag',
@@ -3336,7 +3336,7 @@ ZAPPY_COLLECTION = {
     2614882408: {
         'name': 'Zappy #451',
         'unit_name': 'ZAPP0451',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibcntymdjefhlai5rzt7ub26kodaorwswyxw3r2v6qqmfzijorcu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614882408.jpg',
         'background': 'Yellow',
         'body': 'Daisy Shirt',
         'earring': 'Happy',
@@ -3349,7 +3349,7 @@ ZAPPY_COLLECTION = {
     2614882746: {
         'name': 'Zappy #555',
         'unit_name': 'ZAPP0555',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifvir7jvq6zgpbypnq265ia2qiqct62zttbkibkq3wtdg3cbift4i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614882746.jpg',
         'background': 'Yellow',
         'body': 'Tracksuit Top',
         'earring': 'Carton Cup',
@@ -3362,7 +3362,7 @@ ZAPPY_COLLECTION = {
     2614882895: {
         'name': 'Zappy #290',
         'unit_name': 'ZAPP0290',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidovuxgoqfuc7s7vp3cpbc4xdkhrjxkgdvz25y3eu3jvlbco5iahq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614882895.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'None',
@@ -3375,7 +3375,7 @@ ZAPPY_COLLECTION = {
     2614883289: {
         'name': 'Zappy #764',
         'unit_name': 'ZAPP0764',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiho3tij4j3ezcjv7jtzqdumm4hxzwhj23lwq7p7aj5uqmilopzxd4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614883289.jpg',
         'background': 'Chroma',
         'body': 'Naked',
         'earring': 'Happy',
@@ -3388,7 +3388,7 @@ ZAPPY_COLLECTION = {
     2614883487: {
         'name': 'Zappy #264',
         'unit_name': 'ZAPP0264',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiategffqverocfaswmsbeexhiwe3t3wfj7domuruyvq3e2jmxuxfy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614883487.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Carton Cup',
@@ -3401,7 +3401,7 @@ ZAPPY_COLLECTION = {
     2614883862: {
         'name': 'Zappy #404',
         'unit_name': 'ZAPP0404',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicj4uwcukwlhqp6vpedgd3c5s5gtdi3n2llqrv7kh5cdugjjhnjnq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614883862.jpg',
         'background': 'Yellow',
         'body': 'Turtleneck Sweater',
         'earring': 'None',
@@ -3414,7 +3414,7 @@ ZAPPY_COLLECTION = {
     2614883998: {
         'name': 'Zappy #244',
         'unit_name': 'ZAPP0244',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie4yhkbzkqkycm7ixmxgldn6gpmg6xdwawlmmwsbhzmdf3d4vxciy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614883998.jpg',
         'background': 'Green',
         'body': 'Kimono',
         'earring': 'Party Popper',
@@ -3427,7 +3427,7 @@ ZAPPY_COLLECTION = {
     2614884126: {
         'name': 'Zappy #1001',
         'unit_name': 'ZAPP1001',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifmlfu37kj5zp5bh7pb72eeqr7s5nzqrihd4hxthvlhc5hzwkxqoa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614884126.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Left Ring',
@@ -3440,7 +3440,7 @@ ZAPPY_COLLECTION = {
     2614884316: {
         'name': 'Zappy #1074',
         'unit_name': 'ZAPP1074',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihoujrcwa4k6uvdrqllqybprg4h5a725qkpeokzv4qvol37uikyhe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614884316.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'Pepper',
@@ -3453,7 +3453,7 @@ ZAPPY_COLLECTION = {
     2614884488: {
         'name': 'Zappy #246',
         'unit_name': 'ZAPP0246',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidxfjfh4j33dbdcuwiiv72m7rsmejo6y2xtazny2pwkis4q5wshsq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614884488.jpg',
         'background': 'Green',
         'body': 'Hoodie',
         'earring': 'Carton Cup',
@@ -3466,7 +3466,7 @@ ZAPPY_COLLECTION = {
     2614884665: {
         'name': 'Zappy #283',
         'unit_name': 'ZAPP0283',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifqpvj6yocfvz7pifftwowqljkkec4uuirczm34smw3lu5nsykkgy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614884665.jpg',
         'background': 'Purple',
         'body': 'School Outfit',
         'earring': 'Left Ring',
@@ -3479,7 +3479,7 @@ ZAPPY_COLLECTION = {
     2614885005: {
         'name': 'Zappy #398',
         'unit_name': 'ZAPP0398',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibal26zcvm3pbkhmptt2mdkbvt5xb6b6rsw6leejvqapvxdoubnju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614885005.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Party Popper',
@@ -3492,7 +3492,7 @@ ZAPPY_COLLECTION = {
     2614885108: {
         'name': 'Zappy #972',
         'unit_name': 'ZAPP0972',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiair63yxr62sd3cv7lc6epjuotrswju2r5of7i44jyopgvmfghdci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614885108.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Rainbow',
@@ -3505,7 +3505,7 @@ ZAPPY_COLLECTION = {
     2614885374: {
         'name': 'Zappy #1003',
         'unit_name': 'ZAPP1003',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiggczz64fgdboxcmbx7kscinlt4nmaoyhchk774fyk6jlhakwgjde',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614885374.jpg',
         'background': 'Blue',
         'body': 'Sleeveless Shirt',
         'earring': 'Diamond',
@@ -3518,7 +3518,7 @@ ZAPPY_COLLECTION = {
     2614885472: {
         'name': 'Zappy #1017',
         'unit_name': 'ZAPP1017',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia7lo46x7tr42kpm5kmsqwgflwvf5wbx4feggmn3fpxap2b6m6t3u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614885472.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Sad',
@@ -3531,7 +3531,7 @@ ZAPPY_COLLECTION = {
     2614885634: {
         'name': 'Zappy #499',
         'unit_name': 'ZAPP0499',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibvxzb5elb7uqajryqjw7y753aewqycdu27nwo5ykvd3yxp45jjx4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614885634.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Daisy',
@@ -3544,7 +3544,7 @@ ZAPPY_COLLECTION = {
     2614885957: {
         'name': 'Zappy #861',
         'unit_name': 'ZAPP0861',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifv3qzqny6ezpl5mvv3tjec6huuv4k33spvp4jxk65wxk5i4lhnhi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614885957.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Lightning',
@@ -3557,7 +3557,7 @@ ZAPPY_COLLECTION = {
     2614901607: {
         'name': 'Zappy #1667',
         'unit_name': 'ZAPP1667',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicuufeh5fleuu6bffkgwidgic7lv653iressx76dh6o2bjn433nua',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614901607.jpg',
         'background': 'Red',
         'body': 'Hooded Jacket',
         'earring': 'Serious',
@@ -3570,7 +3570,7 @@ ZAPPY_COLLECTION = {
     2614901732: {
         'name': 'Zappy #1389',
         'unit_name': 'ZAPP1389',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiapaehi7onm5i7ccopoyvqgnnwvl4ejafjd7g6d5fpk5jcmj4p6zq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614901732.jpg',
         'background': 'Purple',
         'body': 'Hoodie',
         'earring': 'Sunrise',
@@ -3583,7 +3583,7 @@ ZAPPY_COLLECTION = {
     2614901830: {
         'name': 'Zappy #1614',
         'unit_name': 'ZAPP1614',
-        'image_url': 'https://ipfs.io/ipfs/bafkreideghxkzjopqkqrgnjgli7xuuy5wrtyy7cwjj566wusqk6xyjdm3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614901830.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Rainbow',
@@ -3596,7 +3596,7 @@ ZAPPY_COLLECTION = {
     2614902484: {
         'name': 'Zappy #1663',
         'unit_name': 'ZAPP1663',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic744nruo7nqsresmfniuyxjidwa62fuurvz6a4ekkolmw2oxrgzy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614902484.jpg',
         'background': 'Purple',
         'body': 'Bowling Shirt',
         'earring': 'Number One',
@@ -3609,7 +3609,7 @@ ZAPPY_COLLECTION = {
     2614902708: {
         'name': 'Zappy #1383',
         'unit_name': 'ZAPP1383',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia4wgu4zr2jcq3iqput7fcs3jzqjgka3lm3oqea5jx3oqmlozgksa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614902708.jpg',
         'background': 'Yellow',
         'body': 'Polo Shirt',
         'earring': 'Sad',
@@ -3622,7 +3622,7 @@ ZAPPY_COLLECTION = {
     2614902986: {
         'name': 'Zappy #1559',
         'unit_name': 'ZAPP1559',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicbijwazjj4jpiy5qdb7vafoupt24zkfscuobsmcczqd2cwsmgc6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614902986.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Serious',
@@ -3635,7 +3635,7 @@ ZAPPY_COLLECTION = {
     2614903249: {
         'name': 'Zappy #1099',
         'unit_name': 'ZAPP1099',
-        'image_url': 'https://ipfs.io/ipfs/bafybeifc2awzcsruftxj4nunzcorxmnm7bp6xcj42bmqka2eei2xuk4t2i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614903249.jpg',
         'background': 'Chroma',
         'body': 'Tracksuit Top',
         'earring': 'Sad',
@@ -3648,7 +3648,7 @@ ZAPPY_COLLECTION = {
     2614903400: {
         'name': 'Zappy #1461',
         'unit_name': 'ZAPP1461',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie6xp6co7gqokdt4l6qzlmfco7a72i3joifhwp3x6lctw77plwbqu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614903400.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Ghost',
@@ -3661,7 +3661,7 @@ ZAPPY_COLLECTION = {
     2614903510: {
         'name': 'Zappy #1649',
         'unit_name': 'ZAPP1649',
-        'image_url': 'https://ipfs.io/ipfs/bafkreift56agtzrqun3doxzg26mrazfyjv34goffm2q2z7hmarxsjicvri',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614903510.jpg',
         'background': 'Green',
         'body': 'Lifesaver',
         'earring': 'Sunrise',
@@ -3674,7 +3674,7 @@ ZAPPY_COLLECTION = {
     2614903597: {
         'name': 'Zappy #1303',
         'unit_name': 'ZAPP1303',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbgswg5hx7cagk74mtfv2gtuz3fwoynfzsgiofc25xwjmx4wtedy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614903597.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Pyramid',
@@ -3687,7 +3687,7 @@ ZAPPY_COLLECTION = {
     2614903685: {
         'name': 'Zappy #1332',
         'unit_name': 'ZAPP1332',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaemwrq5dvyc4ubv42ztdcoihwh4dy24wbihzifrr5ee4cztozohe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614903685.jpg',
         'background': 'Orange',
         'body': 'Fanny Pack',
         'earring': 'Zappies',
@@ -3700,7 +3700,7 @@ ZAPPY_COLLECTION = {
     2614904108: {
         'name': 'Zappy #1519',
         'unit_name': 'ZAPP1519',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiakj2a6rl46d4lmbirjjcypt23mlk6i3oxdyvzqiiz6i4blpsk5ga',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614904108.jpg',
         'background': 'Blue',
         'body': 'Muscle Suit',
         'earring': 'Right Ring',
@@ -3713,7 +3713,7 @@ ZAPPY_COLLECTION = {
     2614904324: {
         'name': 'Zappy #1101',
         'unit_name': 'ZAPP1101',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih6opl3qkb7rs3bvaznxh5aqles47vncusxdduhuschogylvqzmui',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614904324.jpg',
         'background': 'Green',
         'body': 'Rabbit Suit',
         'earring': 'Skull',
@@ -3726,7 +3726,7 @@ ZAPPY_COLLECTION = {
     2614904401: {
         'name': 'Zappy #1320',
         'unit_name': 'ZAPP1320',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihrmxd5cxioxfp6eshu2k26hk6p6ru6netytfg4u4coibzivuqnuu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614904401.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Hashtag',
@@ -3739,7 +3739,7 @@ ZAPPY_COLLECTION = {
     2614904541: {
         'name': 'Zappy #1340',
         'unit_name': 'ZAPP1340',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiampw5gu5wxr3pn7zzwxs2woiyhg5i7j6fxlz6rmyhyxpfzmucuh4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614904541.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Right Helix',
@@ -3752,7 +3752,7 @@ ZAPPY_COLLECTION = {
     2614904835: {
         'name': 'Zappy #1091',
         'unit_name': 'ZAPP1091',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieguqougwp4wq5docw73kojwrunfg3ip3keb2q2wolkdym3ihuj6y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614904835.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Serious',
@@ -3765,7 +3765,7 @@ ZAPPY_COLLECTION = {
     2614904915: {
         'name': 'Zappy #1671',
         'unit_name': 'ZAPP1671',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiesbmxioq635rbstscjr4hoywohf4w725kqh5z4g5sbq54ggxjdqa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614904915.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Sad',
@@ -3778,7 +3778,7 @@ ZAPPY_COLLECTION = {
     2614905301: {
         'name': 'Zappy #1181',
         'unit_name': 'ZAPP1181',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidjhhc4bzmypd3oc2bjsbid3z7dv3i7kzdniacwsjupursw7zk6n4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614905301.jpg',
         'background': 'Orange',
         'body': 'Bathrobe',
         'earring': 'Sunrise',
@@ -3791,7 +3791,7 @@ ZAPPY_COLLECTION = {
     2614905455: {
         'name': 'Zappy #1496',
         'unit_name': 'ZAPP1496',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiehxao3lyeralbhuvkomaoywz6ajoeohxfhqi3rsgbnlrpr5n5lna',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614905455.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Double Helix',
@@ -3804,7 +3804,7 @@ ZAPPY_COLLECTION = {
     2614905623: {
         'name': 'Zappy #1701',
         'unit_name': 'ZAPP1701',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifxfnsnekunqp5h5ttjeoxyqv7uviidbpqzqdl7vqijdifgq56vgy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614905623.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Left Ring',
@@ -3817,7 +3817,7 @@ ZAPPY_COLLECTION = {
     2614907262: {
         'name': 'Zappy #168',
         'unit_name': 'ZAPP0168',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie6t7ttr7fnnxdttqyj3skr6nicld3a2oilguq5j7vlpq3quuad4a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614907262.jpg',
         'background': 'Orange',
         'body': 'Striped Shirt',
         'earring': 'Pyramid',
@@ -3830,7 +3830,7 @@ ZAPPY_COLLECTION = {
     2614907439: {
         'name': 'Zappy #1797',
         'unit_name': 'ZAPP1797',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibhighmplsouezgmconnilsazrqdpx26kaokkp2tckm2wqsczbjza',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614907439.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Daisy',
@@ -3843,7 +3843,7 @@ ZAPPY_COLLECTION = {
     2614907648: {
         'name': 'Zappy #567',
         'unit_name': 'ZAPP0567',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiec3xw6e555cve756m2g4o5g7voexqjj6w72kcrwbmy3mkn5jw2fe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614907648.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'Hashtag',
@@ -3856,7 +3856,7 @@ ZAPPY_COLLECTION = {
     2614907781: {
         'name': 'Zappy #1590',
         'unit_name': 'ZAPP1590',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihomem5iivplrfberimwsjg6skdkpvzf5uhrqycsv7qy3fspvugpu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614907781.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Carton Cup',
@@ -3869,7 +3869,7 @@ ZAPPY_COLLECTION = {
     2614907951: {
         'name': 'Zappy #151',
         'unit_name': 'ZAPP0151',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibn7j46n7y5up2e4zs7vkni4igj5qslhhu3usmy6hhzi2m7lkvyoq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614907951.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Daisy',
@@ -3882,7 +3882,7 @@ ZAPPY_COLLECTION = {
     2614908125: {
         'name': 'Zappy #1422',
         'unit_name': 'ZAPP1422',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiamt4apimvz2vk3a5sa4s3k36pivbw3cubbcdorjrv73szaihd6fe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614908125.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Rainbow',
@@ -3895,7 +3895,7 @@ ZAPPY_COLLECTION = {
     2614908274: {
         'name': 'Zappy #46',
         'unit_name': 'ZAPP0046',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigyvxyu7wcqjhji5lf7kd7umbxocgywsxorkk2fm2gsmv7fje5jmi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614908274.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Right Helix',
@@ -3908,7 +3908,7 @@ ZAPPY_COLLECTION = {
     2614908533: {
         'name': 'Zappy #1469',
         'unit_name': 'ZAPP1469',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigkudwzy6v6xgmlwvw75ygfbea7nsapzrpvfqcntdd6mcqw3ddium',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614908533.jpg',
         'background': 'Blue',
         'body': 'Scarf',
         'earring': 'None',
@@ -3921,7 +3921,7 @@ ZAPPY_COLLECTION = {
     2614908687: {
         'name': 'Zappy #910',
         'unit_name': 'ZAPP0910',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic2biorp5llrhzd7hy7eeyhikqsrebkoiptzv5qamrrtyhslflqz4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614908687.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Hashtag',
@@ -3934,7 +3934,7 @@ ZAPPY_COLLECTION = {
     2614908966: {
         'name': 'Zappy #106',
         'unit_name': 'ZAPP0106',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibl3n7znbjdvkj2f5qhazhvzq45usmbhyt7mzsbijrlzwltcewzmm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614908966.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Left Ring',
@@ -3947,7 +3947,7 @@ ZAPPY_COLLECTION = {
     2614909110: {
         'name': 'Zappy #938',
         'unit_name': 'ZAPP0938',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihfumpzpwxrurad2flw2rads4dpioaf7asme4x4cmjvhawjkms5gu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614909110.jpg',
         'background': 'Yellow',
         'body': 'Kimono',
         'earring': 'Left Ring',
@@ -3960,7 +3960,7 @@ ZAPPY_COLLECTION = {
     2614909647: {
         'name': 'Zappy #1561',
         'unit_name': 'ZAPP1561',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaa2zvtbap6j2hiiyhvu2g73ssm7j7auepkmgn2nkfny2stjzoswy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614909647.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Number One',
@@ -3973,7 +3973,7 @@ ZAPPY_COLLECTION = {
     2614909790: {
         'name': 'Zappy #909',
         'unit_name': 'ZAPP0909',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig7vgnjmzealgi3fvgztfuw24fkpjuc25kiughn7fgrrc47xvxqti',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614909790.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Happy',
@@ -3986,7 +3986,7 @@ ZAPPY_COLLECTION = {
     2614909943: {
         'name': 'Zappy #1633',
         'unit_name': 'ZAPP1633',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibh57rvicnixgyw2kucniv5oquxppb4cp3f5bgadxogjsftemnney',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614909943.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Left Helix',
@@ -3999,7 +3999,7 @@ ZAPPY_COLLECTION = {
     2614910652: {
         'name': 'Zappy #1627',
         'unit_name': 'ZAPP1627',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibhtl5a7ga32wv53uppr7wz5oi5bfh5zjktih4uzgya4aejnongz4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614910652.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'None',
@@ -4012,7 +4012,7 @@ ZAPPY_COLLECTION = {
     2614911214: {
         'name': 'Zappy #1709',
         'unit_name': 'ZAPP1709',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignsjgh4da2riulqx3i3z25nfvhuhkijcho4f53fz6cxm7anelqqi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614911214.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Rainbow',
@@ -4025,7 +4025,7 @@ ZAPPY_COLLECTION = {
     2614911496: {
         'name': 'Zappy #865',
         'unit_name': 'ZAPP0865',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicqsw5a6dtfzblyv7vhii3pi2ijfcmqdj67o772hndjft6n36gdf4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614911496.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'Pepper',
@@ -4038,7 +4038,7 @@ ZAPPY_COLLECTION = {
     2614911683: {
         'name': 'Zappy #1192',
         'unit_name': 'ZAPP1192',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifgvocginokv5mnta2o566xv3rcgrs2332kdywewouhpfvjy2ruzq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614911683.jpg',
         'background': 'Green',
         'body': 'Scarf',
         'earring': 'None',
@@ -4051,7 +4051,7 @@ ZAPPY_COLLECTION = {
     2614911831: {
         'name': 'Zappy #2133',
         'unit_name': 'ZAPP2133',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiezc2eca2sskgfbefzzvjpxr2cn54nen4zo4n64vyopc3m3kuh3fa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614911831.jpg',
         'background': 'Green',
         'body': 'Trench Coat',
         'earring': 'Right Helix',
@@ -4064,7 +4064,7 @@ ZAPPY_COLLECTION = {
     2614911845: {
         'name': 'Zappy #2020',
         'unit_name': 'ZAPP2020',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieyzdxyrxzco33m66tpozxufjhysshzodllfujrobr6425htq6t4y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614911845.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'Pyramid',
@@ -4077,7 +4077,7 @@ ZAPPY_COLLECTION = {
     2614911938: {
         'name': 'Zappy #777',
         'unit_name': 'ZAPP0777',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiddchbeiduhjkwdoetl7bofedv6siqul27nv2dpmhjnarj4yup45u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614911938.jpg',
         'background': 'Yellow',
         'body': 'Suit',
         'earring': 'Bananas',
@@ -4090,7 +4090,7 @@ ZAPPY_COLLECTION = {
     2614912018: {
         'name': 'Zappy #2108',
         'unit_name': 'ZAPP2108',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih7nk6ozeh3xbj7572vm4utfo6lgdojemgavsprg3fe5kpw7hpamu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912018.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'Number One',
@@ -4103,7 +4103,7 @@ ZAPPY_COLLECTION = {
     2614912097: {
         'name': 'Zappy #1467',
         'unit_name': 'ZAPP1467',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiazoncd3xotmnonr24vq7nvohmazv3tw5i7qzwlvquofbyhid2wzm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912097.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Star',
@@ -4116,7 +4116,7 @@ ZAPPY_COLLECTION = {
     2614912167: {
         'name': 'Zappy #2197',
         'unit_name': 'ZAPP2197',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicbqdfmj6zbm2nitol3h3a2u7jcbzblg66nkljpsd4sw226rubaci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912167.jpg',
         'background': 'Green',
         'body': 'Trench Coat',
         'earring': 'None',
@@ -4129,7 +4129,7 @@ ZAPPY_COLLECTION = {
     2614912265: {
         'name': 'Zappy #591',
         'unit_name': 'ZAPP0591',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiefnovqy4yzkdemjeipjjo7vquvo2hzknzzr2awi2fyxmmo6si3zy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912265.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Hashtag',
@@ -4142,7 +4142,7 @@ ZAPPY_COLLECTION = {
     2614912312: {
         'name': 'Zappy #1847',
         'unit_name': 'ZAPP1847',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigs3hmexqesaofupyf7pncoii4j3jzh4ynl6elrn4ju3q53tlkpuq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912312.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'Skull',
@@ -4155,7 +4155,7 @@ ZAPPY_COLLECTION = {
     2614912521: {
         'name': 'Zappy #1840',
         'unit_name': 'ZAPP1840',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihqr3kjonh2a6r26a535dapu5nvvxvfrgzye6pe42mbhdpi4xoo4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912521.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Bananas',
@@ -4168,7 +4168,7 @@ ZAPPY_COLLECTION = {
     2614912588: {
         'name': 'Zappy #1968',
         'unit_name': 'ZAPP1968',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihvlv4cpmroym4jxjlqfioefemyc2dceqnd5mcwfpqciagerrcqde',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912588.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Pepper',
@@ -4181,7 +4181,7 @@ ZAPPY_COLLECTION = {
     2614912682: {
         'name': 'Zappy #2031',
         'unit_name': 'ZAPP2031',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiha7cefcwzwi2ksboucds64ufb2etaigq3d3e2jyzclvq5jwmokxq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912682.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Zappies',
@@ -4194,7 +4194,7 @@ ZAPPY_COLLECTION = {
     2614912771: {
         'name': 'Zappy #1702',
         'unit_name': 'ZAPP1702',
-        'image_url': 'https://ipfs.io/ipfs/bafkreick3hsaqygdrhpihssp2somozx4lt4dhjsj7rsgln4irhh67qxjju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614912771.jpg',
         'background': 'Orange',
         'body': 'Bathrobe',
         'earring': 'Hashtag',
@@ -4207,7 +4207,7 @@ ZAPPY_COLLECTION = {
     2614913236: {
         'name': 'Zappy #20',
         'unit_name': 'ZAPP0020',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiabzpd2xcilc2546ti3oflj63hcpdyay46l4evuy3ban2k6cld5ke',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614913236.jpg',
         'background': 'Red',
         'body': 'Bowling Shirt',
         'earring': 'None',
@@ -4220,7 +4220,7 @@ ZAPPY_COLLECTION = {
     2614913319: {
         'name': 'Zappy #2003',
         'unit_name': 'ZAPP2003',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicz4jakkq6jkiodvi4vv7nxa7vwqpybvr5n2tujqxugnkcrlcygki',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614913319.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Happy',
@@ -4233,7 +4233,7 @@ ZAPPY_COLLECTION = {
     2614913428: {
         'name': 'Zappy #1915',
         'unit_name': 'ZAPP1915',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihyq4b4zpcs4hif7zjprvjah22bqx72uipzx6aqrpkq32q5ehfqsi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614913428.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Lightning',
@@ -4246,7 +4246,7 @@ ZAPPY_COLLECTION = {
     2614913470: {
         'name': 'Zappy #1103',
         'unit_name': 'ZAPP1103',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiamd3ozmmyvagnwpvswthtzxrhiiclj7x2ynl2usu5ry5kdebwdba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614913470.jpg',
         'background': 'Green',
         'body': 'Bathrobe',
         'earring': 'Bananas',
@@ -4259,7 +4259,7 @@ ZAPPY_COLLECTION = {
     2614913716: {
         'name': 'Zappy #2192',
         'unit_name': 'ZAPP2192',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicyqaqodw5gqvuvkvcgw7ivvdzu6dogsicaan5sgurtbm73dxwc3i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614913716.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'None',
@@ -4272,7 +4272,7 @@ ZAPPY_COLLECTION = {
     2614913752: {
         'name': 'Zappy #294',
         'unit_name': 'ZAPP0294',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibn7xmgwiw2p7hz5h55ff6frnh6dnfvthvyrjafmqw3mxfsdj63em',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614913752.jpg',
         'background': 'Green',
         'body': 'Polo Overalls',
         'earring': 'Daisy',
@@ -4285,7 +4285,7 @@ ZAPPY_COLLECTION = {
     2614913825: {
         'name': 'Zappy #1739',
         'unit_name': 'ZAPP1739',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid63ard3n6sgazecqs2xcps3wduxodez5yoqxlwnuu5yc3ajo3qgy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614913825.jpg',
         'background': 'Orange',
         'body': 'Wool Collar Jacket',
         'earring': 'Lightning',
@@ -4298,7 +4298,7 @@ ZAPPY_COLLECTION = {
     2614913905: {
         'name': 'Zappy #2116',
         'unit_name': 'ZAPP2116',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihsjhonzhgsuz6me5kpl4z2jlvutt4wxloemvuujib6vfngxkf35m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614913905.jpg',
         'background': 'Orange',
         'body': 'Scarf',
         'earring': 'Party Popper',
@@ -4311,7 +4311,7 @@ ZAPPY_COLLECTION = {
     2614914069: {
         'name': 'Zappy #1869',
         'unit_name': 'ZAPP1869',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie2mt2wm3t23ta4t6q3eydneltchsdzzzf4nufvgewp5eu7q4qhnm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614914069.jpg',
         'background': 'Blue',
         'body': 'Oversize Sweater',
         'earring': 'None',
@@ -4324,7 +4324,7 @@ ZAPPY_COLLECTION = {
     2614914193: {
         'name': 'Zappy #1971',
         'unit_name': 'ZAPP1971',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidt3ha5i5cychiqlxwq53ldneq6zi7zigitlboxcvnavneks25vbm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614914193.jpg',
         'background': 'Blue',
         'body': 'Crocodile Suit',
         'earring': 'Zappies',
@@ -4337,7 +4337,7 @@ ZAPPY_COLLECTION = {
     2614914289: {
         'name': 'Zappy #2189',
         'unit_name': 'ZAPP2189',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiam7dlaa2ki4upbuwgvtogphaflpnooqnmmjmd4mp5apjdjn6zlcy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614914289.jpg',
         'background': 'Blue',
         'body': 'Scarf',
         'earring': 'Strawberry',
@@ -4350,7 +4350,7 @@ ZAPPY_COLLECTION = {
     2614914480: {
         'name': 'Zappy #2171',
         'unit_name': 'ZAPP2171',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiezu4kccqokkxu7abhifozlpbhdcjxfycrtjy3ftqcprcu53ee5fa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614914480.jpg',
         'background': 'Yellow',
         'body': 'Wool Collar Jacket',
         'earring': 'Star',
@@ -4363,7 +4363,7 @@ ZAPPY_COLLECTION = {
     2614974935: {
         'name': 'Zappy #297',
         'unit_name': 'ZAPP0297',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif673zeo4cytkgjfqyi2tze7hnqhjtmqqq27x5hdnjyx4e3qlabhi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614974935.jpg',
         'background': 'Blue',
         'body': 'Scarf',
         'earring': 'Right Ring',
@@ -4376,7 +4376,7 @@ ZAPPY_COLLECTION = {
     2614975114: {
         'name': 'Zappy #1816',
         'unit_name': 'ZAPP1816',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidodk7eq3den4cgwhp4a357vg7t3sl3ugs2sdcdz6v5tslbtmwtku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2614975114.jpg',
         'background': 'Orange',
         'body': 'Daisy Shirt',
         'earring': 'Serious',
@@ -4389,7 +4389,7 @@ ZAPPY_COLLECTION = {
     2615311036: {
         'name': 'Zappy #76',
         'unit_name': 'ZAPP0076',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidsxjppzjacmyezesagqe2l2kxlj7rpmsxlua4jkfoxqilkkn3dde',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615311036.jpg',
         'background': 'Red',
         'body': 'Suit',
         'earring': 'Twin Rings',
@@ -4402,7 +4402,7 @@ ZAPPY_COLLECTION = {
     2615427860: {
         'name': 'Zappy #105',
         'unit_name': 'ZAPP0105',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibaybpitov5nvunipwdpbmb76xgcuww3n7zdr27murimgxrvqyz7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615427860.jpg',
         'background': 'Purple',
         'body': 'Toga',
         'earring': 'Hashtag',
@@ -4415,7 +4415,7 @@ ZAPPY_COLLECTION = {
     2615428451: {
         'name': 'Zappy #884',
         'unit_name': 'ZAPP0884',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif5f4ydo6uuw6kcvei52jrwlxgfsonnkds5fca7e56q6pkz6oqhtq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615428451.jpg',
         'background': 'Blue',
         'body': 'Crocodile Suit',
         'earring': 'Rainbow',
@@ -4428,7 +4428,7 @@ ZAPPY_COLLECTION = {
     2615428726: {
         'name': 'Zappy #352',
         'unit_name': 'ZAPP0352',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifjothjloqol4dzdr5t3upqjhccxxpdt5coi6vxmovosh3eyxyanm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615428726.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'Pepper',
@@ -4441,7 +4441,7 @@ ZAPPY_COLLECTION = {
     2615429057: {
         'name': 'Zappy #341',
         'unit_name': 'ZAPP0341',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifgvo6kdawfza5ya7ltgkatlvqniwgx2kmwylzxt4pv3gqlmmhkqm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615429057.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Hashtag',
@@ -4454,7 +4454,7 @@ ZAPPY_COLLECTION = {
     2615429196: {
         'name': 'Zappy #296',
         'unit_name': 'ZAPP0296',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiebbeppkzhxvds42tvde6tex5jlbt7v3az7z7sge2lvkzm342zude',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615429196.jpg',
         'background': 'Chroma',
         'body': 'Leather Vest',
         'earring': 'Sad',
@@ -4467,7 +4467,7 @@ ZAPPY_COLLECTION = {
     2615430116: {
         'name': 'Zappy #94',
         'unit_name': 'ZAPP0094',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiefczp6r7iswoovntjifr7mecpjnepo3qnqfzyoww76vbu2gwujiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615430116.jpg',
         'background': 'Purple',
         'body': 'School Outfit',
         'earring': 'Pepper',
@@ -4480,7 +4480,7 @@ ZAPPY_COLLECTION = {
     2615432364: {
         'name': 'Zappy #113',
         'unit_name': 'ZAPP0113',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicxy2canl6boeogpj5yoj2s7q7dikziwsrv2i7kikgh2urmbc22qm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615432364.jpg',
         'background': 'Purple',
         'body': 'Polo Overalls',
         'earring': 'Skull',
@@ -4493,7 +4493,7 @@ ZAPPY_COLLECTION = {
     2615457606: {
         'name': 'Zappy #192',
         'unit_name': 'ZAPP0192',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib4iyfmkqyamfaoloa2tskdt64qsx7jratckymf6yphxsuelqp56a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615457606.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Ghost',
@@ -4506,7 +4506,7 @@ ZAPPY_COLLECTION = {
     2615458022: {
         'name': 'Zappy #39',
         'unit_name': 'ZAPP0039',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiam34glryx2vwkgvwmys767x6sv7uypm6dmqswods5hepyita34vm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615458022.jpg',
         'background': 'Green',
         'body': 'Cat Suit',
         'earring': 'Left Ring',
@@ -4519,7 +4519,7 @@ ZAPPY_COLLECTION = {
     2615458180: {
         'name': 'Zappy #370',
         'unit_name': 'ZAPP0370',
-        'image_url': 'https://ipfs.io/ipfs/bafkreied3afl5exiuo73tfdpo3svbx4izkc72vwcfpdauoq6xcbe6zwpqm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615458180.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Star',
@@ -4532,7 +4532,7 @@ ZAPPY_COLLECTION = {
     2615458311: {
         'name': 'Zappy #392',
         'unit_name': 'ZAPP0392',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifijrixa5vs3v33yi6bs76inglvgnmt4lvqef5fgvc4grrk3vuufu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615458311.jpg',
         'background': 'Blue',
         'body': 'Clouds',
         'earring': 'Pyramid',
@@ -4545,7 +4545,7 @@ ZAPPY_COLLECTION = {
     2615458656: {
         'name': 'Zappy #155',
         'unit_name': 'ZAPP0155',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigenclls7k6necqccri434v4w75uepwabddmcofyyyuapt6i4gd5q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615458656.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Left Helix',
@@ -4558,7 +4558,7 @@ ZAPPY_COLLECTION = {
     2615458752: {
         'name': 'Zappy #394',
         'unit_name': 'ZAPP0394',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigxn54n73pg5oxqgfgxpshqujzf7pdovlj4cq4y2zjgscier4p43m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615458752.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Pyramid',
@@ -4571,7 +4571,7 @@ ZAPPY_COLLECTION = {
     2615458882: {
         'name': 'Zappy #324',
         'unit_name': 'ZAPP0324',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic6gmwjlo6dkrc6r4r645otoxuawbn5sbcxqvr3gfsqr24c2ikpri',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615458882.jpg',
         'background': 'Blue',
         'body': 'Tracksuit Top',
         'earring': 'Bananas',
@@ -4584,7 +4584,7 @@ ZAPPY_COLLECTION = {
     2615459156: {
         'name': 'Zappy #1338',
         'unit_name': 'ZAPP1338',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigf2xjfsrvv3twq5fbkgkhxecvkmm3iwytdljv7grv3yykgrmqbqe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615459156.jpg',
         'background': 'Purple',
         'body': 'Daisy Shirt',
         'earring': 'Star',
@@ -4597,7 +4597,7 @@ ZAPPY_COLLECTION = {
     2615459187: {
         'name': 'Zappy #18',
         'unit_name': 'ZAPP0018',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigrmzmi7quv62w5uumxnxdjvopdarol5dx5umkdyu7fvwldlbqehy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615459187.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Party Popper',
@@ -4610,7 +4610,7 @@ ZAPPY_COLLECTION = {
     2615459571: {
         'name': 'Zappy #448',
         'unit_name': 'ZAPP0448',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifrqipe3yn62qcwvefdpev4gnzw5cwes2t27thefha7uyrnxjfqcu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615459571.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Carton Cup',
@@ -4623,7 +4623,7 @@ ZAPPY_COLLECTION = {
     2615459761: {
         'name': 'Zappy #436',
         'unit_name': 'ZAPP0436',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigsbdjndjl2slng64qyjs562liibxuhee7c2he3cb6jmz4oxiwbtm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615459761.jpg',
         'background': 'Orange',
         'body': 'Kimono',
         'earring': 'Star',
@@ -4636,7 +4636,7 @@ ZAPPY_COLLECTION = {
     2615459837: {
         'name': 'Zappy #180',
         'unit_name': 'ZAPP0180',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigda7jdhu24gbjutwnink6fdcr3h42hs23l4x4ulwam6bm4c4sq3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615459837.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'Knife',
@@ -4649,7 +4649,7 @@ ZAPPY_COLLECTION = {
     2615460366: {
         'name': 'Zappy #1',
         'unit_name': 'ZAPP0001',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiejor7l6rf62aq73fuu332zwpkizs775gcrd4ie3v5vzp77oemthq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615460366.jpg',
         'background': 'Green',
         'body': 'Oversize Sweater',
         'earring': 'Bananas',
@@ -4662,7 +4662,7 @@ ZAPPY_COLLECTION = {
     2615461069: {
         'name': 'Zappy #38',
         'unit_name': 'ZAPP0038',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiflwtxgo4lz46vfjs4vl5q7x7cuyjjnzxbjh73ipfoasf7qd7svba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615461069.jpg',
         'background': 'Red',
         'body': 'Leather Vest',
         'earring': 'Zappies',
@@ -4675,7 +4675,7 @@ ZAPPY_COLLECTION = {
     2615461204: {
         'name': 'Zappy #389',
         'unit_name': 'ZAPP0389',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigzai5tdegxpzv2fu57f2wa7n5fnz76yam22iyjnrwh6mj66ggvpi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615461204.jpg',
         'background': 'Red',
         'body': 'Fur Coat',
         'earring': 'Party Popper',
@@ -4688,7 +4688,7 @@ ZAPPY_COLLECTION = {
     2615461572: {
         'name': 'Zappy #312',
         'unit_name': 'ZAPP0312',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig5tdz6ckh4szrxazzfg2pd3f4zffylvkg2hr254x5nqvqz52rd2u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615461572.jpg',
         'background': 'Purple',
         'body': 'Colorful Jacket',
         'earring': 'Pyramid',
@@ -4701,7 +4701,7 @@ ZAPPY_COLLECTION = {
     2615461777: {
         'name': 'Zappy #40',
         'unit_name': 'ZAPP0040',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihw4u5tnkwnpu6ndpruslpkuuvn2fms3d64jwgfxlgrms4tz7iwqm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615461777.jpg',
         'background': 'Red',
         'body': 'Overalls',
         'earring': 'Right Ring',
@@ -4714,7 +4714,7 @@ ZAPPY_COLLECTION = {
     2615461933: {
         'name': 'Zappy #302',
         'unit_name': 'ZAPP0302',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigibdzivkh2rvpfh67eayw4km42rc4emickqm7qwqps3yulwz7nu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615461933.jpg',
         'background': 'Orange',
         'body': 'Space Suit',
         'earring': 'Zappies',
@@ -4727,7 +4727,7 @@ ZAPPY_COLLECTION = {
     2615462602: {
         'name': 'Zappy #437',
         'unit_name': 'ZAPP0437',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieuhiqioxlb6x5bngdxo4k4lswte2c3bkuzs3eayz6yuututt4omu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615462602.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'Number One',
@@ -4740,7 +4740,7 @@ ZAPPY_COLLECTION = {
     2615462823: {
         'name': 'Zappy #72',
         'unit_name': 'ZAPP0072',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibxwwo3rhjenh3wh45gxbrg6auwdyg2fm6nqvhibhkxwog2ux4pfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615462823.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Zappies',
@@ -4753,7 +4753,7 @@ ZAPPY_COLLECTION = {
     2615462965: {
         'name': 'Zappy #258',
         'unit_name': 'ZAPP0258',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibm7pwuq5edkj24qgj6bl2exteideqq5765zeom55pmxz3c6sbuem',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615462965.jpg',
         'background': 'Green',
         'body': 'Warning Tape',
         'earring': 'Lightning',
@@ -4766,7 +4766,7 @@ ZAPPY_COLLECTION = {
     2615521008: {
         'name': 'Zappy #1788',
         'unit_name': 'ZAPP1788',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif365fqetxsohgcy5joo55ceqnj4mmorwptihb35yoixu4bhs5heq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615521008.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'None',
@@ -4779,7 +4779,7 @@ ZAPPY_COLLECTION = {
     2615521096: {
         'name': 'Zappy #1240',
         'unit_name': 'ZAPP1240',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihc2cp6ay3cgbyhxn5betypw25auqa7y2ahg7odxii2vwnegzvxkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615521096.jpg',
         'background': 'Red',
         'body': 'Puffer Coat',
         'earring': 'Rainbow',
@@ -4792,7 +4792,7 @@ ZAPPY_COLLECTION = {
     2615527077: {
         'name': 'Zappy #832',
         'unit_name': 'ZAPP0832',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiedsfzfbdfkpz5d5rb4ndaxcdlosl6cpn67yp4fn3qzuv2awxhn3q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615527077.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Pyramid',
@@ -4805,7 +4805,7 @@ ZAPPY_COLLECTION = {
     2615527162: {
         'name': 'Zappy #593',
         'unit_name': 'ZAPP0593',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif5n4e26woum4c6a7s2bdbo6kx2altdjtp6j6kb5kbu4bl3hmvrpm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615527162.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Zappies',
@@ -4818,7 +4818,7 @@ ZAPPY_COLLECTION = {
     2615527339: {
         'name': 'Zappy #799',
         'unit_name': 'ZAPP0799',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidzfygb5sel7qm3kaxr7ibhyi5yupxxe22pladi7totls7mzoot64',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615527339.jpg',
         'background': 'Blue',
         'body': 'Bowling Shirt',
         'earring': 'Pyramid',
@@ -4831,7 +4831,7 @@ ZAPPY_COLLECTION = {
     2615527451: {
         'name': 'Zappy #523',
         'unit_name': 'ZAPP0523',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidq44r3rw3rfxnertmy2o33iiaows3tb2oysuwy2jyl4jw2bcfluu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615527451.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Sad',
@@ -4844,7 +4844,7 @@ ZAPPY_COLLECTION = {
     2615527729: {
         'name': 'Zappy #840',
         'unit_name': 'ZAPP0840',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia4cwgzpushcsnlvt7b2vttpoytuz6n7yppbohssy6nhg3bul2hi4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615527729.jpg',
         'background': 'Blue',
         'body': 'Puffer Coat',
         'earring': 'Rainbow',
@@ -4857,7 +4857,7 @@ ZAPPY_COLLECTION = {
     2615527852: {
         'name': 'Zappy #668',
         'unit_name': 'ZAPP0668',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicwjpd7sfso3w5zfx3ki7dcejgxh5p44wxgutcg7ocl5p33iba7ty',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615527852.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Ghost',
@@ -4870,7 +4870,7 @@ ZAPPY_COLLECTION = {
     2615528116: {
         'name': 'Zappy #671',
         'unit_name': 'ZAPP0671',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidimq2d2zhnhoo4qui57cly3ssi4l32aks645i2hfcb4gan2urqay',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615528116.jpg',
         'background': 'Green',
         'body': 'Daisy Shirt',
         'earring': 'Sad',
@@ -4883,7 +4883,7 @@ ZAPPY_COLLECTION = {
     2615530582: {
         'name': 'Zappy #724',
         'unit_name': 'ZAPP0724',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigszdm7jmqgrv6lqwmf757r3jal7sscjawdrkn53jklbjcfdxoctu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615530582.jpg',
         'background': 'Blue',
         'body': 'Scarf',
         'earring': 'Daisy',
@@ -4896,7 +4896,7 @@ ZAPPY_COLLECTION = {
     2615531394: {
         'name': 'Zappy #606',
         'unit_name': 'ZAPP0606',
-        'image_url': 'https://ipfs.io/ipfs/bafybeibzudqrtalthgshwp4q5543xkg3z3eas47pjmzla26fgmq3hvad6y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615531394.jpg',
         'background': 'Chroma',
         'body': 'Naked',
         'earring': 'Right Helix',
@@ -4909,7 +4909,7 @@ ZAPPY_COLLECTION = {
     2615533489: {
         'name': 'Zappy #720',
         'unit_name': 'ZAPP0720',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgrnlovxprsjkq5q3oggptpzuk7a75ivv525343velze55jwyhza',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615533489.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Number One',
@@ -4922,7 +4922,7 @@ ZAPPY_COLLECTION = {
     2615534505: {
         'name': 'Zappy #548',
         'unit_name': 'ZAPP0548',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihobca7vhtrhp2zf22gyhnfsl72ts6pbqbmh43sv4nncwgyujek2y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615534505.jpg',
         'background': 'Orange',
         'body': 'Clouds',
         'earring': 'Left Ring',
@@ -4935,7 +4935,7 @@ ZAPPY_COLLECTION = {
     2615534707: {
         'name': 'Zappy #654',
         'unit_name': 'ZAPP0654',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicev3qwn2qoofsbme5qpdyku3y6nakuobh7gxiearg4ybyna3ndnq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615534707.jpg',
         'background': 'Blue',
         'body': 'Ribbon Tie',
         'earring': 'Sad',
@@ -4948,7 +4948,7 @@ ZAPPY_COLLECTION = {
     2615535325: {
         'name': 'Zappy #566',
         'unit_name': 'ZAPP0566',
-        'image_url': 'https://ipfs.io/ipfs/bafybeigs6ip3lvswp6yf6vyhx24adqyl6xjd7nywphsyj5um7nvalsckd4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615535325.jpg',
         'background': 'Chroma',
         'body': 'Polo Shirt',
         'earring': 'Star',
@@ -4961,7 +4961,7 @@ ZAPPY_COLLECTION = {
     2615535934: {
         'name': 'Zappy #622',
         'unit_name': 'ZAPP0622',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibg2opnvuojkqicq5frd3z267s25xgrh2fo3mccay5wfk4wvfenoi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615535934.jpg',
         'background': 'Red',
         'body': 'Sleeveless Shirt',
         'earring': 'Knife',
@@ -4974,7 +4974,7 @@ ZAPPY_COLLECTION = {
     2615537528: {
         'name': 'Zappy #563',
         'unit_name': 'ZAPP0563',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihvjqbnicnbcc6knmitstqqkn7njfl3cma5rs34worn34qfpcuvou',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615537528.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'None',
@@ -4987,7 +4987,7 @@ ZAPPY_COLLECTION = {
     2615537914: {
         'name': 'Zappy #862',
         'unit_name': 'ZAPP0862',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaz44o3cyryrbhnz2xux4kpmuqvh6rp4ogarmbojwd7vhmgqnxbse',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615537914.jpg',
         'background': 'Green',
         'body': 'Armband',
         'earring': 'Rainbow',
@@ -5000,7 +5000,7 @@ ZAPPY_COLLECTION = {
     2615538673: {
         'name': 'Zappy #543',
         'unit_name': 'ZAPP0543',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicj7kxs5gkizf3vygy2r6qpoq7zy5g2i7tmj2zhxugcbwicn563oa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615538673.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'Double Helix',
@@ -5013,7 +5013,7 @@ ZAPPY_COLLECTION = {
     2615539015: {
         'name': 'Zappy #535',
         'unit_name': 'ZAPP0535',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihvixtjyquuuyraa4z65hldy2jwwydms4yqnzrj2af5dpakvllpxy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615539015.jpg',
         'background': 'Orange',
         'body': 'Scarf',
         'earring': 'Left Ring',
@@ -5026,7 +5026,7 @@ ZAPPY_COLLECTION = {
     2615539548: {
         'name': 'Zappy #665',
         'unit_name': 'ZAPP0665',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiapyvmsphkf5pn45wekarslklr7zkwzwniuw2tyrfhfbitpjzv36u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615539548.jpg',
         'background': 'Purple',
         'body': 'Bowling Shirt',
         'earring': 'Bananas',
@@ -5039,7 +5039,7 @@ ZAPPY_COLLECTION = {
     2615540958: {
         'name': 'Zappy #773',
         'unit_name': 'ZAPP0773',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid4m6ttaqtohrq7ofeycv2by3uydz2wxjgurjtxo5hys3svwpeas4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615540958.jpg',
         'background': 'Blue',
         'body': 'Striped Sweater',
         'earring': 'Left Helix',
@@ -5052,7 +5052,7 @@ ZAPPY_COLLECTION = {
     2615553734: {
         'name': 'Zappy #74',
         'unit_name': 'ZAPP0074',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibcdkoyb4hrzesxghf6eeofgkakx5hfy5d75qlewszjbfvc2adgby',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615553734.jpg',
         'background': 'Green',
         'body': 'Hoodie',
         'earring': 'Pyramid',
@@ -5065,7 +5065,7 @@ ZAPPY_COLLECTION = {
     2615553857: {
         'name': 'Zappy #73',
         'unit_name': 'ZAPP0073',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia4fz5w4q6qqmjipznp2wl6btjnldsqcnapx6sbdmgb2rnghisuya',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615553857.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'Happy',
@@ -5078,7 +5078,7 @@ ZAPPY_COLLECTION = {
     2615558245: {
         'name': 'Zappy #1004',
         'unit_name': 'ZAPP1004',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiav5vkoat5fearcsfczl56qzu4kv7prrwlnxpilf5awl2vcqlzgky',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615558245.jpg',
         'background': 'Green',
         'body': 'Scarf',
         'earring': 'Skull',
@@ -5091,7 +5091,7 @@ ZAPPY_COLLECTION = {
     2615558405: {
         'name': 'Zappy #1874',
         'unit_name': 'ZAPP1874',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifevmrcljnhehe2tdf4xdxerv2znw76mktx2qoj3u7swkst3rhgii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615558405.jpg',
         'background': 'Green',
         'body': 'Scarf',
         'earring': 'Ghost',
@@ -5104,7 +5104,7 @@ ZAPPY_COLLECTION = {
     2615558573: {
         'name': 'Zappy #522',
         'unit_name': 'ZAPP0522',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicvnxcrndmzlczc2hiqmc6pw6pgdx54cyxiuqb2q46gkdb7wakama',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615558573.jpg',
         'background': 'Red',
         'body': 'Oversize Sweater',
         'earring': 'Carton Cup',
@@ -5117,7 +5117,7 @@ ZAPPY_COLLECTION = {
     2615558746: {
         'name': 'Zappy #1248',
         'unit_name': 'ZAPP1248',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiac5zkp6ku47rwp263r4c7t5bvrb3cznkwcsdnbzmi5ejtc5ojjxy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615558746.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Left Ring',
@@ -5130,7 +5130,7 @@ ZAPPY_COLLECTION = {
     2615559157: {
         'name': 'Zappy #2154',
         'unit_name': 'ZAPP2154',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiharrtt2oeutv74m36oyhtqwwwxfvaor44ftyeka734jsw7noekim',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615559157.jpg',
         'background': 'Yellow',
         'body': 'Oversize Sweater',
         'earring': 'Left Ring',
@@ -5143,7 +5143,7 @@ ZAPPY_COLLECTION = {
     2615559326: {
         'name': 'Zappy #293',
         'unit_name': 'ZAPP0293',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidja27nd4a7soogfnf347lkoj6jaxxrtm4cibw7is6tzt3uda2zwi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615559326.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'Happy',
@@ -5156,7 +5156,7 @@ ZAPPY_COLLECTION = {
     2615585861: {
         'name': 'Zappy #869',
         'unit_name': 'ZAPP0869',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifuwhpwmg33vjcmeebzmvp7ix4rac3yxaubcc3a6dxeakmvv256fm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615585861.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Bananas',
@@ -5169,7 +5169,7 @@ ZAPPY_COLLECTION = {
     2615585949: {
         'name': 'Zappy #1189',
         'unit_name': 'ZAPP1189',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih5wkgtqaksou7lumham5rjgcsuqv6ym6chjmtxlxapt73gfb4cnq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615585949.jpg',
         'background': 'Orange',
         'body': 'Wool Collar Jacket',
         'earring': 'Party Popper',
@@ -5182,7 +5182,7 @@ ZAPPY_COLLECTION = {
     2615586305: {
         'name': 'Zappy #1033',
         'unit_name': 'ZAPP1033',
-        'image_url': 'https://ipfs.io/ipfs/bafybeigw6ivmiispywonlldbptbh4hsy7zg2xrkxgqd56xvlmjt6uopa64',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615586305.jpg',
         'background': 'Chroma',
         'body': 'Colorful Jacket',
         'earring': 'Hashtag',
@@ -5195,7 +5195,7 @@ ZAPPY_COLLECTION = {
     2615586414: {
         'name': 'Zappy #1259',
         'unit_name': 'ZAPP1259',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiangvlbekid25onmmlegh37fmh4t6hkbkcxe5opuyvc6x6j57etp4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615586414.jpg',
         'background': 'Purple',
         'body': 'Lifesaver',
         'earring': 'Party Popper',
@@ -5208,7 +5208,7 @@ ZAPPY_COLLECTION = {
     2615586615: {
         'name': 'Zappy #1085',
         'unit_name': 'ZAPP1085',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihg2j5mnvg3dixhfq5a3l4rvpudrgib2qq7fbc2ivtbre6ezpe25i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615586615.jpg',
         'background': 'Red',
         'body': 'Kimono',
         'earring': 'None',
@@ -5221,7 +5221,7 @@ ZAPPY_COLLECTION = {
     2615586723: {
         'name': 'Zappy #1169',
         'unit_name': 'ZAPP1169',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib47js7c6i6lcrqsuf6xkvyew7k63flzckie2jm7cvrkgc2xwumoq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615586723.jpg',
         'background': 'Orange',
         'body': 'Polo Shirt',
         'earring': 'Serious',
@@ -5234,7 +5234,7 @@ ZAPPY_COLLECTION = {
     2615586883: {
         'name': 'Zappy #1016',
         'unit_name': 'ZAPP1016',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia6jzdhthnhe2otjb26jsg2ctivpgoeazoqblji2efbyjfm4a4qii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615586883.jpg',
         'background': 'Yellow',
         'body': 'Striped Sweater',
         'earring': 'Left Ring',
@@ -5247,7 +5247,7 @@ ZAPPY_COLLECTION = {
     2615587044: {
         'name': 'Zappy #1289',
         'unit_name': 'ZAPP1289',
-        'image_url': 'https://ipfs.io/ipfs/bafybeigoyzzuw6wbjm6z6mkeqql4af3swup4colbgekpti63yky3ssy5du',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615587044.jpg',
         'background': 'Chroma',
         'body': 'Funky Coat',
         'earring': 'Left Helix',
@@ -5260,7 +5260,7 @@ ZAPPY_COLLECTION = {
     2615587311: {
         'name': 'Zappy #948',
         'unit_name': 'ZAPP0948',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibpfy5v4b25mm4j7to4hokit6bs6nn2wvr37xdqqzc3pe2jzpjw2u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615587311.jpg',
         'background': 'Purple',
         'body': 'Funky Coat',
         'earring': 'Serious',
@@ -5273,7 +5273,7 @@ ZAPPY_COLLECTION = {
     2615587415: {
         'name': 'Zappy #1313',
         'unit_name': 'ZAPP1313',
-        'image_url': 'https://ipfs.io/ipfs/bafybeibluncw6dbxhqgb6klmt4pktw2nd3feagpml26ud77cqk4saqorlu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615587415.jpg',
         'background': 'Chroma',
         'body': 'Puffer Coat',
         'earring': 'Serious',
@@ -5286,7 +5286,7 @@ ZAPPY_COLLECTION = {
     2615587496: {
         'name': 'Zappy #1178',
         'unit_name': 'ZAPP1178',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2zhaofv45xtthyjhcaslbjbjvu7gc2g6wfzvr255r647tcmmlzi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615587496.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Left Helix',
@@ -5299,7 +5299,7 @@ ZAPPY_COLLECTION = {
     2615587999: {
         'name': 'Zappy #1249',
         'unit_name': 'ZAPP1249',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibsjwtusrgphgo6gqpjg5xz2diboqww6keiyfvnbqyg7tcwpmclf4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615587999.jpg',
         'background': 'Yellow',
         'body': 'Toga',
         'earring': 'Sad',
@@ -5312,7 +5312,7 @@ ZAPPY_COLLECTION = {
     2615588216: {
         'name': 'Zappy #1253',
         'unit_name': 'ZAPP1253',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiha6es4wghqnykboifwyvqms24a5uwstqtk7bueqxvor5qbljns2q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615588216.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Double Helix',
@@ -5325,7 +5325,7 @@ ZAPPY_COLLECTION = {
     2615588364: {
         'name': 'Zappy #955',
         'unit_name': 'ZAPP0955',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieg2xfrlvmpk4ldv3qeg2qtaugrifbijq6o4umftfobfwgeblvnmm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615588364.jpg',
         'background': 'Green',
         'body': 'Basic Jacket',
         'earring': 'Hashtag',
@@ -5338,7 +5338,7 @@ ZAPPY_COLLECTION = {
     2615588794: {
         'name': 'Zappy #1067',
         'unit_name': 'ZAPP1067',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkvfkvnewm4lmjnj2vn7awsa6ifzs6z2tzegwoyohfs573ykaldu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615588794.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Twin Rings',
@@ -5351,7 +5351,7 @@ ZAPPY_COLLECTION = {
     2615589271: {
         'name': 'Zappy #898',
         'unit_name': 'ZAPP0898',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig3sboj2rrtv5koinagtxvsumvtz426spv23gu7oalkdpkrdexzji',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615589271.jpg',
         'background': 'Blue',
         'body': 'Daisy Shirt',
         'earring': 'Skull',
@@ -5364,7 +5364,7 @@ ZAPPY_COLLECTION = {
     2615589752: {
         'name': 'Zappy #1148',
         'unit_name': 'ZAPP1148',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid7te3hvqnoa4cvd7vf6i3tzrd6cdp7b3vmlsoe4rbhviqo2t3yee',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615589752.jpg',
         'background': 'Red',
         'body': 'Daisy Shirt',
         'earring': 'None',
@@ -5377,7 +5377,7 @@ ZAPPY_COLLECTION = {
     2615589873: {
         'name': 'Zappy #1115',
         'unit_name': 'ZAPP1115',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieeqvce5zrh2qb2ujy3yi6kvk6i5g2upx2q74ceedmabjcidma5zu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615589873.jpg',
         'background': 'Purple',
         'body': 'Bowling Shirt',
         'earring': 'None',
@@ -5390,7 +5390,7 @@ ZAPPY_COLLECTION = {
     2615590311: {
         'name': 'Zappy #873',
         'unit_name': 'ZAPP0873',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif36imgoichstt56bekkbtj6ysu2h2bgbzgntxz462dbw4d4f4c7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615590311.jpg',
         'background': 'Yellow',
         'body': 'Armband',
         'earring': 'Left Helix',
@@ -5403,7 +5403,7 @@ ZAPPY_COLLECTION = {
     2615590476: {
         'name': 'Zappy #946',
         'unit_name': 'ZAPP0946',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiefkqar23p6zc7bxeel2nklvwzxfuc73iv7hwm3dwy52tu4p4kvne',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615590476.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Knife',
@@ -5416,7 +5416,7 @@ ZAPPY_COLLECTION = {
     2615638545: {
         'name': 'Zappy #1527',
         'unit_name': 'ZAPP1527',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic55jr74o3mawocdrazdi2h2rhsf5cpmf4fq3oesmlgnn2oqggu4i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615638545.jpg',
         'background': 'Blue',
         'body': 'Sleeveless Shirt',
         'earring': 'Sunrise',
@@ -5429,7 +5429,7 @@ ZAPPY_COLLECTION = {
     2615638943: {
         'name': 'Zappy #1494',
         'unit_name': 'ZAPP1494',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih5ljbndytfceixz2fen2j3s6cnb2uhbom7ra36ileuh5bqfbulxm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615638943.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Sunrise',
@@ -5442,7 +5442,7 @@ ZAPPY_COLLECTION = {
     2615639149: {
         'name': 'Zappy #1346',
         'unit_name': 'ZAPP1346',
-        'image_url': 'https://ipfs.io/ipfs/bafkreianqzbqo5vmr3bg65464x2o7nevcxi5zdmit67hoxhm7a5n7ix4ou',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615639149.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'None',
@@ -5455,7 +5455,7 @@ ZAPPY_COLLECTION = {
     2615639411: {
         'name': 'Zappy #1560',
         'unit_name': 'ZAPP1560',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiheuvrw6mcempw4m77srutazauizlqpltdmdq5apss5zq2dxcvofa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615639411.jpg',
         'background': 'Blue',
         'body': 'Muscle Suit',
         'earring': 'Carton Cup',
@@ -5468,7 +5468,7 @@ ZAPPY_COLLECTION = {
     2615639562: {
         'name': 'Zappy #1342',
         'unit_name': 'ZAPP1342',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicnx26kjrudechflasotfpv7lessjwunvwflcaxiqau3ppxojevfy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615639562.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Twin Rings',
@@ -5481,7 +5481,7 @@ ZAPPY_COLLECTION = {
     2615639852: {
         'name': 'Zappy #1388',
         'unit_name': 'ZAPP1388',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicydyd74ao6fobgws5rc5lepcx5s4cipzivkumamhuioahrjbm2gu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615639852.jpg',
         'background': 'Green',
         'body': 'Choker',
         'earring': 'Left Ring',
@@ -5494,7 +5494,7 @@ ZAPPY_COLLECTION = {
     2615640023: {
         'name': 'Zappy #1580',
         'unit_name': 'ZAPP1580',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihfszm4egjaumnntcyml7fvzhkuli4ju7el56zaj733lvg63vorfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615640023.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Right Ring',
@@ -5507,7 +5507,7 @@ ZAPPY_COLLECTION = {
     2615640256: {
         'name': 'Zappy #1431',
         'unit_name': 'ZAPP1431',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiandzh2ysrnw7mucmduzstctn5fwxjuifuncmky67tu3ysiegccpy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615640256.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Hashtag',
@@ -5520,7 +5520,7 @@ ZAPPY_COLLECTION = {
     2615641323: {
         'name': 'Zappy #1652',
         'unit_name': 'ZAPP1652',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieyndo7slertjpu7bjwny5bheio773uxduwvbb7zazthvnoojypkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615641323.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Carton Cup',
@@ -5533,7 +5533,7 @@ ZAPPY_COLLECTION = {
     2615641988: {
         'name': 'Zappy #1613',
         'unit_name': 'ZAPP1613',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibdh2yn4zvsfxyu45n5mqqtaui5fr6pmyv537zrx7lnsh6nhbjhom',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615641988.jpg',
         'background': 'Yellow',
         'body': 'School Outfit',
         'earring': 'Star',
@@ -5546,7 +5546,7 @@ ZAPPY_COLLECTION = {
     2615642453: {
         'name': 'Zappy #1381',
         'unit_name': 'ZAPP1381',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicmmwznibysrkpnv7v73xpiozgynpacmlkjk6ww2znbk2nowelh3u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615642453.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Carton Cup',
@@ -5559,7 +5559,7 @@ ZAPPY_COLLECTION = {
     2615642648: {
         'name': 'Zappy #636',
         'unit_name': 'ZAPP0636',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic6lmxfqnbhwuzufksn5k4q7a6ihwrzpodberfzxtg5e2tkjdhmsi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615642648.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Twin Rings',
@@ -5572,7 +5572,7 @@ ZAPPY_COLLECTION = {
     2615642665: {
         'name': 'Zappy #1468',
         'unit_name': 'ZAPP1468',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigybz77hriq63jbqxoxioebo5dbrqlxlc5nvm5zezgoubm6fmwcom',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615642665.jpg',
         'background': 'Blue',
         'body': 'Oversize Sweater',
         'earring': 'Bananas',
@@ -5585,7 +5585,7 @@ ZAPPY_COLLECTION = {
     2615642832: {
         'name': 'Zappy #1232',
         'unit_name': 'ZAPP1232',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiaszqbdphynlrk2vxqoniw5ycrdlm6ingkz33luthswp76eq5cqne',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615642832.jpg',
         'background': 'Green',
         'body': 'Leather Vest',
         'earring': 'None',
@@ -5598,7 +5598,7 @@ ZAPPY_COLLECTION = {
     2615642840: {
         'name': 'Zappy #1458',
         'unit_name': 'ZAPP1458',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih67vqkv3amr5qbac6yfh5qmkbbiqe7uh2e3r5vtzqjclov7x2yxu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615642840.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Daisy',
@@ -5611,7 +5611,7 @@ ZAPPY_COLLECTION = {
     2615643079: {
         'name': 'Zappy #1477',
         'unit_name': 'ZAPP1477',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic5horodxzjfaqabetvjxgamfxnixtwo7lplhmsg6yk6xz3yar2oy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615643079.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Happy',
@@ -5624,7 +5624,7 @@ ZAPPY_COLLECTION = {
     2615643117: {
         'name': 'Zappy #24',
         'unit_name': 'ZAPP0024',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidrnztphuxfnbku62563bynb7l6nyndaafyncwslbybi3fsreb5tu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615643117.jpg',
         'background': 'Green',
         'body': 'Leather Vest',
         'earring': 'Right Ring',
@@ -5637,7 +5637,7 @@ ZAPPY_COLLECTION = {
     2615643697: {
         'name': 'Zappy #1588',
         'unit_name': 'ZAPP1588',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicfckbqdjuna6vammlttvbbf7ytu2hmwr7cxpuervl5cfxpbvppgq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615643697.jpg',
         'background': 'Orange',
         'body': 'Polo Shirt',
         'earring': 'Knife',
@@ -5650,7 +5650,7 @@ ZAPPY_COLLECTION = {
     2615643844: {
         'name': 'Zappy #1000',
         'unit_name': 'ZAPP1000',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia5b2hkuygvmzpbu3qdme5pr67ga3dcdccujvi7unyyc7s6ogf5ye',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615643844.jpg',
         'background': 'Red',
         'body': 'School Outfit',
         'earring': 'None',
@@ -5663,7 +5663,7 @@ ZAPPY_COLLECTION = {
     2615643914: {
         'name': 'Zappy #1629',
         'unit_name': 'ZAPP1629',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieygzpf62khjqhjvkdr3ie7t45qddgi3xrxga7bw4bodbgvx52qxq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615643914.jpg',
         'background': 'Orange',
         'body': 'Crocodile Suit',
         'earring': 'Sad',
@@ -5676,7 +5676,7 @@ ZAPPY_COLLECTION = {
     2615643979: {
         'name': 'Zappy #489',
         'unit_name': 'ZAPP0489',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia5mbay3qo5xk4alvbsqrhd37ii235atga6lhzpd6zubem35on3mi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615643979.jpg',
         'background': 'Orange',
         'body': 'Basic Jacket',
         'earring': 'Sunrise',
@@ -5689,7 +5689,7 @@ ZAPPY_COLLECTION = {
     2615644107: {
         'name': 'Zappy #1444',
         'unit_name': 'ZAPP1444',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieqpanrkskyj7i4vxv47yehag4eooi2arqhssbvvi3fjphychkane',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615644107.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Zappies',
@@ -5702,7 +5702,7 @@ ZAPPY_COLLECTION = {
     2615644553: {
         'name': 'Zappy #200',
         'unit_name': 'ZAPP0200',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbtcbshosh56rsyvoravcg3d63q37u2hg7ovwpohzoz4q7hhe7tq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615644553.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'None',
@@ -5715,7 +5715,7 @@ ZAPPY_COLLECTION = {
     2615644754: {
         'name': 'Zappy #1470',
         'unit_name': 'ZAPP1470',
-        'image_url': 'https://ipfs.io/ipfs/bafkreialcr7wfqlykoibauc456cqa24fzc6djh5iarfcs5u6sxujr7hize',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615644754.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Rainbow',
@@ -5728,7 +5728,7 @@ ZAPPY_COLLECTION = {
     2615644781: {
         'name': 'Zappy #936',
         'unit_name': 'ZAPP0936',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigij2szagxzaccj45wtvy2ijg3x5ekeimsrdqx7tyd5d6ayxaz5fe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615644781.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Diamond',
@@ -5741,7 +5741,7 @@ ZAPPY_COLLECTION = {
     2615644957: {
         'name': 'Zappy #1628',
         'unit_name': 'ZAPP1628',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidjv6yax2qjdfa4h775sroftihkvds3u3krau3davpzvbyjstjv2m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615644957.jpg',
         'background': 'Yellow',
         'body': 'Fur Coat',
         'earring': 'Skull',
@@ -5754,7 +5754,7 @@ ZAPPY_COLLECTION = {
     2615645009: {
         'name': 'Zappy #98',
         'unit_name': 'ZAPP0098',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiemlvygkqrrcs2y3sdg35ard2qwdhyl5zugibep5sdhvh72tgq64m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615645009.jpg',
         'background': 'Orange',
         'body': 'Space Suit',
         'earring': 'Lightning',
@@ -5767,7 +5767,7 @@ ZAPPY_COLLECTION = {
     2615645104: {
         'name': 'Zappy #1602',
         'unit_name': 'ZAPP1602',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigzkbpctg7jxawsj6aae7l73tsblcjri4oi55ueflkgxs3vt6ekeu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615645104.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Daisy',
@@ -5780,7 +5780,7 @@ ZAPPY_COLLECTION = {
     2615645404: {
         'name': 'Zappy #653',
         'unit_name': 'ZAPP0653',
-        'image_url': 'https://ipfs.io/ipfs/bafybeihzuvxorve5eku2vqu45jnwqmi2p3cvexpzx2naqtlemijvxnqicm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615645404.jpg',
         'background': 'Chroma',
         'body': 'Armband',
         'earring': 'Daisy',
@@ -5793,7 +5793,7 @@ ZAPPY_COLLECTION = {
     2615645602: {
         'name': 'Zappy #679',
         'unit_name': 'ZAPP0679',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif5lum2xo66dprs2y3csm7gt3r45rshztkwfubuvxu65wspgux73m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615645602.jpg',
         'background': 'Yellow',
         'body': 'Turtleneck Sweater',
         'earring': 'Party Popper',
@@ -5806,7 +5806,7 @@ ZAPPY_COLLECTION = {
     2615646215: {
         'name': 'Zappy #1536',
         'unit_name': 'ZAPP1536',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiddfck2sujkzjljyyzwlnm7tzsbypeqmn72kovvgcedorpd3vrlpm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615646215.jpg',
         'background': 'Red',
         'body': 'Muscle Suit',
         'earring': 'Star',
@@ -5819,7 +5819,7 @@ ZAPPY_COLLECTION = {
     2615646395: {
         'name': 'Zappy #1459',
         'unit_name': 'ZAPP1459',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiblqmyov3v6val44q2ea4y2xjxq66dpds6h55hronv43crxw24tji',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615646395.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'Daisy',
@@ -5832,7 +5832,7 @@ ZAPPY_COLLECTION = {
     2615646792: {
         'name': 'Zappy #1127',
         'unit_name': 'ZAPP1127',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicy6f7qmzch2uq5gbj2nqkvzhujulfelxhq6to6tw5yotwkof3qzu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615646792.jpg',
         'background': 'Yellow',
         'body': 'Choker',
         'earring': 'Zappies',
@@ -5845,7 +5845,7 @@ ZAPPY_COLLECTION = {
     2615646997: {
         'name': 'Zappy #1140',
         'unit_name': 'ZAPP1140',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzrivryvyptodwmo5eacc43si5qwv6fkiux54ktndqrdu4ed5bre',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615646997.jpg',
         'background': 'Purple',
         'body': 'Trench Coat',
         'earring': 'Twin Rings',
@@ -5858,7 +5858,7 @@ ZAPPY_COLLECTION = {
     2615647220: {
         'name': 'Zappy #1006',
         'unit_name': 'ZAPP1006',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiegvm672ev2z4vxkn7b45tkrfm6x3eu4bmh5mxpcjavs7ttzk7osm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615647220.jpg',
         'background': 'Red',
         'body': 'Muscle Suit',
         'earring': 'Skull',
@@ -5871,7 +5871,7 @@ ZAPPY_COLLECTION = {
     2615647758: {
         'name': 'Zappy #1651',
         'unit_name': 'ZAPP1651',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifx4wm62omwykcm7bzhva6vgbe2nisx4fjumdl6arbh2bd3hsrq7u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615647758.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Knife',
@@ -5884,7 +5884,7 @@ ZAPPY_COLLECTION = {
     2615647937: {
         'name': 'Zappy #195',
         'unit_name': 'ZAPP0195',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif2avfu7t3okuup26x4ztkroote6xfkom3sa64uuzszctahdpymhi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615647937.jpg',
         'background': 'Green',
         'body': 'Turtleneck Sweater',
         'earring': 'Lightning',
@@ -5897,7 +5897,7 @@ ZAPPY_COLLECTION = {
     2615648192: {
         'name': 'Zappy #1487',
         'unit_name': 'ZAPP1487',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicq6elxa35pb4zmxyfahkvmpj2lvavqdditx7j7zm7b6wuz3h7q3u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615648192.jpg',
         'background': 'Red',
         'body': 'Fur Coat',
         'earring': 'Happy',
@@ -5910,7 +5910,7 @@ ZAPPY_COLLECTION = {
     2615648446: {
         'name': 'Zappy #1283',
         'unit_name': 'ZAPP1283',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihiorfl6lv6kzqh4n5emmm7tjrz24gf75udmpwpoluysia3kt2vze',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615648446.jpg',
         'background': 'Orange',
         'body': 'Ribbon Tie',
         'earring': 'Right Ring',
@@ -5923,7 +5923,7 @@ ZAPPY_COLLECTION = {
     2615649044: {
         'name': 'Zappy #697',
         'unit_name': 'ZAPP0697',
-        'image_url': 'https://ipfs.io/ipfs/bafkreida6bn6vrwc277bjxcay3xh7rtjzuczlfyhd2mnvz7dwr4rlxgtd4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615649044.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Lightning',
@@ -5936,7 +5936,7 @@ ZAPPY_COLLECTION = {
     2615686593: {
         'name': 'Zappy #1848',
         'unit_name': 'ZAPP1848',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiei2j6hs3aamut7syplk4ymy3wy2wwdnsayammtdjcmbrgyyl43fe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615686593.jpg',
         'background': 'Chroma',
         'body': 'Hawaiian Shirt',
         'earring': 'Twin Rings',
@@ -5949,7 +5949,7 @@ ZAPPY_COLLECTION = {
     2615686733: {
         'name': 'Zappy #1713',
         'unit_name': 'ZAPP1713',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia3wkdjxqkss5tqqplzvoblz7mskxuexk345f2szyx6stq6vmgyiu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615686733.jpg',
         'background': 'Purple',
         'body': 'Turtleneck Sweater',
         'earring': 'Hashtag',
@@ -5962,7 +5962,7 @@ ZAPPY_COLLECTION = {
     2615687049: {
         'name': 'Zappy #1937',
         'unit_name': 'ZAPP1937',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicyfqryg3w2ta3iu5kroi5qwrqlbqe2dnefphsusr3tpdcttrlwby',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615687049.jpg',
         'background': 'Yellow',
         'body': 'Wool Collar Jacket',
         'earring': 'Pyramid',
@@ -5975,7 +5975,7 @@ ZAPPY_COLLECTION = {
     2615687322: {
         'name': 'Zappy #1782',
         'unit_name': 'ZAPP1782',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigybrqhdvvsynl6ytqcncgdx2fpfsj2ibiofrk2o6yinnhawkjevy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615687322.jpg',
         'background': 'Orange',
         'body': 'Dino Suit',
         'earring': 'Happy',
@@ -5988,7 +5988,7 @@ ZAPPY_COLLECTION = {
     2615687432: {
         'name': 'Zappy #1720',
         'unit_name': 'ZAPP1720',
-        'image_url': 'https://ipfs.io/ipfs/bafybeib3gwb2hxiewjkwiopalf2j44bujuh6ncq3pyuhmgl5yooqq77ham',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615687432.jpg',
         'background': 'Chroma',
         'body': 'Sleeveless Shirt',
         'earring': 'Sunrise',
@@ -6001,7 +6001,7 @@ ZAPPY_COLLECTION = {
     2615687612: {
         'name': 'Zappy #1666',
         'unit_name': 'ZAPP1666',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie47x2o36emm32zyqeymjtv75iy2l3frsiczmeawfp2n45k4cmovi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615687612.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Carton Cup',
@@ -6014,7 +6014,7 @@ ZAPPY_COLLECTION = {
     2615687682: {
         'name': 'Zappy #1703',
         'unit_name': 'ZAPP1703',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkcpzbogrdxc6ahvnlu4dm7uutopcs3xpcmj27ghlxcolgwquqta',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615687682.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'Knife',
@@ -6027,7 +6027,7 @@ ZAPPY_COLLECTION = {
     2615687888: {
         'name': 'Zappy #1838',
         'unit_name': 'ZAPP1838',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidtyvquoiwtxj7vgflvbtffsfeziekk4i4ng32m4pydt3tg2yikv4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615687888.jpg',
         'background': 'Orange',
         'body': 'Ribbon Tie',
         'earring': 'Daisy',
@@ -6040,7 +6040,7 @@ ZAPPY_COLLECTION = {
     2615688046: {
         'name': 'Zappy #1885',
         'unit_name': 'ZAPP1885',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaxprx6fcqi64qnt6yez2hwv7qjvhoo3apetrp5vpphkapcmktvca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615688046.jpg',
         'background': 'Yellow',
         'body': 'Tracksuit Top',
         'earring': 'Right Helix',
@@ -6053,7 +6053,7 @@ ZAPPY_COLLECTION = {
     2615688257: {
         'name': 'Zappy #1961',
         'unit_name': 'ZAPP1961',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibmd3bhmoy6jbugqe7atmgbxnlxkprv34o6yourw4nh2vgo37vqfq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615688257.jpg',
         'background': 'Blue',
         'body': 'Naked',
         'earring': 'Party Popper',
@@ -6066,7 +6066,7 @@ ZAPPY_COLLECTION = {
     2615688378: {
         'name': 'Zappy #2050',
         'unit_name': 'ZAPP2050',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiapj3jh52vwi4jop5qbxaskf7nxvhm6etufwgaixjfi636j5dbehi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615688378.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Serious',
@@ -6079,7 +6079,7 @@ ZAPPY_COLLECTION = {
     2615688616: {
         'name': 'Zappy #2158',
         'unit_name': 'ZAPP2158',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiczvsx7zpxy2ixweocsmrnpjelcsyrztqorq4zagjixr72lqbh3ay',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615688616.jpg',
         'background': 'Orange',
         'body': 'Trench Coat',
         'earring': 'Carton Cup',
@@ -6092,7 +6092,7 @@ ZAPPY_COLLECTION = {
     2615688778: {
         'name': 'Zappy #2054',
         'unit_name': 'ZAPP2054',
-        'image_url': 'https://ipfs.io/ipfs/bafybeigggbc4alxwya6lguuvy4utmqkuncrwrqiz3wyqi6lcalty5gvtcm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615688778.jpg',
         'background': 'Chroma',
         'body': 'Suit',
         'earring': 'Carton Cup',
@@ -6105,7 +6105,7 @@ ZAPPY_COLLECTION = {
     2615689208: {
         'name': 'Zappy #1920',
         'unit_name': 'ZAPP1920',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiahqh7u5fdypby6thx77erfi6rpgxenscbxj3z3ae3slisumlrxcm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615689208.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Left Helix',
@@ -6118,7 +6118,7 @@ ZAPPY_COLLECTION = {
     2615689413: {
         'name': 'Zappy #1708',
         'unit_name': 'ZAPP1708',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnudk7bbownxhxqmtpzycxothonorckiqshtpuwavbhgjjwiaibi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615689413.jpg',
         'background': 'Purple',
         'body': 'Turtleneck Sweater',
         'earring': 'Number One',
@@ -6131,7 +6131,7 @@ ZAPPY_COLLECTION = {
     2615689755: {
         'name': 'Zappy #1715',
         'unit_name': 'ZAPP1715',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifm2idtiazzeusbcyvvxshteafagn2upjyzprogjw4hlhdvy6djlq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615689755.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Carton Cup',
@@ -6144,7 +6144,7 @@ ZAPPY_COLLECTION = {
     2615689958: {
         'name': 'Zappy #1861',
         'unit_name': 'ZAPP1861',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibupvj4q4vp5hw5rybjo4rqa3oqp4qd564owikjht7mabv6jqt4ta',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615689958.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Rainbow',
@@ -6157,7 +6157,7 @@ ZAPPY_COLLECTION = {
     2615690078: {
         'name': 'Zappy #1950',
         'unit_name': 'ZAPP1950',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidqndhlrdugjldz6bm7nhybe4edzm66hwog3fenlcdslbdnamejke',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615690078.jpg',
         'background': 'Blue',
         'body': 'Turtleneck Sweater',
         'earring': 'Happy',
@@ -6170,7 +6170,7 @@ ZAPPY_COLLECTION = {
     2615690190: {
         'name': 'Zappy #2084',
         'unit_name': 'ZAPP2084',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicajamuun36plq24y7xq2mw6xxtkc6xr67ll43b7fjtnrladq2dqq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615690190.jpg',
         'background': 'Blue',
         'body': 'Naked',
         'earring': 'Pepper',
@@ -6183,7 +6183,7 @@ ZAPPY_COLLECTION = {
     2615690427: {
         'name': 'Zappy #1696',
         'unit_name': 'ZAPP1696',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiflqhd3mznkacdinrsztbwi56iuhcsyngl4nco2e5onifokrkb4g4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615690427.jpg',
         'background': 'Yellow',
         'body': 'Armor',
         'earring': 'Daisy',
@@ -6196,7 +6196,7 @@ ZAPPY_COLLECTION = {
     2615707849: {
         'name': 'Zappy #2218',
         'unit_name': 'ZAPP2218',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihueo6ajqsqnqbgnly7unzr4arpjjfnefq7hmc65nsvx2yaeotuxu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615707849.jpg',
         'background': 'Red',
         'body': 'School Outfit',
         'earring': 'Star',
@@ -6209,7 +6209,7 @@ ZAPPY_COLLECTION = {
     2615708084: {
         'name': 'Zappy #2193',
         'unit_name': 'ZAPP2193',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiej3xybc3ey6nr4hohkumxupoelpcc6egu4jsnktvmxvvzdvlgzqu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615708084.jpg',
         'background': 'Blue',
         'body': 'Turtleneck Sweater',
         'earring': 'Sunrise',
@@ -6222,7 +6222,7 @@ ZAPPY_COLLECTION = {
     2615709318: {
         'name': 'Zappy #2172',
         'unit_name': 'ZAPP2172',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaof3foasxli5vdmpzbvbufqbonnmgcr45zpaxgoaaiu5vqjlrbt4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615709318.jpg',
         'background': 'Green',
         'body': 'Ribbon Tie',
         'earring': 'Pyramid',
@@ -6235,7 +6235,7 @@ ZAPPY_COLLECTION = {
     2615709531: {
         'name': 'Zappy #2173',
         'unit_name': 'ZAPP2173',
-        'image_url': 'https://ipfs.io/ipfs/bafybeic4mp3773ddjrvli4qfm33lvg3eugioe723nioh3v4cuv6ipwv5da',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615709531.jpg',
         'background': 'Chroma',
         'body': 'Scarf',
         'earring': 'Knife',
@@ -6248,7 +6248,7 @@ ZAPPY_COLLECTION = {
     2615714501: {
         'name': 'Zappy #278',
         'unit_name': 'ZAPP0278',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidpjkbbvghzzp3popaud3vqzwumqoocjx64y446vzjax4r2bbyioa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615714501.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Sad',
@@ -6261,7 +6261,7 @@ ZAPPY_COLLECTION = {
     2615799442: {
         'name': 'Zappy #185',
         'unit_name': 'ZAPP0185',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifkswhikrcoewrlvtzuavqn3monzgv54yshddp6a2nt2c3to7mxki',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615799442.jpg',
         'background': 'Yellow',
         'body': 'Lifesaver',
         'earring': 'Diamond',
@@ -6274,7 +6274,7 @@ ZAPPY_COLLECTION = {
     2615799521: {
         'name': 'Zappy #52',
         'unit_name': 'ZAPP0052',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihajxt5wa5zptmd2t47voqxbv2woslgly2c6vya3tgesf7unv6ddu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615799521.jpg',
         'background': 'Purple',
         'body': 'Striped Sweater',
         'earring': 'Carton Cup',
@@ -6287,7 +6287,7 @@ ZAPPY_COLLECTION = {
     2615799598: {
         'name': 'Zappy #230',
         'unit_name': 'ZAPP0230',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic5owde7dl6atldwpxpbluybjwlk6zgta2osx4st7ly4ecembumua',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615799598.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Double Helix',
@@ -6300,7 +6300,7 @@ ZAPPY_COLLECTION = {
     2615872536: {
         'name': 'Zappy #571',
         'unit_name': 'ZAPP0571',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigndvncg6u6b2ziynemz4jtiz6xc2rich2zewvgnjlwaszq4rdswi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615872536.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Zappies',
@@ -6313,7 +6313,7 @@ ZAPPY_COLLECTION = {
     2615872699: {
         'name': 'Zappy #1887',
         'unit_name': 'ZAPP1887',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihxnxfkp4quwkjtc2zvv2663ixsptkznwhxxkex64ng4gi6dsg4zy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615872699.jpg',
         'background': 'Purple',
         'body': 'Hoodie',
         'earring': 'Pepper',
@@ -6326,7 +6326,7 @@ ZAPPY_COLLECTION = {
     2615873215: {
         'name': 'Zappy #384',
         'unit_name': 'ZAPP0384',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifemrfzytfdyfqshrmirziuhxptrwegycmxp7jggs342izahoz67e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615873215.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Strawberry',
@@ -6339,7 +6339,7 @@ ZAPPY_COLLECTION = {
     2615873376: {
         'name': 'Zappy #1075',
         'unit_name': 'ZAPP1075',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiclmhesq7qjilw24x2hn6izsefy6ifnpoi6aqjjhotd42ipu5xhhu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615873376.jpg',
         'background': 'Green',
         'body': 'Leather Vest',
         'earring': 'None',
@@ -6352,7 +6352,7 @@ ZAPPY_COLLECTION = {
     2615874055: {
         'name': 'Zappy #419',
         'unit_name': 'ZAPP0419',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaxdujyttilxh6tfxeqpc2gzawhsjaqhoi4nqlbbudak6gn6qrlla',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615874055.jpg',
         'background': 'Yellow',
         'body': 'Overalls',
         'earring': 'Hashtag',
@@ -6365,7 +6365,7 @@ ZAPPY_COLLECTION = {
     2615874254: {
         'name': 'Zappy #1655',
         'unit_name': 'ZAPP1655',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidfndhjfuoeo6rcan2c6jzlbjj3op6f3zf3chhh2nkbufh57pbtq4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615874254.jpg',
         'background': 'Yellow',
         'body': 'Trash Can',
         'earring': 'Carton Cup',
@@ -6378,7 +6378,7 @@ ZAPPY_COLLECTION = {
     2615874403: {
         'name': 'Zappy #1102',
         'unit_name': 'ZAPP1102',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiavu5ncjrep3t4nmt5voepl2rln33a6mkjzmmpviwimauurrvu3ze',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615874403.jpg',
         'background': 'Orange',
         'body': 'Bathrobe',
         'earring': 'Bananas',
@@ -6391,7 +6391,7 @@ ZAPPY_COLLECTION = {
     2615874600: {
         'name': 'Zappy #656',
         'unit_name': 'ZAPP0656',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiekpwkbe5ofrauuuwozhuuz5agv4vcfytncaihwknwmlzmiqyxwse',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615874600.jpg',
         'background': 'Chroma',
         'body': 'Oversize Sweater',
         'earring': 'Double Helix',
@@ -6404,7 +6404,7 @@ ZAPPY_COLLECTION = {
     2615874993: {
         'name': 'Zappy #493',
         'unit_name': 'ZAPP0493',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicgm4rd4jr7ku35xqlvmdteeow6qhu7rkrkikd64b4rptcl5bf6km',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615874993.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Skull',
@@ -6417,7 +6417,7 @@ ZAPPY_COLLECTION = {
     2615875305: {
         'name': 'Zappy #1550',
         'unit_name': 'ZAPP1550',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidz4drcf7dpnjcdlz3wry2ypla6lnvobcpmjk33akwnzyqalgilei',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615875305.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'Sunrise',
@@ -6430,7 +6430,7 @@ ZAPPY_COLLECTION = {
     2615875499: {
         'name': 'Zappy #361',
         'unit_name': 'ZAPP0361',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidw5kfkd5hflnmj5vkidxyqirxr6zdbjeqgp7f2b5e6mcoocw2ysi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615875499.jpg',
         'background': 'Red',
         'body': 'Cat Suit',
         'earring': 'Number One',
@@ -6443,7 +6443,7 @@ ZAPPY_COLLECTION = {
     2615875745: {
         'name': 'Zappy #1368',
         'unit_name': 'ZAPP1368',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigwmsuhzpjttmwvxnmjgxipp35yciprqqfhm4nxgrsfh4uo7rivwy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615875745.jpg',
         'background': 'Blue',
         'body': 'Space Suit',
         'earring': 'Knife',
@@ -6456,7 +6456,7 @@ ZAPPY_COLLECTION = {
     2615895559: {
         'name': 'Zappy #193',
         'unit_name': 'ZAPP0193',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiduqas25pwqlkyist4t34ae7apk5od5z43f5p2y6unlpz4byfh3ma',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615895559.jpg',
         'background': 'Yellow',
         'body': 'Overalls',
         'earring': 'Double Helix',
@@ -6469,7 +6469,7 @@ ZAPPY_COLLECTION = {
     2615895677: {
         'name': 'Zappy #1193',
         'unit_name': 'ZAPP1193',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibnz5c5fyj2ah3ntp6atmyrlqf63c5dmywfrhdhdkioghav6empz4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615895677.jpg',
         'background': 'Purple',
         'body': 'Puffer Coat',
         'earring': 'Happy',
@@ -6482,7 +6482,7 @@ ZAPPY_COLLECTION = {
     2615896064: {
         'name': 'Zappy #1955',
         'unit_name': 'ZAPP1955',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibmhzjcvdrbkq5xcd6awvnq55c3akio2ajx2cmzxujxdeui747f7q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615896064.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'Left Ring',
@@ -6495,7 +6495,7 @@ ZAPPY_COLLECTION = {
     2615903471: {
         'name': 'Zappy #760',
         'unit_name': 'ZAPP0760',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiexbuc2slnqxw7w72trpdaolzttky3yjjgw6un3lltnvawnj7l4vq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615903471.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Pepper',
@@ -6508,7 +6508,7 @@ ZAPPY_COLLECTION = {
     2615903609: {
         'name': 'Zappy #267',
         'unit_name': 'ZAPP0267',
-        'image_url': 'https://ipfs.io/ipfs/bafkreids6337v6szimxp3ctsxiqkfx5rei7557zb3ss6kdpad4g7qfmuiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615903609.jpg',
         'background': 'Orange',
         'body': 'Choker',
         'earring': 'Skull',
@@ -6521,7 +6521,7 @@ ZAPPY_COLLECTION = {
     2615903811: {
         'name': 'Zappy #138',
         'unit_name': 'ZAPP0138',
-        'image_url': 'https://ipfs.io/ipfs/bafkreienz4uaglrksj5rdwszu3ogtf6ocrxt27xzlscgnhvcexqgh6eqvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615903811.jpg',
         'background': 'Green',
         'body': 'Polo Overalls',
         'earring': 'Serious',
@@ -6534,7 +6534,7 @@ ZAPPY_COLLECTION = {
     2615903929: {
         'name': 'Zappy #775',
         'unit_name': 'ZAPP0775',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiehqfcucckioydhvwljenuzcmd2d7gyzmjkllope4u7exzr2jigdy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615903929.jpg',
         'background': 'Orange',
         'body': 'Hoodie',
         'earring': 'Daisy',
@@ -6547,7 +6547,7 @@ ZAPPY_COLLECTION = {
     2615904050: {
         'name': 'Zappy #119',
         'unit_name': 'ZAPP0119',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibarxyhne5wyl5f5c7jqzpqtlvymwe7dfo3vywvb52uz37lvz6mey',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615904050.jpg',
         'background': 'Blue',
         'body': 'Hooded Jacket',
         'earring': 'Left Ring',
@@ -6560,7 +6560,7 @@ ZAPPY_COLLECTION = {
     2615913108: {
         'name': 'Zappy #1395',
         'unit_name': 'ZAPP1395',
-        'image_url': 'https://ipfs.io/ipfs/bafkreievuazdfg3nonqjckkcq2qv4ydp4iq6vdjuknfqyheykm6ktx7nfi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615913108.jpg',
         'background': 'Yellow',
         'body': 'Warning Tape',
         'earring': 'Ghost',
@@ -6573,7 +6573,7 @@ ZAPPY_COLLECTION = {
     2615913345: {
         'name': 'Zappy #1497',
         'unit_name': 'ZAPP1497',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif7mn2hfttwxfjtx4ed2qr72mtdjrmgugmjnvl6l7hcz7t5ehtc4y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615913345.jpg',
         'background': 'Red',
         'body': 'Overalls',
         'earring': 'Zappies',
@@ -6586,7 +6586,7 @@ ZAPPY_COLLECTION = {
     2615913944: {
         'name': 'Zappy #1717',
         'unit_name': 'ZAPP1717',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiaoxo4mifz3qy7jom3uqj2iwb4jqksgd32furydpzvxbyh4aclcau',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615913944.jpg',
         'background': 'Chroma',
         'body': 'Crocodile Suit',
         'earring': 'Left Ring',
@@ -6599,7 +6599,7 @@ ZAPPY_COLLECTION = {
     2615914048: {
         'name': 'Zappy #846',
         'unit_name': 'ZAPP0846',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibb3otkvydtk3a32ep6pa22l3ytm3ejph6knybvbvghpdez6mwtcq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615914048.jpg',
         'background': 'Yellow',
         'body': 'Trash Can',
         'earring': 'Left Ring',
@@ -6612,7 +6612,7 @@ ZAPPY_COLLECTION = {
     2615914133: {
         'name': 'Zappy #2068',
         'unit_name': 'ZAPP2068',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibk5uzyfs7lq2jf24d6fnotyagchpe5dtdho2md6xq5jboygcs34a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615914133.jpg',
         'background': 'Purple',
         'body': 'Trench Coat',
         'earring': 'Number One',
@@ -6625,7 +6625,7 @@ ZAPPY_COLLECTION = {
     2615914558: {
         'name': 'Zappy #1360',
         'unit_name': 'ZAPP1360',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifcge5gt7xyetuwbwxsyp3nn2jjx5xfk3zoxfehsyp3ienvi5e6yq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615914558.jpg',
         'background': 'Yellow',
         'body': 'Crocodile Suit',
         'earring': 'Skull',
@@ -6638,7 +6638,7 @@ ZAPPY_COLLECTION = {
     2615914988: {
         'name': 'Zappy #1311',
         'unit_name': 'ZAPP1311',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicrxdegknmooatu3hsqmke4gjzs3fb4eykqttwcgqmwlfrnnwqxva',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615914988.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Knife',
@@ -6651,7 +6651,7 @@ ZAPPY_COLLECTION = {
     2615915120: {
         'name': 'Zappy #2185',
         'unit_name': 'ZAPP2185',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibsnzgi4oept32flyq5f6aqjc2bc26cpp4xyizrkroyda3yodow6y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615915120.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'Double Helix',
@@ -6664,7 +6664,7 @@ ZAPPY_COLLECTION = {
     2615915255: {
         'name': 'Zappy #2101',
         'unit_name': 'ZAPP2101',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicefo7utfqncvxcyv64rxkd43qrza4zki4hd4s2dev5aujnpbhvyi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2615915255.jpg',
         'background': 'Yellow',
         'body': 'Clouds',
         'earring': 'Number One',
@@ -6677,7 +6677,7 @@ ZAPPY_COLLECTION = {
     2616110901: {
         'name': 'Zappy #124',
         'unit_name': 'ZAPP0124',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifwklodece25apma5exhafvqa4isxoykb7wzlqczacbtfg6o4po64',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616110901.jpg',
         'background': 'Purple',
         'body': 'Fanny Pack',
         'earring': 'None',
@@ -6690,7 +6690,7 @@ ZAPPY_COLLECTION = {
     2616125724: {
         'name': 'Zappy #12',
         'unit_name': 'ZAPP0012',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigjzjnhjh5llr3g4fqcz4z7yae7l2is3ksgdgjvefhstewnitswkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616125724.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'Sad',
@@ -6703,7 +6703,7 @@ ZAPPY_COLLECTION = {
     2616125831: {
         'name': 'Zappy #115',
         'unit_name': 'ZAPP0115',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibtpp66g5xdp66exhyu57pfwhoxuxpvwag55zjjwh4t5eflruvtom',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616125831.jpg',
         'background': 'Green',
         'body': 'Leather Vest',
         'earring': 'Skull',
@@ -6716,7 +6716,7 @@ ZAPPY_COLLECTION = {
     2616125953: {
         'name': 'Zappy #140',
         'unit_name': 'ZAPP0140',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifxqwhxv2vkw4ctzu5m7vu3n5e3zmjepndr6qlhvha7l6gzuzh4ha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616125953.jpg',
         'background': 'Blue',
         'body': 'Hawaiian Shirt',
         'earring': 'Diamond',
@@ -6729,7 +6729,7 @@ ZAPPY_COLLECTION = {
     2616126084: {
         'name': 'Zappy #166',
         'unit_name': 'ZAPP0166',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiawwew4gqtb4g6biw4fclobs2f54oru3unm6gww7efpazw4kavqfu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616126084.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Twin Rings',
@@ -6742,7 +6742,7 @@ ZAPPY_COLLECTION = {
     2616126252: {
         'name': 'Zappy #170',
         'unit_name': 'ZAPP0170',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiejgheyst2mk2g2gfbctmzznzua2pcw6qawdyi2ubx6chyadmikey',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616126252.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Hashtag',
@@ -6755,7 +6755,7 @@ ZAPPY_COLLECTION = {
     2616126707: {
         'name': 'Zappy #47',
         'unit_name': 'ZAPP0047',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia22rp4wnrbiz7b6wrjwu5x42crnqhpxxq33rmwrygtnsdnsu2pie',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616126707.jpg',
         'background': 'Blue',
         'body': 'Lifesaver',
         'earring': 'Left Helix',
@@ -6768,7 +6768,7 @@ ZAPPY_COLLECTION = {
     2616127221: {
         'name': 'Zappy #146',
         'unit_name': 'ZAPP0146',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiggpvistjrfksy6one5xgtwvmxzma75obmsn34p7plghhqxj4nj7e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616127221.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Rainbow',
@@ -6781,7 +6781,7 @@ ZAPPY_COLLECTION = {
     2616127370: {
         'name': 'Zappy #87',
         'unit_name': 'ZAPP0087',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih55b77ibpfzjdtgbjg5h7pmiun4odfrqwg7wiolwnstumx7ru2xq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616127370.jpg',
         'background': 'Green',
         'body': 'Basic Jacket',
         'earring': 'Happy',
@@ -6794,7 +6794,7 @@ ZAPPY_COLLECTION = {
     2616127748: {
         'name': 'Zappy #127',
         'unit_name': 'ZAPP0127',
-        'image_url': 'https://ipfs.io/ipfs/bafkreian6ja5xvmvvm4smlvhoequdm7jmnswqqmdw3s2tefzy5cxohcw2a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616127748.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Daisy',
@@ -6807,7 +6807,7 @@ ZAPPY_COLLECTION = {
     2616127966: {
         'name': 'Zappy #29',
         'unit_name': 'ZAPP0029',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif3onbjmj6afjxkiicsf467gw7olc5xovchoauftmhl2x2r2r7lsy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616127966.jpg',
         'background': 'Purple',
         'body': 'Daisy Shirt',
         'earring': 'Double Helix',
@@ -6820,7 +6820,7 @@ ZAPPY_COLLECTION = {
     2616128772: {
         'name': 'Zappy #41',
         'unit_name': 'ZAPP0041',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaeoqca5bvh3etm5hv2h4sa45cvp2to2xvriz7k6lyplol3yqr4yq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616128772.jpg',
         'background': 'Red',
         'body': 'Hawaiian Shirt',
         'earring': 'Rainbow',
@@ -6833,7 +6833,7 @@ ZAPPY_COLLECTION = {
     2616129142: {
         'name': 'Zappy #22',
         'unit_name': 'ZAPP0022',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie4rvecwsoz7pfznxatmgwqvjfbu4n6l5meake7m74crqshjlijku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616129142.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'Sunrise',
@@ -6846,7 +6846,7 @@ ZAPPY_COLLECTION = {
     2616129340: {
         'name': 'Zappy #136',
         'unit_name': 'ZAPP0136',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicbrpwmb7a6pdnlckzgex2kzpgnpz6tz626pr4kdi7yupsnfm7yqe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616129340.jpg',
         'background': 'Orange',
         'body': 'Fanny Pack',
         'earring': 'Pyramid',
@@ -6859,7 +6859,7 @@ ZAPPY_COLLECTION = {
     2616129569: {
         'name': 'Zappy #184',
         'unit_name': 'ZAPP0184',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia2acebq2fuzneqsjqbh3i3lj2gyi65sdn7hf4r6gqysx677lmabq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616129569.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Ghost',
@@ -6872,7 +6872,7 @@ ZAPPY_COLLECTION = {
     2616129779: {
         'name': 'Zappy #23',
         'unit_name': 'ZAPP0023',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifdkmssxfwd3bwbaknldbvhcwe56jf5nawelbpfdvvjezq7rbspka',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616129779.jpg',
         'background': 'Red',
         'body': 'Warning Tape',
         'earring': 'Hashtag',
@@ -6885,7 +6885,7 @@ ZAPPY_COLLECTION = {
     2616129875: {
         'name': 'Zappy #7',
         'unit_name': 'ZAPP0007',
-        'image_url': 'https://ipfs.io/ipfs/bafkreievht2wov3w4lcvhiisxswlelvcrkn4iicfppp7u7elfwszzaccdy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616129875.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Diamond',
@@ -6898,7 +6898,7 @@ ZAPPY_COLLECTION = {
     2616129999: {
         'name': 'Zappy #116',
         'unit_name': 'ZAPP0116',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnw4pgwrqy4u5dvvqn6wj5bkbpr2hl7djya3e4dqeetgsgpuwfom',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616129999.jpg',
         'background': 'Green',
         'body': 'Hoodie',
         'earring': 'Left Ring',
@@ -6911,7 +6911,7 @@ ZAPPY_COLLECTION = {
     2616130337: {
         'name': 'Zappy #84',
         'unit_name': 'ZAPP0084',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieyrrshod7i7eaujwzg7trcdsx6tk5giwtcjzqme77644raus6u2y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616130337.jpg',
         'background': 'Orange',
         'body': 'Bathrobe',
         'earring': 'Party Popper',
@@ -6924,7 +6924,7 @@ ZAPPY_COLLECTION = {
     2616130591: {
         'name': 'Zappy #156',
         'unit_name': 'ZAPP0156',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifj4uhwkdpclqushvii2qa7lwthuh2wweqkqzcqufmgfdn5hpzlhu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616130591.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Pyramid',
@@ -6937,7 +6937,7 @@ ZAPPY_COLLECTION = {
     2616130763: {
         'name': 'Zappy #86',
         'unit_name': 'ZAPP0086',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieagqxwbiv5ytrrxedi4pux4543kytrgysmnf6b53jcexxhqz47qq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616130763.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Serious',
@@ -6950,7 +6950,7 @@ ZAPPY_COLLECTION = {
     2616151476: {
         'name': 'Zappy #277',
         'unit_name': 'ZAPP0277',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid4gchf57enbyhbuflrckmj67ygpdnd5jddbzpx4nlabtecvb77rq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616151476.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Bananas',
@@ -6963,7 +6963,7 @@ ZAPPY_COLLECTION = {
     2616152527: {
         'name': 'Zappy #203',
         'unit_name': 'ZAPP0203',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigk2we7antypp2cl4nkor225waus77hhajalmx4y7b2ng7uwbzxiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616152527.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Number One',
@@ -6976,7 +6976,7 @@ ZAPPY_COLLECTION = {
     2616152660: {
         'name': 'Zappy #197',
         'unit_name': 'ZAPP0197',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia4jssgn7yvj6qgxeqsbuczgqydqxx6ngunrr4egs5wwakmf3soqq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616152660.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Bananas',
@@ -6989,7 +6989,7 @@ ZAPPY_COLLECTION = {
     2616153050: {
         'name': 'Zappy #311',
         'unit_name': 'ZAPP0311',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibaope5utxjjagabtyiq6exb377sqhsk5sndtuktb2hh3qqfrcisa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616153050.jpg',
         'background': 'Green',
         'body': 'Rabbit Suit',
         'earring': 'Left Helix',
@@ -7002,7 +7002,7 @@ ZAPPY_COLLECTION = {
     2616153565: {
         'name': 'Zappy #212',
         'unit_name': 'ZAPP0212',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieagei3twfawl65zudxmr3casikkggg52r5pkdivjcnu367janfp4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616153565.jpg',
         'background': 'Green',
         'body': 'Trench Coat',
         'earring': 'Left Helix',
@@ -7015,7 +7015,7 @@ ZAPPY_COLLECTION = {
     2616153930: {
         'name': 'Zappy #399',
         'unit_name': 'ZAPP0399',
-        'image_url': 'https://ipfs.io/ipfs/bafkreics56kashax3r5arylfsrjqll5nfbcukg43kfvugjq6k6gqq5ewsi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616153930.jpg',
         'background': 'Red',
         'body': 'Funky Coat',
         'earring': 'Serious',
@@ -7028,7 +7028,7 @@ ZAPPY_COLLECTION = {
     2616154188: {
         'name': 'Zappy #405',
         'unit_name': 'ZAPP0405',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibzwnacaucodgikgxd5qzgmxtxzyywhlhied2yqyjpp2patkawm4m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616154188.jpg',
         'background': 'Green',
         'body': 'Sweater',
         'earring': 'Skull',
@@ -7041,7 +7041,7 @@ ZAPPY_COLLECTION = {
     2616154974: {
         'name': 'Zappy #222',
         'unit_name': 'ZAPP0222',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2biccsxuczz3x2xrgqllunushiyo4w32db5z6tsuhibilxro52u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616154974.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Right Ring',
@@ -7054,7 +7054,7 @@ ZAPPY_COLLECTION = {
     2616156222: {
         'name': 'Zappy #298',
         'unit_name': 'ZAPP0298',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihsnmuzsdduifyx6b7zloi5ttt4il6fvke5ihxh3xjofh3l7vzqdi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616156222.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'Zappies',
@@ -7067,7 +7067,7 @@ ZAPPY_COLLECTION = {
     2616156753: {
         'name': 'Zappy #235',
         'unit_name': 'ZAPP0235',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignx4pybkzi6mue3xklzgbz64us46iqxhios2wm2ndjj44q3dbtx4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616156753.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'None',
@@ -7080,7 +7080,7 @@ ZAPPY_COLLECTION = {
     2616156951: {
         'name': 'Zappy #407',
         'unit_name': 'ZAPP0407',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihappvkqfvn5tjewjubza5lxtqs3qg3zchrpaijs6zflukzzxmlna',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616156951.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Knife',
@@ -7093,7 +7093,7 @@ ZAPPY_COLLECTION = {
     2616157202: {
         'name': 'Zappy #338',
         'unit_name': 'ZAPP0338',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiejbsovmpazxzueoxvnmex63lr3szyauft7t2ro4rh5ifjgaxxszu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616157202.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Skull',
@@ -7106,7 +7106,7 @@ ZAPPY_COLLECTION = {
     2616157445: {
         'name': 'Zappy #232',
         'unit_name': 'ZAPP0232',
-        'image_url': 'https://ipfs.io/ipfs/bafybeia76byunzj4isge5yrqumt33tej5hsdwwbsdumq2wq7qsm7w5p4qy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616157445.jpg',
         'background': 'Chroma',
         'body': 'Puffer Coat',
         'earring': 'Twin Rings',
@@ -7119,7 +7119,7 @@ ZAPPY_COLLECTION = {
     2616157609: {
         'name': 'Zappy #276',
         'unit_name': 'ZAPP0276',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig6fhxexmbih6wy5tncu5slngbfap2cncbnmrhlolqmcmosvphrme',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616157609.jpg',
         'background': 'Orange',
         'body': 'Striped Sweater',
         'earring': 'Zappies',
@@ -7132,7 +7132,7 @@ ZAPPY_COLLECTION = {
     2616157903: {
         'name': 'Zappy #364',
         'unit_name': 'ZAPP0364',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiasyjb2y4wnio7g2ifvzpvmaymp7d5j3jivmk35trlhps45tcelga',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616157903.jpg',
         'background': 'Chroma',
         'body': 'Ribbon Tie',
         'earring': 'Sunrise',
@@ -7145,7 +7145,7 @@ ZAPPY_COLLECTION = {
     2616158024: {
         'name': 'Zappy #253',
         'unit_name': 'ZAPP0253',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiffmybi4oal57y4exe7lnjsqycz4ot7buuu5zgp3st2sglrs4eau4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616158024.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Hashtag',
@@ -7158,7 +7158,7 @@ ZAPPY_COLLECTION = {
     2616158944: {
         'name': 'Zappy #396',
         'unit_name': 'ZAPP0396',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifveulvec76llvrw3xdalbiq4qceqbjldm3epsz5golegk3j4regq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616158944.jpg',
         'background': 'Purple',
         'body': 'Bowling Shirt',
         'earring': 'Pepper',
@@ -7171,7 +7171,7 @@ ZAPPY_COLLECTION = {
     2616159381: {
         'name': 'Zappy #403',
         'unit_name': 'ZAPP0403',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidgvkon3wqy42rqoaszhwcpaavapphfwh7fjbvvgajnnmrxlmpkzi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616159381.jpg',
         'background': 'Purple',
         'body': 'Choker',
         'earring': 'Skull',
@@ -7184,7 +7184,7 @@ ZAPPY_COLLECTION = {
     2616159465: {
         'name': 'Zappy #348',
         'unit_name': 'ZAPP0348',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieqf7mei5fzbf5goruppyiofj4uhppgnvzi2xosyly3fl2hrki7mm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616159465.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Pyramid',
@@ -7197,7 +7197,7 @@ ZAPPY_COLLECTION = {
     2616159720: {
         'name': 'Zappy #332',
         'unit_name': 'ZAPP0332',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidm6eekckjitahgv2gck6t2554fblybzu5liskht46zewqgkapbim',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616159720.jpg',
         'background': 'Yellow',
         'body': 'Scarf',
         'earring': 'Star',
@@ -7210,7 +7210,7 @@ ZAPPY_COLLECTION = {
     2616183643: {
         'name': 'Zappy #486',
         'unit_name': 'ZAPP0486',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigsm7iiwclvuo24ig523fzbcbxlnfetpzqbz4jj65f5gsg4adpose',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616183643.jpg',
         'background': 'Orange',
         'body': 'Overalls',
         'earring': 'Right Ring',
@@ -7223,7 +7223,7 @@ ZAPPY_COLLECTION = {
     2616184447: {
         'name': 'Zappy #455',
         'unit_name': 'ZAPP0455',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicfdebkn3dqw6hcnasyi2hohcrsyhl6jjrzfoj6h3llccj2dlefca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616184447.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Knife',
@@ -7236,7 +7236,7 @@ ZAPPY_COLLECTION = {
     2616185214: {
         'name': 'Zappy #464',
         'unit_name': 'ZAPP0464',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7roslnvrhwex322qhc7vwsql5hu3jl242kxfxdtkw4rb4yo2b7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616185214.jpg',
         'background': 'Orange',
         'body': 'Cat Suit',
         'earring': 'Pyramid',
@@ -7249,7 +7249,7 @@ ZAPPY_COLLECTION = {
     2616186150: {
         'name': 'Zappy #426',
         'unit_name': 'ZAPP0426',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic64ifpt2n5ewsj7futbnkwog7tu66nxpzfjuozfbhfz7ipzwjiz4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616186150.jpg',
         'background': 'Green',
         'body': 'Suit',
         'earring': 'Number One',
@@ -7262,7 +7262,7 @@ ZAPPY_COLLECTION = {
     2616187251: {
         'name': 'Zappy #433',
         'unit_name': 'ZAPP0433',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigfsumzqv5pm74q5xyvyaez6lcuxvl7kr7kiv2a4ozekqr2yamhlu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616187251.jpg',
         'background': 'Yellow',
         'body': 'Armband',
         'earring': 'Party Popper',
@@ -7275,7 +7275,7 @@ ZAPPY_COLLECTION = {
     2616188290: {
         'name': 'Zappy #459',
         'unit_name': 'ZAPP0459',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiegdewyspmb3ddxl2w23b2rdnijvo6tidhzpyp7mgirj4isj4p6ny',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616188290.jpg',
         'background': 'Green',
         'body': 'Kimono',
         'earring': 'None',
@@ -7288,7 +7288,7 @@ ZAPPY_COLLECTION = {
     2616189736: {
         'name': 'Zappy #559',
         'unit_name': 'ZAPP0559',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiekwpzz7as4auo5smw3jhkx4pq7gozvphzbvbdgdqd5oofsxnpgcu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616189736.jpg',
         'background': 'Orange',
         'body': 'Fanny Pack',
         'earring': 'Double Helix',
@@ -7301,7 +7301,7 @@ ZAPPY_COLLECTION = {
     2616192035: {
         'name': 'Zappy #557',
         'unit_name': 'ZAPP0557',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigtbz3q6xrm7pqr3f6dl4tzhaufgk7fo76rwgu4p23i3pso7lsdsq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616192035.jpg',
         'background': 'Red',
         'body': 'Kimono',
         'earring': 'Right Helix',
@@ -7314,7 +7314,7 @@ ZAPPY_COLLECTION = {
     2616192420: {
         'name': 'Zappy #447',
         'unit_name': 'ZAPP0447',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidx2lzasanq2fwhfhk35ish2o2vjwb742u6vzj6cvsk46pphszu64',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616192420.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'Number One',
@@ -7327,7 +7327,7 @@ ZAPPY_COLLECTION = {
     2616192833: {
         'name': 'Zappy #411',
         'unit_name': 'ZAPP0411',
-        'image_url': 'https://ipfs.io/ipfs/bafkreice6xcynekkvh7v4ujjz2xorb66flznze7c4qzt2ugw57v3bv7av4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616192833.jpg',
         'background': 'Purple',
         'body': 'Lifesaver',
         'earring': 'Double Helix',
@@ -7340,7 +7340,7 @@ ZAPPY_COLLECTION = {
     2616193044: {
         'name': 'Zappy #484',
         'unit_name': 'ZAPP0484',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignxvd5esboqwftij65fxg35cds252iskeetuoslbihpz7mfcthhy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616193044.jpg',
         'background': 'Yellow',
         'body': 'Choker',
         'earring': 'Skull',
@@ -7353,7 +7353,7 @@ ZAPPY_COLLECTION = {
     2616194053: {
         'name': 'Zappy #565',
         'unit_name': 'ZAPP0565',
-        'image_url': 'https://ipfs.io/ipfs/bafybeifbd4j2y22sfucyl44tymgg3auipozibv67tc5yv62vud4x7nsqy4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616194053.jpg',
         'background': 'Chroma',
         'body': 'Polo Overalls',
         'earring': 'Knife',
@@ -7366,7 +7366,7 @@ ZAPPY_COLLECTION = {
     2616194534: {
         'name': 'Zappy #421',
         'unit_name': 'ZAPP0421',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicgt7bph6uluk4s3nsge73jyfazowqi5kr2eyvie2lg2fdomso6jy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616194534.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Carton Cup',
@@ -7379,7 +7379,7 @@ ZAPPY_COLLECTION = {
     2616195123: {
         'name': 'Zappy #474',
         'unit_name': 'ZAPP0474',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibd7rzz2peaae336cibj2qfkdmsyhjvdpitouqbbc5zgm7ursosii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616195123.jpg',
         'background': 'Red',
         'body': 'Bowling Shirt',
         'earring': 'Pyramid',
@@ -7392,7 +7392,7 @@ ZAPPY_COLLECTION = {
     2616195702: {
         'name': 'Zappy #425',
         'unit_name': 'ZAPP0425',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicp5qaoljekm4frr4khkjkohzpulm576c2427i7bnf2mvyecqquqm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616195702.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Ghost',
@@ -7405,7 +7405,7 @@ ZAPPY_COLLECTION = {
     2616195897: {
         'name': 'Zappy #418',
         'unit_name': 'ZAPP0418',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibunoedcnqnktufxgwlu4mlbwl3ufjnilcghbp54xl4gvxxzh3d7i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616195897.jpg',
         'background': 'Blue',
         'body': 'Hooded Jacket',
         'earring': 'Pyramid',
@@ -7418,7 +7418,7 @@ ZAPPY_COLLECTION = {
     2616196126: {
         'name': 'Zappy #424',
         'unit_name': 'ZAPP0424',
-        'image_url': 'https://ipfs.io/ipfs/bafybeihh4fzxtxkm6kx2jova466mwhxy52okejbhay4kxpf7pbxsb7jkoe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616196126.jpg',
         'background': 'Chroma',
         'body': 'Sweater',
         'earring': 'Strawberry',
@@ -7431,7 +7431,7 @@ ZAPPY_COLLECTION = {
     2616196286: {
         'name': 'Zappy #496',
         'unit_name': 'ZAPP0496',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiagf4gusro7m5zgvqkfcrf3sh7uqi7c56mkzwdwpicobappzwgziy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616196286.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Hashtag',
@@ -7444,7 +7444,7 @@ ZAPPY_COLLECTION = {
     2616196425: {
         'name': 'Zappy #542',
         'unit_name': 'ZAPP0542',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicgq6c2zgq4tiwqbcv4qacr76tjiugobafw6jyce3g3cqf2xzfkxm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616196425.jpg',
         'background': 'Red',
         'body': 'Armor',
         'earring': 'Left Helix',
@@ -7457,7 +7457,7 @@ ZAPPY_COLLECTION = {
     2616196681: {
         'name': 'Zappy #508',
         'unit_name': 'ZAPP0508',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidakzzmhfzupus3flw7kxyuzek5mv6rddjw22wkimnyvw5e2y7e2u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616196681.jpg',
         'background': 'Green',
         'body': 'Bear Suit',
         'earring': 'Lightning',
@@ -7470,7 +7470,7 @@ ZAPPY_COLLECTION = {
     2616209911: {
         'name': 'Zappy #931',
         'unit_name': 'ZAPP0931',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihtguikv3wk2jjq4mmkufokwsibjb4cgrpbf3ngf5njzwnmmi5bpe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616209911.jpg',
         'background': 'Blue',
         'body': 'Scarf',
         'earring': 'Skull',
@@ -7483,7 +7483,7 @@ ZAPPY_COLLECTION = {
     2616211731: {
         'name': 'Zappy #224',
         'unit_name': 'ZAPP0224',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7ia4fmqmpk6rttderkmieefujwxljbh25az4t573nm74saaw5eq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616211731.jpg',
         'background': 'Red',
         'body': 'Muscle Suit',
         'earring': 'Party Popper',
@@ -7496,7 +7496,7 @@ ZAPPY_COLLECTION = {
     2616212632: {
         'name': 'Zappy #1593',
         'unit_name': 'ZAPP1593',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiec5lolitk6bjfjtspszaxjscuzoxwwx2usrj3w6x5ajvqpqgingy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616212632.jpg',
         'background': 'Chroma',
         'body': 'Trench Coat',
         'earring': 'Double Helix',
@@ -7509,7 +7509,7 @@ ZAPPY_COLLECTION = {
     2616212968: {
         'name': 'Zappy #613',
         'unit_name': 'ZAPP0613',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif4shr4r26fyafdrmfwdjk7jfrvqwtfqkamre54gsypojvwsxggbm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616212968.jpg',
         'background': 'Yellow',
         'body': 'Fanny Pack',
         'earring': 'Star',
@@ -7522,7 +7522,7 @@ ZAPPY_COLLECTION = {
     2616214167: {
         'name': 'Zappy #2194',
         'unit_name': 'ZAPP2194',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihd7ag5e5qg7ilqiiv5u2thrauiqpm5rkzlsoha4nrg2bjwue7uoe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616214167.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Happy',
@@ -7535,7 +7535,7 @@ ZAPPY_COLLECTION = {
     2616214653: {
         'name': 'Zappy #118',
         'unit_name': 'ZAPP0118',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigtloiqyoex3iljciriqfcbbmlflpfiybwb7neq6y6ax5o7bww5ue',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616214653.jpg',
         'background': 'Red',
         'body': 'Dino Suit',
         'earring': 'Pepper',
@@ -7548,7 +7548,7 @@ ZAPPY_COLLECTION = {
     2616214994: {
         'name': 'Zappy #599',
         'unit_name': 'ZAPP0599',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibuevc2efiq2j2vrk4os3nyugsn5rbowibj6ndwfiunux32qkz6jm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616214994.jpg',
         'background': 'Purple',
         'body': 'Suit',
         'earring': 'Diamond',
@@ -7561,7 +7561,7 @@ ZAPPY_COLLECTION = {
     2616215331: {
         'name': 'Zappy #696',
         'unit_name': 'ZAPP0696',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic3cjv4djg633v5xdxokxquhqrjz3mp3e4ru76e4nbmkm23p3xzve',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616215331.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Star',
@@ -7574,7 +7574,7 @@ ZAPPY_COLLECTION = {
     2616215710: {
         'name': 'Zappy #2029',
         'unit_name': 'ZAPP2029',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibbruz7q6e2nvhh3mx5fhz4jysncwxyb6izptaqpi36gjpf4fwzfm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616215710.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Star',
@@ -7587,7 +7587,7 @@ ZAPPY_COLLECTION = {
     2616216041: {
         'name': 'Zappy #263',
         'unit_name': 'ZAPP0263',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihd4lfmo5cpgm2ctckjus2mkephyakv6symxboclrls6a64cqqm6u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616216041.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'Hashtag',
@@ -7600,7 +7600,7 @@ ZAPPY_COLLECTION = {
     2616216242: {
         'name': 'Zappy #601',
         'unit_name': 'ZAPP0601',
-        'image_url': 'https://ipfs.io/ipfs/bafkreietlr5kbpgtpgu3ihqbgpnc7c2q2hk45qgz64gbo4jxvgz2l4qj3i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616216242.jpg',
         'background': 'Blue',
         'body': 'Tracksuit Top',
         'earring': 'None',
@@ -7613,7 +7613,7 @@ ZAPPY_COLLECTION = {
     2616217014: {
         'name': 'Zappy #769',
         'unit_name': 'ZAPP0769',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiawrlrtppzsvl5xgt5o27icrvdob4vpwpmrsrhthh4lkrsy5ncfty',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616217014.jpg',
         'background': 'Yellow',
         'body': 'Toga',
         'earring': 'Ghost',
@@ -7626,7 +7626,7 @@ ZAPPY_COLLECTION = {
     2616217139: {
         'name': 'Zappy #944',
         'unit_name': 'ZAPP0944',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic6a6gadiixffdgbawq73bgzuryjautxa4i5r46t5sujobohvudje',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616217139.jpg',
         'background': 'Orange',
         'body': 'Daisy Shirt',
         'earring': 'Lightning',
@@ -7639,7 +7639,7 @@ ZAPPY_COLLECTION = {
     2616217326: {
         'name': 'Zappy #1572',
         'unit_name': 'ZAPP1572',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbce4bxiu4qcg2ngsiifkctpabrjpie6ae7n3vl3ystdpsgj5wya',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616217326.jpg',
         'background': 'Purple',
         'body': 'Basic Jacket',
         'earring': 'Hashtag',
@@ -7652,7 +7652,7 @@ ZAPPY_COLLECTION = {
     2616217448: {
         'name': 'Zappy #250',
         'unit_name': 'ZAPP0250',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif74m5xund6yusmyz7d4wliamhz4a7r6b5dzds2u4qhmolu45uavq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616217448.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'Left Ring',
@@ -7665,7 +7665,7 @@ ZAPPY_COLLECTION = {
     2616217685: {
         'name': 'Zappy #237',
         'unit_name': 'ZAPP0237',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigunuwyaa6mgwrynmtloxemvjdqkalxkud4nfze7yyokhdkrtwoeu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616217685.jpg',
         'background': 'Green',
         'body': 'Suit',
         'earring': 'Left Helix',
@@ -7678,7 +7678,7 @@ ZAPPY_COLLECTION = {
     2616218118: {
         'name': 'Zappy #628',
         'unit_name': 'ZAPP0628',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihoflbusrbiv72he5q2nj3l22dgfugux5t5npv4tqcaazjvsxtpdq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616218118.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Strawberry',
@@ -7691,7 +7691,7 @@ ZAPPY_COLLECTION = {
     2616218387: {
         'name': 'Zappy #1011',
         'unit_name': 'ZAPP1011',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiey42rmvxf37cgeiktgdsa6sj52txizbo3nwllw5fys2oocyyqczu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616218387.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Carton Cup',
@@ -7704,7 +7704,7 @@ ZAPPY_COLLECTION = {
     2616218745: {
         'name': 'Zappy #1976',
         'unit_name': 'ZAPP1976',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid3e73auuiqzrtbhmz2hqmjh53davttoyukb53opmzuxx4qso5czm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616218745.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Carton Cup',
@@ -7717,7 +7717,7 @@ ZAPPY_COLLECTION = {
     2616219179: {
         'name': 'Zappy #627',
         'unit_name': 'ZAPP0627',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihs6cqd3qdw6ggewrajzyr4gbocfajeoio266yzvobj2ttnxlntpi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616219179.jpg',
         'background': 'Red',
         'body': 'Leather Vest',
         'earring': 'Party Popper',
@@ -7730,7 +7730,7 @@ ZAPPY_COLLECTION = {
     2616219725: {
         'name': 'Zappy #328',
         'unit_name': 'ZAPP0328',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiazd27tsaxnr2cjuwsuqxx5uqaulfdrpjkpni37nv2455eovdkzhy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616219725.jpg',
         'background': 'Chroma',
         'body': 'Polo Shirt',
         'earring': 'Diamond',
@@ -7743,7 +7743,7 @@ ZAPPY_COLLECTION = {
     2616219939: {
         'name': 'Zappy #694',
         'unit_name': 'ZAPP0694',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig57spyokbytzsqcqm6azdyv4ikihnriekobpp44x6mto4hpwhvva',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616219939.jpg',
         'background': 'Red',
         'body': 'Fur Coat',
         'earring': 'Ghost',
@@ -7756,7 +7756,7 @@ ZAPPY_COLLECTION = {
     2616220077: {
         'name': 'Zappy #1225',
         'unit_name': 'ZAPP1225',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigrzn3ap2x7knxtwc6qtexwuvtyfgwhbsg4wtfhjy7i4apihgwe5u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616220077.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Star',
@@ -7769,7 +7769,7 @@ ZAPPY_COLLECTION = {
     2616220230: {
         'name': 'Zappy #430',
         'unit_name': 'ZAPP0430',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid4wdru2mffyehjc7cmifcmx65pdaqzri3wstm2n6ukwawysdiori',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616220230.jpg',
         'background': 'Green',
         'body': 'Bathrobe',
         'earring': 'Daisy',
@@ -7782,7 +7782,7 @@ ZAPPY_COLLECTION = {
     2616220558: {
         'name': 'Zappy #1211',
         'unit_name': 'ZAPP1211',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihsdd2vp46q5z37pfifarzsa3bmz7ay5yhuqxfokxjle3nd4lmnwq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616220558.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'None',
@@ -7795,7 +7795,7 @@ ZAPPY_COLLECTION = {
     2616220910: {
         'name': 'Zappy #670',
         'unit_name': 'ZAPP0670',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifxusiotds4m4wbbfmsir4ekk74gdchg5yxm6msq3xvvyuhdbxbfa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616220910.jpg',
         'background': 'Green',
         'body': 'Suit',
         'earring': 'Sunrise',
@@ -7808,7 +7808,7 @@ ZAPPY_COLLECTION = {
     2616221087: {
         'name': 'Zappy #457',
         'unit_name': 'ZAPP0457',
-        'image_url': 'https://ipfs.io/ipfs/bafkreighacrjeraceqp3vuwbmo6iwadlaininpcv6l6cjt2muswwrh7zeq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616221087.jpg',
         'background': 'Green',
         'body': 'Bear Suit',
         'earring': 'Knife',
@@ -7821,7 +7821,7 @@ ZAPPY_COLLECTION = {
     2616221882: {
         'name': 'Zappy #550',
         'unit_name': 'ZAPP0550',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigjvgsnnevgiwik7ionubzecwufyd5f64ndm6q3kpuyretayuskou',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616221882.jpg',
         'background': 'Orange',
         'body': 'Kimono',
         'earring': 'Pepper',
@@ -7834,7 +7834,7 @@ ZAPPY_COLLECTION = {
     2616222148: {
         'name': 'Zappy #917',
         'unit_name': 'ZAPP0917',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibuecnogk2lwbayg7qjsbnj566u3rwexjzjplyzrpum5uvyi5cghu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616222148.jpg',
         'background': 'Green',
         'body': 'Sweater',
         'earring': 'Zappies',
@@ -7847,7 +7847,7 @@ ZAPPY_COLLECTION = {
     2616222380: {
         'name': 'Zappy #1133',
         'unit_name': 'ZAPP1133',
-        'image_url': 'https://ipfs.io/ipfs/bafkreielv6nfhzw3lkgzhullaifc6oyxr5zakudxp55vikskzkovbgb4dy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616222380.jpg',
         'background': 'Orange',
         'body': 'Trash Can',
         'earring': 'Happy',
@@ -7860,7 +7860,7 @@ ZAPPY_COLLECTION = {
     2616222477: {
         'name': 'Zappy #618',
         'unit_name': 'ZAPP0618',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic36p6toggoaaeb2yfsj5qjyoarwgphdr24r4usblvkbwo6a3j7hi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616222477.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Double Helix',
@@ -7873,7 +7873,7 @@ ZAPPY_COLLECTION = {
     2616222610: {
         'name': 'Zappy #1290',
         'unit_name': 'ZAPP1290',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiffilgtdh4dlaqs3aushpcxe7enr6avasfvsffrklx7eramp6yb6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616222610.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Skull',
@@ -7886,7 +7886,7 @@ ZAPPY_COLLECTION = {
     2616223089: {
         'name': 'Zappy #1405',
         'unit_name': 'ZAPP1405',
-        'image_url': 'https://ipfs.io/ipfs/bafkreienrwsvjc2odgj37jco6ensmh7oolsfip5pighi3ju2cvjn3h3574',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616223089.jpg',
         'background': 'Yellow',
         'body': 'Bowling Shirt',
         'earring': 'Right Ring',
@@ -7899,7 +7899,7 @@ ZAPPY_COLLECTION = {
     2616223217: {
         'name': 'Zappy #187',
         'unit_name': 'ZAPP0187',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiayvwfdnjzn5d2sghpeawksxambjzacb6pumvbjjau7bpkbaiqnga',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616223217.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Right Helix',
@@ -7912,7 +7912,7 @@ ZAPPY_COLLECTION = {
     2616223449: {
         'name': 'Zappy #886',
         'unit_name': 'ZAPP0886',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzaj4a7z3zit7vcdoahm7xzehwdbg5u5qjg2uaepuhrphzrtngci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616223449.jpg',
         'background': 'Red',
         'body': 'Puffer Coat',
         'earring': 'Serious',
@@ -7925,7 +7925,7 @@ ZAPPY_COLLECTION = {
     2616223604: {
         'name': 'Zappy #402',
         'unit_name': 'ZAPP0402',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifbt6gro7uzl2wqcp4fgnqegov7xj474guezd4lgfdjf55hygeovm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616223604.jpg',
         'background': 'Red',
         'body': 'Leather Vest',
         'earring': 'Left Ring',
@@ -7938,7 +7938,7 @@ ZAPPY_COLLECTION = {
     2616351245: {
         'name': 'Zappy #589',
         'unit_name': 'ZAPP0589',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidpskdie6ktopa3ph6rp3bplopyxizhgus7nvccdryjfyaojn5fre',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616351245.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Sunrise',
@@ -7951,7 +7951,7 @@ ZAPPY_COLLECTION = {
     2616351388: {
         'name': 'Zappy #1295',
         'unit_name': 'ZAPP1295',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibwbjtih3bnylajr76bbdd7h7nbmolxho6ec6efpe6ivtcxz4pb6y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616351388.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Hashtag',
@@ -7964,7 +7964,7 @@ ZAPPY_COLLECTION = {
     2616351557: {
         'name': 'Zappy #95',
         'unit_name': 'ZAPP0095',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiapogwfnvv2pymjvvdabusl63o2epagrhfv4rqwh7u6qvqfs4otlq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616351557.jpg',
         'background': 'Yellow',
         'body': 'Armor',
         'earring': 'Carton Cup',
@@ -7977,7 +7977,7 @@ ZAPPY_COLLECTION = {
     2616352117: {
         'name': 'Zappy #1119',
         'unit_name': 'ZAPP1119',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihg6fjkocq367cyjf53bi7ch3bwldiw6k25o3ru4dur5f36c2cvnq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616352117.jpg',
         'background': 'Orange',
         'body': 'Toga',
         'earring': 'Ghost',
@@ -7990,7 +7990,7 @@ ZAPPY_COLLECTION = {
     2616428300: {
         'name': 'Zappy #1994',
         'unit_name': 'ZAPP1994',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicp2n4tiq4aj7on5sk3m7zlrj4mgzvsjfxjtbkze4zxgdgtqxxsni',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616428300.jpg',
         'background': 'Yellow',
         'body': 'Rabbit Suit',
         'earring': 'Hashtag',
@@ -8003,7 +8003,7 @@ ZAPPY_COLLECTION = {
     2616428493: {
         'name': 'Zappy #1796',
         'unit_name': 'ZAPP1796',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidxt624mmbke6du6fnucz3kqnl2bh3ogvkmp3nsjtqgabdvegxlr4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616428493.jpg',
         'background': 'Yellow',
         'body': 'Kimono',
         'earring': 'Skull',
@@ -8016,7 +8016,7 @@ ZAPPY_COLLECTION = {
     2616428690: {
         'name': 'Zappy #1958',
         'unit_name': 'ZAPP1958',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibvlbc2gn57znitqpwrl3rxpb3hzzsai7otzehsr7po37lu5wgnxq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616428690.jpg',
         'background': 'Orange',
         'body': 'Hawaiian Shirt',
         'earring': 'Number One',
@@ -8029,7 +8029,7 @@ ZAPPY_COLLECTION = {
     2616428950: {
         'name': 'Zappy #1872',
         'unit_name': 'ZAPP1872',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieiznsuhgy6fuujae4hxcc4cf2t43mw2zrrt2p6zzzdjtua4hcxba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616428950.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Zappies',
@@ -8042,7 +8042,7 @@ ZAPPY_COLLECTION = {
     2616429077: {
         'name': 'Zappy #2082',
         'unit_name': 'ZAPP2082',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigystex3n7mpyclhis27nr7rkftvmm7knoxdhfphwrxcrtuuvemu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616429077.jpg',
         'background': 'Purple',
         'body': 'Striped Sweater',
         'earring': 'Pepper',
@@ -8055,7 +8055,7 @@ ZAPPY_COLLECTION = {
     2616444158: {
         'name': 'Zappy #1728',
         'unit_name': 'ZAPP1728',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiblwqu7qz45ibd2ommmzmipzypbv2of7jljsoklnrdclgzihpsuxe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616444158.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Pepper',
@@ -8068,7 +8068,7 @@ ZAPPY_COLLECTION = {
     2616444552: {
         'name': 'Zappy #1277',
         'unit_name': 'ZAPP1277',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidewszztjwiav2sdyowrxok2nivby4yorivzdyk2cklug5kuiuhee',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616444552.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Right Ring',
@@ -8081,7 +8081,7 @@ ZAPPY_COLLECTION = {
     2616483213: {
         'name': 'Zappy #1483',
         'unit_name': 'ZAPP1483',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2ubik5v6zpt64ax4ruabuekwpv3lpuhqoscxrfnlzccpsnhxpva',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616483213.jpg',
         'background': 'Blue',
         'body': 'Fur Coat',
         'earring': 'Left Helix',
@@ -8094,7 +8094,7 @@ ZAPPY_COLLECTION = {
     2616582682: {
         'name': 'Zappy #727',
         'unit_name': 'ZAPP0727',
-        'image_url': 'https://ipfs.io/ipfs/bafkreianjwy6mdyl6wtithpavtfg6evubdwh4kssx2ro7uhfmzabpiqmfy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616582682.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Left Ring',
@@ -8107,7 +8107,7 @@ ZAPPY_COLLECTION = {
     2616582891: {
         'name': 'Zappy #429',
         'unit_name': 'ZAPP0429',
-        'image_url': 'https://ipfs.io/ipfs/bafybeife72e6kbtkwv3jse7exyw7udu5rq2n47pp5okdlinqdstivpasgm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616582891.jpg',
         'background': 'Chroma',
         'body': 'Sweater',
         'earring': 'Party Popper',
@@ -8120,7 +8120,7 @@ ZAPPY_COLLECTION = {
     2616623586: {
         'name': 'Zappy #415',
         'unit_name': 'ZAPP0415',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicvkrdx7lvcfvssjvnyszwtr446i7uj7lkhcox4c5imbzwlx4j7ze',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616623586.jpg',
         'background': 'Red',
         'body': 'Hawaiian Shirt',
         'earring': 'Pyramid',
@@ -8133,7 +8133,7 @@ ZAPPY_COLLECTION = {
     2616623659: {
         'name': 'Zappy #623',
         'unit_name': 'ZAPP0623',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibrokdjishtht72oitxcezbmvlrzu3kguuokwjvofh2vymty6dbu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616623659.jpg',
         'background': 'Purple',
         'body': 'Striped Sweater',
         'earring': 'Star',
@@ -8146,7 +8146,7 @@ ZAPPY_COLLECTION = {
     2616623796: {
         'name': 'Zappy #585',
         'unit_name': 'ZAPP0585',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifl557isfxfenpmk5qb44vki2a7hogxc65lbcric534ln4nsx4jgm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616623796.jpg',
         'background': 'Red',
         'body': 'Dino Suit',
         'earring': 'Rainbow',
@@ -8159,7 +8159,7 @@ ZAPPY_COLLECTION = {
     2616624054: {
         'name': 'Zappy #740',
         'unit_name': 'ZAPP0740',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif4ursxxfbqaugcggfzflrzvhbssukdijyqc4s5yftci3xmwnlioi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616624054.jpg',
         'background': 'Red',
         'body': 'Leather Vest',
         'earring': 'Daisy',
@@ -8172,7 +8172,7 @@ ZAPPY_COLLECTION = {
     2616624197: {
         'name': 'Zappy #1023',
         'unit_name': 'ZAPP1023',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigoamrfwd3dtqtttwhufnxtfxr2nbbbjj3srswuybttx76o4ezre4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616624197.jpg',
         'background': 'Purple',
         'body': 'Colorful Jacket',
         'earring': 'Skull',
@@ -8185,7 +8185,7 @@ ZAPPY_COLLECTION = {
     2616624451: {
         'name': 'Zappy #270',
         'unit_name': 'ZAPP0270',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifljrw7j6vn6qcvlq47ujp26tkk2sxaiexw6nnzw6vvvbfjlvtkra',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616624451.jpg',
         'background': 'Purple',
         'body': 'Kimono',
         'earring': 'Strawberry',
@@ -8198,7 +8198,7 @@ ZAPPY_COLLECTION = {
     2616624584: {
         'name': 'Zappy #161',
         'unit_name': 'ZAPP0161',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig6soug4kz2f3jmreni3inlh44q7mwrfyenyltcysnihtedvrlvt4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616624584.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Rainbow',
@@ -8211,7 +8211,7 @@ ZAPPY_COLLECTION = {
     2616624759: {
         'name': 'Zappy #1236',
         'unit_name': 'ZAPP1236',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig6lebb22gfcppxhzruwkegw357dmjnb5323dsrw35il3zctsmvwy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616624759.jpg',
         'background': 'Yellow',
         'body': 'Ribbon Tie',
         'earring': 'Sunrise',
@@ -8224,7 +8224,7 @@ ZAPPY_COLLECTION = {
     2616624897: {
         'name': 'Zappy #963',
         'unit_name': 'ZAPP0963',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigf7hwcyn5u4chozn6oikidfm4hmiwv4em5gttkiix66up32ae2ra',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616624897.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Hashtag',
@@ -8237,7 +8237,7 @@ ZAPPY_COLLECTION = {
     2616625141: {
         'name': 'Zappy #723',
         'unit_name': 'ZAPP0723',
-        'image_url': 'https://ipfs.io/ipfs/bafkreida2qpc3wbrqgamtnrxe5h2gcw6s6s5mcgvycrqg3xwrkfn2f4hk4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616625141.jpg',
         'background': 'Orange',
         'body': 'Striped Shirt',
         'earring': 'Left Helix',
@@ -8250,7 +8250,7 @@ ZAPPY_COLLECTION = {
     2616625254: {
         'name': 'Zappy #36',
         'unit_name': 'ZAPP0036',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibesfs6zoqez33luik6wvyh6lkthpioc5zfd2higabykzqkqacw7m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616625254.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Star',
@@ -8263,7 +8263,7 @@ ZAPPY_COLLECTION = {
     2616625405: {
         'name': 'Zappy #304',
         'unit_name': 'ZAPP0304',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiau5ygefzffkw2dvgapekxocf2vx3yngf3jm2slcdn4fow3e7xffi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616625405.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Serious',
@@ -8276,7 +8276,7 @@ ZAPPY_COLLECTION = {
     2616625534: {
         'name': 'Zappy #704',
         'unit_name': 'ZAPP0704',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigony2a5mnaatcmihndhkgxrktydbwx4urjyy5ga3mzkirj6rdo7q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616625534.jpg',
         'background': 'Yellow',
         'body': 'Warning Tape',
         'earring': 'Zappies',
@@ -8289,7 +8289,7 @@ ZAPPY_COLLECTION = {
     2616625636: {
         'name': 'Zappy #377',
         'unit_name': 'ZAPP0377',
-        'image_url': 'https://ipfs.io/ipfs/bafybeibykp5gliegb2pthxhc2y5z4tnwenglyaroesxxemlergn5pyhzcq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616625636.jpg',
         'background': 'Chroma',
         'body': 'Rabbit Suit',
         'earring': 'None',
@@ -8302,7 +8302,7 @@ ZAPPY_COLLECTION = {
     2616625758: {
         'name': 'Zappy #904',
         'unit_name': 'ZAPP0904',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifumg36fbtumkknejmush2wn34mbdhoerxq5473mxya7qwbaz2qqq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616625758.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'None',
@@ -8315,7 +8315,7 @@ ZAPPY_COLLECTION = {
     2616625897: {
         'name': 'Zappy #183',
         'unit_name': 'ZAPP0183',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiacbkwxxnueskewi35uazpdmgy2cuvz3nyoeflw4eb5xeozictz2y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616625897.jpg',
         'background': 'Purple',
         'body': 'School Outfit',
         'earring': 'Left Helix',
@@ -8328,7 +8328,7 @@ ZAPPY_COLLECTION = {
     2616626033: {
         'name': 'Zappy #1199',
         'unit_name': 'ZAPP1199',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiazi7ylj7d3ris6cbdluhb3xt2rw2jlj2wnydzpo4kdswhoxap2wq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616626033.jpg',
         'background': 'Blue',
         'body': 'Oversize Sweater',
         'earring': 'Right Helix',
@@ -8341,7 +8341,7 @@ ZAPPY_COLLECTION = {
     2616626229: {
         'name': 'Zappy #783',
         'unit_name': 'ZAPP0783',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidde2x4kgnu5jijwa3ibo6hkm2x4hnxpgiqe33l24yp5ukkxi2vxq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616626229.jpg',
         'background': 'Yellow',
         'body': 'Striped Sweater',
         'earring': 'Lightning',
@@ -8354,7 +8354,7 @@ ZAPPY_COLLECTION = {
     2616626415: {
         'name': 'Zappy #261',
         'unit_name': 'ZAPP0261',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiduq5cdm7ualdsyucbk4nynih66jdx7z2lb44ol7nkahiexl5acci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616626415.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Right Ring',
@@ -8367,7 +8367,7 @@ ZAPPY_COLLECTION = {
     2616626637: {
         'name': 'Zappy #1135',
         'unit_name': 'ZAPP1135',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigoshctlr4xxmw44g42utkzfu3l7gp5sxuqh7rgtqzajsqgwe57yi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616626637.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Daisy',
@@ -8380,7 +8380,7 @@ ZAPPY_COLLECTION = {
     2616664702: {
         'name': 'Zappy #1413',
         'unit_name': 'ZAPP1413',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibop6l6rslispj7pt3alylicwqpqnppjwx5ap22aop6sea24lkfqe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616664702.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Number One',
@@ -8393,7 +8393,7 @@ ZAPPY_COLLECTION = {
     2616665295: {
         'name': 'Zappy #2190',
         'unit_name': 'ZAPP2190',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiacz4ameabv27mxaufcvwbptoe4fdskcekoy44mclxk7vmsqycake',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616665295.jpg',
         'background': 'Orange',
         'body': 'Ribbon Tie',
         'earring': 'Number One',
@@ -8406,7 +8406,7 @@ ZAPPY_COLLECTION = {
     2616665573: {
         'name': 'Zappy #2004',
         'unit_name': 'ZAPP2004',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicnazlxe3qpueykavup2l2txcu42upvhtsigbwwbmgwqmp5btlpjm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616665573.jpg',
         'background': 'Yellow',
         'body': 'Tracksuit Top',
         'earring': 'Star',
@@ -8419,7 +8419,7 @@ ZAPPY_COLLECTION = {
     2616666025: {
         'name': 'Zappy #1327',
         'unit_name': 'ZAPP1327',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibxzkjonx7drusdc6okt5yabxf2suuakmunjjgp37qwe3fifyak2a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616666025.jpg',
         'background': 'Orange',
         'body': 'Cat Suit',
         'earring': 'Skull',
@@ -8432,7 +8432,7 @@ ZAPPY_COLLECTION = {
     2616667116: {
         'name': 'Zappy #1256',
         'unit_name': 'ZAPP1256',
-        'image_url': 'https://ipfs.io/ipfs/bafybeig2vtmvbixbxi4dyqfxb6h2m2kh5y3qkyoycex7zmigj47k7d4xvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616667116.jpg',
         'background': 'Chroma',
         'body': 'Overalls',
         'earring': 'Double Helix',
@@ -8445,7 +8445,7 @@ ZAPPY_COLLECTION = {
     2616667496: {
         'name': 'Zappy #1813',
         'unit_name': 'ZAPP1813',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif4as2kaogtzitf47ynbl7em5garsiodfsgm7tpv7naml447qcmvy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616667496.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Knife',
@@ -8458,7 +8458,7 @@ ZAPPY_COLLECTION = {
     2616668043: {
         'name': 'Zappy #1786',
         'unit_name': 'ZAPP1786',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih6cfnmjb6d73b7pwn5wkl5h5ei7fchwefaifznx6rda4abwba4ca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616668043.jpg',
         'background': 'Orange',
         'body': 'Tracksuit Top',
         'earring': 'None',
@@ -8471,7 +8471,7 @@ ZAPPY_COLLECTION = {
     2616668327: {
         'name': 'Zappy #1954',
         'unit_name': 'ZAPP1954',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigkyfjl3xsxdze5gsmskph3idzjciqstwpzzmr6u2puzktxjnwba4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616668327.jpg',
         'background': 'Blue',
         'body': 'Naked',
         'earring': 'None',
@@ -8484,7 +8484,7 @@ ZAPPY_COLLECTION = {
     2616668830: {
         'name': 'Zappy #1401',
         'unit_name': 'ZAPP1401',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiejrmwh7lfzi5equefnt4t6ux7drhwgd7qglpkguwxamivuz3vw7u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616668830.jpg',
         'background': 'Yellow',
         'body': 'School Outfit',
         'earring': 'Happy',
@@ -8497,7 +8497,7 @@ ZAPPY_COLLECTION = {
     2616669129: {
         'name': 'Zappy #1650',
         'unit_name': 'ZAPP1650',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicsfjrlwcneyrd5uld33uzw5ok3xc64wm7gfosaubudspbqniegky',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616669129.jpg',
         'background': 'Blue',
         'body': 'Muscle Suit',
         'earring': 'Strawberry',
@@ -8510,7 +8510,7 @@ ZAPPY_COLLECTION = {
     2616670238: {
         'name': 'Zappy #1410',
         'unit_name': 'ZAPP1410',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiez56pt6x5hst2zey53i4ehm5ulpokoklfnluxoelv2wk726p2kcu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616670238.jpg',
         'background': 'Purple',
         'body': 'Hoodie',
         'earring': 'Sad',
@@ -8523,7 +8523,7 @@ ZAPPY_COLLECTION = {
     2616670821: {
         'name': 'Zappy #1731',
         'unit_name': 'ZAPP1731',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihdv6ovkvrc4rsejt2rpiidg76hcmpsldg4oandqgbtttsrrfzxeu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616670821.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Pyramid',
@@ -8536,7 +8536,7 @@ ZAPPY_COLLECTION = {
     2616671024: {
         'name': 'Zappy #1278',
         'unit_name': 'ZAPP1278',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidlk35sefldks37iiwp5m3pwmbj2olghv66jurjcnsb66y3ud3yi4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616671024.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Star',
@@ -8549,7 +8549,7 @@ ZAPPY_COLLECTION = {
     2616671307: {
         'name': 'Zappy #1439',
         'unit_name': 'ZAPP1439',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig7alaciy3calzfqp62o6dvzxyw3xzugnhaqdtsn4zyczohtfhhge',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616671307.jpg',
         'background': 'Yellow',
         'body': 'Polo Shirt',
         'earring': 'Number One',
@@ -8562,7 +8562,7 @@ ZAPPY_COLLECTION = {
     2616671475: {
         'name': 'Zappy #1462',
         'unit_name': 'ZAPP1462',
-        'image_url': 'https://ipfs.io/ipfs/bafkreielimiochlnuujvvdksl4mw25cxkkee5vx7wh4frvsnquho6wk6ha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616671475.jpg',
         'background': 'Red',
         'body': 'Basic Jacket',
         'earring': 'Right Ring',
@@ -8575,7 +8575,7 @@ ZAPPY_COLLECTION = {
     2616671874: {
         'name': 'Zappy #1438',
         'unit_name': 'ZAPP1438',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibguytk3422e47ehgll6d3vaf2dssgfsxmnws75acwqpvctck27fq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616671874.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'Hashtag',
@@ -8588,7 +8588,7 @@ ZAPPY_COLLECTION = {
     2616672852: {
         'name': 'Zappy #1362',
         'unit_name': 'ZAPP1362',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigousu6lfm5uij2drdj4w2laxxitcf3fndf7lbi3ctn3xvsmg55ky',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616672852.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'Pyramid',
@@ -8601,7 +8601,7 @@ ZAPPY_COLLECTION = {
     2616673554: {
         'name': 'Zappy #1586',
         'unit_name': 'ZAPP1586',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieoaeoo3iorzr336du2h372r52yqin4r3comwokj6izzoeg7d3ezq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616673554.jpg',
         'background': 'Yellow',
         'body': 'Dino Suit',
         'earring': 'Happy',
@@ -8614,7 +8614,7 @@ ZAPPY_COLLECTION = {
     2616673812: {
         'name': 'Zappy #1319',
         'unit_name': 'ZAPP1319',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiakm2o45pqmkkdmhxebmmg4mf425at2l73ajtjo4gwcuwet2yqkni',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616673812.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'None',
@@ -8627,7 +8627,7 @@ ZAPPY_COLLECTION = {
     2616673964: {
         'name': 'Zappy #1441',
         'unit_name': 'ZAPP1441',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifdkni2ua75pxrfyxv7xdo2xhizg6z3hmebtmh267obxdi6ocolnu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616673964.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Pepper',
@@ -8640,7 +8640,7 @@ ZAPPY_COLLECTION = {
     2616697051: {
         'name': 'Zappy #2206',
         'unit_name': 'ZAPP2206',
-        'image_url': 'https://ipfs.io/ipfs/bafkreighg274dmdedwu55gs6kgv6jz2sbqgmfqtaltgumyklme6ckof5jm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616697051.jpg',
         'background': 'Red',
         'body': 'Space Suit',
         'earring': 'Party Popper',
@@ -8653,7 +8653,7 @@ ZAPPY_COLLECTION = {
     2616888810: {
         'name': 'Zappy #471',
         'unit_name': 'ZAPP0471',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieuuhzbhcpofxfiab6vzywys6ph4t3nnygiiryiqnn3dvh4fvvoma',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616888810.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Serious',
@@ -8666,7 +8666,7 @@ ZAPPY_COLLECTION = {
     2616900137: {
         'name': 'Zappy #703',
         'unit_name': 'ZAPP0703',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihbommwtzlye5uzbmjyge6xaq3up5lt4ryzfwpzankrrwadtkce6i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2616900137.jpg',
         'background': 'Green',
         'body': 'Cat Suit',
         'earring': 'Pyramid',
@@ -8679,7 +8679,7 @@ ZAPPY_COLLECTION = {
     2617059061: {
         'name': 'Zappy #238',
         'unit_name': 'ZAPP0238',
-        'image_url': 'https://ipfs.io/ipfs/bafybeigfsyjftvmcbkpdoq2ps7jk5olgctio5qvzeb4jhqn52j6obos5tm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617059061.jpg',
         'background': 'Chroma',
         'body': 'Turtleneck Sweater',
         'earring': 'Right Ring',
@@ -8692,7 +8692,7 @@ ZAPPY_COLLECTION = {
     2617063694: {
         'name': 'Zappy #1837',
         'unit_name': 'ZAPP1837',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibnygqp7iv2jdcf5ew4bewwfzkl5bmp6p5wf7kos5v4dme6pazxh4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617063694.jpg',
         'background': 'Red',
         'body': 'Kimono',
         'earring': 'Pepper',
@@ -8705,7 +8705,7 @@ ZAPPY_COLLECTION = {
     2617063746: {
         'name': 'Zappy #634',
         'unit_name': 'ZAPP0634',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihuy6x6zc343fqrebloo6lmvzvphe4vg6igoz7jz6vszjejkeykfy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617063746.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'Left Helix',
@@ -8718,7 +8718,7 @@ ZAPPY_COLLECTION = {
     2617063786: {
         'name': 'Zappy #2102',
         'unit_name': 'ZAPP2102',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiepxnudcgh53jve23gkttwwfhzugxlemjoknjoo5a4gd6j62xb2n4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617063786.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Rainbow',
@@ -8731,7 +8731,7 @@ ZAPPY_COLLECTION = {
     2617063976: {
         'name': 'Zappy #1515',
         'unit_name': 'ZAPP1515',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiffvxzd6odoslbm2qt722tyebhnjsdgp5whj2rylxlsmaijhi54cu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617063976.jpg',
         'background': 'Purple',
         'body': 'Lifesaver',
         'earring': 'Hashtag',
@@ -8744,7 +8744,7 @@ ZAPPY_COLLECTION = {
     2617064072: {
         'name': 'Zappy #957',
         'unit_name': 'ZAPP0957',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihbnbeuk477sjdluwtogzgpihiirf3woowj23zmu7escmvapwcmcu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064072.jpg',
         'background': 'Blue',
         'body': 'Wool Collar Jacket',
         'earring': 'Number One',
@@ -8757,7 +8757,7 @@ ZAPPY_COLLECTION = {
     2617064184: {
         'name': 'Zappy #1859',
         'unit_name': 'ZAPP1859',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidgmimqjg2nelbwxt6ybx3cr6p3v4yxihfefo74emmxzlg4nxd3ri',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064184.jpg',
         'background': 'Yellow',
         'body': 'Leather Vest',
         'earring': 'Carton Cup',
@@ -8770,7 +8770,7 @@ ZAPPY_COLLECTION = {
     2617064383: {
         'name': 'Zappy #1093',
         'unit_name': 'ZAPP1093',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihveeacqw5zcqjp5c3xxhwihhd2hugzwlpv2ujxwvxwhaf6hqfydy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064383.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Number One',
@@ -8783,7 +8783,7 @@ ZAPPY_COLLECTION = {
     2617064464: {
         'name': 'Zappy #1793',
         'unit_name': 'ZAPP1793',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigml2vtttqrqf3psxae66uukeotjczy7p6lvnsb2zlbdwgg7sklbu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064464.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Sad',
@@ -8796,7 +8796,7 @@ ZAPPY_COLLECTION = {
     2617064568: {
         'name': 'Zappy #903',
         'unit_name': 'ZAPP0903',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifq3dqbzskqbio3jid6xlaxfcwz53iumfn4zslbqba436f3ogr2he',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064568.jpg',
         'background': 'Green',
         'body': 'Sweater',
         'earring': 'Daisy',
@@ -8809,7 +8809,7 @@ ZAPPY_COLLECTION = {
     2617064712: {
         'name': 'Zappy #527',
         'unit_name': 'ZAPP0527',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigkvsetcxulqjoqsgcei2j3kynkbog6nmdma5zk26yrd62ictql2q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064712.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Left Helix',
@@ -8822,7 +8822,7 @@ ZAPPY_COLLECTION = {
     2617064841: {
         'name': 'Zappy #1053',
         'unit_name': 'ZAPP1053',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicxidhz2gecpjhjxw72bxhyxd7dj7bq74j7bk7d6d3r6xwcxgr5ra',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064841.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'Hashtag',
@@ -8835,7 +8835,7 @@ ZAPPY_COLLECTION = {
     2617064931: {
         'name': 'Zappy #533',
         'unit_name': 'ZAPP0533',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifvyk6g5et42ew5roaksbxfkepgqztxp62iwsmbjelamjm7ojwcg4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064931.jpg',
         'background': 'Red',
         'body': 'Suit',
         'earring': 'Left Helix',
@@ -8848,7 +8848,7 @@ ZAPPY_COLLECTION = {
     2617064984: {
         'name': 'Zappy #1260',
         'unit_name': 'ZAPP1260',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihpgdk4ma4nhqyces3y4ovu3kccskrkf2jpljzyzfj7lyfevzh7lu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617064984.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Knife',
@@ -8861,7 +8861,7 @@ ZAPPY_COLLECTION = {
     2617065085: {
         'name': 'Zappy #519',
         'unit_name': 'ZAPP0519',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic4hknkmibqifdjwbfygmwlum6ome6vcz2ufo6srtxs7ogs2ljuzy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2617065085.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Left Helix',
@@ -8874,7 +8874,7 @@ ZAPPY_COLLECTION = {
     2619373420: {
         'name': 'Zappy #1400',
         'unit_name': 'ZAPP1400',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiatbubcwe2xislxll2eo4jjozp3pwwn63dmfkbjzqndw553wyougy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2619373420.jpg',
         'background': 'Orange',
         'body': 'Striped Sweater',
         'earring': 'Ghost',
@@ -8887,7 +8887,7 @@ ZAPPY_COLLECTION = {
     2621020205: {
         'name': 'Zappy #93',
         'unit_name': 'ZAPP0093',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicxclyxqryh7cndp34jiboikvvb2kik5ijwb5wxj6dumgnlxpjqky',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621020205.jpg',
         'background': 'Purple',
         'body': 'Rabbit Suit',
         'earring': 'Zappies',
@@ -8900,7 +8900,7 @@ ZAPPY_COLLECTION = {
     2621020394: {
         'name': 'Zappy #747',
         'unit_name': 'ZAPP0747',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigzknygu5lzyajgdwulm4mll3jympufej2xbmkw6ogu2xjxqqepqy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621020394.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Diamond',
@@ -8913,7 +8913,7 @@ ZAPPY_COLLECTION = {
     2621020543: {
         'name': 'Zappy #673',
         'unit_name': 'ZAPP0673',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigiak3mlykxlb7jdc5sufn2owe77m6ais7mmytkxsalwsxdpfrn2u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621020543.jpg',
         'background': 'Green',
         'body': 'Bear Suit',
         'earring': 'Carton Cup',
@@ -8926,7 +8926,7 @@ ZAPPY_COLLECTION = {
     2621021033: {
         'name': 'Zappy #162',
         'unit_name': 'ZAPP0162',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiavikn2xwk5wvxuitztl7nhw2xhw6twfxx4cvsucxta2a3ko3khra',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621021033.jpg',
         'background': 'Orange',
         'body': 'Suit',
         'earring': 'Bananas',
@@ -8939,7 +8939,7 @@ ZAPPY_COLLECTION = {
     2621021226: {
         'name': 'Zappy #179',
         'unit_name': 'ZAPP0179',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif7z4scjyhvdfpo6dbkuuodzjuauorphia3dex5kvldb5ynfg4llm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621021226.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Ghost',
@@ -8952,7 +8952,7 @@ ZAPPY_COLLECTION = {
     2621035442: {
         'name': 'Zappy #914',
         'unit_name': 'ZAPP0914',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihwvdacmvsjmibsr5a22rypuzkzq2xe6eplqsmlcl57wrbxjolmum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621035442.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'Serious',
@@ -8965,7 +8965,7 @@ ZAPPY_COLLECTION = {
     2621035630: {
         'name': 'Zappy #998',
         'unit_name': 'ZAPP0998',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiepk6l5xjuypok44ixmlvg5k3xv45qxzrighdc3lwyjsi37ih5hyy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621035630.jpg',
         'background': 'Blue',
         'body': 'Daisy Shirt',
         'earring': 'Hashtag',
@@ -8978,7 +8978,7 @@ ZAPPY_COLLECTION = {
     2621035777: {
         'name': 'Zappy #1077',
         'unit_name': 'ZAPP1077',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifxfxnqoj5oqe6dkhggd2jolo4echs3ztatpuk37u2dwzd442j24m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621035777.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Serious',
@@ -8991,7 +8991,7 @@ ZAPPY_COLLECTION = {
     2621035912: {
         'name': 'Zappy #850',
         'unit_name': 'ZAPP0850',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifesff3fawi4wbn7i56qv2lwecx62okkbvh2k6ctmuwj4pup2rkrm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621035912.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'Knife',
@@ -9004,7 +9004,7 @@ ZAPPY_COLLECTION = {
     2621036100: {
         'name': 'Zappy #1136',
         'unit_name': 'ZAPP1136',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiglshhvzsi4bpidjhsksjz2iphizi6gdb4zkmxmiwd4bivwxaubli',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621036100.jpg',
         'background': 'Red',
         'body': 'Trash Can',
         'earring': 'Skull',
@@ -9017,7 +9017,7 @@ ZAPPY_COLLECTION = {
     2621043106: {
         'name': 'Zappy #1326',
         'unit_name': 'ZAPP1326',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia546jbkjeeh33lowejhqcgsz6aojtt6mnblkwpsulqjamsj2mewi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621043106.jpg',
         'background': 'Blue',
         'body': 'Naked',
         'earring': 'Ghost',
@@ -9030,7 +9030,7 @@ ZAPPY_COLLECTION = {
     2621043180: {
         'name': 'Zappy #1263',
         'unit_name': 'ZAPP1263',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiggjfa5szewpnlx7274td23hizlky4wtqfeg5wfmb545b6zuseseq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621043180.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'Star',
@@ -9043,7 +9043,7 @@ ZAPPY_COLLECTION = {
     2621043331: {
         'name': 'Zappy #1435',
         'unit_name': 'ZAPP1435',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidtt4gn24lmwjul2mfkz4mmbm3a7m43h22sbuctfz7fyit44t6fs4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621043331.jpg',
         'background': 'Yellow',
         'body': 'Choker',
         'earring': 'Happy',
@@ -9056,7 +9056,7 @@ ZAPPY_COLLECTION = {
     2621043428: {
         'name': 'Zappy #1152',
         'unit_name': 'ZAPP1152',
-        'image_url': 'https://ipfs.io/ipfs/bafkreienzgw357iqva3lpu7ugmupivktjqjpbtmnlppavwyftnj63fblpm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621043428.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Double Helix',
@@ -9069,7 +9069,7 @@ ZAPPY_COLLECTION = {
     2621043534: {
         'name': 'Zappy #1285',
         'unit_name': 'ZAPP1285',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiduriqeqf27ml2j2zjxsvhcgd3ambdemv4mnz3gbhxk3yzgd2fali',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621043534.jpg',
         'background': 'Red',
         'body': 'Cat Suit',
         'earring': 'Pyramid',
@@ -9082,7 +9082,7 @@ ZAPPY_COLLECTION = {
     2621049239: {
         'name': 'Zappy #1776',
         'unit_name': 'ZAPP1776',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic5mhz5w6eynisnaxjw63xwq7p22rtamecy57k444yq37iswgh64a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621049239.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Right Helix',
@@ -9095,7 +9095,7 @@ ZAPPY_COLLECTION = {
     2621049329: {
         'name': 'Zappy #1857',
         'unit_name': 'ZAPP1857',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihhn5ohwbuctcj5cpehiuuof26ruma5d7vp566cs245f3rhfjwqfa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621049329.jpg',
         'background': 'Blue',
         'body': 'Turtleneck Sweater',
         'earring': 'Pepper',
@@ -9108,7 +9108,7 @@ ZAPPY_COLLECTION = {
     2621049863: {
         'name': 'Zappy #1945',
         'unit_name': 'ZAPP1945',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib6vea3s3e2gnam7cz7lcl7qk3zxiz5jhfmwqsjfjh4fospn3gyjy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621049863.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Hashtag',
@@ -9121,7 +9121,7 @@ ZAPPY_COLLECTION = {
     2621049956: {
         'name': 'Zappy #1718',
         'unit_name': 'ZAPP1718',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicutuzevhyt6rrissiyhwfftwoxithjoz6wjwiadhc62kc3adu74u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621049956.jpg',
         'background': 'Orange',
         'body': 'Scarf',
         'earring': 'Pepper',
@@ -9134,7 +9134,7 @@ ZAPPY_COLLECTION = {
     2621050100: {
         'name': 'Zappy #1909',
         'unit_name': 'ZAPP1909',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig2iwdj5jrzzlcumsi2tvdghkx366rwmvoeuurh7z3wbygqkqgdfy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621050100.jpg',
         'background': 'Yellow',
         'body': 'Overalls',
         'earring': 'Sunrise',
@@ -9147,7 +9147,7 @@ ZAPPY_COLLECTION = {
     2621089945: {
         'name': 'Zappy #1066',
         'unit_name': 'ZAPP1066',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihmxtxpmbes3aoumxcon4ji5ou52yf4nixh5ofywbfx7rfe6mot2m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621089945.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Bananas',
@@ -9160,7 +9160,7 @@ ZAPPY_COLLECTION = {
     2621090104: {
         'name': 'Zappy #1748',
         'unit_name': 'ZAPP1748',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidzo3bkgnyq2z3wqoeyyr7743vr7nuzvr4v33endmndf37ra4bjxy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621090104.jpg',
         'background': 'Red',
         'body': 'Puffer Coat',
         'earring': 'Zappies',
@@ -9173,7 +9173,7 @@ ZAPPY_COLLECTION = {
     2621090228: {
         'name': 'Zappy #1380',
         'unit_name': 'ZAPP1380',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibvkigfiynpal5venijpn6o7heom35tjbzygyhx7pjxkr273podim',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621090228.jpg',
         'background': 'Purple',
         'body': 'Suit',
         'earring': 'Sad',
@@ -9186,7 +9186,7 @@ ZAPPY_COLLECTION = {
     2621090397: {
         'name': 'Zappy #815',
         'unit_name': 'ZAPP0815',
-        'image_url': 'https://ipfs.io/ipfs/bafkreief4ld25ctjbw5rdn3o7utu2h6e5sy6hwytoeujqbbeey4hx7k2yy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621090397.jpg',
         'background': 'Purple',
         'body': 'Puffer Coat',
         'earring': 'Happy',
@@ -9199,7 +9199,7 @@ ZAPPY_COLLECTION = {
     2621090597: {
         'name': 'Zappy #562',
         'unit_name': 'ZAPP0562',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihtin3sh2hgry5odyzihuan2upqic22e5tcddo2wpprud3axragzq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621090597.jpg',
         'background': 'Purple',
         'body': 'Funky Coat',
         'earring': 'Pyramid',
@@ -9212,7 +9212,7 @@ ZAPPY_COLLECTION = {
     2621254985: {
         'name': 'Zappy #16',
         'unit_name': 'ZAPP0016',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihcnupqeqouysceo2dumgndrngasoduwpx2n6k4xmhe46476giuiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621254985.jpg',
         'background': 'Green',
         'body': 'Scarf',
         'earring': 'Diamond',
@@ -9225,7 +9225,7 @@ ZAPPY_COLLECTION = {
     2621463320: {
         'name': 'Zappy #173',
         'unit_name': 'ZAPP0173',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibyftgcnmxcetx3o6u5h6yxif4qnm3pl35cix77ohxq3nmjct5gwu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621463320.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Twin Rings',
@@ -9238,7 +9238,7 @@ ZAPPY_COLLECTION = {
     2621475505: {
         'name': 'Zappy #64',
         'unit_name': 'ZAPP0064',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigmgylnp5g4klp77p7qfrxaby6o62jxnbaifuea3ytcz6iwy2jgmi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621475505.jpg',
         'background': 'Blue',
         'body': 'Clouds',
         'earring': 'Bananas',
@@ -9251,7 +9251,7 @@ ZAPPY_COLLECTION = {
     2621475807: {
         'name': 'Zappy #326',
         'unit_name': 'ZAPP0326',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignyqkfx4fbllc6mbjygcjhu4fvylqgcxyfkwqva4xqj6axi2fsjy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621475807.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Party Popper',
@@ -9264,7 +9264,7 @@ ZAPPY_COLLECTION = {
     2621475857: {
         'name': 'Zappy #208',
         'unit_name': 'ZAPP0208',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidjpbbncfdkv33yvbvic63qb5mhqvsygp5qt5ifaqwhatjnlvljoy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621475857.jpg',
         'background': 'Blue',
         'body': 'Fanny Pack',
         'earring': 'Star',
@@ -9277,7 +9277,7 @@ ZAPPY_COLLECTION = {
     2621476452: {
         'name': 'Zappy #9',
         'unit_name': 'ZAPP0009',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2w4dsmguqftzltygsotrtt3wtfaievrjra3flpjubfcrpqwc7i4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621476452.jpg',
         'background': 'Red',
         'body': 'School Outfit',
         'earring': 'Strawberry',
@@ -9290,7 +9290,7 @@ ZAPPY_COLLECTION = {
     2621476462: {
         'name': 'Zappy #570',
         'unit_name': 'ZAPP0570',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieatflcext2eocmbtbhxfzdyoljcx44m3qawo4bjax4rcu655dqoa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621476462.jpg',
         'background': 'Purple',
         'body': 'Puffer Coat',
         'earring': 'Knife',
@@ -9303,7 +9303,7 @@ ZAPPY_COLLECTION = {
     2621476918: {
         'name': 'Zappy #175',
         'unit_name': 'ZAPP0175',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidonr4gfqwokk4q4lldyki6xhjqhjwtc25njrncogkxbbsoci6x6y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621476918.jpg',
         'background': 'Red',
         'body': 'Hawaiian Shirt',
         'earring': 'Right Helix',
@@ -9316,7 +9316,7 @@ ZAPPY_COLLECTION = {
     2621476966: {
         'name': 'Zappy #205',
         'unit_name': 'ZAPP0205',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidhttyvcturm4ju33vyoqqyqg4jme4rt6k4nk7secotmdvilycxyu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621476966.jpg',
         'background': 'Yellow',
         'body': 'Striped Sweater',
         'earring': 'Happy',
@@ -9329,7 +9329,7 @@ ZAPPY_COLLECTION = {
     2621476975: {
         'name': 'Zappy #322',
         'unit_name': 'ZAPP0322',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigunkwoonq3qj265pudmr3q5uh4gbl4tieyd6xrdefyxoukngl4t4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621476975.jpg',
         'background': 'Green',
         'body': 'Leather Vest',
         'earring': 'Number One',
@@ -9342,7 +9342,7 @@ ZAPPY_COLLECTION = {
     2621477057: {
         'name': 'Zappy #677',
         'unit_name': 'ZAPP0677',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidedm5ukkzrt5shl7chwtk2yt4ij4d5lk2f6vrmsb2x4fyx7ppqve',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621477057.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Double Helix',
@@ -9355,7 +9355,7 @@ ZAPPY_COLLECTION = {
     2621477349: {
         'name': 'Zappy #177',
         'unit_name': 'ZAPP0177',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigsokgsahcbydamgt33kejkwhjjk5vck3bkn2pfqnsv2deqzpfbvm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621477349.jpg',
         'background': 'Red',
         'body': 'Choker',
         'earring': 'Pyramid',
@@ -9368,7 +9368,7 @@ ZAPPY_COLLECTION = {
     2621477486: {
         'name': 'Zappy #778',
         'unit_name': 'ZAPP0778',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifkw76wyy5ur2xhgh3bhp6bzg4p6ibfd5abi7edgplfgczdhdap6a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621477486.jpg',
         'background': 'Green',
         'body': 'Colorful Jacket',
         'earring': 'Knife',
@@ -9381,7 +9381,7 @@ ZAPPY_COLLECTION = {
     2621477516: {
         'name': 'Zappy #260',
         'unit_name': 'ZAPP0260',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic6fewamwdxklqk2pzkt2jsulgklrc3ldiln5cfnda7drk3xymss4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621477516.jpg',
         'background': 'Purple',
         'body': 'Crocodile Suit',
         'earring': 'None',
@@ -9394,7 +9394,7 @@ ZAPPY_COLLECTION = {
     2621477583: {
         'name': 'Zappy #581',
         'unit_name': 'ZAPP0581',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaq6gdimhzbz4dvyxth4nxhc3rizxq4sls5xgmv7m6k5lxg6jxaaa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621477583.jpg',
         'background': 'Purple',
         'body': 'Polo Overalls',
         'earring': 'Zappies',
@@ -9407,7 +9407,7 @@ ZAPPY_COLLECTION = {
     2621477937: {
         'name': 'Zappy #262',
         'unit_name': 'ZAPP0262',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihhme53zokwzgvkesec2cc5uphhxuempqcmute5dsjnodvybtgyjm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621477937.jpg',
         'background': 'Yellow',
         'body': 'Funky Coat',
         'earring': 'Sunrise',
@@ -9420,7 +9420,7 @@ ZAPPY_COLLECTION = {
     2621477944: {
         'name': 'Zappy #912',
         'unit_name': 'ZAPP0912',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnkfalxpmnz4dut3aa2dep5ryoxa4s36onxzmzami4m7hqqckw4q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621477944.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Sad',
@@ -9433,7 +9433,7 @@ ZAPPY_COLLECTION = {
     2621478372: {
         'name': 'Zappy #307',
         'unit_name': 'ZAPP0307',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieimyc5v2jcnqvr32bi5jjuhxuokq4jb3mjtqov6fmxj5a5if47eu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621478372.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Ghost',
@@ -9446,7 +9446,7 @@ ZAPPY_COLLECTION = {
     2621478374: {
         'name': 'Zappy #896',
         'unit_name': 'ZAPP0896',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiajbi362bzdvxdarf4pxbszvzi3oke2aymn6qiffncrtr7ep3iuui',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621478374.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Lightning',
@@ -9459,7 +9459,7 @@ ZAPPY_COLLECTION = {
     2621478767: {
         'name': 'Zappy #45',
         'unit_name': 'ZAPP0045',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidmrcfruvvvyalm6sumoctrztzqeuezilvfauzzhpgv3vsp6i5bvy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621478767.jpg',
         'background': 'Green',
         'body': 'Dino Suit',
         'earring': 'Twin Rings',
@@ -9472,7 +9472,7 @@ ZAPPY_COLLECTION = {
     2621478773: {
         'name': 'Zappy #485',
         'unit_name': 'ZAPP0485',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifvuvlnwlsfkv2nmpimw57kgq7eyap2hbiaklkhvmi6mmrfq4t3wy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621478773.jpg',
         'background': 'Red',
         'body': 'Funky Coat',
         'earring': 'Pepper',
@@ -9485,7 +9485,7 @@ ZAPPY_COLLECTION = {
     2621479013: {
         'name': 'Zappy #108',
         'unit_name': 'ZAPP0108',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigbwta5sfmzozghug4svc4ts6wvu6dxxhsrntnugmlu27s3m5fe5m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621479013.jpg',
         'background': 'Orange',
         'body': 'Ribbon Tie',
         'earring': 'Zappies',
@@ -9498,7 +9498,7 @@ ZAPPY_COLLECTION = {
     2621479316: {
         'name': 'Zappy #149',
         'unit_name': 'ZAPP0149',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibfs2gbqyfj6lbqxvt6j3hwjdde4k53gqymc2hk5m76oxkpca65qy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621479316.jpg',
         'background': 'Yellow',
         'body': 'Toga',
         'earring': 'None',
@@ -9511,7 +9511,7 @@ ZAPPY_COLLECTION = {
     2621479407: {
         'name': 'Zappy #355',
         'unit_name': 'ZAPP0355',
-        'image_url': 'https://ipfs.io/ipfs/bafkreictrscutk5jfek5wj6o7p2i7hlf2gijl5iv275iibmwg7hnb6fbum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621479407.jpg',
         'background': 'Orange',
         'body': 'Scarf',
         'earring': 'Skull',
@@ -9524,7 +9524,7 @@ ZAPPY_COLLECTION = {
     2621479449: {
         'name': 'Zappy #13',
         'unit_name': 'ZAPP0013',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicfc3vcstoxstsqnhtgee3kwf2s2uirqrh6yic7yukytfepkgsb2e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621479449.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Strawberry',
@@ -9537,7 +9537,7 @@ ZAPPY_COLLECTION = {
     2621479738: {
         'name': 'Zappy #834',
         'unit_name': 'ZAPP0834',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiheup3l5jiki4d7xpccv4msiujkfw23myvrngddqi2757l3ujc7vy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621479738.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Hashtag',
@@ -9550,7 +9550,7 @@ ZAPPY_COLLECTION = {
     2621479793: {
         'name': 'Zappy #266',
         'unit_name': 'ZAPP0266',
-        'image_url': 'https://ipfs.io/ipfs/bafybeibpvbx5loc76k6l6xlw5i3cwtqc76nu3kszjo5b7v6bwtwn5maefi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621479793.jpg',
         'background': 'Chroma',
         'body': 'Colorful Jacket',
         'earring': 'None',
@@ -9563,7 +9563,7 @@ ZAPPY_COLLECTION = {
     2621479931: {
         'name': 'Zappy #453',
         'unit_name': 'ZAPP0453',
-        'image_url': 'https://ipfs.io/ipfs/bafkreick7tdnhrmjkd7byhnepw7pb6rwms7yb7b6o3jouhuywpqqshodii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621479931.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Hashtag',
@@ -9576,7 +9576,7 @@ ZAPPY_COLLECTION = {
     2621479972: {
         'name': 'Zappy #117',
         'unit_name': 'ZAPP0117',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaku444yxn2d675ywzvo4qmt5aodzzfkarukqjjyb5j24y2fh6joe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621479972.jpg',
         'background': 'Purple',
         'body': 'Hawaiian Shirt',
         'earring': 'Diamond',
@@ -9589,7 +9589,7 @@ ZAPPY_COLLECTION = {
     2621480289: {
         'name': 'Zappy #801',
         'unit_name': 'ZAPP0801',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiauragj67iyl62x7dr5tvd6vhovjy2z5ucuvc3j7qqj53gxeoibgq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621480289.jpg',
         'background': 'Blue',
         'body': 'Fanny Pack',
         'earring': 'Hashtag',
@@ -9602,7 +9602,7 @@ ZAPPY_COLLECTION = {
     2621480322: {
         'name': 'Zappy #141',
         'unit_name': 'ZAPP0141',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib5tc7pbqjshtehnpkmavvkwuahc7hji2uhzx3s3igsnc44cyk2km',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621480322.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Skull',
@@ -9615,7 +9615,7 @@ ZAPPY_COLLECTION = {
     2621480399: {
         'name': 'Zappy #602',
         'unit_name': 'ZAPP0602',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibtgdzofb6okrwveipqm4owk6ghtruls2tzbbde6xdllaaqigoyse',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621480399.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Rainbow',
@@ -9628,7 +9628,7 @@ ZAPPY_COLLECTION = {
     2621480687: {
         'name': 'Zappy #89',
         'unit_name': 'ZAPP0089',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiavq6pzxxenikrdhvnjnan6rlwohzmwnxrqe77lsmaasngemaiijm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621480687.jpg',
         'background': 'Blue',
         'body': 'Wool Collar Jacket',
         'earring': 'Diamond',
@@ -9641,7 +9641,7 @@ ZAPPY_COLLECTION = {
     2621480721: {
         'name': 'Zappy #767',
         'unit_name': 'ZAPP0767',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidmm54quupnh7qllyjlqgw6rwmnmwzgvhet7jfjzalwgmvnoe2p4a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621480721.jpg',
         'background': 'Yellow',
         'body': 'School Outfit',
         'earring': 'Hashtag',
@@ -9654,7 +9654,7 @@ ZAPPY_COLLECTION = {
     2621480775: {
         'name': 'Zappy #199',
         'unit_name': 'ZAPP0199',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihxlppjqjwxgdvfyciozzwj4adzdsxbrzxxjxzbf2kluhqp44xjvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621480775.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'None',
@@ -9667,7 +9667,7 @@ ZAPPY_COLLECTION = {
     2621481091: {
         'name': 'Zappy #701',
         'unit_name': 'ZAPP0701',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifcocv4nt5yngbib3v6befw2kjf2fsql7khhxbhanhczteqkvi7wy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621481091.jpg',
         'background': 'Blue',
         'body': 'Suit',
         'earring': 'Rainbow',
@@ -9680,7 +9680,7 @@ ZAPPY_COLLECTION = {
     2621481150: {
         'name': 'Zappy #243',
         'unit_name': 'ZAPP0243',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihey3x4ard52ixvnugvxaz2cbspmemdareyeyyemivedpbrz2o5ha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621481150.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Skull',
@@ -9693,7 +9693,7 @@ ZAPPY_COLLECTION = {
     2621481200: {
         'name': 'Zappy #449',
         'unit_name': 'ZAPP0449',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiejo7w66ws2sqkweh3ygfngfbed3dfewkufhwhebqh4c2n5htt5ay',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621481200.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'Star',
@@ -9706,7 +9706,7 @@ ZAPPY_COLLECTION = {
     2621481214: {
         'name': 'Zappy #99',
         'unit_name': 'ZAPP0099',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicoxy4ixirwsqq37g4a37hoe6dgld4olyqoidybfxf5o7uajm64wy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621481214.jpg',
         'background': 'Chroma',
         'body': 'Polo Shirt',
         'earring': 'Party Popper',
@@ -9719,7 +9719,7 @@ ZAPPY_COLLECTION = {
     2621481531: {
         'name': 'Zappy #423',
         'unit_name': 'ZAPP0423',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie36rfqd55x6p2efgpjni23px4zxfkh3hjevmixuenqkksxzahzna',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621481531.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Hashtag',
@@ -9732,7 +9732,7 @@ ZAPPY_COLLECTION = {
     2621481585: {
         'name': 'Zappy #217',
         'unit_name': 'ZAPP0217',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiffm6lmfnqkmcp52zcna555ulkq74a7pyyl5z2xfod7yv7p3x27jm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621481585.jpg',
         'background': 'Green',
         'body': 'Royal Robe',
         'earring': 'Happy',
@@ -9745,7 +9745,7 @@ ZAPPY_COLLECTION = {
     2621481714: {
         'name': 'Zappy #736',
         'unit_name': 'ZAPP0736',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih44nvmtrs4hgxjw7umi4wjbligp2uv7oq4tt6wtd5hdd5mbwhrfi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621481714.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Serious',
@@ -9758,7 +9758,7 @@ ZAPPY_COLLECTION = {
     2621494425: {
         'name': 'Zappy #420',
         'unit_name': 'ZAPP0420',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihvh57prnp5f2t7xwo7jnxjfr65kap6r4uv2namcxvveqzypwzmxe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621494425.jpg',
         'background': 'Purple',
         'body': 'Lifesaver',
         'earring': 'Zappies',
@@ -9771,7 +9771,7 @@ ZAPPY_COLLECTION = {
     2621494798: {
         'name': 'Zappy #391',
         'unit_name': 'ZAPP0391',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia6xsswj4a2xws2pyyfizcav42enxqb3y37btphhqkhfv4fqsu43y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621494798.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'Party Popper',
@@ -9784,7 +9784,7 @@ ZAPPY_COLLECTION = {
     2621495267: {
         'name': 'Zappy #645',
         'unit_name': 'ZAPP0645',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiejm4pyiqo7whlrsvsnonzweppwaatlhtdblblar5mgqwf3y2fi2i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621495267.jpg',
         'background': 'Chroma',
         'body': 'Leather Vest',
         'earring': 'Number One',
@@ -9797,7 +9797,7 @@ ZAPPY_COLLECTION = {
     2621495586: {
         'name': 'Zappy #638',
         'unit_name': 'ZAPP0638',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiemjopvcncglyzrf4wvbcbue767ak77z322vctaon3f6rcrfcs4qy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621495586.jpg',
         'background': 'Purple',
         'body': 'Crocodile Suit',
         'earring': 'Daisy',
@@ -9810,7 +9810,7 @@ ZAPPY_COLLECTION = {
     2621496063: {
         'name': 'Zappy #441',
         'unit_name': 'ZAPP0441',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib3yq22f5ffkcqmb5xhtleo4t3bkq7bihevfywysw2fnue76is32i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621496063.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'None',
@@ -9823,7 +9823,7 @@ ZAPPY_COLLECTION = {
     2621496593: {
         'name': 'Zappy #674',
         'unit_name': 'ZAPP0674',
-        'image_url': 'https://ipfs.io/ipfs/bafkreial2drf6gejhuqlkwzyiuxph2fzrgarxjrm4pu5lblzgvyqly6xqu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621496593.jpg',
         'background': 'Orange',
         'body': 'Daisy Shirt',
         'earring': 'Ghost',
@@ -9836,7 +9836,7 @@ ZAPPY_COLLECTION = {
     2621496963: {
         'name': 'Zappy #1064',
         'unit_name': 'ZAPP1064',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibyzq2otlvgnkwexdrzg5dvbkneqsd4zxffka7qmek3d537e4elni',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621496963.jpg',
         'background': 'Purple',
         'body': 'Polo Overalls',
         'earring': 'Double Helix',
@@ -9849,7 +9849,7 @@ ZAPPY_COLLECTION = {
     2621496996: {
         'name': 'Zappy #729',
         'unit_name': 'ZAPP0729',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihe4wck5x22bdfii6tqizsx5xjdyindrepoaos3tsxzyx6w5kwrue',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621496996.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Strawberry',
@@ -9862,7 +9862,7 @@ ZAPPY_COLLECTION = {
     2621497072: {
         'name': 'Zappy #1044',
         'unit_name': 'ZAPP1044',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiedutdjgcspbrailg5xbgkr3flj2kyzpv2ag4loal7l7eajslohue',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621497072.jpg',
         'background': 'Orange',
         'body': 'Striped Shirt',
         'earring': 'Serious',
@@ -9875,7 +9875,7 @@ ZAPPY_COLLECTION = {
     2621497168: {
         'name': 'Zappy #702',
         'unit_name': 'ZAPP0702',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibgrg5kydb3oiqmcgjwai4o6oq7asnrpcbeah6aykeonffwbbksfy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621497168.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Number One',
@@ -9888,7 +9888,7 @@ ZAPPY_COLLECTION = {
     2621497592: {
         'name': 'Zappy #1201',
         'unit_name': 'ZAPP1201',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibsoqyu4eftlmjnrnhalt2s3dz4ektixuqiah4b3zenvor6gretq4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621497592.jpg',
         'background': 'Red',
         'body': 'Oversize Sweater',
         'earring': 'Serious',
@@ -9901,7 +9901,7 @@ ZAPPY_COLLECTION = {
     2621497709: {
         'name': 'Zappy #497',
         'unit_name': 'ZAPP0497',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicyo6gvxkw6k6xohpza2j4lhvqqt2g6vjndpahplfhngvtv5bfy4e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621497709.jpg',
         'background': 'Orange',
         'body': 'Lifesaver',
         'earring': 'Right Helix',
@@ -9914,7 +9914,7 @@ ZAPPY_COLLECTION = {
     2621497717: {
         'name': 'Zappy #1056',
         'unit_name': 'ZAPP1056',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignzz77etazrfdhpmoti5agkpnnqphxd4wmfrq65ubem3oppieq4m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621497717.jpg',
         'background': 'Blue',
         'body': 'Leather Vest',
         'earring': 'Rainbow',
@@ -9927,7 +9927,7 @@ ZAPPY_COLLECTION = {
     2621498067: {
         'name': 'Zappy #1150',
         'unit_name': 'ZAPP1150',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicj2oc76y3ltdqvp5t2p664enngg3x5k5xymxx3xn6zytstsndvdu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621498067.jpg',
         'background': 'Yellow',
         'body': 'Funky Coat',
         'earring': 'Number One',
@@ -9940,7 +9940,7 @@ ZAPPY_COLLECTION = {
     2621498331: {
         'name': 'Zappy #388',
         'unit_name': 'ZAPP0388',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigkfxqyatuxie23hao6iah2wuypuh7js3lnogsb2gajhvi7jjgagm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621498331.jpg',
         'background': 'Red',
         'body': 'Fur Coat',
         'earring': 'Lightning',
@@ -9953,7 +9953,7 @@ ZAPPY_COLLECTION = {
     2621498639: {
         'name': 'Zappy #1356',
         'unit_name': 'ZAPP1356',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7u2vgs4ze3exvtmy6u7wfd27olpgvo7dttbnuhjj3sw5mcbgjti',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621498639.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Knife',
@@ -9966,7 +9966,7 @@ ZAPPY_COLLECTION = {
     2621498732: {
         'name': 'Zappy #470',
         'unit_name': 'ZAPP0470',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiardq5rqce4ukelvo5hei5axcafcpfwxt3cddqjhdkom7yqrj4pla',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621498732.jpg',
         'background': 'Red',
         'body': 'Clouds',
         'earring': 'Serious',
@@ -9979,7 +9979,7 @@ ZAPPY_COLLECTION = {
     2621498871: {
         'name': 'Zappy #1251',
         'unit_name': 'ZAPP1251',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidpeiv54nkpzxnvrimzcjox4e4yo6272cjanob5xrrvxgkbraao2q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621498871.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Right Ring',
@@ -9992,7 +9992,7 @@ ZAPPY_COLLECTION = {
     2621498914: {
         'name': 'Zappy #598',
         'unit_name': 'ZAPP0598',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2oes3omt5x5pgjeixl5bj7c3npuggrnapxqoben6xgyytewtpcq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621498914.jpg',
         'background': 'Yellow',
         'body': 'Tracksuit Top',
         'earring': 'Serious',
@@ -10005,7 +10005,7 @@ ZAPPY_COLLECTION = {
     2621499014: {
         'name': 'Zappy #1164',
         'unit_name': 'ZAPP1164',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihiqhpkitbhnchcffrxeixbwscqilhuo2qto3jt662kzsey7ewki4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621499014.jpg',
         'background': 'Green',
         'body': 'Muscle Suit',
         'earring': 'Left Ring',
@@ -10018,7 +10018,7 @@ ZAPPY_COLLECTION = {
     2621499368: {
         'name': 'Zappy #467',
         'unit_name': 'ZAPP0467',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidf23xa7fifqnkggpn7z4a2qeijv4ffkrsnss2xcyuofspmy5sz4q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621499368.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Hashtag',
@@ -10031,7 +10031,7 @@ ZAPPY_COLLECTION = {
     2621499607: {
         'name': 'Zappy #1566',
         'unit_name': 'ZAPP1566',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbkb7u6qv7qjlzf2sfv3wlpfovqfeutzmwvn2gy2jhh2nf2x7hsq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621499607.jpg',
         'background': 'Orange',
         'body': 'Scarf',
         'earring': 'Pepper',
@@ -10044,7 +10044,7 @@ ZAPPY_COLLECTION = {
     2621499748: {
         'name': 'Zappy #725',
         'unit_name': 'ZAPP0725',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig4fdrucfp4zkb5tsdzpb3zyns2t7kz5yqfki3jkjtpyqauecpjca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621499748.jpg',
         'background': 'Yellow',
         'body': 'Cat Suit',
         'earring': 'Serious',
@@ -10057,7 +10057,7 @@ ZAPPY_COLLECTION = {
     2621499892: {
         'name': 'Zappy #1493',
         'unit_name': 'ZAPP1493',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigpzs4xldesbbegm755ph55v63dev4qgilcfzv3ftcvfqkvb2mkry',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621499892.jpg',
         'background': 'Purple',
         'body': 'Cat Suit',
         'earring': 'Pepper',
@@ -10070,7 +10070,7 @@ ZAPPY_COLLECTION = {
     2621499986: {
         'name': 'Zappy #678',
         'unit_name': 'ZAPP0678',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2gorv3k6rpg5hebhmat6olrd2gaxzl2igflfv4wrmkhohpefupa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621499986.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Bananas',
@@ -10083,7 +10083,7 @@ ZAPPY_COLLECTION = {
     2621500076: {
         'name': 'Zappy #1187',
         'unit_name': 'ZAPP1187',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidfnnfkj2ewkgmg4vvnmgru5sux5erb3izhzjxwuulpzzp44c4awi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500076.jpg',
         'background': 'Orange',
         'body': 'Overalls',
         'earring': 'Knife',
@@ -10096,7 +10096,7 @@ ZAPPY_COLLECTION = {
     2621500150: {
         'name': 'Zappy #517',
         'unit_name': 'ZAPP0517',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiai6mu55ptyqq7ompmidtwbnkz3xmm43wek25uytgjjk2bwkbzhpu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500150.jpg',
         'background': 'Blue',
         'body': 'Daisy Shirt',
         'earring': 'Party Popper',
@@ -10109,7 +10109,7 @@ ZAPPY_COLLECTION = {
     2621500191: {
         'name': 'Zappy #1329',
         'unit_name': 'ZAPP1329',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieo5y5eiexfiokh2vk56oxjmxa7vqirka4nnqzadrszeovstn7oum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500191.jpg',
         'background': 'Orange',
         'body': 'Ribbon Tie',
         'earring': 'Knife',
@@ -10122,7 +10122,7 @@ ZAPPY_COLLECTION = {
     2621500208: {
         'name': 'Zappy #387',
         'unit_name': 'ZAPP0387',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiezg4bjzs2g5vsev6ayaetxr6v3hzl2ns4hcjmouki6c3zd5p4lnm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500208.jpg',
         'background': 'Chroma',
         'body': 'Leather Vest',
         'earring': 'Daisy',
@@ -10135,7 +10135,7 @@ ZAPPY_COLLECTION = {
     2621500424: {
         'name': 'Zappy #434',
         'unit_name': 'ZAPP0434',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic5xzxfodpwfcc4xcdmm5t5zmlaju6gjwklwkghxt24f2lozozsgi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500424.jpg',
         'background': 'Green',
         'body': 'Choker',
         'earring': 'Bananas',
@@ -10148,7 +10148,7 @@ ZAPPY_COLLECTION = {
     2621500472: {
         'name': 'Zappy #1563',
         'unit_name': 'ZAPP1563',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibnyorgk6rp76lzvk6izmkt7pig4rzea533pkdfh56yxpzzsnfdg4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500472.jpg',
         'background': 'Red',
         'body': 'Oversize Sweater',
         'earring': 'Party Popper',
@@ -10161,7 +10161,7 @@ ZAPPY_COLLECTION = {
     2621500616: {
         'name': 'Zappy #479',
         'unit_name': 'ZAPP0479',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicvmvcvx3effb57zaro22zbsxbbdt43f2anoln4ywpnf3mx4xkcgu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500616.jpg',
         'background': 'Chroma',
         'body': 'Tracksuit Top',
         'earring': 'Sad',
@@ -10174,7 +10174,7 @@ ZAPPY_COLLECTION = {
     2621500677: {
         'name': 'Zappy #1541',
         'unit_name': 'ZAPP1541',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidaj4qwie4tbp2iskzixj6ndixdap4h7h6cfcv2xmyxwv2iekuofa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500677.jpg',
         'background': 'Yellow',
         'body': 'Hooded Jacket',
         'earring': 'Left Helix',
@@ -10187,7 +10187,7 @@ ZAPPY_COLLECTION = {
     2621500873: {
         'name': 'Zappy #491',
         'unit_name': 'ZAPP0491',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihxurthvzayjwfkn4ljrv64tu5pxomiiqenag7a562wcgcykre7ai',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500873.jpg',
         'background': 'Yellow',
         'body': 'Choker',
         'earring': 'Party Popper',
@@ -10200,7 +10200,7 @@ ZAPPY_COLLECTION = {
     2621500928: {
         'name': 'Zappy #1499',
         'unit_name': 'ZAPP1499',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib653qxgdpbuh655n23hdsim5ttxppqflkcvpcjrdj5vhhmjz6nqy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621500928.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Right Helix',
@@ -10213,7 +10213,7 @@ ZAPPY_COLLECTION = {
     2621501975: {
         'name': 'Zappy #1062',
         'unit_name': 'ZAPP1062',
-        'image_url': 'https://ipfs.io/ipfs/bafkreienmxhtyaos6f44mlwl6mfkgdrrordwei6d5ztriagwbamdfpzpn4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621501975.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Skull',
@@ -10226,7 +10226,7 @@ ZAPPY_COLLECTION = {
     2621502199: {
         'name': 'Zappy #1350',
         'unit_name': 'ZAPP1350',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigomory64vvyhp77h73jth6k7blbc4ylpoqpfccsh66v5eskt3ri4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621502199.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Right Ring',
@@ -10239,7 +10239,7 @@ ZAPPY_COLLECTION = {
     2621502560: {
         'name': 'Zappy #933',
         'unit_name': 'ZAPP0933',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie2m2dzetinkdbtv4kkjgp6whsdmko52jzzeyss3wjd4xhqy7lzri',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621502560.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Sunrise',
@@ -10252,7 +10252,7 @@ ZAPPY_COLLECTION = {
     2621502959: {
         'name': 'Zappy #1457',
         'unit_name': 'ZAPP1457',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig5fmhn5m3mvirdjq7mymy5ph6hph2ryy6n7yxyatalujambsp3f4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621502959.jpg',
         'background': 'Orange',
         'body': 'Armband',
         'earring': 'Party Popper',
@@ -10265,7 +10265,7 @@ ZAPPY_COLLECTION = {
     2621503224: {
         'name': 'Zappy #1446',
         'unit_name': 'ZAPP1446',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifzwcxfqf74joq7biccly5z5gnoc45hl6fuahougjajbqq35cqcnu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621503224.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Serious',
@@ -10278,7 +10278,7 @@ ZAPPY_COLLECTION = {
     2621516660: {
         'name': 'Zappy #925',
         'unit_name': 'ZAPP0925',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigisazquymsugvqwjyg2rbi5736rlon2umk3r3g7xc6fiznxlsg64',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621516660.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Star',
@@ -10291,7 +10291,7 @@ ZAPPY_COLLECTION = {
     2621516812: {
         'name': 'Zappy #855',
         'unit_name': 'ZAPP0855',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibcvqay2gymgttbweobic3on4kiavvjfjj5csmbashcieuhgwd2mm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621516812.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Sad',
@@ -10304,7 +10304,7 @@ ZAPPY_COLLECTION = {
     2621516917: {
         'name': 'Zappy #878',
         'unit_name': 'ZAPP0878',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig357ex5aje5b2y5bgyb3br7cshubrzkgwyvsvpxy4tgstf3fluiy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621516917.jpg',
         'background': 'Blue',
         'body': 'School Outfit',
         'earring': 'Sad',
@@ -10317,7 +10317,7 @@ ZAPPY_COLLECTION = {
     2621517035: {
         'name': 'Zappy #841',
         'unit_name': 'ZAPP0841',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibib4i246qda2yqg3utaiapucly6xf7em4iqu5awphmatygt7xwxa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621517035.jpg',
         'background': 'Blue',
         'body': 'Choker',
         'earring': 'Skull',
@@ -10330,7 +10330,7 @@ ZAPPY_COLLECTION = {
     2621517204: {
         'name': 'Zappy #991',
         'unit_name': 'ZAPP0991',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaq7fjji5dlulxnvthueuomqpgvzx4aqikfcpz7dremamc24s3vvq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621517204.jpg',
         'background': 'Blue',
         'body': 'Turtleneck Sweater',
         'earring': 'Rainbow',
@@ -10343,7 +10343,7 @@ ZAPPY_COLLECTION = {
     2621517298: {
         'name': 'Zappy #967',
         'unit_name': 'ZAPP0967',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic33h4gx7rrj7s34n5zs4vnlgi2ae67i2e6clkjwoc4rn5hpxxb6m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621517298.jpg',
         'background': 'Blue',
         'body': 'Oversize Sweater',
         'earring': 'Pyramid',
@@ -10356,7 +10356,7 @@ ZAPPY_COLLECTION = {
     2621517555: {
         'name': 'Zappy #734',
         'unit_name': 'ZAPP0734',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidnwsjfkqavbid2xwdn44wpea24cca7ud2p5ivax3aaozsrtf4mj4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621517555.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Pyramid',
@@ -10369,7 +10369,7 @@ ZAPPY_COLLECTION = {
     2621517914: {
         'name': 'Zappy #1040',
         'unit_name': 'ZAPP1040',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieuqfco6ydcdhyvruehqonyb4jts6kwiwp2ugqf2hcx56cabzxuqu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621517914.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Star',
@@ -10382,7 +10382,7 @@ ZAPPY_COLLECTION = {
     2621518100: {
         'name': 'Zappy #973',
         'unit_name': 'ZAPP0973',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiharyb4i7jbaj644x73ckdwadbc7lkdqilrjwo5jdeo7h4wzllh4a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621518100.jpg',
         'background': 'Yellow',
         'body': 'Bear Suit',
         'earring': 'Skull',
@@ -10395,7 +10395,7 @@ ZAPPY_COLLECTION = {
     2621518444: {
         'name': 'Zappy #922',
         'unit_name': 'ZAPP0922',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid666mp5tflfovhrfadewn5lkkc43kjt3o347d4miv5qjcq6mf7ny',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621518444.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Rainbow',
@@ -10408,7 +10408,7 @@ ZAPPY_COLLECTION = {
     2621518587: {
         'name': 'Zappy #776',
         'unit_name': 'ZAPP0776',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieta7gm24amcnryncscarcuarnzgubh2h4tvslm47yaah6rm4bvpa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621518587.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Sunrise',
@@ -10421,7 +10421,7 @@ ZAPPY_COLLECTION = {
     2621518955: {
         'name': 'Zappy #900',
         'unit_name': 'ZAPP0900',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidp2ft26epoalkhmmt3hfbvorz27757ofcde7p75zdt72ll3zagxa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621518955.jpg',
         'background': 'Green',
         'body': 'School Outfit',
         'earring': 'Number One',
@@ -10434,7 +10434,7 @@ ZAPPY_COLLECTION = {
     2621519492: {
         'name': 'Zappy #895',
         'unit_name': 'ZAPP0895',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicsfd3covcn56lvuys2vwzwket6wbn3a2cosrglie35lgfrtyrzlq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621519492.jpg',
         'background': 'Red',
         'body': 'Hawaiian Shirt',
         'earring': 'Sad',
@@ -10447,7 +10447,7 @@ ZAPPY_COLLECTION = {
     2621519675: {
         'name': 'Zappy #779',
         'unit_name': 'ZAPP0779',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihv3cn44st4cr5rf2nvrstnqbn4cvwci3ftyfsl6fazelh6swxecm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621519675.jpg',
         'background': 'Yellow',
         'body': 'Wool Collar Jacket',
         'earring': 'Zappies',
@@ -10460,7 +10460,7 @@ ZAPPY_COLLECTION = {
     2621520074: {
         'name': 'Zappy #792',
         'unit_name': 'ZAPP0792',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidcrb7zlhso7ixr6m62cjdaoahz6itbcrsrsxs6ifdunh4b5onb3m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621520074.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Skull',
@@ -10473,7 +10473,7 @@ ZAPPY_COLLECTION = {
     2621520176: {
         'name': 'Zappy #800',
         'unit_name': 'ZAPP0800',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiesql2joobnj53p4zlck3k43whrsldbtnewvmsw42ux76uccej7ji',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621520176.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Happy',
@@ -10486,7 +10486,7 @@ ZAPPY_COLLECTION = {
     2621520587: {
         'name': 'Zappy #827',
         'unit_name': 'ZAPP0827',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidwssiec4t4pzlaqnwimvamvyijqphc3cj7gm6zrjpfl72od3l34u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621520587.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'Sad',
@@ -10499,7 +10499,7 @@ ZAPPY_COLLECTION = {
     2621520608: {
         'name': 'Zappy #1930',
         'unit_name': 'ZAPP1930',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig2x6ls6t2idgut5p5edhia6mw2qwg7s2ez635u43o7b6sleiv5qi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621520608.jpg',
         'background': 'Yellow',
         'body': 'Rabbit Suit',
         'earring': 'Serious',
@@ -10512,7 +10512,7 @@ ZAPPY_COLLECTION = {
     2621521364: {
         'name': 'Zappy #756',
         'unit_name': 'ZAPP0756',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid27xityt27ks52ri46uw2r7ef7abagnztukhr6hculur6qzxxoiu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621521364.jpg',
         'background': 'Blue',
         'body': 'Crocodile Suit',
         'earring': 'Sad',
@@ -10525,7 +10525,7 @@ ZAPPY_COLLECTION = {
     2621521379: {
         'name': 'Zappy #1770',
         'unit_name': 'ZAPP1770',
-        'image_url': 'https://ipfs.io/ipfs/bafybeidkzy3lhgjh5bloyzrrpwcu6bijfy3y6tsxoevxxokvsu6jc44vca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621521379.jpg',
         'background': 'Chroma',
         'body': 'Polo Shirt',
         'earring': 'Star',
@@ -10538,7 +10538,7 @@ ZAPPY_COLLECTION = {
     2621521537: {
         'name': 'Zappy #950',
         'unit_name': 'ZAPP0950',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiehcuhxr7pgsip4gsfyjpeohfnf2kmpljbjapcaaltmji56yrvykq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621521537.jpg',
         'background': 'Blue',
         'body': 'Wool Collar Jacket',
         'earring': 'Ghost',
@@ -10551,7 +10551,7 @@ ZAPPY_COLLECTION = {
     2621521543: {
         'name': 'Zappy #1573',
         'unit_name': 'ZAPP1573',
-        'image_url': 'https://ipfs.io/ipfs/bafkreied5iahev24ti6wqtke7llyxylvwfwgbvapslubrzxftxbgee7jgm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621521543.jpg',
         'background': 'Blue',
         'body': 'Fanny Pack',
         'earring': 'Happy',
@@ -10564,7 +10564,7 @@ ZAPPY_COLLECTION = {
     2621522055: {
         'name': 'Zappy #1022',
         'unit_name': 'ZAPP1022',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidhf7dosd224phnrk3jj7nsox3kxib4vc6o3r2bqnlr76hy5fklzy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621522055.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Sad',
@@ -10577,7 +10577,7 @@ ZAPPY_COLLECTION = {
     2621522061: {
         'name': 'Zappy #1904',
         'unit_name': 'ZAPP1904',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieie2qypr76e6rndnioyrgysfafiodm7svd2dh3bpqo45ivf6bkmi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621522061.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Sad',
@@ -10590,7 +10590,7 @@ ZAPPY_COLLECTION = {
     2621522205: {
         'name': 'Zappy #2145',
         'unit_name': 'ZAPP2145',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie3dswafeoylah53eaoqylcyyzfaf3t4zo2roveqjv6uah32zk2zi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621522205.jpg',
         'background': 'Green',
         'body': 'Clouds',
         'earring': 'Sad',
@@ -10603,7 +10603,7 @@ ZAPPY_COLLECTION = {
     2621522583: {
         'name': 'Zappy #1661',
         'unit_name': 'ZAPP1661',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidwa2jfwib4nudxlrifc5rcht2kwoln6ajplbln6s73kypyhjidby',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621522583.jpg',
         'background': 'Purple',
         'body': 'Puffer Coat',
         'earring': 'Carton Cup',
@@ -10616,7 +10616,7 @@ ZAPPY_COLLECTION = {
     2621522947: {
         'name': 'Zappy #1681',
         'unit_name': 'ZAPP1681',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigpu4aqfjxabmfnkreavpc6okgne7kxde5gulfs4bcnz7d2cuncoq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621522947.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Sad',
@@ -10629,7 +10629,7 @@ ZAPPY_COLLECTION = {
     2621523064: {
         'name': 'Zappy #1828',
         'unit_name': 'ZAPP1828',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif5r6h5563zutitiuhqkj5ke2cf355bulqyt2lrrzyaxjcb3uq56a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621523064.jpg',
         'background': 'Red',
         'body': 'Armor',
         'earring': 'Star',
@@ -10642,7 +10642,7 @@ ZAPPY_COLLECTION = {
     2621523447: {
         'name': 'Zappy #1834',
         'unit_name': 'ZAPP1834',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidfzuir57i73yta7jhdc4rr6xri4s3ojg523q4vrfyywzty633er4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621523447.jpg',
         'background': 'Blue',
         'body': 'Bowling Shirt',
         'earring': 'Carton Cup',
@@ -10655,7 +10655,7 @@ ZAPPY_COLLECTION = {
     2621523948: {
         'name': 'Zappy #2059',
         'unit_name': 'ZAPP2059',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiffyxetignqzfmy2sc2bi5dyhtdjasuxb7kleswzgec5efzm4xhte',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621523948.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Bananas',
@@ -10668,7 +10668,7 @@ ZAPPY_COLLECTION = {
     2621524352: {
         'name': 'Zappy #2097',
         'unit_name': 'ZAPP2097',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7u5fszntpepotphb2ptrunu6syxhucmsmvxtnvvtrs6lsa6w4fm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621524352.jpg',
         'background': 'Purple',
         'body': 'Puffer Coat',
         'earring': 'Number One',
@@ -10681,7 +10681,7 @@ ZAPPY_COLLECTION = {
     2621526590: {
         'name': 'Zappy #1921',
         'unit_name': 'ZAPP1921',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidncjbmcoanjugdaa27mjgiorxdr7533fh2zd6vuo5jcvzq7smrxa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621526590.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'Pepper',
@@ -10694,7 +10694,7 @@ ZAPPY_COLLECTION = {
     2621527661: {
         'name': 'Zappy #1792',
         'unit_name': 'ZAPP1792',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicfiweqnjipfhg37of373y2egl5hyftaxjztcp6sqk5nhz4w6vcam',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621527661.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Star',
@@ -10707,7 +10707,7 @@ ZAPPY_COLLECTION = {
     2621528189: {
         'name': 'Zappy #1768',
         'unit_name': 'ZAPP1768',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiay6nsprrfzdzb7y6hqftyazbsd5wlveaklrayzaegjxpdfnzb5nm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621528189.jpg',
         'background': 'Blue',
         'body': 'Turtleneck Sweater',
         'earring': 'Lightning',
@@ -10720,7 +10720,7 @@ ZAPPY_COLLECTION = {
     2621528322: {
         'name': 'Zappy #1820',
         'unit_name': 'ZAPP1820',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia7qhkiat5mukkvzi7hkrsdu25zexfwnbsuyrmx43dlb6yqnr5cfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621528322.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Right Helix',
@@ -10733,7 +10733,7 @@ ZAPPY_COLLECTION = {
     2621528728: {
         'name': 'Zappy #1888',
         'unit_name': 'ZAPP1888',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiawgl7rdapd4grt34fx73x6uxcyuejc3jg4zvucjdmr4fjlyaxyju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621528728.jpg',
         'background': 'Red',
         'body': 'Basic Jacket',
         'earring': 'Happy',
@@ -10746,7 +10746,7 @@ ZAPPY_COLLECTION = {
     2621529127: {
         'name': 'Zappy #1949',
         'unit_name': 'ZAPP1949',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihdzpu6vvgzfsbzphelf6vsrxe5vgp7zfxvp564prabu6akmwllha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621529127.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Star',
@@ -10759,7 +10759,7 @@ ZAPPY_COLLECTION = {
     2621552363: {
         'name': 'Zappy #1132',
         'unit_name': 'ZAPP1132',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif62cscraurzjrfqo2nxawr43k4qufns66tfeq3kgua6uqwgwilte',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621552363.jpg',
         'background': 'Green',
         'body': 'Hoodie',
         'earring': 'Number One',
@@ -10772,7 +10772,7 @@ ZAPPY_COLLECTION = {
     2621552482: {
         'name': 'Zappy #1525',
         'unit_name': 'ZAPP1525',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihepwomo3ojpf3ikipqm5r7gqzsbc4cyo6n6ctp62jbbzkgc7sqte',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621552482.jpg',
         'background': 'Orange',
         'body': 'Oversize Sweater',
         'earring': 'Sunrise',
@@ -10785,7 +10785,7 @@ ZAPPY_COLLECTION = {
     2621552605: {
         'name': 'Zappy #1505',
         'unit_name': 'ZAPP1505',
-        'image_url': 'https://ipfs.io/ipfs/bafkreievfbvysut7r6brciz6lkzq5lemix3i6rv3msoucrnavynqhqfutu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621552605.jpg',
         'background': 'Blue',
         'body': 'Crocodile Suit',
         'earring': 'Left Ring',
@@ -10798,7 +10798,7 @@ ZAPPY_COLLECTION = {
     2621552761: {
         'name': 'Zappy #1348',
         'unit_name': 'ZAPP1348',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifcsy5utjme7tltq4efoqj44i2bdhmn7pnojuvksichoi5fwikg7m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621552761.jpg',
         'background': 'Blue',
         'body': 'Choker',
         'earring': 'Serious',
@@ -10811,7 +10811,7 @@ ZAPPY_COLLECTION = {
     2621553516: {
         'name': 'Zappy #1255',
         'unit_name': 'ZAPP1255',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2z3s2jjxroswyqesp6rcrxxxr5oezhmlpvpvpwrkjlrgj6ize6y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621553516.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Diamond',
@@ -10824,7 +10824,7 @@ ZAPPY_COLLECTION = {
     2621553726: {
         'name': 'Zappy #1463',
         'unit_name': 'ZAPP1463',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihyb2r4i7727buhnnf3v5khivfhw5va6abywuh6wqm7igrbqpwo4i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621553726.jpg',
         'background': 'Green',
         'body': 'Oversize Sweater',
         'earring': 'Zappies',
@@ -10837,7 +10837,7 @@ ZAPPY_COLLECTION = {
     2621554247: {
         'name': 'Zappy #1554',
         'unit_name': 'ZAPP1554',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibzewkqsz2rfayqtzks2qwx7nmp2vjozgiav5qfie5svu5so5aagm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621554247.jpg',
         'background': 'Green',
         'body': 'Basic Jacket',
         'earring': 'Party Popper',
@@ -10850,7 +10850,7 @@ ZAPPY_COLLECTION = {
     2621554478: {
         'name': 'Zappy #1146',
         'unit_name': 'ZAPP1146',
-        'image_url': 'https://ipfs.io/ipfs/bafkreierkl6vjhiagfxzbaq7nsaxanoheloim7lwpoaboybw2czuexy7ia',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621554478.jpg',
         'background': 'Purple',
         'body': 'Crocodile Suit',
         'earring': 'Star',
@@ -10863,7 +10863,7 @@ ZAPPY_COLLECTION = {
     2621554757: {
         'name': 'Zappy #1183',
         'unit_name': 'ZAPP1183',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibz46xe5vcj7ly3et2ukeoe6up2eupoyrcu23uokqambsfxslhxw4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621554757.jpg',
         'background': 'Yellow',
         'body': 'Trench Coat',
         'earring': 'Skull',
@@ -10876,7 +10876,7 @@ ZAPPY_COLLECTION = {
     2621555103: {
         'name': 'Zappy #1226',
         'unit_name': 'ZAPP1226',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia2wtwhnl5v2qjazoysbqnqoawqk2gwly5cln57cfh6noqck6y24e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621555103.jpg',
         'background': 'Red',
         'body': 'Toga',
         'earring': 'Party Popper',
@@ -10889,7 +10889,7 @@ ZAPPY_COLLECTION = {
     2621555291: {
         'name': 'Zappy #1195',
         'unit_name': 'ZAPP1195',
-        'image_url': 'https://ipfs.io/ipfs/bafkreictldtecq4zgpcfecqgtp3bsjbotdx3f35h7u5fznv3yynfdipxiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621555291.jpg',
         'background': 'Yellow',
         'body': 'Trash Can',
         'earring': 'Knife',
@@ -10902,7 +10902,7 @@ ZAPPY_COLLECTION = {
     2621555422: {
         'name': 'Zappy #1270',
         'unit_name': 'ZAPP1270',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihtvf3z333yknizebha7ck3bmib2yep4eaiml7ml7lo3danbts2hm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621555422.jpg',
         'background': 'Red',
         'body': 'Overalls',
         'earring': 'Sunrise',
@@ -10915,7 +10915,7 @@ ZAPPY_COLLECTION = {
     2621555550: {
         'name': 'Zappy #1479',
         'unit_name': 'ZAPP1479',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiayeqjliviqx4ln3vxauowqqtl2wikiepxppyegzu6zqjn73qq44y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621555550.jpg',
         'background': 'Blue',
         'body': 'Trash Can',
         'earring': 'Diamond',
@@ -10928,7 +10928,7 @@ ZAPPY_COLLECTION = {
     2621555831: {
         'name': 'Zappy #1374',
         'unit_name': 'ZAPP1374',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihhsb4so43wvf2qqbooiaf6vn23e2au4egvdsjjxkekjmoktrw6bm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621555831.jpg',
         'background': 'Yellow',
         'body': 'Fur Coat',
         'earring': 'Serious',
@@ -10941,7 +10941,7 @@ ZAPPY_COLLECTION = {
     2621556020: {
         'name': 'Zappy #1409',
         'unit_name': 'ZAPP1409',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigpujkpma4xrzjnhhx4ypn7umkyykfnjhp5dmhf3amqaqxvocd44e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621556020.jpg',
         'background': 'Purple',
         'body': 'Turtleneck Sweater',
         'earring': 'Carton Cup',
@@ -10954,7 +10954,7 @@ ZAPPY_COLLECTION = {
     2621556133: {
         'name': 'Zappy #1427',
         'unit_name': 'ZAPP1427',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnej3jkjpwameprnqf5qiwk3kdocbufxxvi7qwrqbjqb3rnutybu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621556133.jpg',
         'background': 'Purple',
         'body': 'Lifesaver',
         'earring': 'Right Ring',
@@ -10967,7 +10967,7 @@ ZAPPY_COLLECTION = {
     2621556234: {
         'name': 'Zappy #1553',
         'unit_name': 'ZAPP1553',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignvdun52njchivgwgntvbfesiqn4q2u5od77myquionbviuljtru',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621556234.jpg',
         'background': 'Red',
         'body': 'Puffer Coat',
         'earring': 'Rainbow',
@@ -10980,7 +10980,7 @@ ZAPPY_COLLECTION = {
     2621556337: {
         'name': 'Zappy #1343',
         'unit_name': 'ZAPP1343',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif6gdrhh7zqp5dpkoznmzcidqhuc2qzdvjxpyhopsvptjgbw3ouea',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621556337.jpg',
         'background': 'Red',
         'body': 'Trash Can',
         'earring': 'Diamond',
@@ -10993,7 +10993,7 @@ ZAPPY_COLLECTION = {
     2621556411: {
         'name': 'Zappy #1426',
         'unit_name': 'ZAPP1426',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibkc6amjtdry6ozvqz3pd3cqgvb7n5wurd55cghhdm7rowxnonqqy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621556411.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Sunrise',
@@ -11006,7 +11006,7 @@ ZAPPY_COLLECTION = {
     2621556574: {
         'name': 'Zappy #1330',
         'unit_name': 'ZAPP1330',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaaoby5gha6dln4f73h4drlkmknotqsx3vihfxqeg6lprlft6te3i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621556574.jpg',
         'background': 'Orange',
         'body': 'Striped Shirt',
         'earring': 'None',
@@ -11019,7 +11019,7 @@ ZAPPY_COLLECTION = {
     2621580380: {
         'name': 'Zappy #1622',
         'unit_name': 'ZAPP1622',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiddyktuabykq6umrya25w4rkayiowmvngfaoijtcujukoel73whja',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621580380.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'None',
@@ -11032,7 +11032,7 @@ ZAPPY_COLLECTION = {
     2621580482: {
         'name': 'Zappy #1959',
         'unit_name': 'ZAPP1959',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihm32pjy7knyq54x2zivxicc33utyxhezm44jrsykgsjheyvnxzha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621580482.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Knife',
@@ -11045,7 +11045,7 @@ ZAPPY_COLLECTION = {
     2621580631: {
         'name': 'Zappy #1988',
         'unit_name': 'ZAPP1988',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicivbxk6jreadgncll2szdv752j74blhbkkwr5y476i4gezqq222i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621580631.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Party Popper',
@@ -11058,7 +11058,7 @@ ZAPPY_COLLECTION = {
     2621580922: {
         'name': 'Zappy #1585',
         'unit_name': 'ZAPP1585',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifqlsxozcthm2loid7r325ikibg2f7s5xye7mesdxgqjwunave6sy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621580922.jpg',
         'background': 'Blue',
         'body': 'Kimono',
         'earring': 'Lightning',
@@ -11071,7 +11071,7 @@ ZAPPY_COLLECTION = {
     2621581051: {
         'name': 'Zappy #1903',
         'unit_name': 'ZAPP1903',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigd43ov2xbrz4ib7n3jfjarf53smas4q7lyxcxkneouqphfukk7xa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621581051.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Right Ring',
@@ -11084,7 +11084,7 @@ ZAPPY_COLLECTION = {
     2621581232: {
         'name': 'Zappy #1599',
         'unit_name': 'ZAPP1599',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidvzmajs3rfceaa6hoknr55vpkjtb3hcuctytrlfhwdcxwy37vyba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621581232.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Party Popper',
@@ -11097,7 +11097,7 @@ ZAPPY_COLLECTION = {
     2621581835: {
         'name': 'Zappy #1952',
         'unit_name': 'ZAPP1952',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihay5wwwvtqdwpe3wr5zjhllsjyel5rclltbvrrmimtjrcqciaowi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621581835.jpg',
         'background': 'Green',
         'body': 'Kimono',
         'earring': 'Daisy',
@@ -11110,7 +11110,7 @@ ZAPPY_COLLECTION = {
     2621582092: {
         'name': 'Zappy #1892',
         'unit_name': 'ZAPP1892',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiejj6impyfrihwr7j6f5ehz42szy5gjleuk3mmhmxnxs2c2kk2sbi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621582092.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Bananas',
@@ -11123,7 +11123,7 @@ ZAPPY_COLLECTION = {
     2621582203: {
         'name': 'Zappy #2040',
         'unit_name': 'ZAPP2040',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkfibjsjjii3pvyb62jes6b4i3emtyo4hzpuptpgco7xlynbmite',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621582203.jpg',
         'background': 'Purple',
         'body': 'Space Suit',
         'earring': 'Pyramid',
@@ -11136,7 +11136,7 @@ ZAPPY_COLLECTION = {
     2621582306: {
         'name': 'Zappy #1630',
         'unit_name': 'ZAPP1630',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibbjpquon3um4lcztbtiyusexinvo5x2zaarunrzblpc6uupwrupi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621582306.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'None',
@@ -11149,7 +11149,7 @@ ZAPPY_COLLECTION = {
     2621582605: {
         'name': 'Zappy #1749',
         'unit_name': 'ZAPP1749',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidy7vdfhkwfp2voy4jztmimag3z54kzxskfywscly22rke6kmzkxy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621582605.jpg',
         'background': 'Yellow',
         'body': 'Polo Shirt',
         'earring': 'Happy',
@@ -11162,7 +11162,7 @@ ZAPPY_COLLECTION = {
     2621582696: {
         'name': 'Zappy #1761',
         'unit_name': 'ZAPP1761',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif3ar7v4dce2izojxqbcv76ldn4lcegmvbdjg4zg7bgtmbqoqeo6i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621582696.jpg',
         'background': 'Yellow',
         'body': 'Lifesaver',
         'earring': 'Left Ring',
@@ -11175,7 +11175,7 @@ ZAPPY_COLLECTION = {
     2621582816: {
         'name': 'Zappy #2106',
         'unit_name': 'ZAPP2106',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiedguerp3iuouecdcsm6dyvqnlmivivlfrakcksyflvvjurnutxfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621582816.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'None',
@@ -11188,7 +11188,7 @@ ZAPPY_COLLECTION = {
     2621583402: {
         'name': 'Zappy #1716',
         'unit_name': 'ZAPP1716',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzgj76sbdy5p4sbzqir6d747zmtwm2o52qk2dny44z64cqokgb4i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621583402.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'Left Ring',
@@ -11201,7 +11201,7 @@ ZAPPY_COLLECTION = {
     2621583519: {
         'name': 'Zappy #1686',
         'unit_name': 'ZAPP1686',
-        'image_url': 'https://ipfs.io/ipfs/bafkreichjrxzevk3twybwsp2x3hr7ic5zhxl5qdzu5l5cea5w5deomxb7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621583519.jpg',
         'background': 'Orange',
         'body': 'Fur Coat',
         'earring': 'Rainbow',
@@ -11214,7 +11214,7 @@ ZAPPY_COLLECTION = {
     2621583722: {
         'name': 'Zappy #2085',
         'unit_name': 'ZAPP2085',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib6jgr6bz7o55di5wmfb5efbhaqvmwktzhsvhvze2s4hwb3l6gley',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621583722.jpg',
         'background': 'Orange',
         'body': 'Choker',
         'earring': 'Right Helix',
@@ -11227,7 +11227,7 @@ ZAPPY_COLLECTION = {
     2621583814: {
         'name': 'Zappy #1741',
         'unit_name': 'ZAPP1741',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidmbhb7jwripngqysthzfxyenpmn44z5bxflrwmfsujhtv5ycut4y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621583814.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Left Helix',
@@ -11240,7 +11240,7 @@ ZAPPY_COLLECTION = {
     2621583906: {
         'name': 'Zappy #2127',
         'unit_name': 'ZAPP2127',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiblhx6lbyc5uijbjvg5dvo3v7gdqotaek66ly3oxvd2usq7zrvmcu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621583906.jpg',
         'background': 'Chroma',
         'body': 'Fur Coat',
         'earring': 'Twin Rings',
@@ -11253,7 +11253,7 @@ ZAPPY_COLLECTION = {
     2621584009: {
         'name': 'Zappy #1626',
         'unit_name': 'ZAPP1626',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifwqn4hh5zuyapntjm7j6ramwhufvq7bnsznxxibrlvig7dxiuwoy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621584009.jpg',
         'background': 'Yellow',
         'body': 'Kimono',
         'earring': 'Strawberry',
@@ -11266,7 +11266,7 @@ ZAPPY_COLLECTION = {
     2621584256: {
         'name': 'Zappy #2041',
         'unit_name': 'ZAPP2041',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifeoaczlcm4px7v3cu5onmgradwma4pci4vtckia6sb3mv76o6fqq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621584256.jpg',
         'background': 'Purple',
         'body': 'Colorful Jacket',
         'earring': 'Sad',
@@ -11279,7 +11279,7 @@ ZAPPY_COLLECTION = {
     2621591289: {
         'name': 'Zappy #2155',
         'unit_name': 'ZAPP2155',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigx6wlyrqf7hrimxguuynyw72ji3c2pd3kfjf32v634yhm7uzsaqe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621591289.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Daisy',
@@ -11292,7 +11292,7 @@ ZAPPY_COLLECTION = {
     2621591341: {
         'name': 'Zappy #2162',
         'unit_name': 'ZAPP2162',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifo2zeexl62xndenkg6rhxgqftfrn3hcd66oeqjvnwezw5q4uhiba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621591341.jpg',
         'background': 'Orange',
         'body': 'Space Suit',
         'earring': 'Sad',
@@ -11305,7 +11305,7 @@ ZAPPY_COLLECTION = {
     2621591437: {
         'name': 'Zappy #2150',
         'unit_name': 'ZAPP2150',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie37vabc7i2kbpjux6ogfcsvqvk7v33hfcplwq7turpyp7tbxplxi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621591437.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Daisy',
@@ -11318,7 +11318,7 @@ ZAPPY_COLLECTION = {
     2621591482: {
         'name': 'Zappy #2209',
         'unit_name': 'ZAPP2209',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihggbpebjuumc425onbuk65q6pkrt2276oj3l3uboozn4zq5dgnrm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621591482.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'Left Ring',
@@ -11331,7 +11331,7 @@ ZAPPY_COLLECTION = {
     2621591647: {
         'name': 'Zappy #2140',
         'unit_name': 'ZAPP2140',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif2zexgno6wggmk5fdrzhkw732fm7gqysqtb7mp7lbakhh57l6jc4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621591647.jpg',
         'background': 'Blue',
         'body': 'Tracksuit Top',
         'earring': 'Hashtag',
@@ -11344,7 +11344,7 @@ ZAPPY_COLLECTION = {
     2621591830: {
         'name': 'Zappy #2132',
         'unit_name': 'ZAPP2132',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid4hceczzhsowsxspobukzqmscwtqbg4if63cmeldo4bj2e25hh7a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2621591830.jpg',
         'background': 'Red',
         'body': 'Royal Robe',
         'earring': 'Sunrise',
@@ -11357,7 +11357,7 @@ ZAPPY_COLLECTION = {
     2622004139: {
         'name': 'Zappy #202',
         'unit_name': 'ZAPP0202',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieqe22zsouz7t5e7wttxrhir6srtnqaaytzkbqkv7ttmi6u4gri4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622004139.jpg',
         'background': 'Red',
         'body': 'Leather Vest',
         'earring': 'Zappies',
@@ -11370,7 +11370,7 @@ ZAPPY_COLLECTION = {
     2622004651: {
         'name': 'Zappy #57',
         'unit_name': 'ZAPP0057',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigqeuiw2fr3xz5juf7ooxoaefvhiesaq6fcbtowvy6zaltfyilgmy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622004651.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Party Popper',
@@ -11383,7 +11383,7 @@ ZAPPY_COLLECTION = {
     2622004826: {
         'name': 'Zappy #970',
         'unit_name': 'ZAPP0970',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignyhydkryrkwm2d4ie7okt6giqdeuuh7b6nc7pqaifypw5paeh6m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622004826.jpg',
         'background': 'Orange',
         'body': 'Oversize Sweater',
         'earring': 'Sad',
@@ -11396,7 +11396,7 @@ ZAPPY_COLLECTION = {
     2622004956: {
         'name': 'Zappy #50',
         'unit_name': 'ZAPP0050',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigr7vbufnj2qevtuanwvxegwcy72t7pbxl5i52npv2hq7xlushzzi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622004956.jpg',
         'background': 'Purple',
         'body': 'Funky Coat',
         'earring': 'Skull',
@@ -11409,7 +11409,7 @@ ZAPPY_COLLECTION = {
     2622005128: {
         'name': 'Zappy #1297',
         'unit_name': 'ZAPP1297',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia5be4dnax5uxweupf4phndq5o5uoecdethyevymlvelvhyrz4snq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622005128.jpg',
         'background': 'Yellow',
         'body': 'Rabbit Suit',
         'earring': 'Serious',
@@ -11422,7 +11422,7 @@ ZAPPY_COLLECTION = {
     2622005306: {
         'name': 'Zappy #1672',
         'unit_name': 'ZAPP1672',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie4mnlqbh7lt4ggskswjgc4zf6tbeup36u237xmczcxijo4hwqvou',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622005306.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Sad',
@@ -11435,7 +11435,7 @@ ZAPPY_COLLECTION = {
     2622005457: {
         'name': 'Zappy #1643',
         'unit_name': 'ZAPP1643',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie6pujzmhw3p27xorqr4y3k6vyonkmqbbgdltetws7ecc5lxz4s4q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622005457.jpg',
         'background': 'Red',
         'body': 'Fur Coat',
         'earring': 'Star',
@@ -11448,7 +11448,7 @@ ZAPPY_COLLECTION = {
     2622005615: {
         'name': 'Zappy #1803',
         'unit_name': 'ZAPP1803',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibw25nwprdf3jvkajcdxg4sbstno4ra6zlz25yli5zq3uqxkhxdba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622005615.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Sad',
@@ -11461,7 +11461,7 @@ ZAPPY_COLLECTION = {
     2622005995: {
         'name': 'Zappy #1951',
         'unit_name': 'ZAPP1951',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihallofvfqi4oonkoifwmbq4zlafz6sq5pfdhg4fcgth53agds4rq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622005995.jpg',
         'background': 'Blue',
         'body': 'Turtleneck Sweater',
         'earring': 'Serious',
@@ -11474,7 +11474,7 @@ ZAPPY_COLLECTION = {
     2622006322: {
         'name': 'Zappy #468',
         'unit_name': 'ZAPP0468',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia44fad2pilqy462lkcnq5xkh2pqrvvr2flhbxrao7wf3kt5fxtca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622006322.jpg',
         'background': 'Green',
         'body': 'Ribbon Tie',
         'earring': 'Left Ring',
@@ -11487,7 +11487,7 @@ ZAPPY_COLLECTION = {
     2622006741: {
         'name': 'Zappy #2199',
         'unit_name': 'ZAPP2199',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiau6wvijjhnhleyyycbkzhtprdkvjl5rfq46q3ri4wubke7wmsnki',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622006741.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Lightning',
@@ -11500,7 +11500,7 @@ ZAPPY_COLLECTION = {
     2622006911: {
         'name': 'Zappy #2042',
         'unit_name': 'ZAPP2042',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihqbwp3sehfk77zgbnhttprzz5r5sh2cbyjcrmywuwnnwdlk6sbxi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622006911.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Sunrise',
@@ -11513,7 +11513,7 @@ ZAPPY_COLLECTION = {
     2622007322: {
         'name': 'Zappy #887',
         'unit_name': 'ZAPP0887',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibyofebbb5ss3wpicr5fl42dca5fy3bdjydzywcpn5pbapfxkbmju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622007322.jpg',
         'background': 'Yellow',
         'body': 'Ribbon Tie',
         'earring': 'Left Helix',
@@ -11526,7 +11526,7 @@ ZAPPY_COLLECTION = {
     2622007467: {
         'name': 'Zappy #1403',
         'unit_name': 'ZAPP1403',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzs4gwbrxnpu7th72gcsm5h4vgkv752tkq7ln7oedxobxwfhpawi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622007467.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'Twin Rings',
@@ -11539,7 +11539,7 @@ ZAPPY_COLLECTION = {
     2622077520: {
         'name': 'Zappy #55',
         'unit_name': 'ZAPP0055',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbfsniqnh7c3vvnob7nw3ympqgfoyq6nujlxfox6ofwidierkp2i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622077520.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Strawberry',
@@ -11552,7 +11552,7 @@ ZAPPY_COLLECTION = {
     2622173358: {
         'name': 'Zappy #160',
         'unit_name': 'ZAPP0160',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie6ib2plsorluuvjp6awjcvmh2hvdn5oljid5i5nbes6l6r25x72q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622173358.jpg',
         'background': 'Blue',
         'body': 'Hooded Jacket',
         'earring': 'Skull',
@@ -11565,7 +11565,7 @@ ZAPPY_COLLECTION = {
     2622173736: {
         'name': 'Zappy #190',
         'unit_name': 'ZAPP0190',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig4n2yxdpasn477ixopboz3mtfic4dfwcvdbvpaqeqtvv3n45a5nq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622173736.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Double Helix',
@@ -11578,7 +11578,7 @@ ZAPPY_COLLECTION = {
     2622173912: {
         'name': 'Zappy #867',
         'unit_name': 'ZAPP0867',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibhtlxrxi3rrovxnwwcvkcqa2aqjcimrb6j4iz6lsrxv67qeh6lmu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622173912.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Double Helix',
@@ -11591,7 +11591,7 @@ ZAPPY_COLLECTION = {
     2622174002: {
         'name': 'Zappy #1082',
         'unit_name': 'ZAPP1082',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidsgfiiv2vflgaw6bsf5dlt4mtgc4olywhgmr75wac55htflkwiyi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622174002.jpg',
         'background': 'Blue',
         'body': 'Bear Suit',
         'earring': 'Pepper',
@@ -11604,7 +11604,7 @@ ZAPPY_COLLECTION = {
     2622174163: {
         'name': 'Zappy #1086',
         'unit_name': 'ZAPP1086',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid5er254267vk4dz4tavdshwj76mpyjfzobiimqc66qfhjf2j3m5e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622174163.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Ghost',
@@ -11617,7 +11617,7 @@ ZAPPY_COLLECTION = {
     2622174286: {
         'name': 'Zappy #993',
         'unit_name': 'ZAPP0993',
-        'image_url': 'https://ipfs.io/ipfs/bafybeigdvjpnheg7bya3yk6ffai7g3f4qjzl5uxtlqy4pobp55z6vefe6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622174286.jpg',
         'background': 'Chroma',
         'body': 'Ribbon Tie',
         'earring': 'Lightning',
@@ -11630,7 +11630,7 @@ ZAPPY_COLLECTION = {
     2622174848: {
         'name': 'Zappy #336',
         'unit_name': 'ZAPP0336',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnzcbvee5fvius2scoplzcnecikdbulhhycjowzb4aqly6syeqkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622174848.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Skull',
@@ -11643,7 +11643,7 @@ ZAPPY_COLLECTION = {
     2622175032: {
         'name': 'Zappy #1065',
         'unit_name': 'ZAPP1065',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihb56qsmk2maurxqiids6motezzcxgvlzuotahsu3jsbx4wauxnk4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622175032.jpg',
         'background': 'Yellow',
         'body': 'Trench Coat',
         'earring': 'Happy',
@@ -11656,7 +11656,7 @@ ZAPPY_COLLECTION = {
     2622175097: {
         'name': 'Zappy #284',
         'unit_name': 'ZAPP0284',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiekcdzqze7l26qrkcvwzrhcqua5pijkzlnu7sa7ebwctryjis6xt4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622175097.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'Hashtag',
@@ -11669,7 +11669,7 @@ ZAPPY_COLLECTION = {
     2622175332: {
         'name': 'Zappy #1317',
         'unit_name': 'ZAPP1317',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihj3hd3s7sl7og6psvt73oq3qh246qf3edanarfjx7fwnaeszzaha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622175332.jpg',
         'background': 'Green',
         'body': 'Bowling Shirt',
         'earring': 'Pyramid',
@@ -11682,7 +11682,7 @@ ZAPPY_COLLECTION = {
     2622175799: {
         'name': 'Zappy #771',
         'unit_name': 'ZAPP0771',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie4fzfkwxcv7nwgcbsyfkpjzovlyo4364sm6ab7cwq3wrnsij4y34',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622175799.jpg',
         'background': 'Blue',
         'body': 'Oversize Sweater',
         'earring': 'Diamond',
@@ -11695,7 +11695,7 @@ ZAPPY_COLLECTION = {
     2622176149: {
         'name': 'Zappy #299',
         'unit_name': 'ZAPP0299',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigtfosh5ge6dt7fjlsptsihkblh2ig7cxnsn7hzrptavemoqunfiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622176149.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'None',
@@ -11708,7 +11708,7 @@ ZAPPY_COLLECTION = {
     2622176345: {
         'name': 'Zappy #1160',
         'unit_name': 'ZAPP1160',
-        'image_url': 'https://ipfs.io/ipfs/bafybeihyxkeo6w3wpkstb3flsfufz3qnfmzwuebasaksx67ue2qxr6wmvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622176345.jpg',
         'background': 'Chroma',
         'body': 'Hooded Jacket',
         'earring': 'Skull',
@@ -11721,7 +11721,7 @@ ZAPPY_COLLECTION = {
     2622177175: {
         'name': 'Zappy #648',
         'unit_name': 'ZAPP0648',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihqtvtgcuzbgrvbyh6sh5uhbsrflhaazh3n3ahz4gpwit62pmhyhq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622177175.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Sunrise',
@@ -11734,7 +11734,7 @@ ZAPPY_COLLECTION = {
     2622177525: {
         'name': 'Zappy #103',
         'unit_name': 'ZAPP0103',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifkm6rx5qretkppmhzghpw5jcacuap6ticzba5m2pnzzxph3bwsuy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622177525.jpg',
         'background': 'Orange',
         'body': 'Trash Can',
         'earring': 'Twin Rings',
@@ -11747,7 +11747,7 @@ ZAPPY_COLLECTION = {
     2622177789: {
         'name': 'Zappy #256',
         'unit_name': 'ZAPP0256',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihrxgelffgk4nvpkiwswm3rnouzzqk7axqvdunszdiwu5tkiuiywq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622177789.jpg',
         'background': 'Blue',
         'body': 'Fur Coat',
         'earring': 'Serious',
@@ -11760,7 +11760,7 @@ ZAPPY_COLLECTION = {
     2622178533: {
         'name': 'Zappy #1296',
         'unit_name': 'ZAPP1296',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibetc2agqgidogjvpri6dm5s4qg2d2n6dgiukva2yz7lwqjn6bupq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622178533.jpg',
         'background': 'Blue',
         'body': 'Trash Can',
         'earring': 'Daisy',
@@ -11773,7 +11773,7 @@ ZAPPY_COLLECTION = {
     2622178701: {
         'name': 'Zappy #927',
         'unit_name': 'ZAPP0927',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib3jsivxqgh4yctg6x4rht4gwb23oi63puidtjbzq34f4lp6vu3ni',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622178701.jpg',
         'background': 'Blue',
         'body': 'Bowling Shirt',
         'earring': 'Daisy',
@@ -11786,7 +11786,7 @@ ZAPPY_COLLECTION = {
     2622179041: {
         'name': 'Zappy #908',
         'unit_name': 'ZAPP0908',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihsgm3erozcfngghuywgexlrjaqkxuooatcdshuyghppy5ee5axwi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622179041.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'Rainbow',
@@ -11799,7 +11799,7 @@ ZAPPY_COLLECTION = {
     2622179357: {
         'name': 'Zappy #432',
         'unit_name': 'ZAPP0432',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie3uqnwc7ro7yppit7m3utwzjegfs4garj4tjune4nyvooyk73yk4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622179357.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'Sunrise',
@@ -11812,7 +11812,7 @@ ZAPPY_COLLECTION = {
     2622181863: {
         'name': 'Zappy #71',
         'unit_name': 'ZAPP0071',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidyzfkli45dxqnfemysnnsimj67f6zne4avrqwneo7fzx5fmeo7he',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622181863.jpg',
         'background': 'Yellow',
         'body': 'Fanny Pack',
         'earring': 'Knife',
@@ -11825,7 +11825,7 @@ ZAPPY_COLLECTION = {
     2622181884: {
         'name': 'Zappy #492',
         'unit_name': 'ZAPP0492',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihjjc46bzfwcwmaj6swgozqpo6vkvmphqdjrxu2doz5cuagfizdua',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622181884.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Skull',
@@ -11838,7 +11838,7 @@ ZAPPY_COLLECTION = {
     2622181990: {
         'name': 'Zappy #1206',
         'unit_name': 'ZAPP1206',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigqkdubobctkexd7tepb23uq56drmk4aleib7yae6rpa2yxeu2qbq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622181990.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Knife',
@@ -11851,7 +11851,7 @@ ZAPPY_COLLECTION = {
     2622182250: {
         'name': 'Zappy #67',
         'unit_name': 'ZAPP0067',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigdcuv2nsemr4rh44a7v5ikikerpaimvfxl5kbbpsqe562ugz5nky',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622182250.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Right Ring',
@@ -11864,7 +11864,7 @@ ZAPPY_COLLECTION = {
     2622182777: {
         'name': 'Zappy #1498',
         'unit_name': 'ZAPP1498',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiax7u6hajheqzkgdxli7hob4xcgll76jfnovc74aubji53jm5bj3i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622182777.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Right Helix',
@@ -11877,7 +11877,7 @@ ZAPPY_COLLECTION = {
     2622182803: {
         'name': 'Zappy #458',
         'unit_name': 'ZAPP0458',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig5dtkreloipii6urzbnnnovbn3qmvncv3pq772qavvwxfjkhmfce',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622182803.jpg',
         'background': 'Red',
         'body': 'School Outfit',
         'earring': 'Sad',
@@ -11890,7 +11890,7 @@ ZAPPY_COLLECTION = {
     2622182999: {
         'name': 'Zappy #1424',
         'unit_name': 'ZAPP1424',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicly6tnvybww24tdm6w5tre3lrmzbtx7myg2xustt4mfs4q3zdvyy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622182999.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Happy',
@@ -11903,7 +11903,7 @@ ZAPPY_COLLECTION = {
     2622189665: {
         'name': 'Zappy #1335',
         'unit_name': 'ZAPP1335',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih4wdgy4cr2fcj6j7djhneswxp5acnslpgorqbgnkw7gnjshfmsoy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622189665.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'None',
@@ -11916,7 +11916,7 @@ ZAPPY_COLLECTION = {
     2622189896: {
         'name': 'Zappy #1729',
         'unit_name': 'ZAPP1729',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifufmgkdij44fpqwqgwda3ltbp5pyhc4y4vsn5xmgpgpu72f2zdje',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622189896.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Star',
@@ -11929,7 +11929,7 @@ ZAPPY_COLLECTION = {
     2622190271: {
         'name': 'Zappy #1328',
         'unit_name': 'ZAPP1328',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihlnlqg2gwn3zpgjiqlbttdu2rxi32kztsl434yxsoa2bibaelwbm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622190271.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Left Helix',
@@ -11942,7 +11942,7 @@ ZAPPY_COLLECTION = {
     2622190443: {
         'name': 'Zappy #1418',
         'unit_name': 'ZAPP1418',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidxzk3bke3o7uwppnt76y2nutx5cmbzaggawi4h6iih4wqlmxag6u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622190443.jpg',
         'background': 'Red',
         'body': 'Daisy Shirt',
         'earring': 'Pepper',
@@ -11955,7 +11955,7 @@ ZAPPY_COLLECTION = {
     2622190911: {
         'name': 'Zappy #1478',
         'unit_name': 'ZAPP1478',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid55lmqe6ylhcwpnip5uklymqz4iukn6dh5aswskxrbtlllheqmqu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622190911.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Zappies',
@@ -11968,7 +11968,7 @@ ZAPPY_COLLECTION = {
     2622225649: {
         'name': 'Zappy #2167',
         'unit_name': 'ZAPP2167',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiemy6btrhxxmt7dz7b6f3x4yvumcwrhzhvym5rmbc6gilvofoocte',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622225649.jpg',
         'background': 'Yellow',
         'body': 'Fanny Pack',
         'earring': 'Double Helix',
@@ -11981,7 +11981,7 @@ ZAPPY_COLLECTION = {
     2622226042: {
         'name': 'Zappy #1993',
         'unit_name': 'ZAPP1993',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidyeltayfsxfk67kuz5le4mkkuggwdtjbms4famdrgwcbmdcfsuha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622226042.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Ghost',
@@ -11994,7 +11994,7 @@ ZAPPY_COLLECTION = {
     2622226407: {
         'name': 'Zappy #2065',
         'unit_name': 'ZAPP2065',
-        'image_url': 'https://ipfs.io/ipfs/bafkreife63o6ndrwlvibcyae6ngsr7vewrahoarrmhx5wmtabj45ygipc4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622226407.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Happy',
@@ -12007,7 +12007,7 @@ ZAPPY_COLLECTION = {
     2622226784: {
         'name': 'Zappy #2163',
         'unit_name': 'ZAPP2163',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaubxantlzjdxyrt5w5pddl3ztkxxqjclsg23dyvez6tby5xtig4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622226784.jpg',
         'background': 'Blue',
         'body': 'Funky Coat',
         'earring': 'Pyramid',
@@ -12020,7 +12020,7 @@ ZAPPY_COLLECTION = {
     2622227141: {
         'name': 'Zappy #1978',
         'unit_name': 'ZAPP1978',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicv2drdm3u3vijab47sjmmxdc36742jckwy44vumppne32jkbhxze',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622227141.jpg',
         'background': 'Chroma',
         'body': 'Trench Coat',
         'earring': 'Lightning',
@@ -12033,7 +12033,7 @@ ZAPPY_COLLECTION = {
     2622235024: {
         'name': 'Zappy #2203',
         'unit_name': 'ZAPP2203',
-        'image_url': 'https://ipfs.io/ipfs/bafkreighymkmemkrtoqezu5ps23w3anz7mewl5woaaxlbakdlrr5gsf7aa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622235024.jpg',
         'background': 'Orange',
         'body': 'Polo Overalls',
         'earring': 'Knife',
@@ -12046,7 +12046,7 @@ ZAPPY_COLLECTION = {
     2622235106: {
         'name': 'Zappy #2208',
         'unit_name': 'ZAPP2208',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidgzq5vacgavwa6dtxe567fddcmypw4r7gcza7f7irtjoxfsfpa5e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622235106.jpg',
         'background': 'Orange',
         'body': 'Puffer Coat',
         'earring': 'Carton Cup',
@@ -12059,7 +12059,7 @@ ZAPPY_COLLECTION = {
     2622254835: {
         'name': 'Zappy #1416',
         'unit_name': 'ZAPP1416',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidrbvtjvv4l2qr4zcfq635uyil5bz6epv2xjrgglhf73r5tmthynq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622254835.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Hashtag',
@@ -12072,7 +12072,7 @@ ZAPPY_COLLECTION = {
     2622255161: {
         'name': 'Zappy #320',
         'unit_name': 'ZAPP0320',
-        'image_url': 'https://ipfs.io/ipfs/bafkreianyystbk62ieh5nth3zpqty67bgss2w7ieutu6xzabdtvfzjkc34',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622255161.jpg',
         'background': 'Orange',
         'body': 'Funky Coat',
         'earring': 'None',
@@ -12085,7 +12085,7 @@ ZAPPY_COLLECTION = {
     2622256215: {
         'name': 'Zappy #666',
         'unit_name': 'ZAPP0666',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaeke43s2bsmii5yqz4rwqrz5wmays447tfvl7hgx6ls5xjjning4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622256215.jpg',
         'background': 'Orange',
         'body': 'Leather Vest',
         'earring': 'Pyramid',
@@ -12098,7 +12098,7 @@ ZAPPY_COLLECTION = {
     2622257569: {
         'name': 'Zappy #1871',
         'unit_name': 'ZAPP1871',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiav3mfagtwa6yuc6v2upadygrf27fnkn4intddlpvjmej3k3d7jia',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622257569.jpg',
         'background': 'Yellow',
         'body': 'Daisy Shirt',
         'earring': 'Knife',
@@ -12111,7 +12111,7 @@ ZAPPY_COLLECTION = {
     2622258129: {
         'name': 'Zappy #828',
         'unit_name': 'ZAPP0828',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigx3bhlqvx4k5ivm6op5dl7usz5j3kfwtqn5ujpak66a5mldorazi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622258129.jpg',
         'background': 'Orange',
         'body': 'Tracksuit Top',
         'earring': 'Diamond',
@@ -12124,7 +12124,7 @@ ZAPPY_COLLECTION = {
     2622258264: {
         'name': 'Zappy #753',
         'unit_name': 'ZAPP0753',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicn562pcm7s7jtb4ngdneiduzq7lrszc7juscl5vmweb3ssm4uwcm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622258264.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Pepper',
@@ -12137,7 +12137,7 @@ ZAPPY_COLLECTION = {
     2622258781: {
         'name': 'Zappy #1451',
         'unit_name': 'ZAPP1451',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidnjf3qntnbofvuqjahx2jksuuamx6rkzov2empfwjl5plkwens3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622258781.jpg',
         'background': 'Green',
         'body': 'Suit',
         'earring': 'Bananas',
@@ -12150,7 +12150,7 @@ ZAPPY_COLLECTION = {
     2622258950: {
         'name': 'Zappy #1700',
         'unit_name': 'ZAPP1700',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiatvweg7eoisdjx6ejz2dpcbocctbds6lusrlnd6lailyj5ex4j2e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622258950.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Sad',
@@ -12163,7 +12163,7 @@ ZAPPY_COLLECTION = {
     2622424887: {
         'name': 'Zappy #951',
         'unit_name': 'ZAPP0951',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihpdajkjgwl26kh2ihiuc7yj5ny3y46vnmbt63b4paw7ki5rx6e64',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622424887.jpg',
         'background': 'Purple',
         'body': 'Crocodile Suit',
         'earring': 'Daisy',
@@ -12176,7 +12176,7 @@ ZAPPY_COLLECTION = {
     2622424993: {
         'name': 'Zappy #1161',
         'unit_name': 'ZAPP1161',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibsgseyndvjyseg7vxhzsxowlfzifhmfzfpxfaycghw5tscofhwtu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622424993.jpg',
         'background': 'Orange',
         'body': 'Basic Jacket',
         'earring': 'Right Helix',
@@ -12189,7 +12189,7 @@ ZAPPY_COLLECTION = {
     2622425325: {
         'name': 'Zappy #102',
         'unit_name': 'ZAPP0102',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib3dyuozmyrfpd64yjfdkph4ssl5fmhr7pyrvx3vwa4wsgcrhidee',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622425325.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'Star',
@@ -12202,7 +12202,7 @@ ZAPPY_COLLECTION = {
     2622425725: {
         'name': 'Zappy #803',
         'unit_name': 'ZAPP0803',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaaj36nautpy5y72bb6kpspcfed372u6wyju6ekql4i5ujrgblbu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622425725.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Lightning',
@@ -12215,7 +12215,7 @@ ZAPPY_COLLECTION = {
     2622425848: {
         'name': 'Zappy #1176',
         'unit_name': 'ZAPP1176',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifu4s5ijyu3wauwmjczogwdk7txxsuqxnge7ez6pqzdsfzu4gcula',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622425848.jpg',
         'background': 'Blue',
         'body': 'Kimono',
         'earring': 'None',
@@ -12228,7 +12228,7 @@ ZAPPY_COLLECTION = {
     2622426198: {
         'name': 'Zappy #1352',
         'unit_name': 'ZAPP1352',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihp2ieyajducngdlxkfsgs4vdeemzomut6vvyjbrwxo6w2o7y46f4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622426198.jpg',
         'background': 'Green',
         'body': 'Rabbit Suit',
         'earring': 'Ghost',
@@ -12241,7 +12241,7 @@ ZAPPY_COLLECTION = {
     2622426288: {
         'name': 'Zappy #1583',
         'unit_name': 'ZAPP1583',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiauuw2dzz4ugm2nt3clf2gctjo6yfk5ud5rul32ffogmuhikyjknq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622426288.jpg',
         'background': 'Yellow',
         'body': 'Trench Coat',
         'earring': 'Skull',
@@ -12254,7 +12254,7 @@ ZAPPY_COLLECTION = {
     2622427115: {
         'name': 'Zappy #808',
         'unit_name': 'ZAPP0808',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih5kpsto2bjz2za7y5juvfjxbtxucuez46gasgprjumjacm5ljbj4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622427115.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Knife',
@@ -12267,7 +12267,7 @@ ZAPPY_COLLECTION = {
     2622427655: {
         'name': 'Zappy #383',
         'unit_name': 'ZAPP0383',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2gt2cu27bzmnrxdezbzfza7kdhd2yhdsicntu3ybyvn2ntvsb6a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622427655.jpg',
         'background': 'Red',
         'body': 'Armband',
         'earring': 'Knife',
@@ -12280,7 +12280,7 @@ ZAPPY_COLLECTION = {
     2622427747: {
         'name': 'Zappy #518',
         'unit_name': 'ZAPP0518',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigislnxw56d33bcfjfvceiur35yluhwhmgykugguxczg6kc5czrea',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622427747.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Pepper',
@@ -12293,7 +12293,7 @@ ZAPPY_COLLECTION = {
     2622428073: {
         'name': 'Zappy #465',
         'unit_name': 'ZAPP0465',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiguwjaibknqstcklzjnuznjzbq5b4ceqjqhjbanby43ha4xuapaoy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622428073.jpg',
         'background': 'Purple',
         'body': 'Choker',
         'earring': 'Ghost',
@@ -12306,7 +12306,7 @@ ZAPPY_COLLECTION = {
     2622428339: {
         'name': 'Zappy #1830',
         'unit_name': 'ZAPP1830',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigfnhtijagozn7j5ig3bogcek5z4xchl6gcegiqqkncjmjlnbv6f4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622428339.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Lightning',
@@ -12319,7 +12319,7 @@ ZAPPY_COLLECTION = {
     2622428791: {
         'name': 'Zappy #698',
         'unit_name': 'ZAPP0698',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihjzeeoba2cjwq6vl4eist4f5ybgxumdrarah27zt6lhbn5uc5dze',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622428791.jpg',
         'background': 'Green',
         'body': 'Armband',
         'earring': 'Carton Cup',
@@ -12332,7 +12332,7 @@ ZAPPY_COLLECTION = {
     2622429171: {
         'name': 'Zappy #1822',
         'unit_name': 'ZAPP1822',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibmzbrsbzm63hv72sukingsj32eu2tmqtq7egrfw3bqhfp2rapgfu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622429171.jpg',
         'background': 'Red',
         'body': 'Overalls',
         'earring': 'Number One',
@@ -12345,7 +12345,7 @@ ZAPPY_COLLECTION = {
     2622429271: {
         'name': 'Zappy #1281',
         'unit_name': 'ZAPP1281',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib4ga72mpjjrwzfltdpmpp6wz2gimdhcswaeam4jnavrjzppnjq3q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622429271.jpg',
         'background': 'Green',
         'body': 'Colorful Jacket',
         'earring': 'Bananas',
@@ -12358,7 +12358,7 @@ ZAPPY_COLLECTION = {
     2622430069: {
         'name': 'Zappy #819',
         'unit_name': 'ZAPP0819',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieg5xq5r5pav62h6536ueh3vmjg2lwrvvl3xdqohskemxnqboxeca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622430069.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Hashtag',
@@ -12371,7 +12371,7 @@ ZAPPY_COLLECTION = {
     2622430234: {
         'name': 'Zappy #586',
         'unit_name': 'ZAPP0586',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif2qrrmaqnniivbzqx6vgbgfluay344ovna3ttthq2ezi5qunshkq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622430234.jpg',
         'background': 'Blue',
         'body': 'Lifesaver',
         'earring': 'Serious',
@@ -12384,7 +12384,7 @@ ZAPPY_COLLECTION = {
     2622430662: {
         'name': 'Zappy #1204',
         'unit_name': 'ZAPP1204',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigucrjll3u4p2cvl5danlp7ef7gptyxv6aokugx72ygu7pf5ertrm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622430662.jpg',
         'background': 'Orange',
         'body': 'Choker',
         'earring': 'Pepper',
@@ -12397,7 +12397,7 @@ ZAPPY_COLLECTION = {
     2622431026: {
         'name': 'Zappy #1512',
         'unit_name': 'ZAPP1512',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiebilcclr7q5agr5a5nsmnm4tshq2vhpbxqpxrpj55ggzu2rv42je',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622431026.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'Strawberry',
@@ -12410,7 +12410,7 @@ ZAPPY_COLLECTION = {
     2622431182: {
         'name': 'Zappy #833',
         'unit_name': 'ZAPP0833',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibys6r4mjoimg273rngq2phxaa2m2zemd5dksa3vbdv2km2fcf7pi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622431182.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Bananas',
@@ -12423,7 +12423,7 @@ ZAPPY_COLLECTION = {
     2622445554: {
         'name': 'Zappy #2212',
         'unit_name': 'ZAPP2212',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaqtvc3r6mgqhpxqhk6aeqktojmn25yxqckms5ky4yqfm223znasa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622445554.jpg',
         'background': 'Green',
         'body': 'Daisy Shirt',
         'earring': 'Sunrise',
@@ -12436,7 +12436,7 @@ ZAPPY_COLLECTION = {
     2622445662: {
         'name': 'Zappy #1967',
         'unit_name': 'ZAPP1967',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiablyshnxf7zeyhjhkhre3tmzleevttff3s7zkby5wdxnx7fgzxue',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622445662.jpg',
         'background': 'Blue',
         'body': 'Armor',
         'earring': 'Right Ring',
@@ -12449,7 +12449,7 @@ ZAPPY_COLLECTION = {
     2622446233: {
         'name': 'Zappy #2175',
         'unit_name': 'ZAPP2175',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigvjbhovjmgderwvgtxyhaxopi662q6t4hr5dluhok5jfleeugtbm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622446233.jpg',
         'background': 'Purple',
         'body': 'Hoodie',
         'earring': 'Pepper',
@@ -12462,7 +12462,7 @@ ZAPPY_COLLECTION = {
     2622446672: {
         'name': 'Zappy #2057',
         'unit_name': 'ZAPP2057',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid7e235a5wlnfs4p2fszgphasftoggrvats36fyhuoa3vwwi2keni',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622446672.jpg',
         'background': 'Orange',
         'body': 'Choker',
         'earring': 'Pepper',
@@ -12475,7 +12475,7 @@ ZAPPY_COLLECTION = {
     2622446803: {
         'name': 'Zappy #2216',
         'unit_name': 'ZAPP2216',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia5nuv4uompqxdemcfm6tae3jyf7h6prkqczrzcodkcubnf63stki',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622446803.jpg',
         'background': 'Red',
         'body': 'Fur Coat',
         'earring': 'Lightning',
@@ -12488,7 +12488,7 @@ ZAPPY_COLLECTION = {
     2622447193: {
         'name': 'Zappy #1863',
         'unit_name': 'ZAPP1863',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif5oqqw4vabvogltdl5ddhel3solfhntfoj46ryleahprzw6ccyly',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622447193.jpg',
         'background': 'Red',
         'body': 'Sleeveless Shirt',
         'earring': 'Strawberry',
@@ -12501,7 +12501,7 @@ ZAPPY_COLLECTION = {
     2622532412: {
         'name': 'Zappy #1690',
         'unit_name': 'ZAPP1690',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifev44x5g5babcagerlp65hodcfu3wc4q32tlgfkkfq56gc5scnqe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622532412.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Sad',
@@ -12514,7 +12514,7 @@ ZAPPY_COLLECTION = {
     2622532475: {
         'name': 'Zappy #1677',
         'unit_name': 'ZAPP1677',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifbox3ckec7fuwyaojgpn7e7xe2xqpdw3chdi3a73rny3gcux67ii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622532475.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'Double Helix',
@@ -12527,7 +12527,7 @@ ZAPPY_COLLECTION = {
     2622532820: {
         'name': 'Zappy #1773',
         'unit_name': 'ZAPP1773',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibe7vprjvm6zhoqlwuxuxbtc7rgowhm5x73lslf7xosinesre3l4m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622532820.jpg',
         'background': 'Yellow',
         'body': 'Kimono',
         'earring': 'Pepper',
@@ -12540,7 +12540,7 @@ ZAPPY_COLLECTION = {
     2622532960: {
         'name': 'Zappy #1876',
         'unit_name': 'ZAPP1876',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiautbs6al3bpxpbp2z6imvrobwznk2c5rww6aibbznd2i3ltwr5oe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622532960.jpg',
         'background': 'Yellow',
         'body': 'Trash Can',
         'earring': 'Hashtag',
@@ -12553,7 +12553,7 @@ ZAPPY_COLLECTION = {
     2622533344: {
         'name': 'Zappy #513',
         'unit_name': 'ZAPP0513',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif4dm7kj754mg67t4vrzp7a57ammzc7px5c6zs4zknxgvtkvymgde',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622533344.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Double Helix',
@@ -12566,7 +12566,7 @@ ZAPPY_COLLECTION = {
     2622533472: {
         'name': 'Zappy #1605',
         'unit_name': 'ZAPP1605',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiagnwbstz4ijssfsyrfy73krropy2j2m6t4dl3ukp5zd3ogonaxkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622533472.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Zappies',
@@ -12579,7 +12579,7 @@ ZAPPY_COLLECTION = {
     2622534148: {
         'name': 'Zappy #463',
         'unit_name': 'ZAPP0463',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaps7ygottlvatcsqg2tnkxplqxsaaoxhpwg5rykfh6qqppsns4vy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622534148.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Skull',
@@ -12592,7 +12592,7 @@ ZAPPY_COLLECTION = {
     2622534574: {
         'name': 'Zappy #759',
         'unit_name': 'ZAPP0759',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiabclkz7qtz5tgvfznyurex3zmaexacffosgijkgixx6tpe4erlqi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622534574.jpg',
         'background': 'Green',
         'body': 'Puffer Coat',
         'earring': 'Ghost',
@@ -12605,7 +12605,7 @@ ZAPPY_COLLECTION = {
     2622534788: {
         'name': 'Zappy #1480',
         'unit_name': 'ZAPP1480',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicyt5syl7w53bbyrz5bw7jf3jxlepcibbus45r665uolngoomkymu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622534788.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'Daisy',
@@ -12618,7 +12618,7 @@ ZAPPY_COLLECTION = {
     2622535177: {
         'name': 'Zappy #1683',
         'unit_name': 'ZAPP1683',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihpmsizsrbxrs67qarft2pzvdqorwahuy7ziarkwijz7daanpovze',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622535177.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Sad',
@@ -12631,7 +12631,7 @@ ZAPPY_COLLECTION = {
     2622535283: {
         'name': 'Zappy #537',
         'unit_name': 'ZAPP0537',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihic6lsxztxeu5teoibsy7xpsqnmsgmvriswm37sfxlhosmy73ef4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622535283.jpg',
         'background': 'Yellow',
         'body': 'Crocodile Suit',
         'earring': 'Bananas',
@@ -12644,7 +12644,7 @@ ZAPPY_COLLECTION = {
     2622535683: {
         'name': 'Zappy #1393',
         'unit_name': 'ZAPP1393',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiao67g6rk4i37j3m4ccgd25mqqdhy3fwsmlp7ayzawd3bh3p3e4ri',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622535683.jpg',
         'background': 'Red',
         'body': 'Fur Coat',
         'earring': 'Diamond',
@@ -12657,7 +12657,7 @@ ZAPPY_COLLECTION = {
     2622536077: {
         'name': 'Zappy #2191',
         'unit_name': 'ZAPP2191',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibrncdrpdl3whaj2gnobwmus4sei436l6ckl5nyzrrxk2gkw4rchu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2622536077.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'None',
@@ -12670,7 +12670,7 @@ ZAPPY_COLLECTION = {
     2623078402: {
         'name': 'Zappy #287',
         'unit_name': 'ZAPP0287',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibqumawcejdi2y7si3644nx4frqdhwu5kwjefvunw6q4nqlke4hpa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623078402.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'Party Popper',
@@ -12683,7 +12683,7 @@ ZAPPY_COLLECTION = {
     2623078785: {
         'name': 'Zappy #488',
         'unit_name': 'ZAPP0488',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic4qj5rc5cxo32zhgrred6rznokdvb5qypwjhs7zmtjkrnoawteii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623078785.jpg',
         'background': 'Purple',
         'body': 'Trash Can',
         'earring': 'Bananas',
@@ -12696,7 +12696,7 @@ ZAPPY_COLLECTION = {
     2623078933: {
         'name': 'Zappy #215',
         'unit_name': 'ZAPP0215',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidq3he4vpaowvik33azpmuz54ahumeqdzslst5q2zsumky5a54dtu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623078933.jpg',
         'background': 'Orange',
         'body': 'Hawaiian Shirt',
         'earring': 'Lightning',
@@ -12709,7 +12709,7 @@ ZAPPY_COLLECTION = {
     2623079308: {
         'name': 'Zappy #490',
         'unit_name': 'ZAPP0490',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihanubdcnbhcztfx73dbcudygehphprna2xnrvy23iemfaxqd5wte',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623079308.jpg',
         'background': 'Green',
         'body': 'Basic Jacket',
         'earring': 'Twin Rings',
@@ -12722,7 +12722,7 @@ ZAPPY_COLLECTION = {
     2623094110: {
         'name': 'Zappy #1647',
         'unit_name': 'ZAPP1647',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif6hti3knhmedh6jblcc2nhv4aldu6sjxqflaxjuwjn2wlfkwpsce',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623094110.jpg',
         'background': 'Orange',
         'body': 'Muscle Suit',
         'earring': 'Daisy',
@@ -12735,7 +12735,7 @@ ZAPPY_COLLECTION = {
     2623094212: {
         'name': 'Zappy #2047',
         'unit_name': 'ZAPP2047',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidzay6iu2ixknacddze6d33jqfjglbc5moysnmpdc74rkjtda73em',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623094212.jpg',
         'background': 'Purple',
         'body': 'Trench Coat',
         'earring': 'Strawberry',
@@ -12748,7 +12748,7 @@ ZAPPY_COLLECTION = {
     2623729792: {
         'name': 'Zappy #631',
         'unit_name': 'ZAPP0631',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiggxk27mefrehmdmuv4xed7gckl5lbhsyn5bhso54rs4h5y3qmnwy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623729792.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'None',
@@ -12761,7 +12761,7 @@ ZAPPY_COLLECTION = {
     2623730203: {
         'name': 'Zappy #597',
         'unit_name': 'ZAPP0597',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia4zeyrnbv627n357ttumofos7pxkwok2zl67po624vhyy4fhhioq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623730203.jpg',
         'background': 'Purple',
         'body': 'Daisy Shirt',
         'earring': 'Bananas',
@@ -12774,7 +12774,7 @@ ZAPPY_COLLECTION = {
     2623730545: {
         'name': 'Zappy #569',
         'unit_name': 'ZAPP0569',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigct2i2mm42eu6gakkkb642v2fa2ld6s6ctdmaigldunrlsbd57uy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623730545.jpg',
         'background': 'Blue',
         'body': 'Funky Coat',
         'earring': 'Bananas',
@@ -12787,7 +12787,7 @@ ZAPPY_COLLECTION = {
     2623730619: {
         'name': 'Zappy #664',
         'unit_name': 'ZAPP0664',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic3s3ti7av2pcsnrt2rpgzzhdkpsyvnbnfcetghl7kjkxdbur6ooi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623730619.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Sunrise',
@@ -12800,7 +12800,7 @@ ZAPPY_COLLECTION = {
     2623730921: {
         'name': 'Zappy #617',
         'unit_name': 'ZAPP0617',
-        'image_url': 'https://ipfs.io/ipfs/bafkreict2eedlv7lyo5zxi6kbaknbj7oifuo4h57nkbaco5zm5435uckxm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623730921.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Daisy',
@@ -12813,7 +12813,7 @@ ZAPPY_COLLECTION = {
     2623731159: {
         'name': 'Zappy #607',
         'unit_name': 'ZAPP0607',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigydlwgfbprnajylwcejk5xdvyzhd6lqqxm3xpi7d5e3p5el6xda4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623731159.jpg',
         'background': 'Green',
         'body': 'Daisy Shirt',
         'earring': 'Sunrise',
@@ -12826,7 +12826,7 @@ ZAPPY_COLLECTION = {
     2623731481: {
         'name': 'Zappy #652',
         'unit_name': 'ZAPP0652',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid5p2di5ugbfwbzloab43c3qqgmmknuqvogooylxf5p44xy5dujky',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623731481.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Bananas',
@@ -12839,7 +12839,7 @@ ZAPPY_COLLECTION = {
     2623731813: {
         'name': 'Zappy #580',
         'unit_name': 'ZAPP0580',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihj4avby2kilvxl4avikn5c6kecgnbatqhgzs7fbbpf52dvxgl3qi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623731813.jpg',
         'background': 'Red',
         'body': 'Basic Jacket',
         'earring': 'Zappies',
@@ -12852,7 +12852,7 @@ ZAPPY_COLLECTION = {
     2623731996: {
         'name': 'Zappy #608',
         'unit_name': 'ZAPP0608',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2ngxf56opg5wt2krb6eiwhdbv3jmathfr73nwnmmq65isw7gnna',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623731996.jpg',
         'background': 'Yellow',
         'body': 'Bear Suit',
         'earring': 'Strawberry',
@@ -12865,7 +12865,7 @@ ZAPPY_COLLECTION = {
     2623732325: {
         'name': 'Zappy #624',
         'unit_name': 'ZAPP0624',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiatphb7wll7dsek4gtbl535gssm5dtg7nr3w3vmbjszm3onw2hw4a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623732325.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Double Helix',
@@ -12878,7 +12878,7 @@ ZAPPY_COLLECTION = {
     2623732541: {
         'name': 'Zappy #611',
         'unit_name': 'ZAPP0611',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifrjt3lriizrvhydgncwltryx7bejgzvcijhtn6o4uhzp3dwb5e24',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623732541.jpg',
         'background': 'Yellow',
         'body': 'Trash Can',
         'earring': 'Party Popper',
@@ -12891,7 +12891,7 @@ ZAPPY_COLLECTION = {
     2623732876: {
         'name': 'Zappy #594',
         'unit_name': 'ZAPP0594',
-        'image_url': 'https://ipfs.io/ipfs/bafybeib66icrufhkh5f3yoccwn5yr5vqlbovumbjwt3fkwuep2ifvita3i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623732876.jpg',
         'background': 'Chroma',
         'body': 'Funky Coat',
         'earring': 'Strawberry',
@@ -12904,7 +12904,7 @@ ZAPPY_COLLECTION = {
     2623733210: {
         'name': 'Zappy #574',
         'unit_name': 'ZAPP0574',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicarguvwjeebgy3opepmefpkqyyqjnkrc5y3ppdepnlufl6wah6ee',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623733210.jpg',
         'background': 'Green',
         'body': 'Sweater',
         'earring': 'Carton Cup',
@@ -12917,7 +12917,7 @@ ZAPPY_COLLECTION = {
     2623733395: {
         'name': 'Zappy #603',
         'unit_name': 'ZAPP0603',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifhzmfnmfs3s7cop257fhvx3zcxzal3avumyaz5ifxhzqf6bxaldq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623733395.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Carton Cup',
@@ -12930,7 +12930,7 @@ ZAPPY_COLLECTION = {
     2623733920: {
         'name': 'Zappy #619',
         'unit_name': 'ZAPP0619',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiagbeeyf4xfp6bbldg54fzdh2zwfllxccgzx352keyfgbuttnjn7q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623733920.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Sad',
@@ -12943,7 +12943,7 @@ ZAPPY_COLLECTION = {
     2623734032: {
         'name': 'Zappy #587',
         'unit_name': 'ZAPP0587',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif3ennjg3knrilnhiigfdr2gieywn2v7kcdo64gsj2o4tlewkzi6e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623734032.jpg',
         'background': 'Purple',
         'body': 'Fanny Pack',
         'earring': 'Bananas',
@@ -12956,7 +12956,7 @@ ZAPPY_COLLECTION = {
     2623734455: {
         'name': 'Zappy #642',
         'unit_name': 'ZAPP0642',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicghyv3fxaefxcki7ivikfm2iojxezm4avqhcvv7yrbjvx5ca7lxy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623734455.jpg',
         'background': 'Blue',
         'body': 'Scarf',
         'earring': 'Knife',
@@ -12969,7 +12969,7 @@ ZAPPY_COLLECTION = {
     2623734782: {
         'name': 'Zappy #583',
         'unit_name': 'ZAPP0583',
-        'image_url': 'https://ipfs.io/ipfs/bafybeih5aw5m6wbo37dfzcywkbu4e4yohhh5kn5bybqk22qqkb6b5hhira',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623734782.jpg',
         'background': 'Chroma',
         'body': 'Lifesaver',
         'earring': 'Daisy',
@@ -12982,7 +12982,7 @@ ZAPPY_COLLECTION = {
     2623734840: {
         'name': 'Zappy #610',
         'unit_name': 'ZAPP0610',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidvloueua43sxpsi7tetxqzz57byzgyaownnppalqf45mlzxamnay',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623734840.jpg',
         'background': 'Blue',
         'body': 'Suit',
         'earring': 'Knife',
@@ -12995,7 +12995,7 @@ ZAPPY_COLLECTION = {
     2623735187: {
         'name': 'Zappy #633',
         'unit_name': 'ZAPP0633',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifclc5mfeeucxvheigwf6vlc4vthq2hacbxcskeed6ibqv7jxdasa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623735187.jpg',
         'background': 'Blue',
         'body': 'Warning Tape',
         'earring': 'Left Helix',
@@ -13008,7 +13008,7 @@ ZAPPY_COLLECTION = {
     2623749327: {
         'name': 'Zappy #714',
         'unit_name': 'ZAPP0714',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih4h65mkwtjq53briby5cnvv5n5y4h5swqq6jv3dpdsvbrru6wi2i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623749327.jpg',
         'background': 'Yellow',
         'body': 'Tracksuit Top',
         'earring': 'Pepper',
@@ -13021,7 +13021,7 @@ ZAPPY_COLLECTION = {
     2623751721: {
         'name': 'Zappy #762',
         'unit_name': 'ZAPP0762',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigpsd4wkqkly2qg3fpmstml54awyhacreuvuh53wsjamnh6xrbuhi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623751721.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Left Helix',
@@ -13034,7 +13034,7 @@ ZAPPY_COLLECTION = {
     2623751871: {
         'name': 'Zappy #885',
         'unit_name': 'ZAPP0885',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia67ukjhudd5iprwbhndmv3hoikbsuwz4f46yzo2qiyraikbcupn4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623751871.jpg',
         'background': 'Orange',
         'body': 'Armband',
         'earring': 'Diamond',
@@ -13047,7 +13047,7 @@ ZAPPY_COLLECTION = {
     2623752261: {
         'name': 'Zappy #737',
         'unit_name': 'ZAPP0737',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnrwqouoyqc7qjce7iizrnfs66urupuotudolvych3bzqlo4sftq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623752261.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'Rainbow',
@@ -13060,7 +13060,7 @@ ZAPPY_COLLECTION = {
     2623752619: {
         'name': 'Zappy #875',
         'unit_name': 'ZAPP0875',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiajb3csuw65ll6xvg5ejw4szu4vms5biog5edfapezafquvnagfj4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623752619.jpg',
         'background': 'Yellow',
         'body': 'Daisy Shirt',
         'earring': 'Serious',
@@ -13073,7 +13073,7 @@ ZAPPY_COLLECTION = {
     2623753393: {
         'name': 'Zappy #699',
         'unit_name': 'ZAPP0699',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidylz4pg3mvk3k6jnhl22mwhtarpsyfmicvwn5jubfpdahvzfq4ti',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623753393.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Knife',
@@ -13086,7 +13086,7 @@ ZAPPY_COLLECTION = {
     2623754039: {
         'name': 'Zappy #680',
         'unit_name': 'ZAPP0680',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicz6cd5epjrtes5kshifjopozw64yffd3teu3bckkclh2d55r45oy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623754039.jpg',
         'background': 'Purple',
         'body': 'Toga',
         'earring': 'None',
@@ -13099,7 +13099,7 @@ ZAPPY_COLLECTION = {
     2623754325: {
         'name': 'Zappy #831',
         'unit_name': 'ZAPP0831',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifocmtqn6vqjo2ecytdlohxaoh44jueusjvq4x5ddd3ypsofawwla',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623754325.jpg',
         'background': 'Green',
         'body': 'Fanny Pack',
         'earring': 'None',
@@ -13112,7 +13112,7 @@ ZAPPY_COLLECTION = {
     2623754775: {
         'name': 'Zappy #890',
         'unit_name': 'ZAPP0890',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzw6vnhvpxvvimztxg7adh5pzzzlxvdbqmwlx2olancdpegxdeju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623754775.jpg',
         'background': 'Yellow',
         'body': 'Ribbon Tie',
         'earring': 'Skull',
@@ -13125,7 +13125,7 @@ ZAPPY_COLLECTION = {
     2623754907: {
         'name': 'Zappy #872',
         'unit_name': 'ZAPP0872',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid7xyfnxhqph4dtmgso3ueibmm7epvyqdmw67atjhc4ygmmextyve',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623754907.jpg',
         'background': 'Blue',
         'body': 'Scarf',
         'earring': 'Strawberry',
@@ -13138,7 +13138,7 @@ ZAPPY_COLLECTION = {
     2623755281: {
         'name': 'Zappy #780',
         'unit_name': 'ZAPP0780',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiejj4rdsfcdhzja5akli3dmhpfxsxgcuukfeww2lzmshkhecorcs4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623755281.jpg',
         'background': 'Blue',
         'body': 'Scarf',
         'earring': 'Twin Rings',
@@ -13151,7 +13151,7 @@ ZAPPY_COLLECTION = {
     2623755337: {
         'name': 'Zappy #786',
         'unit_name': 'ZAPP0786',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicn4gsa5slxjyfhv7uk3zaje7t5tepcd5s5bhlcis7rh7svbcpiry',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623755337.jpg',
         'background': 'Green',
         'body': 'Puffer Coat',
         'earring': 'Daisy',
@@ -13164,7 +13164,7 @@ ZAPPY_COLLECTION = {
     2623755801: {
         'name': 'Zappy #722',
         'unit_name': 'ZAPP0722',
-        'image_url': 'https://ipfs.io/ipfs/bafkreici2c3lctrflke7ruixodt5grmdgvgnmxd6zvurnqhyfp4z6xfimi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623755801.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Strawberry',
@@ -13177,7 +13177,7 @@ ZAPPY_COLLECTION = {
     2623756379: {
         'name': 'Zappy #763',
         'unit_name': 'ZAPP0763',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiemsktokprspfkz7qzcgp3wgge2t2xzjpuxr4nyxnql65fvempttq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623756379.jpg',
         'background': 'Orange',
         'body': 'Leather Vest',
         'earring': 'None',
@@ -13190,7 +13190,7 @@ ZAPPY_COLLECTION = {
     2623756442: {
         'name': 'Zappy #811',
         'unit_name': 'ZAPP0811',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzmvbhn5aq5xcvt2gkhk6ri5td25nkgqaw5rxtwunjxuvmjdeakm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623756442.jpg',
         'background': 'Red',
         'body': 'Crocodile Suit',
         'earring': 'Pyramid',
@@ -13203,7 +13203,7 @@ ZAPPY_COLLECTION = {
     2623756902: {
         'name': 'Zappy #758',
         'unit_name': 'ZAPP0758',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihq4lzqkthj6jpcgfk7zz7zlnnttnsyzw4oz24k5hbqfax5l2vcgm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623756902.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Ghost',
@@ -13216,7 +13216,7 @@ ZAPPY_COLLECTION = {
     2623757093: {
         'name': 'Zappy #889',
         'unit_name': 'ZAPP0889',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigwww6k6upz4wlzpvtdk663ozrzaj3b73qynpf27uhg43xphcgnyi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623757093.jpg',
         'background': 'Red',
         'body': 'Suit',
         'earring': 'Bananas',
@@ -13229,7 +13229,7 @@ ZAPPY_COLLECTION = {
     2623757514: {
         'name': 'Zappy #789',
         'unit_name': 'ZAPP0789',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieqlkq3uwkrquzucusa7itx4gnaz6kuvxzgy22vb2otqlakwuuqbm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623757514.jpg',
         'background': 'Green',
         'body': 'Puffer Coat',
         'earring': 'Twin Rings',
@@ -13242,7 +13242,7 @@ ZAPPY_COLLECTION = {
     2623757677: {
         'name': 'Zappy #883',
         'unit_name': 'ZAPP0883',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigwwff2jh6huro33jex5k4b2zsba7llplrsicpyysgvia2rbfky3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623757677.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Happy',
@@ -13255,7 +13255,7 @@ ZAPPY_COLLECTION = {
     2623757988: {
         'name': 'Zappy #824',
         'unit_name': 'ZAPP0824',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifiq6gsw5artgvzjp5nqpk7vuornekcwack4k6rinc5ur3abyheyi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2623757988.jpg',
         'background': 'Orange',
         'body': 'Lifesaver',
         'earring': 'Pyramid',
@@ -13268,7 +13268,7 @@ ZAPPY_COLLECTION = {
     2624313435: {
         'name': 'Zappy #754',
         'unit_name': 'ZAPP0754',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifc7rjoaqvs3qt3fmoqfija7lloxopcp6ornv4tkzrf7a5clfzugi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624313435.jpg',
         'background': 'Blue',
         'body': 'Trash Can',
         'earring': 'Carton Cup',
@@ -13281,7 +13281,7 @@ ZAPPY_COLLECTION = {
     2624313781: {
         'name': 'Zappy #1658',
         'unit_name': 'ZAPP1658',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiechmpeig5uj2uj3fqe6vz3q3xiyj5fm5mbdetnsa254yzhwwkcpu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624313781.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Pepper',
@@ -13294,7 +13294,7 @@ ZAPPY_COLLECTION = {
     2624313988: {
         'name': 'Zappy #1751',
         'unit_name': 'ZAPP1751',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihpb72rddfn2pkjeyponyemjf4hnvta5vmd6ssdm66pugfu562mru',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624313988.jpg',
         'background': 'Red',
         'body': 'Bowling Shirt',
         'earring': 'Star',
@@ -13307,7 +13307,7 @@ ZAPPY_COLLECTION = {
     2624318352: {
         'name': 'Zappy #536',
         'unit_name': 'ZAPP0536',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidgaqkhqe5eecyb3hn3nji2nmyveni3azbdm5fjqexgmzslgugzsa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624318352.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Ghost',
@@ -13320,7 +13320,7 @@ ZAPPY_COLLECTION = {
     2624320361: {
         'name': 'Zappy #2184',
         'unit_name': 'ZAPP2184',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibpkrwfz23avesckr6oq2lowtgtheom55yivp6vfzswr7etuzpaci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624320361.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Hashtag',
@@ -13333,7 +13333,7 @@ ZAPPY_COLLECTION = {
     2624322750: {
         'name': 'Zappy #2067',
         'unit_name': 'ZAPP2067',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibpgemcf5ub34ew7w2v35v7qwak22iy5g77fd7qnxafaqya2k74di',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624322750.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Double Helix',
@@ -13346,7 +13346,7 @@ ZAPPY_COLLECTION = {
     2624324227: {
         'name': 'Zappy #561',
         'unit_name': 'ZAPP0561',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihmtviadpebtwx3az7lx3aktm2xlrtyb6kx7jdkftywouwhi2v22i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624324227.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Bananas',
@@ -13359,7 +13359,7 @@ ZAPPY_COLLECTION = {
     2624324994: {
         'name': 'Zappy #629',
         'unit_name': 'ZAPP0629',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicqcwyhqikagadtphxcbdnap55hdo44nfxybk2isk73qf3frndfqy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624324994.jpg',
         'background': 'Blue',
         'body': 'Striped Sweater',
         'earring': 'Rainbow',
@@ -13372,7 +13372,7 @@ ZAPPY_COLLECTION = {
     2624325535: {
         'name': 'Zappy #56',
         'unit_name': 'ZAPP0056',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibj5m4fk3kxkwvvgwbctarjqcfegnw3y4e6oxsjjh6daig6or2m44',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624325535.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Right Ring',
@@ -13385,7 +13385,7 @@ ZAPPY_COLLECTION = {
     2624327238: {
         'name': 'Zappy #907',
         'unit_name': 'ZAPP0907',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia6umg5orwe3efm24ktgzw7eftku6pctr3uz7od34xg27s6nbrf4i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624327238.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Sad',
@@ -13398,7 +13398,7 @@ ZAPPY_COLLECTION = {
     2624328065: {
         'name': 'Zappy #934',
         'unit_name': 'ZAPP0934',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiau7hqzs7jhcwfqfi27is2tly4y3rqosxbmpq26bq74kbyhwefeca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624328065.jpg',
         'background': 'Red',
         'body': 'Lifesaver',
         'earring': 'Left Helix',
@@ -13411,7 +13411,7 @@ ZAPPY_COLLECTION = {
     2624328339: {
         'name': 'Zappy #2153',
         'unit_name': 'ZAPP2153',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic4326qfwd3jns76wz7pmhacyn5xtrqwtrft2zcmjmixco5pmdawi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624328339.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Daisy',
@@ -13424,7 +13424,7 @@ ZAPPY_COLLECTION = {
     2624332533: {
         'name': 'Zappy #409',
         'unit_name': 'ZAPP0409',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaylzru6deo6c3lch3iy3iup25qzx5cdpfcrta5uzoqw6mpfemnp4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624332533.jpg',
         'background': 'Orange',
         'body': 'Basic Jacket',
         'earring': 'Left Ring',
@@ -13437,7 +13437,7 @@ ZAPPY_COLLECTION = {
     2624333951: {
         'name': 'Zappy #301',
         'unit_name': 'ZAPP0301',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic3qckbxvznfeairsxiut6bszh3uj736knagevmaa4vlwr5cml3su',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624333951.jpg',
         'background': 'Yellow',
         'body': 'Wool Collar Jacket',
         'earring': 'Strawberry',
@@ -13450,7 +13450,7 @@ ZAPPY_COLLECTION = {
     2624334451: {
         'name': 'Zappy #881',
         'unit_name': 'ZAPP0881',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie26tn7eauh4tfkumizs2don5prkg2l4pjsxcyje6axlm4xikyiem',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624334451.jpg',
         'background': 'Orange',
         'body': 'Overalls',
         'earring': 'Zappies',
@@ -13463,7 +13463,7 @@ ZAPPY_COLLECTION = {
     2624583957: {
         'name': 'Zappy #495',
         'unit_name': 'ZAPP0495',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiciuurtvj5k7wgknerh57vcmqeafvztal44ldfuh4uyvnkjuj5zkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624583957.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Diamond',
@@ -13476,7 +13476,7 @@ ZAPPY_COLLECTION = {
     2624584149: {
         'name': 'Zappy #684',
         'unit_name': 'ZAPP0684',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifssi6wvcqiksco6am7iyrxzqffcw2n6ygxtau3zw5f4sjhmppv2m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624584149.jpg',
         'background': 'Red',
         'body': 'Scarf',
         'earring': 'Pyramid',
@@ -13489,7 +13489,7 @@ ZAPPY_COLLECTION = {
     2624584261: {
         'name': 'Zappy #2123',
         'unit_name': 'ZAPP2123',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidts7yz4lhsg7au36wkynhpeqfobdladqjojvernu6xrancnruqje',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624584261.jpg',
         'background': 'Blue',
         'body': 'Fanny Pack',
         'earring': 'Pepper',
@@ -13502,7 +13502,7 @@ ZAPPY_COLLECTION = {
     2624584387: {
         'name': 'Zappy #342',
         'unit_name': 'ZAPP0342',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih52qb4mkpiqjg5xwbjvsnh2qui7nd5k6ctz3itrrjbwrma2uohbq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624584387.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Pepper',
@@ -13515,7 +13515,7 @@ ZAPPY_COLLECTION = {
     2624831443: {
         'name': 'Zappy #765',
         'unit_name': 'ZAPP0765',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihdkwvxr5rhmn6hgutjv7fll3cgt7f7wnprdzx2sjsr5jvgc3zl5a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624831443.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Number One',
@@ -13528,7 +13528,7 @@ ZAPPY_COLLECTION = {
     2624831484: {
         'name': 'Zappy #807',
         'unit_name': 'ZAPP0807',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidgcjt4iorvsp3sjvy5oeh2uvhan4nhwlyhmwvwb2budeviwuf2bm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624831484.jpg',
         'background': 'Red',
         'body': 'Funky Coat',
         'earring': 'Right Ring',
@@ -13541,7 +13541,7 @@ ZAPPY_COLLECTION = {
     2624831789: {
         'name': 'Zappy #667',
         'unit_name': 'ZAPP0667',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibekh6kkl6xvvi6em5yquctp5ccye6ujtefl733soiij7pcxpy7ya',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624831789.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'None',
@@ -13554,7 +13554,7 @@ ZAPPY_COLLECTION = {
     2624831879: {
         'name': 'Zappy #739',
         'unit_name': 'ZAPP0739',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifak7homz6l2yldcwnozwpgj2c57nr43tot6ntynebokixl6j3pxa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624831879.jpg',
         'background': 'Yellow',
         'body': 'Space Suit',
         'earring': 'Strawberry',
@@ -13567,7 +13567,7 @@ ZAPPY_COLLECTION = {
     2624832195: {
         'name': 'Zappy #686',
         'unit_name': 'ZAPP0686',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigz4ljh5urjl3uyku745ccc7zneijbhgmbalhfjcetp542y56e6du',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624832195.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Happy',
@@ -13580,7 +13580,7 @@ ZAPPY_COLLECTION = {
     2624832502: {
         'name': 'Zappy #795',
         'unit_name': 'ZAPP0795',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaq4dlq6cobsnxokqn33wfpwh5etqkmqtj7dg4tnycnc5wlxbqng4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624832502.jpg',
         'background': 'Orange',
         'body': 'Choker',
         'earring': 'Pyramid',
@@ -13593,7 +13593,7 @@ ZAPPY_COLLECTION = {
     2624832682: {
         'name': 'Zappy #1207',
         'unit_name': 'ZAPP1207',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidkuxm3tejuiimx6o2s6omuuuewh6seanjh6i2e3jgyib5ofqn5ga',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624832682.jpg',
         'background': 'Green',
         'body': 'Leather Vest',
         'earring': 'Number One',
@@ -13606,7 +13606,7 @@ ZAPPY_COLLECTION = {
     2624833063: {
         'name': 'Zappy #1141',
         'unit_name': 'ZAPP1141',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicdxrwquonvbcv5zlgowgxvanh6pdjsun5fumtasqbjtqziqgqrwq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624833063.jpg',
         'background': 'Red',
         'body': 'Puffer Coat',
         'earring': 'Right Ring',
@@ -13619,7 +13619,7 @@ ZAPPY_COLLECTION = {
     2624833154: {
         'name': 'Zappy #984',
         'unit_name': 'ZAPP0984',
-        'image_url': 'https://ipfs.io/ipfs/bafkreich2q6yjj7d3qaq7cckubvo7tnfglgogyvjphqcmgjrfm7j77sg5u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624833154.jpg',
         'background': 'Yellow',
         'body': 'Armband',
         'earring': 'None',
@@ -13632,7 +13632,7 @@ ZAPPY_COLLECTION = {
     2624833488: {
         'name': 'Zappy #592',
         'unit_name': 'ZAPP0592',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidl757buv4d6wolcsq32qdpir5lknv2mr3duyzpywjneazq7lka4m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624833488.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Sunrise',
@@ -13645,7 +13645,7 @@ ZAPPY_COLLECTION = {
     2624833824: {
         'name': 'Zappy #1188',
         'unit_name': 'ZAPP1188',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihatg3mpg5aepcfbisurlsjvekdkxzmarhmi3v75gy4xslhl56rq4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624833824.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Pyramid',
@@ -13658,7 +13658,7 @@ ZAPPY_COLLECTION = {
     2624833891: {
         'name': 'Zappy #1174',
         'unit_name': 'ZAPP1174',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidfiu25fsmlyqemypfhi32246woio5l5svxcd4x7zytfnee3lwvfy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624833891.jpg',
         'background': 'Purple',
         'body': 'Trench Coat',
         'earring': 'None',
@@ -13671,7 +13671,7 @@ ZAPPY_COLLECTION = {
     2624834235: {
         'name': 'Zappy #1032',
         'unit_name': 'ZAPP1032',
-        'image_url': 'https://ipfs.io/ipfs/bafybeidazg34v7ivzblbpoqyzyhedhrcebs7i4schjy35o5kxvnhdjnp3i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624834235.jpg',
         'background': 'Blue',
         'body': 'Clouds',
         'earring': 'Party Popper',
@@ -13684,7 +13684,7 @@ ZAPPY_COLLECTION = {
     2624834325: {
         'name': 'Zappy #932',
         'unit_name': 'ZAPP0932',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicubdhpml4xoaouwik3ihtc2lb3lbzs2etf6gvi6qoliqaejajn3m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624834325.jpg',
         'background': 'Orange',
         'body': 'Daisy Shirt',
         'earring': 'None',
@@ -13697,7 +13697,7 @@ ZAPPY_COLLECTION = {
     2624834759: {
         'name': 'Zappy #669',
         'unit_name': 'ZAPP0669',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibrq7wmrhwvrgd2ts75zv7o3qzjtjd5o77acm7yfrumdrdx2o4cku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624834759.jpg',
         'background': 'Yellow',
         'body': 'Wool Collar Jacket',
         'earring': 'Pyramid',
@@ -13710,7 +13710,7 @@ ZAPPY_COLLECTION = {
     2624835085: {
         'name': 'Zappy #995',
         'unit_name': 'ZAPP0995',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibn7xg7cdlpmiph7t2j6liz6ks27urwuayiwwglbzoayeuio5vukm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624835085.jpg',
         'background': 'Blue',
         'body': 'School Outfit',
         'earring': 'None',
@@ -13723,7 +13723,7 @@ ZAPPY_COLLECTION = {
     2624835122: {
         'name': 'Zappy #847',
         'unit_name': 'ZAPP0847',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifu45buultibg7qcbqzhiquqcxqrdj7syrn22zjel2gkgurjavtei',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624835122.jpg',
         'background': 'Yellow',
         'body': 'Warning Tape',
         'earring': 'Sunrise',
@@ -13736,7 +13736,7 @@ ZAPPY_COLLECTION = {
     2624835478: {
         'name': 'Zappy #983',
         'unit_name': 'ZAPP0983',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiccpouxknfjapdwd7acq6n7ttadfbeh4edoemjkjkd72egazksi7a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624835478.jpg',
         'background': 'Purple',
         'body': 'Clouds',
         'earring': 'Daisy',
@@ -13749,7 +13749,7 @@ ZAPPY_COLLECTION = {
     2624835576: {
         'name': 'Zappy #1217',
         'unit_name': 'ZAPP1217',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib6sahwiu7fzjfk6dngoj7drrylzsm3l6vt2ye64mymwnnpsg5yhm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624835576.jpg',
         'background': 'Orange',
         'body': 'Puffer Coat',
         'earring': 'Pepper',
@@ -13762,7 +13762,7 @@ ZAPPY_COLLECTION = {
     2624836553: {
         'name': 'Zappy #735',
         'unit_name': 'ZAPP0735',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiadtagrjyp7eru65dkne3d4dtt5ipkpbdlxw6e6qvkpmqae7gewty',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624836553.jpg',
         'background': 'Yellow',
         'body': 'Naked',
         'earring': 'Hashtag',
@@ -13775,7 +13775,7 @@ ZAPPY_COLLECTION = {
     2624849592: {
         'name': 'Zappy #1280',
         'unit_name': 'ZAPP1280',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigd6aqtothvtljyprpyau3xp24aw7o3pccjnkgpg2hcyikrsrayaa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624849592.jpg',
         'background': 'Green',
         'body': 'Puffer Coat',
         'earring': 'Party Popper',
@@ -13788,7 +13788,7 @@ ZAPPY_COLLECTION = {
     2624849853: {
         'name': 'Zappy #1873',
         'unit_name': 'ZAPP1873',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiavwgnbddgissaet425vmend4henz4cja7zmm2tuk7hk5gmjxgenu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624849853.jpg',
         'background': 'Chroma',
         'body': 'Hooded Jacket',
         'earring': 'Left Helix',
@@ -13801,7 +13801,7 @@ ZAPPY_COLLECTION = {
     2624850278: {
         'name': 'Zappy #1938',
         'unit_name': 'ZAPP1938',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic33rgdgnv632freis4cto4xsmxkzr6xufwbczhscg5u4nksql54u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624850278.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Star',
@@ -13814,7 +13814,7 @@ ZAPPY_COLLECTION = {
     2624850404: {
         'name': 'Zappy #1745',
         'unit_name': 'ZAPP1745',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihv7w3tvxanle25oju57erjknpugikq5dlcrfjx4yzsjw63x7eraa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624850404.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Knife',
@@ -13827,7 +13827,7 @@ ZAPPY_COLLECTION = {
     2624850758: {
         'name': 'Zappy #1706',
         'unit_name': 'ZAPP1706',
-        'image_url': 'https://ipfs.io/ipfs/bafkreietphp6ssb3al6z3vbbz63skmtzzfaequ73hrl2yky7eqsogzh3me',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624850758.jpg',
         'background': 'Green',
         'body': 'Crocodile Suit',
         'earring': 'None',
@@ -13840,7 +13840,7 @@ ZAPPY_COLLECTION = {
     2624851449: {
         'name': 'Zappy #1764',
         'unit_name': 'ZAPP1764',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiasi2o2lbyhnnz6r33par4naswyx3sj6q3eekzulvogevvqcwxade',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624851449.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'None',
@@ -13853,7 +13853,7 @@ ZAPPY_COLLECTION = {
     2624852184: {
         'name': 'Zappy #1654',
         'unit_name': 'ZAPP1654',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih6entlrlre6x4xm56qtprpt4rdg5xpdrsngnjldvm5jwlea3piou',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624852184.jpg',
         'background': 'Red',
         'body': 'Funky Coat',
         'earring': 'Rainbow',
@@ -13866,7 +13866,7 @@ ZAPPY_COLLECTION = {
     2624852311: {
         'name': 'Zappy #1517',
         'unit_name': 'ZAPP1517',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiecql5arr45mhtjz35ujd7loy7tjlfpe7ttpsguy2xucpji7iafea',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624852311.jpg',
         'background': 'Yellow',
         'body': 'Hawaiian Shirt',
         'earring': 'Right Ring',
@@ -13879,7 +13879,7 @@ ZAPPY_COLLECTION = {
     2624852713: {
         'name': 'Zappy #1321',
         'unit_name': 'ZAPP1321',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibhr2elpafokuuz5oqwjdh72h4hqzqzhax7jmqimdkqtrydccgw3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624852713.jpg',
         'background': 'Yellow',
         'body': 'Oversize Sweater',
         'earring': 'Star',
@@ -13892,7 +13892,7 @@ ZAPPY_COLLECTION = {
     2624853281: {
         'name': 'Zappy #1723',
         'unit_name': 'ZAPP1723',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibmgnii2cdlluh6oonvxktbxj7pc7xahareqkbw7dqycoqpjacwn4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624853281.jpg',
         'background': 'Green',
         'body': 'Bowling Shirt',
         'earring': 'Party Popper',
@@ -13905,7 +13905,7 @@ ZAPPY_COLLECTION = {
     2624853377: {
         'name': 'Zappy #1355',
         'unit_name': 'ZAPP1355',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibnmjzhfelhlrkxj6yrhvfsgkdt3gqi63wr42eh3rdolsfg2pmj2a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624853377.jpg',
         'background': 'Yellow',
         'body': 'Funky Coat',
         'earring': 'Pepper',
@@ -13918,7 +13918,7 @@ ZAPPY_COLLECTION = {
     2624853728: {
         'name': 'Zappy #2028',
         'unit_name': 'ZAPP2028',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaglzor5zeffbevbs7obeajk2rzgkyc63wchszabgspfyan4oddxy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624853728.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Carton Cup',
@@ -13931,7 +13931,7 @@ ZAPPY_COLLECTION = {
     2624853879: {
         'name': 'Zappy #1880',
         'unit_name': 'ZAPP1880',
-        'image_url': 'https://ipfs.io/ipfs/bafybeib4xzwiwacvgcocv6winduhd7f4dfefk4t5pnzf7sathtkyqzir2i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624853879.jpg',
         'background': 'Chroma',
         'body': 'Bathrobe',
         'earring': 'Strawberry',
@@ -13944,7 +13944,7 @@ ZAPPY_COLLECTION = {
     2624854378: {
         'name': 'Zappy #1408',
         'unit_name': 'ZAPP1408',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiev3roak4ielaqjyjwt4izzyphledau2gazwdefbgnlqjsu4yggb4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624854378.jpg',
         'background': 'Blue',
         'body': 'Cat Suit',
         'earring': 'Pyramid',
@@ -13957,7 +13957,7 @@ ZAPPY_COLLECTION = {
     2624854710: {
         'name': 'Zappy #1802',
         'unit_name': 'ZAPP1802',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig5qkjbhzcxxodfp3ms6gsztlzb7s5slpkpoayn3kzvlvtsppz5r4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624854710.jpg',
         'background': 'Purple',
         'body': 'Puffer Coat',
         'earring': 'Happy',
@@ -13970,7 +13970,7 @@ ZAPPY_COLLECTION = {
     2624854840: {
         'name': 'Zappy #1616',
         'unit_name': 'ZAPP1616',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigisk3o3tbotsb4jfwhlqagv5q7pr72bfnn32jyjc237dgltyzt5y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624854840.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Bananas',
@@ -13983,7 +13983,7 @@ ZAPPY_COLLECTION = {
     2624855300: {
         'name': 'Zappy #1906',
         'unit_name': 'ZAPP1906',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiegae2e2n4k3e4d33xgqwx2lkmjajbibf3l5yj5orcelydazqpbea',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624855300.jpg',
         'background': 'Orange',
         'body': 'Choker',
         'earring': 'Carton Cup',
@@ -13996,7 +13996,7 @@ ZAPPY_COLLECTION = {
     2624855376: {
         'name': 'Zappy #1814',
         'unit_name': 'ZAPP1814',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidwrefgpyicxy2xolpcju62umwjv7buhqniyyslfpjf5tqofranpa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624855376.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Twin Rings',
@@ -14009,7 +14009,7 @@ ZAPPY_COLLECTION = {
     2624855729: {
         'name': 'Zappy #1704',
         'unit_name': 'ZAPP1704',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic5qsgzo26nby73agqyixacyr7migu4ifbcmn62rnmgaw77qoh6b4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624855729.jpg',
         'background': 'Orange',
         'body': 'Funky Coat',
         'earring': 'Pyramid',
@@ -14022,7 +14022,7 @@ ZAPPY_COLLECTION = {
     2624856105: {
         'name': 'Zappy #1391',
         'unit_name': 'ZAPP1391',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic2vcvkyg3yicbecbuf5qb6ufhwsvncgbf7s4zpb44uc3xvxlvjj4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624856105.jpg',
         'background': 'Purple',
         'body': 'School Outfit',
         'earring': 'Star',
@@ -14035,7 +14035,7 @@ ZAPPY_COLLECTION = {
     2624880626: {
         'name': 'Zappy #2064',
         'unit_name': 'ZAPP2064',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidj2oju4mzq3gseorlo2c456ptrazyr3j7y6kl5v4rz2pxvutuawa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624880626.jpg',
         'background': 'Red',
         'body': 'Warning Tape',
         'earring': 'Right Ring',
@@ -14048,7 +14048,7 @@ ZAPPY_COLLECTION = {
     2624880982: {
         'name': 'Zappy #2037',
         'unit_name': 'ZAPP2037',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib3yymvww2pj3al4zauk3n752ue26kkoqx7izta3he5eu6wbsjtvu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624880982.jpg',
         'background': 'Purple',
         'body': 'Fanny Pack',
         'earring': 'Hashtag',
@@ -14061,7 +14061,7 @@ ZAPPY_COLLECTION = {
     2624972941: {
         'name': 'Zappy #516',
         'unit_name': 'ZAPP0516',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibnpx7ty4mupzibtt3bdm4te7ebxsrrk45inljvj6eqvz2yexgswy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2624972941.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Number One',
@@ -14074,7 +14074,7 @@ ZAPPY_COLLECTION = {
     2625009606: {
         'name': 'Zappy #924',
         'unit_name': 'ZAPP0924',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid3zylheyybxmpxivqoscnybhklzkyegpb6g36khzesmwescclmqe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625009606.jpg',
         'background': 'Orange',
         'body': 'Muscle Suit',
         'earring': 'Twin Rings',
@@ -14087,7 +14087,7 @@ ZAPPY_COLLECTION = {
     2625009896: {
         'name': 'Zappy #929',
         'unit_name': 'ZAPP0929',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiarwbvn266va5ybvc4oxop6w3yf53upxiblsmb3qtcfwzk4brrx74',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625009896.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'Hashtag',
@@ -14100,7 +14100,7 @@ ZAPPY_COLLECTION = {
     2625010359: {
         'name': 'Zappy #1059',
         'unit_name': 'ZAPP1059',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicaot3snglbv37jdrvv6f5t3caj4aciqdxdtclfxaotemyxhvh7sy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625010359.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Carton Cup',
@@ -14113,7 +14113,7 @@ ZAPPY_COLLECTION = {
     2625010531: {
         'name': 'Zappy #1019',
         'unit_name': 'ZAPP1019',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieyu5pupgp5hjchvlfhefqirbbgzzee3j3z5qhrympgylzbuok4cq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625010531.jpg',
         'background': 'Red',
         'body': 'Muscle Suit',
         'earring': 'Pepper',
@@ -14126,7 +14126,7 @@ ZAPPY_COLLECTION = {
     2625010793: {
         'name': 'Zappy #1055',
         'unit_name': 'ZAPP1055',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicvlhnsisjswqou7gq6jf4xd3obpj33zpwitxq2mtexmvkc7st27y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625010793.jpg',
         'background': 'Chroma',
         'body': 'Sweater',
         'earring': 'Right Helix',
@@ -14139,7 +14139,7 @@ ZAPPY_COLLECTION = {
     2625010917: {
         'name': 'Zappy #1013',
         'unit_name': 'ZAPP1013',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiexvh3z65ag2xyorwbqihwzbzldwpbwqjzpqh3v7362etuwdzdkea',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625010917.jpg',
         'background': 'Orange',
         'body': 'Fanny Pack',
         'earring': 'Twin Rings',
@@ -14152,7 +14152,7 @@ ZAPPY_COLLECTION = {
     2625011053: {
         'name': 'Zappy #1042',
         'unit_name': 'ZAPP1042',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigfgt7eeugwpms4jkdjzxk7ezttbg3lr5dxx3fnqvnry67eyimtpq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625011053.jpg',
         'background': 'Orange',
         'body': 'Daisy Shirt',
         'earring': 'Strawberry',
@@ -14165,7 +14165,7 @@ ZAPPY_COLLECTION = {
     2625011165: {
         'name': 'Zappy #1008',
         'unit_name': 'ZAPP1008',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifayotnmmpnhmfbnvgmasgqbosqayi7uxp6n57qzm2p45326sdzjm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625011165.jpg',
         'background': 'Orange',
         'body': 'Overalls',
         'earring': 'Knife',
@@ -14178,7 +14178,7 @@ ZAPPY_COLLECTION = {
     2625011296: {
         'name': 'Zappy #1070',
         'unit_name': 'ZAPP1070',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigmyt7h4edrfj5nekg7r66ihx3yauloivyp4gn4fujrrtpm7qugmi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625011296.jpg',
         'background': 'Blue',
         'body': 'Tracksuit Top',
         'earring': 'Skull',
@@ -14191,7 +14191,7 @@ ZAPPY_COLLECTION = {
     2625011465: {
         'name': 'Zappy #964',
         'unit_name': 'ZAPP0964',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigxxggtc6hiijerpndcqszfpd46de6aruh6avhifdcrj2qy2iulyi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625011465.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Right Ring',
@@ -14204,7 +14204,7 @@ ZAPPY_COLLECTION = {
     2625011768: {
         'name': 'Zappy #939',
         'unit_name': 'ZAPP0939',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigrxzkjw6qcymwv2ecwocqhvvbscy32bw2vcs5oh2ppbx24pvzata',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625011768.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Party Popper',
@@ -14217,7 +14217,7 @@ ZAPPY_COLLECTION = {
     2625011915: {
         'name': 'Zappy #999',
         'unit_name': 'ZAPP0999',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid57wlvpumvu52xrh6v6cgsfmz7swdtnxir4gkcbxz6tvzteli4fq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625011915.jpg',
         'background': 'Green',
         'body': 'Dino Suit',
         'earring': 'Twin Rings',
@@ -14230,7 +14230,7 @@ ZAPPY_COLLECTION = {
     2625012033: {
         'name': 'Zappy #897',
         'unit_name': 'ZAPP0897',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiheu7c5q7qnoa4orzqy6c5akgjboiu6g4rkemnukvztj6njcmp63q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625012033.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Diamond',
@@ -14243,7 +14243,7 @@ ZAPPY_COLLECTION = {
     2625012360: {
         'name': 'Zappy #954',
         'unit_name': 'ZAPP0954',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih3ya5hvdimn5ihxqempgyzpmq34lylzdyarqdfvzsz3wn4beman4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625012360.jpg',
         'background': 'Green',
         'body': 'Turtleneck Sweater',
         'earring': 'Skull',
@@ -14256,7 +14256,7 @@ ZAPPY_COLLECTION = {
     2625012503: {
         'name': 'Zappy #1014',
         'unit_name': 'ZAPP1014',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihygzghbfrfnmw2l6ix2hqyvvstowr6oj6o2nlsacsdxbvt7yicm4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625012503.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Sunrise',
@@ -14269,7 +14269,7 @@ ZAPPY_COLLECTION = {
     2625012673: {
         'name': 'Zappy #1058',
         'unit_name': 'ZAPP1058',
-        'image_url': 'https://ipfs.io/ipfs/bafkreienxvmhv6zftstxv47fu7ak7grroohmlg7hnntuhcxunwk33dueke',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625012673.jpg',
         'background': 'Yellow',
         'body': 'Hooded Jacket',
         'earring': 'Carton Cup',
@@ -14282,7 +14282,7 @@ ZAPPY_COLLECTION = {
     2625012719: {
         'name': 'Zappy #921',
         'unit_name': 'ZAPP0921',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7uatze3icudfvv2uk4exptilvq4z7k3coqj3l6unuu2jtwnzray',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625012719.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Skull',
@@ -14295,7 +14295,7 @@ ZAPPY_COLLECTION = {
     2625012900: {
         'name': 'Zappy #971',
         'unit_name': 'ZAPP0971',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigpzbax373upi3zaw7jwhszrzx5lfxfi6e3vazcxprzna6zbnwuvu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625012900.jpg',
         'background': 'Green',
         'body': 'Bear Suit',
         'earring': 'Hashtag',
@@ -14308,7 +14308,7 @@ ZAPPY_COLLECTION = {
     2625013019: {
         'name': 'Zappy #1026',
         'unit_name': 'ZAPP1026',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidj4zfhmzzx3q6nnldfowobbwj2fttwrfbjc47avbb4selka6f6fi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625013019.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Sunrise',
@@ -14321,7 +14321,7 @@ ZAPPY_COLLECTION = {
     2625013411: {
         'name': 'Zappy #962',
         'unit_name': 'ZAPP0962',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidwdedm4owmkdgd7n6cezjjfrusyn2b3arpdlryq6stc2t5sit7gq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625013411.jpg',
         'background': 'Purple',
         'body': 'Space Suit',
         'earring': 'Carton Cup',
@@ -14334,7 +14334,7 @@ ZAPPY_COLLECTION = {
     2625019815: {
         'name': 'Zappy #1221',
         'unit_name': 'ZAPP1221',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiflc35dxhvcqjbxejleoygj44ql4rbhy2foznvjgjapfbbugas4sy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625019815.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Left Ring',
@@ -14347,7 +14347,7 @@ ZAPPY_COLLECTION = {
     2625020077: {
         'name': 'Zappy #1138',
         'unit_name': 'ZAPP1138',
-        'image_url': 'https://ipfs.io/ipfs/bafkreift4k2iytdawprzbyw5daib4kbjoq3tsqy6gixpkae4qw2s77j6t4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625020077.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Party Popper',
@@ -14360,7 +14360,7 @@ ZAPPY_COLLECTION = {
     2625020315: {
         'name': 'Zappy #1267',
         'unit_name': 'ZAPP1267',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig4dcdomkycb6v6yw3sh5sinakcam7jpnskzu7trdlkthux3apyvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625020315.jpg',
         'background': 'Green',
         'body': 'Tracksuit Top',
         'earring': 'Pepper',
@@ -14373,7 +14373,7 @@ ZAPPY_COLLECTION = {
     2625022169: {
         'name': 'Zappy #1100',
         'unit_name': 'ZAPP1100',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaftevg5tovy6bdhm6byq3d3tzrm6fabeoknqeewej7l6bv46dpxm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625022169.jpg',
         'background': 'Purple',
         'body': 'Suit',
         'earring': 'None',
@@ -14386,7 +14386,7 @@ ZAPPY_COLLECTION = {
     2625022788: {
         'name': 'Zappy #1108',
         'unit_name': 'ZAPP1108',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig3lfln6kiwjdpu4643oi6zjy2kqdx3ybtowujd6xnh66zoruhk4q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625022788.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Sunrise',
@@ -14399,7 +14399,7 @@ ZAPPY_COLLECTION = {
     2625023154: {
         'name': 'Zappy #1080',
         'unit_name': 'ZAPP1080',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigd7wcq4vs4ccgbcoarexshrre7oh6d23xa3jxwxs74bk3n2s6bfi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625023154.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'None',
@@ -14412,7 +14412,7 @@ ZAPPY_COLLECTION = {
     2625023385: {
         'name': 'Zappy #1120',
         'unit_name': 'ZAPP1120',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigtifvi34xtw5sah25i5xry3gg2j3oa6ymfmestbde3jqkoakmv7q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625023385.jpg',
         'background': 'Purple',
         'body': 'Naked',
         'earring': 'Knife',
@@ -14425,7 +14425,7 @@ ZAPPY_COLLECTION = {
     2625023566: {
         'name': 'Zappy #1224',
         'unit_name': 'ZAPP1224',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaxr2wslr4boa7s3ozkww4y3xzjg3xh4twwrl52nftuya5t6mpyjm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625023566.jpg',
         'background': 'Purple',
         'body': 'Colorful Jacket',
         'earring': 'Sad',
@@ -14438,7 +14438,7 @@ ZAPPY_COLLECTION = {
     2625023770: {
         'name': 'Zappy #1220',
         'unit_name': 'ZAPP1220',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiaioahcnjyvay3fuihid3pri7cuubpv4zmuulhjke5nymxi25v6dq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625023770.jpg',
         'background': 'Chroma',
         'body': 'Fanny Pack',
         'earring': 'Star',
@@ -14451,7 +14451,7 @@ ZAPPY_COLLECTION = {
     2625024048: {
         'name': 'Zappy #1084',
         'unit_name': 'ZAPP1084',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibcf6ywdc3t6zzvpphg2twj3tdgfrn2ftoj3r2az7osb6zxj4nvum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625024048.jpg',
         'background': 'Blue',
         'body': 'Armband',
         'earring': 'Bananas',
@@ -14464,7 +14464,7 @@ ZAPPY_COLLECTION = {
     2625024240: {
         'name': 'Zappy #1218',
         'unit_name': 'ZAPP1218',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidj24sin3by6ub5i7u3luz5si7yddc5dbrky7da75cbirpe6r4tdq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625024240.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Zappies',
@@ -14477,7 +14477,7 @@ ZAPPY_COLLECTION = {
     2625024807: {
         'name': 'Zappy #1114',
         'unit_name': 'ZAPP1114',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia222mzqnjd7cmkmn3xcdxlq7cepkoldg3mvxppaxv37jua7euuaa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625024807.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'Pepper',
@@ -14490,7 +14490,7 @@ ZAPPY_COLLECTION = {
     2625025097: {
         'name': 'Zappy #1209',
         'unit_name': 'ZAPP1209',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibnafx4atocbcqg4bcvj7ev2cktt5uz7oeln2ylwifb37ghak56uu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625025097.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'Happy',
@@ -14503,7 +14503,7 @@ ZAPPY_COLLECTION = {
     2625025394: {
         'name': 'Zappy #1208',
         'unit_name': 'ZAPP1208',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicjuzsymjupfaa2kjhsxjesdpqftxy2kanjamqw7cft7744uddxpe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625025394.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Diamond',
@@ -14516,7 +14516,7 @@ ZAPPY_COLLECTION = {
     2625025772: {
         'name': 'Zappy #1230',
         'unit_name': 'ZAPP1230',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidloiingm4ndqitixhivhlwtti63xtczsggvmtb6waonowlm6wr6u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625025772.jpg',
         'background': 'Red',
         'body': 'Toga',
         'earring': 'Serious',
@@ -14529,7 +14529,7 @@ ZAPPY_COLLECTION = {
     2625026482: {
         'name': 'Zappy #1213',
         'unit_name': 'ZAPP1213',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiazypsn57gc4fkxhen6y4vgypq43aftfavcboihv3zcuji624be6e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625026482.jpg',
         'background': 'Yellow',
         'body': 'Clouds',
         'earring': 'Party Popper',
@@ -14542,7 +14542,7 @@ ZAPPY_COLLECTION = {
     2625026685: {
         'name': 'Zappy #1134',
         'unit_name': 'ZAPP1134',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidxaky7dchfmtr4vbsgheexysxmoi3btr5sf7q7zdolyhv535ruca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625026685.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'Diamond',
@@ -14555,7 +14555,7 @@ ZAPPY_COLLECTION = {
     2625027401: {
         'name': 'Zappy #1276',
         'unit_name': 'ZAPP1276',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig6on2zaytwoyqi5bab6oh6iehtoc2o3ltksq4bx2g7qsoxudhe34',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625027401.jpg',
         'background': 'Yellow',
         'body': 'Sleeveless Shirt',
         'earring': 'Happy',
@@ -14568,7 +14568,7 @@ ZAPPY_COLLECTION = {
     2625027639: {
         'name': 'Zappy #1210',
         'unit_name': 'ZAPP1210',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieari2hiuxced75murfsgt2t3bziw5sbil7hhv3ppfqrlezmmgjxa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625027639.jpg',
         'background': 'Purple',
         'body': 'Warning Tape',
         'earring': 'Bananas',
@@ -14581,7 +14581,7 @@ ZAPPY_COLLECTION = {
     2625027742: {
         'name': 'Zappy #1111',
         'unit_name': 'ZAPP1111',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidgzn5sd7wymijspo32ycsi5iymsd6fzsefepflu3k4oepvf3ixoi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625027742.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Right Ring',
@@ -14594,7 +14594,7 @@ ZAPPY_COLLECTION = {
     2625035156: {
         'name': 'Zappy #1339',
         'unit_name': 'ZAPP1339',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiacedfhjzhztw62bi5jhwf7yudrofv3zq6z34opdies47pke7i5ru',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625035156.jpg',
         'background': 'Purple',
         'body': 'Funky Coat',
         'earring': 'Daisy',
@@ -14607,7 +14607,7 @@ ZAPPY_COLLECTION = {
     2625035626: {
         'name': 'Zappy #1282',
         'unit_name': 'ZAPP1282',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia3tpoas4sqzdppdyowdypsytyeun3l5lr7fa4g3ars5c4y5u7rl4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625035626.jpg',
         'background': 'Blue',
         'body': 'Funky Coat',
         'earring': 'Sunrise',
@@ -14620,7 +14620,7 @@ ZAPPY_COLLECTION = {
     2625035853: {
         'name': 'Zappy #1366',
         'unit_name': 'ZAPP1366',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgty7lplmkjglosfthrx5gy5isuw7hr5u3ohq2ft5kag7u7znypy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625035853.jpg',
         'background': 'Yellow',
         'body': 'Hawaiian Shirt',
         'earring': 'Carton Cup',
@@ -14633,7 +14633,7 @@ ZAPPY_COLLECTION = {
     2625035942: {
         'name': 'Zappy #1300',
         'unit_name': 'ZAPP1300',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib76nojfq663op4e63fg3brhaatgzzmpcnvxdrpfeofhvlx66oxvy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625035942.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Happy',
@@ -14646,7 +14646,7 @@ ZAPPY_COLLECTION = {
     2625036165: {
         'name': 'Zappy #1412',
         'unit_name': 'ZAPP1412',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibkk6ojp6qazndwgyzwnhnw6fmtob2lqek7ejqxs7ofup6amunrci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625036165.jpg',
         'background': 'Red',
         'body': 'Armor',
         'earring': 'Carton Cup',
@@ -14659,7 +14659,7 @@ ZAPPY_COLLECTION = {
     2625036347: {
         'name': 'Zappy #1336',
         'unit_name': 'ZAPP1336',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifgyhrk3yvwns3fn7frg62s3phy35gm3zquuli7rxiarh27pvivua',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625036347.jpg',
         'background': 'Orange',
         'body': 'Polo Shirt',
         'earring': 'None',
@@ -14672,7 +14672,7 @@ ZAPPY_COLLECTION = {
     2625036579: {
         'name': 'Zappy #1333',
         'unit_name': 'ZAPP1333',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiebtumrvi3taov65bihzonbcmsjnvd3jzcajro752kugkpaoxpfku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625036579.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'Left Ring',
@@ -14685,7 +14685,7 @@ ZAPPY_COLLECTION = {
     2625036738: {
         'name': 'Zappy #1440',
         'unit_name': 'ZAPP1440',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiepwr6k37gqo77p3sik3djvwdrjhaugzz2pfj7exixyacbhnkjqkq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625036738.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'None',
@@ -14698,7 +14698,7 @@ ZAPPY_COLLECTION = {
     2625036919: {
         'name': 'Zappy #1420',
         'unit_name': 'ZAPP1420',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidee22b6p6ccqb7757elycgyce5k6g5ttam4iv4caols7e73iv5wa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625036919.jpg',
         'background': 'Blue',
         'body': 'Turtleneck Sweater',
         'earring': 'Skull',
@@ -14711,7 +14711,7 @@ ZAPPY_COLLECTION = {
     2625037609: {
         'name': 'Zappy #1349',
         'unit_name': 'ZAPP1349',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifhhoqz4gialagcfazlgyfcmhbhipov564srk2xjonlbuzksxjyey',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625037609.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Pyramid',
@@ -14724,7 +14724,7 @@ ZAPPY_COLLECTION = {
     2625037999: {
         'name': 'Zappy #1299',
         'unit_name': 'ZAPP1299',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiboxstscxionxzbrhfzcohdxstiepm33nynu5b5bh5tz4ncqyx7kq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625037999.jpg',
         'background': 'Purple',
         'body': 'Kimono',
         'earring': 'Strawberry',
@@ -14737,7 +14737,7 @@ ZAPPY_COLLECTION = {
     2625038605: {
         'name': 'Zappy #1406',
         'unit_name': 'ZAPP1406',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidymeoo4i7qfn4ywjw6g3e4fs36mma4o2tbts7hlwass5mu75rusa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625038605.jpg',
         'background': 'Yellow',
         'body': 'Kimono',
         'earring': 'Number One',
@@ -14750,7 +14750,7 @@ ZAPPY_COLLECTION = {
     2625039009: {
         'name': 'Zappy #1425',
         'unit_name': 'ZAPP1425',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieo4yxdijnrhg2aoay435w2hxhzocwqnuwgqzff7yzt4tbprcykhy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625039009.jpg',
         'background': 'Red',
         'body': 'Colorful Jacket',
         'earring': 'None',
@@ -14763,7 +14763,7 @@ ZAPPY_COLLECTION = {
     2625039370: {
         'name': 'Zappy #1345',
         'unit_name': 'ZAPP1345',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia4g5a6rs6y7sieghfqgrksjgneozwscyokaijmbz65siyrzluqqi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625039370.jpg',
         'background': 'Blue',
         'body': 'Ribbon Tie',
         'earring': 'Party Popper',
@@ -14776,7 +14776,7 @@ ZAPPY_COLLECTION = {
     2625039601: {
         'name': 'Zappy #1298',
         'unit_name': 'ZAPP1298',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihk3aen3br3ebhz42shbxwbqw2lx4jczqib4xqeqc3bogcb3iib7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625039601.jpg',
         'background': 'Orange',
         'body': 'Royal Robe',
         'earring': 'Party Popper',
@@ -14789,7 +14789,7 @@ ZAPPY_COLLECTION = {
     2625039854: {
         'name': 'Zappy #1419',
         'unit_name': 'ZAPP1419',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicyn25rkxpryuxgmtsnrcnteebrjhhfcmerd5c3dprmt3trwgbfdu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625039854.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Carton Cup',
@@ -14802,7 +14802,7 @@ ZAPPY_COLLECTION = {
     2625040107: {
         'name': 'Zappy #1287',
         'unit_name': 'ZAPP1287',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2kqjlgarqoasjjidw635nijirrrblune6zhpe26uhwlj46sotum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625040107.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Hashtag',
@@ -14815,7 +14815,7 @@ ZAPPY_COLLECTION = {
     2625040502: {
         'name': 'Zappy #1364',
         'unit_name': 'ZAPP1364',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidvzxcvyvsf6fs4gxv3gsy5gdqf2tytsn6m62wvnwxwg7lbnpedfi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625040502.jpg',
         'background': 'Red',
         'body': 'Crocodile Suit',
         'earring': 'Pyramid',
@@ -14828,7 +14828,7 @@ ZAPPY_COLLECTION = {
     2625040749: {
         'name': 'Zappy #1310',
         'unit_name': 'ZAPP1310',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiekwiypqrtvwtkotkjpk4fmerxg4g7klfjmhmpwfbp33pxmoq4kum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625040749.jpg',
         'background': 'Red',
         'body': 'Suit',
         'earring': 'Hashtag',
@@ -14841,7 +14841,7 @@ ZAPPY_COLLECTION = {
     2625040871: {
         'name': 'Zappy #1284',
         'unit_name': 'ZAPP1284',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiehpujrctzhoxzvrpcyxam4ykk25zazbllaofhryc5gl7fykovzt4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625040871.jpg',
         'background': 'Yellow',
         'body': 'Suit',
         'earring': 'Happy',
@@ -14854,7 +14854,7 @@ ZAPPY_COLLECTION = {
     2625059946: {
         'name': 'Zappy #1540',
         'unit_name': 'ZAPP1540',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifbqvxqqd55hxtn7th7rxil37wpblpgu4nezlr3ev5zcawpvrhhfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625059946.jpg',
         'background': 'Green',
         'body': 'Clouds',
         'earring': 'Star',
@@ -14867,7 +14867,7 @@ ZAPPY_COLLECTION = {
     2625060097: {
         'name': 'Zappy #1511',
         'unit_name': 'ZAPP1511',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigjebuuc7gtjct2lyenk2cgifnpswdkghrk3ssamy63fw2fv4ijgi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625060097.jpg',
         'background': 'Green',
         'body': 'Trash Can',
         'earring': 'Carton Cup',
@@ -14880,7 +14880,7 @@ ZAPPY_COLLECTION = {
     2625060167: {
         'name': 'Zappy #1591',
         'unit_name': 'ZAPP1591',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiamllv2k545dxmlvhb2mwcbksubsds7jlyskvowvsj34jpvhj3i6m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625060167.jpg',
         'background': 'Chroma',
         'body': 'Scarf',
         'earring': 'Carton Cup',
@@ -14893,7 +14893,7 @@ ZAPPY_COLLECTION = {
     2625060262: {
         'name': 'Zappy #1552',
         'unit_name': 'ZAPP1552',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidt7trw2qt6zfkj5gyb4pomyy3m3m37ejzcuhyhemcy46dxxt5sd4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625060262.jpg',
         'background': 'Orange',
         'body': 'Polo Overalls',
         'earring': 'Twin Rings',
@@ -14906,7 +14906,7 @@ ZAPPY_COLLECTION = {
     2625060553: {
         'name': 'Zappy #1471',
         'unit_name': 'ZAPP1471',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiblpof4mx2ketcxhleyr2vvkkrl3lepq7fawzxq3n5uw7e7by722y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625060553.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Number One',
@@ -14919,7 +14919,7 @@ ZAPPY_COLLECTION = {
     2625060719: {
         'name': 'Zappy #1604',
         'unit_name': 'ZAPP1604',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicb2tehlione4rhc6hrnp5xim5smczz5vl5n6a63ugorsblugrko4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625060719.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Diamond',
@@ -14932,7 +14932,7 @@ ZAPPY_COLLECTION = {
     2625060935: {
         'name': 'Zappy #1570',
         'unit_name': 'ZAPP1570',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihksb5kbtuuijzwljwiy543e7mn2wv2t5olcmwppob2j3ez4lssli',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625060935.jpg',
         'background': 'Blue',
         'body': 'Sleeveless Shirt',
         'earring': 'Sad',
@@ -14945,7 +14945,7 @@ ZAPPY_COLLECTION = {
     2625061153: {
         'name': 'Zappy #1676',
         'unit_name': 'ZAPP1676',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihiyczzdsow2zt6xlyy7qbtyurynjm7mi56gfx22fde5cezl3kgdi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625061153.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'None',
@@ -14958,7 +14958,7 @@ ZAPPY_COLLECTION = {
     2625061279: {
         'name': 'Zappy #1610',
         'unit_name': 'ZAPP1610',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiew3pjifjxy2s344nso27fzrf7njjfvltxlpt5vucpdwqqophtbv4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625061279.jpg',
         'background': 'Yellow',
         'body': 'Fur Coat',
         'earring': 'Sunrise',
@@ -14971,7 +14971,7 @@ ZAPPY_COLLECTION = {
     2625061414: {
         'name': 'Zappy #1491',
         'unit_name': 'ZAPP1491',
-        'image_url': 'https://ipfs.io/ipfs/bafkreielzzqjnhf44d3wxeazupb7f3mwiz5xjgiabqh4uujypy22pkphhm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625061414.jpg',
         'background': 'Green',
         'body': 'Fanny Pack',
         'earring': 'Pyramid',
@@ -14984,7 +14984,7 @@ ZAPPY_COLLECTION = {
     2625061520: {
         'name': 'Zappy #1634',
         'unit_name': 'ZAPP1634',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiflnp7xyb7zp5ifbwulsjanxdhsilqvvf3k6jgcejcm64o7dvijti',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625061520.jpg',
         'background': 'Yellow',
         'body': 'Overalls',
         'earring': 'Bananas',
@@ -14997,7 +14997,7 @@ ZAPPY_COLLECTION = {
     2625061723: {
         'name': 'Zappy #1571',
         'unit_name': 'ZAPP1571',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieywwljwvkjrgvg3y32u6qn2capsm6rjebewezhfe56v5tqvryeuu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625061723.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Happy',
@@ -15010,7 +15010,7 @@ ZAPPY_COLLECTION = {
     2625061887: {
         'name': 'Zappy #1534',
         'unit_name': 'ZAPP1534',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigimyeh5rpvz7pi3edoqsqtxw4wt5pritjdftw2xojz3bftuicyxa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625061887.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Carton Cup',
@@ -15023,7 +15023,7 @@ ZAPPY_COLLECTION = {
     2625062029: {
         'name': 'Zappy #1547',
         'unit_name': 'ZAPP1547',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiglzeuz4rqqqbfj5fglmmbnlewue7frzj5aix53qd7y642qcdeuim',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625062029.jpg',
         'background': 'Blue',
         'body': 'Leather Vest',
         'earring': 'Pyramid',
@@ -15036,7 +15036,7 @@ ZAPPY_COLLECTION = {
     2625062240: {
         'name': 'Zappy #1656',
         'unit_name': 'ZAPP1656',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidfwlolkwokefnqecrotdaonhhlpsnmpz6d3wo3jowcqqnhw26riy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625062240.jpg',
         'background': 'Yellow',
         'body': 'Tracksuit Top',
         'earring': 'Strawberry',
@@ -15049,7 +15049,7 @@ ZAPPY_COLLECTION = {
     2625062322: {
         'name': 'Zappy #1600',
         'unit_name': 'ZAPP1600',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihxnj4ofkye3vegpvie46m5vtvtikkn2fzm37org4hpconzpfewdm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625062322.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'Bananas',
@@ -15062,7 +15062,7 @@ ZAPPY_COLLECTION = {
     2625062402: {
         'name': 'Zappy #1660',
         'unit_name': 'ZAPP1660',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifrx6ajtzt2x47zll5agtrtayq43aynrujawhwustyzxxwufy22fq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625062402.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Diamond',
@@ -15075,7 +15075,7 @@ ZAPPY_COLLECTION = {
     2625062494: {
         'name': 'Zappy #1589',
         'unit_name': 'ZAPP1589',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiab3hl773mv5kxnpcngrjrnfxxcdzscvecdlofmdet62l7q7osrs4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625062494.jpg',
         'background': 'Blue',
         'body': 'Lifesaver',
         'earring': 'Number One',
@@ -15088,7 +15088,7 @@ ZAPPY_COLLECTION = {
     2625062606: {
         'name': 'Zappy #1565',
         'unit_name': 'ZAPP1565',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih6pfa4abrbfb5a6z6ps4u3on7b5es5kch3orkda3avsq3wbdgxhy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625062606.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Zappies',
@@ -15101,7 +15101,7 @@ ZAPPY_COLLECTION = {
     2625062785: {
         'name': 'Zappy #1546',
         'unit_name': 'ZAPP1546',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihlo43vv5e6nnzp3b4jsjxh5ymdzbunahxaee7eg5vo5jwhbf5eai',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625062785.jpg',
         'background': 'Green',
         'body': 'Clouds',
         'earring': 'Strawberry',
@@ -15114,7 +15114,7 @@ ZAPPY_COLLECTION = {
     2625103711: {
         'name': 'Zappy #1734',
         'unit_name': 'ZAPP1734',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidjynrgs4sdq55esbkrdaltywmlsaog3xqiccvsp56ax4m54g3wo4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625103711.jpg',
         'background': 'Blue',
         'body': 'Naked',
         'earring': 'Skull',
@@ -15127,7 +15127,7 @@ ZAPPY_COLLECTION = {
     2625103894: {
         'name': 'Zappy #1787',
         'unit_name': 'ZAPP1787',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid5whtp2u2v5qlumo55bexi4mgnxw7wbjoqdeetr4wmqo2sbucmhe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625103894.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Sunrise',
@@ -15140,7 +15140,7 @@ ZAPPY_COLLECTION = {
     2625103950: {
         'name': 'Zappy #1736',
         'unit_name': 'ZAPP1736',
-        'image_url': 'https://ipfs.io/ipfs/bafybeigarmvg22ze2rhi6tlcudyeroejxtvgchdyzbddjfpl3xtobh3gci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625103950.jpg',
         'background': 'Chroma',
         'body': 'Daisy Shirt',
         'earring': 'Skull',
@@ -15153,7 +15153,7 @@ ZAPPY_COLLECTION = {
     2625104033: {
         'name': 'Zappy #1832',
         'unit_name': 'ZAPP1832',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiesmsd56gzfyvkalb2gnw42ct6xzjlupoegkgcaeud5qiw6xf3tsu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625104033.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Twin Rings',
@@ -15166,7 +15166,7 @@ ZAPPY_COLLECTION = {
     2625104128: {
         'name': 'Zappy #1779',
         'unit_name': 'ZAPP1779',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihuwu6kleaq5tynycifgm6pqfyfgqhvyxq2xsbehh6gtxsslbkzyu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625104128.jpg',
         'background': 'Blue',
         'body': 'Bear Suit',
         'earring': 'Star',
@@ -15179,7 +15179,7 @@ ZAPPY_COLLECTION = {
     2625104320: {
         'name': 'Zappy #1738',
         'unit_name': 'ZAPP1738',
-        'image_url': 'https://ipfs.io/ipfs/bafkreied77dw5kxmbcnezlb2r5vnobjrd3wpppbs6bnrgl4cf665ady4qy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625104320.jpg',
         'background': 'Purple',
         'body': 'Striped Sweater',
         'earring': 'Sad',
@@ -15192,7 +15192,7 @@ ZAPPY_COLLECTION = {
     2625104444: {
         'name': 'Zappy #1769',
         'unit_name': 'ZAPP1769',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicfxjhuvp6cx2zbmpocbrubo5jzdfpkiopbkz4hvirrsc266shvma',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625104444.jpg',
         'background': 'Yellow',
         'body': 'Daisy Shirt',
         'earring': 'Ghost',
@@ -15205,7 +15205,7 @@ ZAPPY_COLLECTION = {
     2625104690: {
         'name': 'Zappy #1781',
         'unit_name': 'ZAPP1781',
-        'image_url': 'https://ipfs.io/ipfs/bafkreian4i7fxf3ayxljbywwgpnybtmw7vxtp6ilvmy4swrhieb7tfdts4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625104690.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Ghost',
@@ -15218,7 +15218,7 @@ ZAPPY_COLLECTION = {
     2625104821: {
         'name': 'Zappy #1697',
         'unit_name': 'ZAPP1697',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiglwfw7at7zzi6ouzpiicbqhz6rgugqypkjx33asxueukkrgvtzju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625104821.jpg',
         'background': 'Blue',
         'body': 'Suit',
         'earring': 'Number One',
@@ -15231,7 +15231,7 @@ ZAPPY_COLLECTION = {
     2625104921: {
         'name': 'Zappy #1721',
         'unit_name': 'ZAPP1721',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieeu6hw7mzaxul7zhamajyvsxkzladv3s5w77qgs7anpcrpovmbay',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625104921.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Twin Rings',
@@ -15244,7 +15244,7 @@ ZAPPY_COLLECTION = {
     2625105271: {
         'name': 'Zappy #1784',
         'unit_name': 'ZAPP1784',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiddffhcrptd65shnlxy6vwqsxww2g7uzvynqz4wvo7ps7vjp6iisy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625105271.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Strawberry',
@@ -15257,7 +15257,7 @@ ZAPPY_COLLECTION = {
     2625105504: {
         'name': 'Zappy #1747',
         'unit_name': 'ZAPP1747',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib3koxubhouxc7iz7gygfwvpmep4rnfisqros2blaj5oaqbftfclu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625105504.jpg',
         'background': 'Orange',
         'body': 'Bowling Shirt',
         'earring': 'Sunrise',
@@ -15270,7 +15270,7 @@ ZAPPY_COLLECTION = {
     2625105602: {
         'name': 'Zappy #1844',
         'unit_name': 'ZAPP1844',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiairvaeiyk6dym42lxlvasii62hiyoaiuuunodp575msg5kirp7x4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625105602.jpg',
         'background': 'Chroma',
         'body': 'Striped Sweater',
         'earring': 'Knife',
@@ -15283,7 +15283,7 @@ ZAPPY_COLLECTION = {
     2625105705: {
         'name': 'Zappy #1785',
         'unit_name': 'ZAPP1785',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibgm4joheb4lyl2cnsbki3aomjzfdqnkfe7rpjd7gkfebmnjka2b4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625105705.jpg',
         'background': 'Green',
         'body': 'Ribbon Tie',
         'earring': 'Right Helix',
@@ -15296,7 +15296,7 @@ ZAPPY_COLLECTION = {
     2625105793: {
         'name': 'Zappy #1687',
         'unit_name': 'ZAPP1687',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicfv7nx4cqbox4i2p5ijx6dgdou6uz4acftstpkxg7x5pqdlc7zeq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625105793.jpg',
         'background': 'Orange',
         'body': 'Polo Overalls',
         'earring': 'Happy',
@@ -15309,7 +15309,7 @@ ZAPPY_COLLECTION = {
     2625105989: {
         'name': 'Zappy #1705',
         'unit_name': 'ZAPP1705',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7tahjdaeavc3o5bxrvdvh23g4qjbznmon42flogydbgqptuds44',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625105989.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'Strawberry',
@@ -15322,7 +15322,7 @@ ZAPPY_COLLECTION = {
     2625106272: {
         'name': 'Zappy #1815',
         'unit_name': 'ZAPP1815',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiey7xkkafdug5fmluqlhfactdnmdfidtskhcmkia5houqxivsjg4y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625106272.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Hashtag',
@@ -15335,7 +15335,7 @@ ZAPPY_COLLECTION = {
     2625106391: {
         'name': 'Zappy #1722',
         'unit_name': 'ZAPP1722',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicx277ru5vkcc7x2sh4m7s4s5vhzacn2emvfaxzwheereqbqrhdui',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625106391.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Zappies',
@@ -15348,7 +15348,7 @@ ZAPPY_COLLECTION = {
     2625106454: {
         'name': 'Zappy #1805',
         'unit_name': 'ZAPP1805',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihuee3dmyo36t4y3as7lrntrbaswcx25xdhlz5a47z6dbvmangdym',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625106454.jpg',
         'background': 'Yellow',
         'body': 'Clouds',
         'earring': 'Carton Cup',
@@ -15361,7 +15361,7 @@ ZAPPY_COLLECTION = {
     2625106583: {
         'name': 'Zappy #1808',
         'unit_name': 'ZAPP1808',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidin2y2jvs7c6s2pqknofz3c75diynxtns7u2je3lmahwthzrrb5y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625106583.jpg',
         'background': 'Yellow',
         'body': 'Turtleneck Sweater',
         'earring': 'Party Popper',
@@ -15374,7 +15374,7 @@ ZAPPY_COLLECTION = {
     2625112915: {
         'name': 'Zappy #1956',
         'unit_name': 'ZAPP1956',
-        'image_url': 'https://ipfs.io/ipfs/bafkreici7pvmoke4kpurbl5tepfvubx5cx5o5tg2qwzogcmxutmboqlpnu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625112915.jpg',
         'background': 'Orange',
         'body': 'Choker',
         'earring': 'Twin Rings',
@@ -15387,7 +15387,7 @@ ZAPPY_COLLECTION = {
     2625113081: {
         'name': 'Zappy #1926',
         'unit_name': 'ZAPP1926',
-        'image_url': 'https://ipfs.io/ipfs/bafkreich4o3ykuf6ohulrn5z6ebzfdizxewvnkpcimljrbabcgbbzvmi2i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625113081.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Happy',
@@ -15400,7 +15400,7 @@ ZAPPY_COLLECTION = {
     2625113260: {
         'name': 'Zappy #1858',
         'unit_name': 'ZAPP1858',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidac7fdbqahegjxs67z22jamk6igorzutx4kqv5pw7fy6xpndqy2y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625113260.jpg',
         'background': 'Purple',
         'body': 'Turtleneck Sweater',
         'earring': 'Bananas',
@@ -15413,7 +15413,7 @@ ZAPPY_COLLECTION = {
     2625113676: {
         'name': 'Zappy #1980',
         'unit_name': 'ZAPP1980',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigr2wphr7dg5mt4rms33vokl6okxauprvhrnvmi333lv6g5rpqore',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625113676.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Star',
@@ -15426,7 +15426,7 @@ ZAPPY_COLLECTION = {
     2625113774: {
         'name': 'Zappy #1879',
         'unit_name': 'ZAPP1879',
-        'image_url': 'https://ipfs.io/ipfs/bafybeibqxygejzvulekddu3i3su7xbcm5fyskkedj6sjdtxc6fxbtuq7oy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625113774.jpg',
         'background': 'Chroma',
         'body': 'Suit',
         'earring': 'Star',
@@ -15439,7 +15439,7 @@ ZAPPY_COLLECTION = {
     2625113889: {
         'name': 'Zappy #1884',
         'unit_name': 'ZAPP1884',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkgefhxsyb2n52veala7exrp55gjnleg2ejgva42uiik5plupf2i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625113889.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Zappies',
@@ -15452,7 +15452,7 @@ ZAPPY_COLLECTION = {
     2625114020: {
         'name': 'Zappy #1908',
         'unit_name': 'ZAPP1908',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibgfimi5ieiwadzjit7pljolyz6jmjfkcl3cgnbj325j3kn6wivz4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625114020.jpg',
         'background': 'Red',
         'body': 'Muscle Suit',
         'earring': 'Right Helix',
@@ -15465,7 +15465,7 @@ ZAPPY_COLLECTION = {
     2625114295: {
         'name': 'Zappy #1910',
         'unit_name': 'ZAPP1910',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiccl6c6rvt53ilerel6l3msyoiprmvffbtf3gcy53skjq6ozvuqyi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625114295.jpg',
         'background': 'Blue',
         'body': 'Turtleneck Sweater',
         'earring': 'Strawberry',
@@ -15478,7 +15478,7 @@ ZAPPY_COLLECTION = {
     2625114417: {
         'name': 'Zappy #2033',
         'unit_name': 'ZAPP2033',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif4t3f43ahad6jvtq77v7xir6rei6ldegtooyxng4moautedaccuy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625114417.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Serious',
@@ -15491,7 +15491,7 @@ ZAPPY_COLLECTION = {
     2625114554: {
         'name': 'Zappy #1942',
         'unit_name': 'ZAPP1942',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiey5a7veppjddiqbxid3l62bol7q6rca6jekttyraec7vkbiyfo24',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625114554.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Left Helix',
@@ -15504,7 +15504,7 @@ ZAPPY_COLLECTION = {
     2625114611: {
         'name': 'Zappy #1927',
         'unit_name': 'ZAPP1927',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigpw3o6mzm27b54jyvilzm27f4wykf7kmt47gypdyye6ahretl2iq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625114611.jpg',
         'background': 'Yellow',
         'body': 'Striped Sweater',
         'earring': 'Lightning',
@@ -15517,7 +15517,7 @@ ZAPPY_COLLECTION = {
     2625114746: {
         'name': 'Zappy #1868',
         'unit_name': 'ZAPP1868',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibe53y6qavbjlf6mc76wejgmqwqzoudcryhb6z6loc6sa4f4yursy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625114746.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'Left Helix',
@@ -15530,7 +15530,7 @@ ZAPPY_COLLECTION = {
     2625114863: {
         'name': 'Zappy #1852',
         'unit_name': 'ZAPP1852',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihc3gpxivaf6vqqigb6bwqcpoxd7hy4tr4bhxgcd4ijvp5wpznw3e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625114863.jpg',
         'background': 'Orange',
         'body': 'Wool Collar Jacket',
         'earring': 'Knife',
@@ -15543,7 +15543,7 @@ ZAPPY_COLLECTION = {
     2625114907: {
         'name': 'Zappy #1935',
         'unit_name': 'ZAPP1935',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibkyu7u4rnecxfmuxkkvldjcksyamn454upm6bvaaahagthvkjypi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625114907.jpg',
         'background': 'Purple',
         'body': 'Choker',
         'earring': 'Left Helix',
@@ -15556,7 +15556,7 @@ ZAPPY_COLLECTION = {
     2625115046: {
         'name': 'Zappy #2006',
         'unit_name': 'ZAPP2006',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiem5lcskpz6zllx4pftyhfjmcypnyogd5njooevhiemkqrod74fhm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625115046.jpg',
         'background': 'Green',
         'body': 'School Outfit',
         'earring': 'Party Popper',
@@ -15569,7 +15569,7 @@ ZAPPY_COLLECTION = {
     2625115498: {
         'name': 'Zappy #2001',
         'unit_name': 'ZAPP2001',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicm64h53xivogy3wkmwyya7isuj4hdqd3lffmomgeqk72ywaor5ei',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625115498.jpg',
         'background': 'Green',
         'body': 'Bathrobe',
         'earring': 'Party Popper',
@@ -15582,7 +15582,7 @@ ZAPPY_COLLECTION = {
     2625115582: {
         'name': 'Zappy #1855',
         'unit_name': 'ZAPP1855',
-        'image_url': 'https://ipfs.io/ipfs/bafybeide2sulodxzgz4ctn35u67wpzw7v3hdc7lgteblus5lvp74fgdmd4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625115582.jpg',
         'background': 'Chroma',
         'body': 'Bathrobe',
         'earring': 'Party Popper',
@@ -15595,7 +15595,7 @@ ZAPPY_COLLECTION = {
     2625115761: {
         'name': 'Zappy #2046',
         'unit_name': 'ZAPP2046',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigp757vwg4yydaypgtcfrinkx5scxfatadh564d3hlnkhrkzb34oy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625115761.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Right Ring',
@@ -15608,7 +15608,7 @@ ZAPPY_COLLECTION = {
     2625115868: {
         'name': 'Zappy #1891',
         'unit_name': 'ZAPP1891',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiedr4lalz6hjfbu2ngb4hcf2no5sm7ldbas6eipjfsptbof4ansba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625115868.jpg',
         'background': 'Green',
         'body': 'Warning Tape',
         'earring': 'Sunrise',
@@ -15621,7 +15621,7 @@ ZAPPY_COLLECTION = {
     2625116056: {
         'name': 'Zappy #1982',
         'unit_name': 'ZAPP1982',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid7ghyzj2ndvjoefg7c47h3akiaqlix65xsitunqvrledcs2uplry',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625116056.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Right Helix',
@@ -15634,7 +15634,7 @@ ZAPPY_COLLECTION = {
     2625128849: {
         'name': 'Zappy #2089',
         'unit_name': 'ZAPP2089',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiburddct4lkt5xddrclg5iasv7q2uaj5me2xoj7bjsrn2ganefqoy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625128849.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Ghost',
@@ -15647,7 +15647,7 @@ ZAPPY_COLLECTION = {
     2625128934: {
         'name': 'Zappy #2149',
         'unit_name': 'ZAPP2149',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiektncre3od3v7tqsj3vk3oqoiqyaya3lis7z6kc5lntlsn73lsye',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625128934.jpg',
         'background': 'Green',
         'body': 'Tracksuit Top',
         'earring': 'Carton Cup',
@@ -15660,7 +15660,7 @@ ZAPPY_COLLECTION = {
     2625129055: {
         'name': 'Zappy #2066',
         'unit_name': 'ZAPP2066',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibkgoom2dhh4paa3b5ykif5n4uzlmfqfkli3w2acv5ptcwquf3h4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625129055.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Daisy',
@@ -15673,7 +15673,7 @@ ZAPPY_COLLECTION = {
     2625129255: {
         'name': 'Zappy #2070',
         'unit_name': 'ZAPP2070',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibxkex3ummlzyjxndzbbubtkgu3wiob46s2it2fsjavhl7xmg4qdy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625129255.jpg',
         'background': 'Purple',
         'body': 'Fanny Pack',
         'earring': 'Carton Cup',
@@ -15686,7 +15686,7 @@ ZAPPY_COLLECTION = {
     2625129363: {
         'name': 'Zappy #2069',
         'unit_name': 'ZAPP2069',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiedis6fbftz2rkiu6rynfkmzrkkieqgolfvvhjq6jvtlknd3h6yzq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625129363.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Right Ring',
@@ -15699,7 +15699,7 @@ ZAPPY_COLLECTION = {
     2625129502: {
         'name': 'Zappy #2087',
         'unit_name': 'ZAPP2087',
-        'image_url': 'https://ipfs.io/ipfs/bafybeigvwcwpc7mdx26ougxnxu67wqbq6hzcll3bm6qt2nhl42cnqubota',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625129502.jpg',
         'background': 'Chroma',
         'body': 'Puffer Coat',
         'earring': 'Carton Cup',
@@ -15712,7 +15712,7 @@ ZAPPY_COLLECTION = {
     2625130037: {
         'name': 'Zappy #2088',
         'unit_name': 'ZAPP2088',
-        'image_url': 'https://ipfs.io/ipfs/bafkreichjze2nthmxvec53jxbxlkvycth2zsscrcizcxyzaelzwfban7ie',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625130037.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Rainbow',
@@ -15725,7 +15725,7 @@ ZAPPY_COLLECTION = {
     2625130185: {
         'name': 'Zappy #2051',
         'unit_name': 'ZAPP2051',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibrhkqqhyam6trnfvsxek3hgjwvz3txovo3jykjax3ugzjydhbote',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625130185.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Bananas',
@@ -15738,7 +15738,7 @@ ZAPPY_COLLECTION = {
     2625130320: {
         'name': 'Zappy #2174',
         'unit_name': 'ZAPP2174',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiectcpof52aupsmyez73qgghnets2nymvirkl4qwj6tn237bowjcu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625130320.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Pyramid',
@@ -15751,7 +15751,7 @@ ZAPPY_COLLECTION = {
     2625130465: {
         'name': 'Zappy #2053',
         'unit_name': 'ZAPP2053',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiarm7ngjayypjvkfoz6auaz6rffa4vy2yj3krqnmcd2ojxhwia67u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625130465.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Ghost',
@@ -15764,7 +15764,7 @@ ZAPPY_COLLECTION = {
     2625130673: {
         'name': 'Zappy #2110',
         'unit_name': 'ZAPP2110',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig6nxp2sdohlrwl4u55jfsgxqblr7r3tj5rq7ywntgfp7ejkqzd2e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625130673.jpg',
         'background': 'Red',
         'body': 'Cat Suit',
         'earring': 'Ghost',
@@ -15777,7 +15777,7 @@ ZAPPY_COLLECTION = {
     2625130816: {
         'name': 'Zappy #2182',
         'unit_name': 'ZAPP2182',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiacb56qeawj6sogzygdulmovme6s7c37as5rglingh2kmfw2pirzi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625130816.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Party Popper',
@@ -15790,7 +15790,7 @@ ZAPPY_COLLECTION = {
     2625131396: {
         'name': 'Zappy #2159',
         'unit_name': 'ZAPP2159',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifvvbwpt76t45hpr77jkb6sdzgcxb4s3djnfttfynt6cjc3cnzvce',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625131396.jpg',
         'background': 'Purple',
         'body': 'Hawaiian Shirt',
         'earring': 'Hashtag',
@@ -15803,7 +15803,7 @@ ZAPPY_COLLECTION = {
     2625131559: {
         'name': 'Zappy #2060',
         'unit_name': 'ZAPP2060',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibs22q4ihj26lvnaf3zveuqnf26ngasphtymli6qrt4h64c2n76pq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625131559.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Rainbow',
@@ -15816,7 +15816,7 @@ ZAPPY_COLLECTION = {
     2625131680: {
         'name': 'Zappy #2137',
         'unit_name': 'ZAPP2137',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihlxgxfgsp7azvpu7gownv6c2ciykgsz6ugv2nfw7247co23yo4ga',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625131680.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'None',
@@ -15829,7 +15829,7 @@ ZAPPY_COLLECTION = {
     2625131832: {
         'name': 'Zappy #2073',
         'unit_name': 'ZAPP2073',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidyu2xxl5onndttmaln7c7bfazekmslyfon2yhpswmm6s5h3wivcm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625131832.jpg',
         'background': 'Orange',
         'body': 'Overalls',
         'earring': 'Happy',
@@ -15842,7 +15842,7 @@ ZAPPY_COLLECTION = {
     2625131955: {
         'name': 'Zappy #2093',
         'unit_name': 'ZAPP2093',
-        'image_url': 'https://ipfs.io/ipfs/bafkreids2cuyhb3sxe36zajplh6thnz22yh3akaztrpdwsb5vckuaonrf4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625131955.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Knife',
@@ -15855,7 +15855,7 @@ ZAPPY_COLLECTION = {
     2625132132: {
         'name': 'Zappy #2058',
         'unit_name': 'ZAPP2058',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidqmwzt55msqqh7dfzhdpil6hy4b7jcfaeedq4xdvytocfegkyldi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625132132.jpg',
         'background': 'Orange',
         'body': 'Funky Coat',
         'earring': 'Pyramid',
@@ -15868,7 +15868,7 @@ ZAPPY_COLLECTION = {
     2625132202: {
         'name': 'Zappy #2109',
         'unit_name': 'ZAPP2109',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib4rwyzbabp7w3ph4cahaxvvy5kflzjzcka3jkr3gdlgrdjtjkilm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625132202.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Left Ring',
@@ -15881,7 +15881,7 @@ ZAPPY_COLLECTION = {
     2625132620: {
         'name': 'Zappy #2061',
         'unit_name': 'ZAPP2061',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifzvsfxqgmfy7ltzzowzwbctnyvqh7e3fxzn7vet77mnhpawjypty',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625132620.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Party Popper',
@@ -15894,7 +15894,7 @@ ZAPPY_COLLECTION = {
     2625145731: {
         'name': 'Zappy #2219',
         'unit_name': 'ZAPP2219',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiasmn3i3pven3wseq2a56bslq6qh6kakoud7nfjkotk4ynuhujrnq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625145731.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Sunrise',
@@ -15907,7 +15907,7 @@ ZAPPY_COLLECTION = {
     2625145820: {
         'name': 'Zappy #2187',
         'unit_name': 'ZAPP2187',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig57na2ml4hr7i53gd4kb46vdycnlmero3e6tpncx5dbyjr7ovus4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625145820.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Rainbow',
@@ -15920,7 +15920,7 @@ ZAPPY_COLLECTION = {
     2625146437: {
         'name': 'Zappy #2213',
         'unit_name': 'ZAPP2213',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibqkuisufnlvowkwwor3qrkxw7smcg2daxhervswahwca2nxz44a4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625146437.jpg',
         'background': 'Red',
         'body': 'Striped Shirt',
         'earring': 'None',
@@ -15933,7 +15933,7 @@ ZAPPY_COLLECTION = {
     2625632700: {
         'name': 'Zappy #171',
         'unit_name': 'ZAPP0171',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkrhplz62arxyeoffiouprqwxngoti4v5jhmcz3z5krjsbaalepi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625632700.jpg',
         'background': 'Orange',
         'body': 'Scarf',
         'earring': 'Carton Cup',
@@ -15946,7 +15946,7 @@ ZAPPY_COLLECTION = {
     2625632801: {
         'name': 'Zappy #219',
         'unit_name': 'ZAPP0219',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiawd4lyy3drtxmsqfiwe7akcicc4bedwksjpxfwpcr3ui664xiocq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625632801.jpg',
         'background': 'Green',
         'body': 'Leather Vest',
         'earring': 'Pepper',
@@ -15959,7 +15959,7 @@ ZAPPY_COLLECTION = {
     2625633235: {
         'name': 'Zappy #30',
         'unit_name': 'ZAPP0030',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaadhhga4sebndc5ckrsra4qklbgc7esbuqdddgd6z2uoi6jssc6m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625633235.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Pepper',
@@ -15972,7 +15972,7 @@ ZAPPY_COLLECTION = {
     2625633305: {
         'name': 'Zappy #291',
         'unit_name': 'ZAPP0291',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicbziyg546vxrsgewv33q33pnqeh44rzw36ggjs2qiynnkvb5tkle',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625633305.jpg',
         'background': 'Purple',
         'body': 'Suit',
         'earring': 'Sad',
@@ -15985,7 +15985,7 @@ ZAPPY_COLLECTION = {
     2625633665: {
         'name': 'Zappy #223',
         'unit_name': 'ZAPP0223',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibb6gm2xrsfbh5qa2awscsgotonaa4zg3qi3tzzhb57hoqsf7ns4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625633665.jpg',
         'background': 'Purple',
         'body': 'Basic Jacket',
         'earring': 'Star',
@@ -15998,7 +15998,7 @@ ZAPPY_COLLECTION = {
     2625649829: {
         'name': 'Zappy #1158',
         'unit_name': 'ZAPP1158',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicnhbho3yjmdppwxqgsd3iwn4c2ff7dggfni4rzwy5za3ve2zkfiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625649829.jpg',
         'background': 'Chroma',
         'body': 'Striped Shirt',
         'earring': 'Lightning',
@@ -16011,7 +16011,7 @@ ZAPPY_COLLECTION = {
     2625650011: {
         'name': 'Zappy #1833',
         'unit_name': 'ZAPP1833',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidwdftu5behdhqqo2qlrz4w7dv5r2xv7xsf65dpgrmzy32x4csm7m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625650011.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Twin Rings',
@@ -16024,7 +16024,7 @@ ZAPPY_COLLECTION = {
     2625650087: {
         'name': 'Zappy #466',
         'unit_name': 'ZAPP0466',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibue3pfsik7cxjd2nzdq7kowgza2chnxdjcwxhk6abdzew3icjx5y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625650087.jpg',
         'background': 'Blue',
         'body': 'Suit',
         'earring': 'Left Ring',
@@ -16037,7 +16037,7 @@ ZAPPY_COLLECTION = {
     2625650217: {
         'name': 'Zappy #620',
         'unit_name': 'ZAPP0620',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid6hjvabieb3zvaddsshksvzkc2ow27c4nlnricyr623luccmsfne',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625650217.jpg',
         'background': 'Purple',
         'body': 'Polo Shirt',
         'earring': 'Zappies',
@@ -16050,7 +16050,7 @@ ZAPPY_COLLECTION = {
     2625650339: {
         'name': 'Zappy #1756',
         'unit_name': 'ZAPP1756',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicblhvsoukgsgrpjsuwx7gml3nzymcpwpwih6lexflwd3lzv5xsli',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625650339.jpg',
         'background': 'Orange',
         'body': 'Striped Sweater',
         'earring': 'Knife',
@@ -16063,7 +16063,7 @@ ZAPPY_COLLECTION = {
     2625650477: {
         'name': 'Zappy #647',
         'unit_name': 'ZAPP0647',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia262y2wrdoihe2exobv7hulap23gzitdqymsrt7rq4pvfibx7xvu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625650477.jpg',
         'background': 'Orange',
         'body': 'Polo Overalls',
         'earring': 'Hashtag',
@@ -16076,7 +16076,7 @@ ZAPPY_COLLECTION = {
     2625650587: {
         'name': 'Zappy #710',
         'unit_name': 'ZAPP0710',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibyttxzyy74q4otxrsnejbzolpaigxrar32s4vfedfrtejnsngowa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625650587.jpg',
         'background': 'Green',
         'body': 'Basic Jacket',
         'earring': 'Zappies',
@@ -16089,7 +16089,7 @@ ZAPPY_COLLECTION = {
     2625651085: {
         'name': 'Zappy #554',
         'unit_name': 'ZAPP0554',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigzpwqnp6r6bmgw75ms7juwgofkwzskupmxlvn4urskuyjspa5j6y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625651085.jpg',
         'background': 'Orange',
         'body': 'Ribbon Tie',
         'earring': 'Party Popper',
@@ -16102,7 +16102,7 @@ ZAPPY_COLLECTION = {
     2625651236: {
         'name': 'Zappy #709',
         'unit_name': 'ZAPP0709',
-        'image_url': 'https://ipfs.io/ipfs/bafkreickruaiys22epq77gnjd36tmjdim3rucfdol2njqgwivzqtsvu7xu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625651236.jpg',
         'background': 'Yellow',
         'body': 'Scarf',
         'earring': 'Number One',
@@ -16115,7 +16115,7 @@ ZAPPY_COLLECTION = {
     2625651327: {
         'name': 'Zappy #676',
         'unit_name': 'ZAPP0676',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidkaerxsrsqcb3k2qbrkljwgbl7foz2gju44tkbe6dza65v2j3t5i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625651327.jpg',
         'background': 'Orange',
         'body': 'Tracksuit Top',
         'earring': 'Serious',
@@ -16128,7 +16128,7 @@ ZAPPY_COLLECTION = {
     2625651423: {
         'name': 'Zappy #406',
         'unit_name': 'ZAPP0406',
-        'image_url': 'https://ipfs.io/ipfs/bafkreider3xasznkubkhh6vr3aoht7eoxsaubfwj6q6cipfgt424ps757i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625651423.jpg',
         'background': 'Yellow',
         'body': 'Armband',
         'earring': 'Star',
@@ -16141,7 +16141,7 @@ ZAPPY_COLLECTION = {
     2625651899: {
         'name': 'Zappy #414',
         'unit_name': 'ZAPP0414',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif3de44sli4tfm3uyanhlkgn7l4dak6e6olsat4z7cgu5zfmf2zgu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625651899.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Sunrise',
@@ -16154,7 +16154,7 @@ ZAPPY_COLLECTION = {
     2625652157: {
         'name': 'Zappy #1359',
         'unit_name': 'ZAPP1359',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicesskx25dkssicdd5wf7z5c7adkwmnssaxtwetgj4nxip227stfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625652157.jpg',
         'background': 'Green',
         'body': 'Kimono',
         'earring': 'Diamond',
@@ -16167,7 +16167,7 @@ ZAPPY_COLLECTION = {
     2625652459: {
         'name': 'Zappy #1507',
         'unit_name': 'ZAPP1507',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiamcfvqxrmerlald3w7j6bky3p4hnig2s3zojdju3gm6d6lmugaee',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625652459.jpg',
         'background': 'Green',
         'body': 'Turtleneck Sweater',
         'earring': 'Left Helix',
@@ -16180,7 +16180,7 @@ ZAPPY_COLLECTION = {
     2625652609: {
         'name': 'Zappy #894',
         'unit_name': 'ZAPP0894',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicp67zqxeqtvdrlpksnm3kmw76ionrcgm6x2ex5ppur6sjpxuqs6a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625652609.jpg',
         'background': 'Green',
         'body': 'Choker',
         'earring': 'Carton Cup',
@@ -16193,7 +16193,7 @@ ZAPPY_COLLECTION = {
     2625652727: {
         'name': 'Zappy #2030',
         'unit_name': 'ZAPP2030',
-        'image_url': 'https://ipfs.io/ipfs/bafkreictwqpbqxtl6qatgkbqscaxn7mccge3e6gxdqzbwgkqzqtliptaeq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625652727.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Knife',
@@ -16206,7 +16206,7 @@ ZAPPY_COLLECTION = {
     2625652869: {
         'name': 'Zappy #1243',
         'unit_name': 'ZAPP1243',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiasfj6wobsfhsobaz4jx6hx3ilfhdbssh7zwyl4w45ypwuzajqgqi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625652869.jpg',
         'background': 'Chroma',
         'body': 'Lifesaver',
         'earring': 'Lightning',
@@ -16219,7 +16219,7 @@ ZAPPY_COLLECTION = {
     2625652966: {
         'name': 'Zappy #1724',
         'unit_name': 'ZAPP1724',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicnuacim6zzoom5hhzmfjmbqusvn7qfbyik6bsysky2xqelema5e4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625652966.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Sad',
@@ -16232,7 +16232,7 @@ ZAPPY_COLLECTION = {
     2625653179: {
         'name': 'Zappy #1073',
         'unit_name': 'ZAPP1073',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2lc7bxsczwate65ttxfckicny7xl2ri7l2htknxnewqgvutseoa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625653179.jpg',
         'background': 'Red',
         'body': 'Royal Robe',
         'earring': 'Pyramid',
@@ -16245,7 +16245,7 @@ ZAPPY_COLLECTION = {
     2625653338: {
         'name': 'Zappy #1693',
         'unit_name': 'ZAPP1693',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaifmnrywyeku4gymnaut2dgjy65cjiognv5otowklkbcijma6t7m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625653338.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Lightning',
@@ -16258,7 +16258,7 @@ ZAPPY_COLLECTION = {
     2625679760: {
         'name': 'Zappy #2117',
         'unit_name': 'ZAPP2117',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieuxlfz2d4tzbfdblgw7aqxoxl7igc7nakkljwbnw7bzisd2xsr2e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625679760.jpg',
         'background': 'Orange',
         'body': 'Ribbon Tie',
         'earring': 'Left Ring',
@@ -16271,7 +16271,7 @@ ZAPPY_COLLECTION = {
     2625845748: {
         'name': 'Zappy #1662',
         'unit_name': 'ZAPP1662',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie6dfedhugpmvsbshon2hopzshoc2mxc5pf5uu3ezgr4px2mwy75q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625845748.jpg',
         'background': 'Yellow',
         'body': 'Oversize Sweater',
         'earring': 'Rainbow',
@@ -16284,7 +16284,7 @@ ZAPPY_COLLECTION = {
     2625916490: {
         'name': 'Zappy #605',
         'unit_name': 'ZAPP0605',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigabtm3saiyd6liyrdhn3y5judi3ycaxa6xyrysbtbvr5sxj46hfq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625916490.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Sad',
@@ -16297,7 +16297,7 @@ ZAPPY_COLLECTION = {
     2625916541: {
         'name': 'Zappy #1144',
         'unit_name': 'ZAPP1144',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifkluzgvzh7vptaxzkszkzbvvocqcfcuggm3ajtlrsmvkscr7p6im',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2625916541.jpg',
         'background': 'Orange',
         'body': 'Striped Sweater',
         'earring': 'Left Ring',
@@ -16310,7 +16310,7 @@ ZAPPY_COLLECTION = {
     2626678151: {
         'name': 'Zappy #251',
         'unit_name': 'ZAPP0251',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaxeykqw3aab32vyh6ksf6oqlgdemgxh2qkkycuokd5e4prjmoana',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626678151.jpg',
         'background': 'Orange',
         'body': 'Armband',
         'earring': 'Double Helix',
@@ -16323,7 +16323,7 @@ ZAPPY_COLLECTION = {
     2626678293: {
         'name': 'Zappy #1526',
         'unit_name': 'ZAPP1526',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicfqvh5leih5vffnfsq45whnhmhtcvvh5fv6qkbox3zay5firw3xu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626678293.jpg',
         'background': 'Red',
         'body': 'Colorful Jacket',
         'earring': 'Daisy',
@@ -16336,7 +16336,7 @@ ZAPPY_COLLECTION = {
     2626678572: {
         'name': 'Zappy #1894',
         'unit_name': 'ZAPP1894',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihdfjn5hsjaswpoj2aulodt6lxzkx2daxp256d5s6lugwpytezixi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626678572.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Double Helix',
@@ -16349,7 +16349,7 @@ ZAPPY_COLLECTION = {
     2626678715: {
         'name': 'Zappy #1694',
         'unit_name': 'ZAPP1694',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiajnipayscezxhaw4mj4ohxjivo447ogtdykk5v67ictbalnn7myy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626678715.jpg',
         'background': 'Green',
         'body': 'Colorful Jacket',
         'earring': 'Double Helix',
@@ -16362,7 +16362,7 @@ ZAPPY_COLLECTION = {
     2626727908: {
         'name': 'Zappy #282',
         'unit_name': 'ZAPP0282',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiew5eyk4i3zywhcrxnc7vuxgc5ggoyivazj4ijzgh5tbsph7npcz4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626727908.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Number One',
@@ -16375,7 +16375,7 @@ ZAPPY_COLLECTION = {
     2626728057: {
         'name': 'Zappy #1202',
         'unit_name': 'ZAPP1202',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieuaazu3s7yqc3bma2jpnslmrsz3rvzphmnyzcfxdej35du3ujxva',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626728057.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Right Ring',
@@ -16388,7 +16388,7 @@ ZAPPY_COLLECTION = {
     2626728134: {
         'name': 'Zappy #248',
         'unit_name': 'ZAPP0248',
-        'image_url': 'https://ipfs.io/ipfs/bafkreide4hcmg22leigzireug2ywol7y3dbudwefh4jnrcqotjufpwu5aq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626728134.jpg',
         'background': 'Yellow',
         'body': 'Funky Coat',
         'earring': 'Right Ring',
@@ -16401,7 +16401,7 @@ ZAPPY_COLLECTION = {
     2626728505: {
         'name': 'Zappy #1699',
         'unit_name': 'ZAPP1699',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidsgy2t4aj6ddc5h5xz4he6l3fmo3wvuz42hftvn2oc7mtoslxzza',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626728505.jpg',
         'background': 'Blue',
         'body': 'Fanny Pack',
         'earring': 'Carton Cup',
@@ -16414,7 +16414,7 @@ ZAPPY_COLLECTION = {
     2626772779: {
         'name': 'Zappy #242',
         'unit_name': 'ZAPP0242',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnim6b4lsp5gv5ttrovgbr4acguywwhaeo26hn6w5skninm3g6wi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626772779.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Party Popper',
@@ -16427,7 +16427,7 @@ ZAPPY_COLLECTION = {
     2626772920: {
         'name': 'Zappy #1669',
         'unit_name': 'ZAPP1669',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiayl6huucl6jizuddgln3dbthgpmbqm4hgax5fhaypuaskuqrxcxm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626772920.jpg',
         'background': 'Green',
         'body': 'Dino Suit',
         'earring': 'Strawberry',
@@ -16440,7 +16440,7 @@ ZAPPY_COLLECTION = {
     2626773316: {
         'name': 'Zappy #1397',
         'unit_name': 'ZAPP1397',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2degww3a6qm5mrciutj5pn62p6rjbzqwg22t76o2gg5tewldbcq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626773316.jpg',
         'background': 'Orange',
         'body': 'Bear Suit',
         'earring': 'Right Helix',
@@ -16453,7 +16453,7 @@ ZAPPY_COLLECTION = {
     2626779130: {
         'name': 'Zappy #2180',
         'unit_name': 'ZAPP2180',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif36rxx3gns57pl2tvxdlyszs3mcghvpz6qhlfvsipycxv4xhvyum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626779130.jpg',
         'background': 'Purple',
         'body': 'Muscle Suit',
         'earring': 'Rainbow',
@@ -16466,7 +16466,7 @@ ZAPPY_COLLECTION = {
     2626779217: {
         'name': 'Zappy #100',
         'unit_name': 'ZAPP0100',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie76azkbttriwoo6e2scjjxelglhqo65vsrh6yc7x6lkq4nzb46ge',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626779217.jpg',
         'background': 'Red',
         'body': 'Scarf',
         'earring': 'Knife',
@@ -16479,7 +16479,7 @@ ZAPPY_COLLECTION = {
     2626803688: {
         'name': 'Zappy #692',
         'unit_name': 'ZAPP0692',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiga6f3jepzrzqlqdtl777azazbe62c5h3igwgamrk2leoiua7bgty',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626803688.jpg',
         'background': 'Yellow',
         'body': 'Clouds',
         'earring': 'Daisy',
@@ -16492,7 +16492,7 @@ ZAPPY_COLLECTION = {
     2626803872: {
         'name': 'Zappy #395',
         'unit_name': 'ZAPP0395',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicutchaoc4qd4vctu7hbtnfxw4er3pg772z47szt4ekizmcu6psz4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626803872.jpg',
         'background': 'Orange',
         'body': 'Funky Coat',
         'earring': 'Left Ring',
@@ -16505,7 +16505,7 @@ ZAPPY_COLLECTION = {
     2626804003: {
         'name': 'Zappy #969',
         'unit_name': 'ZAPP0969',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib4s5h5orenvzh2bksocjcg42q7shmg3ggu7hjhp7utgjeheyyzvm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626804003.jpg',
         'background': 'Purple',
         'body': 'Muscle Suit',
         'earring': 'Bananas',
@@ -16518,7 +16518,7 @@ ZAPPY_COLLECTION = {
     2626804318: {
         'name': 'Zappy #576',
         'unit_name': 'ZAPP0576',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidhlofbjmutt3f66dlthlcdsy3zvjn7blhauel2eo2wle4qusevly',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626804318.jpg',
         'background': 'Purple',
         'body': 'Lifesaver',
         'earring': 'Double Helix',
@@ -16531,7 +16531,7 @@ ZAPPY_COLLECTION = {
     2626805384: {
         'name': 'Zappy #2120',
         'unit_name': 'ZAPP2120',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih5kbdju3lzcwadxfnzryu2ttyvc2wawba2a7kvlq7z46se3yhx7m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626805384.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'Daisy',
@@ -16544,7 +16544,7 @@ ZAPPY_COLLECTION = {
     2626835707: {
         'name': 'Zappy #1351',
         'unit_name': 'ZAPP1351',
-        'image_url': 'https://ipfs.io/ipfs/bafybeignwcu26ipfbo2femlkfafjkg5gyuc4aohuifhtgwtsz5n5jwzlhi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626835707.jpg',
         'background': 'Orange',
         'body': 'Tracksuit Top',
         'earring': 'Ghost',
@@ -16557,7 +16557,7 @@ ZAPPY_COLLECTION = {
     2626835961: {
         'name': 'Zappy #2207',
         'unit_name': 'ZAPP2207',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib7voiaaqcwikz7t7gpx7owmcqafykuskqx56q3dbb4wzoibzwpca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626835961.jpg',
         'background': 'Blue',
         'body': 'Bowling Shirt',
         'earring': 'Strawberry',
@@ -16570,7 +16570,7 @@ ZAPPY_COLLECTION = {
     2626836058: {
         'name': 'Zappy #1898',
         'unit_name': 'ZAPP1898',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibb42nwu23qfhvfvmot53uezq54camvfal4ursx6vkp7kk2wsrzay',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626836058.jpg',
         'background': 'Yellow',
         'body': 'Suit',
         'earring': 'Number One',
@@ -16583,7 +16583,7 @@ ZAPPY_COLLECTION = {
     2626836179: {
         'name': 'Zappy #125',
         'unit_name': 'ZAPP0125',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicidctncehp7eiz26ai6bntzjaljnlu4bbhz4baad4rg7yxsw5wge',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626836179.jpg',
         'background': 'Orange',
         'body': 'Hoodie',
         'earring': 'Serious',
@@ -16596,7 +16596,7 @@ ZAPPY_COLLECTION = {
     2626855698: {
         'name': 'Zappy #1568',
         'unit_name': 'ZAPP1568',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiemwrktjkevlslag5phsjcwwtkw3rgmeoh2sgnkk2ltkp2yzag6tq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626855698.jpg',
         'background': 'Orange',
         'body': 'Lifesaver',
         'earring': 'Serious',
@@ -16609,7 +16609,7 @@ ZAPPY_COLLECTION = {
     2626881459: {
         'name': 'Zappy #286',
         'unit_name': 'ZAPP0286',
-        'image_url': 'https://ipfs.io/ipfs/bafybeidcujeytihzobevyjul7voz2mr62nyjfjkuunonuw3x2qv2x43fju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626881459.jpg',
         'background': 'Chroma',
         'body': 'Warning Tape',
         'earring': 'Carton Cup',
@@ -16622,7 +16622,7 @@ ZAPPY_COLLECTION = {
     2626946941: {
         'name': 'Zappy #2141',
         'unit_name': 'ZAPP2141',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiciwbyfaaraeft2wxmb6kei3zmwdeqeumfpjcc2izxeoktl75usd4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626946941.jpg',
         'background': 'Blue',
         'body': 'Trash Can',
         'earring': 'Zappies',
@@ -16635,7 +16635,7 @@ ZAPPY_COLLECTION = {
     2626947072: {
         'name': 'Zappy #2124',
         'unit_name': 'ZAPP2124',
-        'image_url': 'https://ipfs.io/ipfs/bafybeieu27qoi4tytpcco3ycvryhh6z6hjoczhqcmfkgpxgigujapb2jfu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626947072.jpg',
         'background': 'Chroma',
         'body': 'Bear Suit',
         'earring': 'Strawberry',
@@ -16648,7 +16648,7 @@ ZAPPY_COLLECTION = {
     2626947319: {
         'name': 'Zappy #2113',
         'unit_name': 'ZAPP2113',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig52rmzdjoeq3xsjk6qvdeokz7susvvakqitztvpexpfbh5beicie',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626947319.jpg',
         'background': 'Yellow',
         'body': 'Leather Vest',
         'earring': 'Pepper',
@@ -16661,7 +16661,7 @@ ZAPPY_COLLECTION = {
     2626947705: {
         'name': 'Zappy #2170',
         'unit_name': 'ZAPP2170',
-        'image_url': 'https://ipfs.io/ipfs/bafkreica7tygczg6dorvidldiltxklhqezqat74iecx6b45fwp7ggmylyy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626947705.jpg',
         'background': 'Orange',
         'body': 'Kimono',
         'earring': 'Carton Cup',
@@ -16674,7 +16674,7 @@ ZAPPY_COLLECTION = {
     2626947816: {
         'name': 'Zappy #2098',
         'unit_name': 'ZAPP2098',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig2xngo752pbl63ln2b7nppuooa7fodggbmwanijoqf4ytjrrziqm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626947816.jpg',
         'background': 'Green',
         'body': 'Lifesaver',
         'earring': 'Strawberry',
@@ -16687,7 +16687,7 @@ ZAPPY_COLLECTION = {
     2626967908: {
         'name': 'Zappy #216',
         'unit_name': 'ZAPP0216',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihtjkfcqptn54ohbmopxpj2njhlsjxwe6niohrfthhwhlwghllpui',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626967908.jpg',
         'background': 'Yellow',
         'body': 'Hawaiian Shirt',
         'earring': 'Sad',
@@ -16700,7 +16700,7 @@ ZAPPY_COLLECTION = {
     2626981225: {
         'name': 'Zappy #2134',
         'unit_name': 'ZAPP2134',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnaufgrjdqgqyhxbwoq6miqvz3poss3enwmb4qmvilbospxfsuve',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626981225.jpg',
         'background': 'Orange',
         'body': 'Fur Coat',
         'earring': 'Carton Cup',
@@ -16713,7 +16713,7 @@ ZAPPY_COLLECTION = {
     2626981334: {
         'name': 'Zappy #220',
         'unit_name': 'ZAPP0220',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigyqaujjawy4fomosxxr4jjqzyod6aqi4tluspnvr6rdas2b6en2y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2626981334.jpg',
         'background': 'Blue',
         'body': 'Sleeveless Shirt',
         'earring': 'Serious',
@@ -16726,7 +16726,7 @@ ZAPPY_COLLECTION = {
     2627007853: {
         'name': 'Zappy #577',
         'unit_name': 'ZAPP0577',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaalrnnpidmt6lsml35c5wposxujirxjdpiythxznfc32imse7dwm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627007853.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Party Popper',
@@ -16739,7 +16739,7 @@ ZAPPY_COLLECTION = {
     2627008401: {
         'name': 'Zappy #257',
         'unit_name': 'ZAPP0257',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiclt25k5z6grpzhqugendiyeijtzmeba3go34p4tl3fv5tt72akna',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627008401.jpg',
         'background': 'Green',
         'body': 'Hawaiian Shirt',
         'earring': 'Hashtag',
@@ -16752,7 +16752,7 @@ ZAPPY_COLLECTION = {
     2627081763: {
         'name': 'Zappy #959',
         'unit_name': 'ZAPP0959',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid6h5jhvasdw6pnxvfmn3dq65ai4ulniwviwlit43utrfowi2jeke',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627081763.jpg',
         'background': 'Yellow',
         'body': 'Striped Sweater',
         'earring': 'Bananas',
@@ -16765,7 +16765,7 @@ ZAPPY_COLLECTION = {
     2627095557: {
         'name': 'Zappy #1635',
         'unit_name': 'ZAPP1635',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2n74jgasriys5luf2jld6i45w5txw7nyatxbm2ognltmp5rjysu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627095557.jpg',
         'background': 'Blue',
         'body': 'Daisy Shirt',
         'earring': 'Hashtag',
@@ -16778,7 +16778,7 @@ ZAPPY_COLLECTION = {
     2627130066: {
         'name': 'Zappy #1510',
         'unit_name': 'ZAPP1510',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihxvgbebpdx22hip3gs76gtujhlafpdrtlskhkmibgwcimu4zmy5a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627130066.jpg',
         'background': 'Red',
         'body': 'Sleeveless Shirt',
         'earring': 'Right Ring',
@@ -16791,7 +16791,7 @@ ZAPPY_COLLECTION = {
     2627130375: {
         'name': 'Zappy #2011',
         'unit_name': 'ZAPP2011',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibazasgp5zl6qi3ehhmp26657e2lxpjfmxkrt3ssu255voxkuuwdq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627130375.jpg',
         'background': 'Green',
         'body': 'Daisy Shirt',
         'earring': 'Serious',
@@ -16804,7 +16804,7 @@ ZAPPY_COLLECTION = {
     2627130714: {
         'name': 'Zappy #1464',
         'unit_name': 'ZAPP1464',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaa3lbpsv3blsfuxj3wktvlpr4cbfiv3dbr3ww2ub5epbl4kwqtl4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627130714.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Zappies',
@@ -16817,7 +16817,7 @@ ZAPPY_COLLECTION = {
     2627131445: {
         'name': 'Zappy #530',
         'unit_name': 'ZAPP0530',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihtecfd6ssz6k3z7mouh4lo5a7ozavgd2zz6sukvikg7uw6odg5fi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627131445.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Happy',
@@ -16830,7 +16830,7 @@ ZAPPY_COLLECTION = {
     2627131714: {
         'name': 'Zappy #1545',
         'unit_name': 'ZAPP1545',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibwxdcwqht6mwo3vjaeaklndpktpqfiia5zhdpzd4wgkocnz66z7q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627131714.jpg',
         'background': 'Blue',
         'body': 'Basic Jacket',
         'earring': 'Left Helix',
@@ -16843,7 +16843,7 @@ ZAPPY_COLLECTION = {
     2627131854: {
         'name': 'Zappy #588',
         'unit_name': 'ZAPP0588',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicuylpnlpujky6zhdwcdn6kbkdpffsdjrglzxlcblxvoyw34uqkoe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627131854.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Carton Cup',
@@ -16856,7 +16856,7 @@ ZAPPY_COLLECTION = {
     2627132330: {
         'name': 'Zappy #1306',
         'unit_name': 'ZAPP1306',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifbtfalcdnmhjrlazvbyqsqe7mzmfh3vp7hhm73zun77fgfou5cpa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627132330.jpg',
         'background': 'Green',
         'body': 'Fanny Pack',
         'earring': 'Twin Rings',
@@ -16869,7 +16869,7 @@ ZAPPY_COLLECTION = {
     2627233947: {
         'name': 'Zappy #2091',
         'unit_name': 'ZAPP2091',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiag2b4tyr2t7aytcjesv4vqypw2rmc4tvvqra5nr2qjji5qd3khly',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627233947.jpg',
         'background': 'Purple',
         'body': 'School Outfit',
         'earring': 'Strawberry',
@@ -16882,7 +16882,7 @@ ZAPPY_COLLECTION = {
     2627234087: {
         'name': 'Zappy #1246',
         'unit_name': 'ZAPP1246',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2je64hiznpx6pir2wayqzbnlbrt66iap7g6zkriabh5v4xcmi3q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627234087.jpg',
         'background': 'Blue',
         'body': 'Bear Suit',
         'earring': 'Serious',
@@ -16895,7 +16895,7 @@ ZAPPY_COLLECTION = {
     2627234224: {
         'name': 'Zappy #2160',
         'unit_name': 'ZAPP2160',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihjzxa4mnohivsfmt74gata4526jhtmf7qik2tcj7w66n7dcwn6f4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627234224.jpg',
         'background': 'Purple',
         'body': 'Armband',
         'earring': 'Knife',
@@ -16908,7 +16908,7 @@ ZAPPY_COLLECTION = {
     2627279796: {
         'name': 'Zappy #1992',
         'unit_name': 'ZAPP1992',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihrnosuuz3wszlfoy4q5oxlbdshioxtg6a6qu3gqoeznmhu5tvujy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627279796.jpg',
         'background': 'Yellow',
         'body': 'Warning Tape',
         'earring': 'None',
@@ -16921,7 +16921,7 @@ ZAPPY_COLLECTION = {
     2627280242: {
         'name': 'Zappy #541',
         'unit_name': 'ZAPP0541',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigcawxtkt54o4hwsafmeelj5e7qdfzwfoxdqgt2bwkomcdcjnjy2m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627280242.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Pepper',
@@ -16934,7 +16934,7 @@ ZAPPY_COLLECTION = {
     2627280357: {
         'name': 'Zappy #1488',
         'unit_name': 'ZAPP1488',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicmrofhgjhqvqktxpwcey2345r2dt345eanhz6xgc5nm6raoptyhy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627280357.jpg',
         'background': 'Green',
         'body': 'Overalls',
         'earring': 'Hashtag',
@@ -16947,7 +16947,7 @@ ZAPPY_COLLECTION = {
     2627280759: {
         'name': 'Zappy #994',
         'unit_name': 'ZAPP0994',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicokjowhawuld2dz6nbao5lh67l26iemnmevkpsvbz6pkcnmwzo3i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627280759.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Sunrise',
@@ -16960,7 +16960,7 @@ ZAPPY_COLLECTION = {
     2627408243: {
         'name': 'Zappy #1984',
         'unit_name': 'ZAPP1984',
-        'image_url': 'https://ipfs.io/ipfs/bafybeibhtnz2qmxsby46ylbcsafzmnboruwoha6tso2as3ly64rmvgbzuq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627408243.jpg',
         'background': 'Chroma',
         'body': 'Bear Suit',
         'earring': 'Skull',
@@ -16973,7 +16973,7 @@ ZAPPY_COLLECTION = {
     2627423601: {
         'name': 'Zappy #1219',
         'unit_name': 'ZAPP1219',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifwu3jrqjxh4fjpxqnbg5hwxsfavuxxuz7eofljyjhv5uowxsxp5m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627423601.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Daisy',
@@ -16986,7 +16986,7 @@ ZAPPY_COLLECTION = {
     2627423730: {
         'name': 'Zappy #987',
         'unit_name': 'ZAPP0987',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidokdn2si7gdlzoqzagppssjkcdshwqvmbcsqmxhsd2fuowjslmg4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627423730.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'Star',
@@ -16999,7 +16999,7 @@ ZAPPY_COLLECTION = {
     2627423870: {
         'name': 'Zappy #988',
         'unit_name': 'ZAPP0988',
-        'image_url': 'https://ipfs.io/ipfs/bafkreielo5anzgfc2cs6jpvzx4ehsezzglxqoogvgemvwspqogojtwf2ci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627423870.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Diamond',
@@ -17012,7 +17012,7 @@ ZAPPY_COLLECTION = {
     2627424015: {
         'name': 'Zappy #1367',
         'unit_name': 'ZAPP1367',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigjrrhv4zdofgj5zdwtztp6twxuookjfuzlgih4a4xz2mey2zdcnq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627424015.jpg',
         'background': 'Orange',
         'body': 'Bathrobe',
         'earring': 'Strawberry',
@@ -17025,7 +17025,7 @@ ZAPPY_COLLECTION = {
     2627424546: {
         'name': 'Zappy #1657',
         'unit_name': 'ZAPP1657',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaslhsmazvmqimzabc4hitnytbczgzkhgljjrqaixfnbpbz3pswqa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627424546.jpg',
         'background': 'Blue',
         'body': 'Striped Sweater',
         'earring': 'Sunrise',
@@ -17038,7 +17038,7 @@ ZAPPY_COLLECTION = {
     2627424734: {
         'name': 'Zappy #1223',
         'unit_name': 'ZAPP1223',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia3eooavwpjsdbcuavxf6rtqaukykcmedlcvzcaweofwp7uynm52y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2627424734.jpg',
         'background': 'Green',
         'body': 'Kimono',
         'earring': 'Pepper',
@@ -17051,7 +17051,7 @@ ZAPPY_COLLECTION = {
     2628242275: {
         'name': 'Zappy #1030',
         'unit_name': 'ZAPP1030',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidpowbkztu3vd2ilvdhpy25qcq2d4ohmavhfr7fptd3shcf6schq4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628242275.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Star',
@@ -17064,7 +17064,7 @@ ZAPPY_COLLECTION = {
     2628243029: {
         'name': 'Zappy #650',
         'unit_name': 'ZAPP0650',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih6sbquiwosbufnzqph3awxwujq2f7zbo2w2ddulwpxkreaeiogqm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628243029.jpg',
         'background': 'Red',
         'body': 'Puffer Coat',
         'earring': 'Strawberry',
@@ -17077,7 +17077,7 @@ ZAPPY_COLLECTION = {
     2628243559: {
         'name': 'Zappy #521',
         'unit_name': 'ZAPP0521',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifqo5iigufcrje3rmjl2y5qygwxuzs3qny7aedenht6mr2v6kzkqm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628243559.jpg',
         'background': 'Red',
         'body': 'Scarf',
         'earring': 'Left Helix',
@@ -17090,7 +17090,7 @@ ZAPPY_COLLECTION = {
     2628243659: {
         'name': 'Zappy #1450',
         'unit_name': 'ZAPP1450',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicpqiky6oekrotpn4jroo3bpr2wipggiqwewsfniqhwlhqskikq7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628243659.jpg',
         'background': 'Orange',
         'body': 'Hooded Jacket',
         'earring': 'Double Helix',
@@ -17103,7 +17103,7 @@ ZAPPY_COLLECTION = {
     2628244045: {
         'name': 'Zappy #568',
         'unit_name': 'ZAPP0568',
-        'image_url': 'https://ipfs.io/ipfs/bafkreievrkvtpolqwqqomin4npcf3xgd5wkhdwduwtqtt2b6y2div3iu44',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628244045.jpg',
         'background': 'Purple',
         'body': 'Muscle Suit',
         'earring': 'Number One',
@@ -17116,7 +17116,7 @@ ZAPPY_COLLECTION = {
     2628244275: {
         'name': 'Zappy #507',
         'unit_name': 'ZAPP0507',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigdbgyfesviukef5ypntrmomx6wk2txg6adexuenclurkddhiwrne',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628244275.jpg',
         'background': 'Green',
         'body': 'Funky Coat',
         'earring': 'Carton Cup',
@@ -17129,7 +17129,7 @@ ZAPPY_COLLECTION = {
     2628244622: {
         'name': 'Zappy #663',
         'unit_name': 'ZAPP0663',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiayljafcl6xxoho7gif7lh5ticb7k3mf44yxgt2e4hggyqxb3bqwe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628244622.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Left Ring',
@@ -17142,7 +17142,7 @@ ZAPPY_COLLECTION = {
     2628244802: {
         'name': 'Zappy #1979',
         'unit_name': 'ZAPP1979',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaxqennnfbig4rxwwk2din4iqg4qyvadnwupblwpgfdrub5svu2x4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628244802.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'Star',
@@ -17155,7 +17155,7 @@ ZAPPY_COLLECTION = {
     2628245164: {
         'name': 'Zappy #953',
         'unit_name': 'ZAPP0953',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicve6zverxixxznjgssvfnvd5zg436gjdmapvvvcsylqgsbcwduw4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628245164.jpg',
         'background': 'Blue',
         'body': 'Muscle Suit',
         'earring': 'Serious',
@@ -17168,7 +17168,7 @@ ZAPPY_COLLECTION = {
     2628245736: {
         'name': 'Zappy #1312',
         'unit_name': 'ZAPP1312',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifiwycpvozmxk5r3afte6szytgzk4df7lve5ddr3nx5pg2g7pmxqy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628245736.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Happy',
@@ -17181,7 +17181,7 @@ ZAPPY_COLLECTION = {
     2628246162: {
         'name': 'Zappy #1901',
         'unit_name': 'ZAPP1901',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia3kaeithzsc4frpmqq3axv4ql4mjz3ucesqeeuv7qwikvdje2gim',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628246162.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Hashtag',
@@ -17194,7 +17194,7 @@ ZAPPY_COLLECTION = {
     2628246531: {
         'name': 'Zappy #738',
         'unit_name': 'ZAPP0738',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifvjw5v5hcg254rz342ibtr7dvc753wsqjhler5yo2mnaitai4s6u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628246531.jpg',
         'background': 'Yellow',
         'body': 'Suit',
         'earring': 'Left Ring',
@@ -17207,7 +17207,7 @@ ZAPPY_COLLECTION = {
     2628246673: {
         'name': 'Zappy #1186',
         'unit_name': 'ZAPP1186',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkg7u6cxehuw5jlhwcp4apebxsqiwjlktrh6rncgevfkmjladfvq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628246673.jpg',
         'background': 'Yellow',
         'body': 'Puffer Coat',
         'earring': 'Left Ring',
@@ -17220,7 +17220,7 @@ ZAPPY_COLLECTION = {
     2628247046: {
         'name': 'Zappy #1826',
         'unit_name': 'ZAPP1826',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig3ua32g44ndffny26zk4thwkwiikjca33fq3hd4rugtkytl7yufi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628247046.jpg',
         'background': 'Blue',
         'body': 'Armband',
         'earring': 'Number One',
@@ -17233,7 +17233,7 @@ ZAPPY_COLLECTION = {
     2628247179: {
         'name': 'Zappy #707',
         'unit_name': 'ZAPP0707',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibf7p6qhouk5h67dwtwkg3igtk35sjwyenveypmgnqziaeb4yxqdm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628247179.jpg',
         'background': 'Yellow',
         'body': 'Basic Jacket',
         'earring': 'Star',
@@ -17246,7 +17246,7 @@ ZAPPY_COLLECTION = {
     2628247535: {
         'name': 'Zappy #150',
         'unit_name': 'ZAPP0150',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiecclsz2ptq2gwzkl7jswwvnfjewfdzfzuw4getwtivyg7hqx3zte',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628247535.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Daisy',
@@ -17259,7 +17259,7 @@ ZAPPY_COLLECTION = {
     2628248000: {
         'name': 'Zappy #1096',
         'unit_name': 'ZAPP1096',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiav2lbeg33j52h6fcwdppse6g3kmopsxokylazmmcwea5tashq5d4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628248000.jpg',
         'background': 'Red',
         'body': 'Kimono',
         'earring': 'None',
@@ -17272,7 +17272,7 @@ ZAPPY_COLLECTION = {
     2628248349: {
         'name': 'Zappy #472',
         'unit_name': 'ZAPP0472',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihqhnoueqdp5dlgb544k5vlu4mmfrgoeoh2jmtlduwxl2l4p647ha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628248349.jpg',
         'background': 'Yellow',
         'body': 'Overalls',
         'earring': 'Rainbow',
@@ -17285,7 +17285,7 @@ ZAPPY_COLLECTION = {
     2628248936: {
         'name': 'Zappy #228',
         'unit_name': 'ZAPP0228',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicg6zjzxqp73pesmqq7aoixxek4thz3xzrweycqml4d5p2xvtm4j4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628248936.jpg',
         'background': 'Yellow',
         'body': 'Overalls',
         'earring': 'None',
@@ -17298,7 +17298,7 @@ ZAPPY_COLLECTION = {
     2628249184: {
         'name': 'Zappy #367',
         'unit_name': 'ZAPP0367',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibo6ltahb47pqcww666mhemlkqinqigzzpyiyo5jdlawq4pb3exou',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628249184.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Left Ring',
@@ -17311,7 +17311,7 @@ ZAPPY_COLLECTION = {
     2628277488: {
         'name': 'Zappy #2157',
         'unit_name': 'ZAPP2157',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibzjwsp2qb3ukyyqyeiefna4jhtgw2kqcusyomth2srq2zxxhmofq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628277488.jpg',
         'background': 'Blue',
         'body': 'Hawaiian Shirt',
         'earring': 'Skull',
@@ -17324,7 +17324,7 @@ ZAPPY_COLLECTION = {
     2628693714: {
         'name': 'Zappy #97',
         'unit_name': 'ZAPP0097',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigfplsdccw4p3hhzgmoo3fu34pjo6iwtcjav3eyf3okipe4423jji',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628693714.jpg',
         'background': 'Orange',
         'body': 'Fanny Pack',
         'earring': 'Carton Cup',
@@ -17337,7 +17337,7 @@ ZAPPY_COLLECTION = {
     2628693857: {
         'name': 'Zappy #32',
         'unit_name': 'ZAPP0032',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidvjyrelr6zuyubaqnezwmowcq7vo45j6s2qhw6ruumelnmh67jke',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628693857.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Zappies',
@@ -17350,7 +17350,7 @@ ZAPPY_COLLECTION = {
     2628694038: {
         'name': 'Zappy #2143',
         'unit_name': 'ZAPP2143',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifcqiuscnznsllhpelzhrtbw6eqywqnsdugitul726nb7g7dkvzsy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2628694038.jpg',
         'background': 'Blue',
         'body': 'Muscle Suit',
         'earring': 'Daisy',
@@ -17363,7 +17363,7 @@ ZAPPY_COLLECTION = {
     2629461421: {
         'name': 'Zappy #1069',
         'unit_name': 'ZAPP1069',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaz2xlx5u5nxfx7j2e5k2dggxukqvjd3ojjikh7itu2icjkdcvce4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629461421.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'Right Ring',
@@ -17376,7 +17376,7 @@ ZAPPY_COLLECTION = {
     2629461686: {
         'name': 'Zappy #249',
         'unit_name': 'ZAPP0249',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiablrhlkjv2fhitmuc5trlp2hew3xm6u47ncc3icwwg246y7h2tfq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629461686.jpg',
         'background': 'Green',
         'body': 'Overalls',
         'earring': 'Left Helix',
@@ -17389,7 +17389,7 @@ ZAPPY_COLLECTION = {
     2629461755: {
         'name': 'Zappy #1377',
         'unit_name': 'ZAPP1377',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibp5qtqjzva24lp77r25rjcdzojifyonfzjsp2jxmct4a7qhc6vvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629461755.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Left Ring',
@@ -17402,7 +17402,7 @@ ZAPPY_COLLECTION = {
     2629462055: {
         'name': 'Zappy #1106',
         'unit_name': 'ZAPP1106',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihwmn7qo5qpjcxouw3oawsoyxy443kxppbwxuunbqlachcsywmlcq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629462055.jpg',
         'background': 'Purple',
         'body': 'Turtleneck Sweater',
         'earring': 'Left Ring',
@@ -17415,7 +17415,7 @@ ZAPPY_COLLECTION = {
     2629477500: {
         'name': 'Zappy #1167',
         'unit_name': 'ZAPP1167',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig7qz7x5sqnpmx5w3rs2nqjae7tkhoezk3ge3627x77njx3dcubxq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629477500.jpg',
         'background': 'Blue',
         'body': 'Ribbon Tie',
         'earring': 'Pepper',
@@ -17428,7 +17428,7 @@ ZAPPY_COLLECTION = {
     2629477540: {
         'name': 'Zappy #236',
         'unit_name': 'ZAPP0236',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihhbuf4mkjbxh7mskopvtrxhd32d57sfgz3voav2gkob237sahg6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629477540.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Right Helix',
@@ -17441,7 +17441,7 @@ ZAPPY_COLLECTION = {
     2629477587: {
         'name': 'Zappy #1755',
         'unit_name': 'ZAPP1755',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicjsj35zk4ms6v42grpvv57gby3w5zxhbv5jvlusvi7terbaroiku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629477587.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Right Helix',
@@ -17454,7 +17454,7 @@ ZAPPY_COLLECTION = {
     2629477901: {
         'name': 'Zappy #1678',
         'unit_name': 'ZAPP1678',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbnnceqpbsqn4i4ootw2pkrxiaimqdzg23vyqsznhn6pzey6b7pa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629477901.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Hashtag',
@@ -17467,7 +17467,7 @@ ZAPPY_COLLECTION = {
     2629478226: {
         'name': 'Zappy #172',
         'unit_name': 'ZAPP0172',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifuq6a4qi4wpblqydjk5czrlyxruuypft2s7jms3aanrumkmrog6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629478226.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Happy',
@@ -17480,7 +17480,7 @@ ZAPPY_COLLECTION = {
     2629478366: {
         'name': 'Zappy #295',
         'unit_name': 'ZAPP0295',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia5ivt5aq2nxj7vqhfmfn7hx35ewuthduu5esaeubbdduzsvnxweq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629478366.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Strawberry',
@@ -17493,7 +17493,7 @@ ZAPPY_COLLECTION = {
     2629478695: {
         'name': 'Zappy #1948',
         'unit_name': 'ZAPP1948',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbv7em2lryhlgnx2rvpcdm6ei35ay6eprnacb4pilunp2qe6uuvm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629478695.jpg',
         'background': 'Blue',
         'body': 'Striped Sweater',
         'earring': 'Strawberry',
@@ -17506,7 +17506,7 @@ ZAPPY_COLLECTION = {
     2629478755: {
         'name': 'Zappy #11',
         'unit_name': 'ZAPP0011',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidbfth57s2sut65hfwzk77vqhl5ehlfnreot6vt5lgxqley7iejf4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629478755.jpg',
         'background': 'Blue',
         'body': 'Puffer Coat',
         'earring': 'Bananas',
@@ -17519,7 +17519,7 @@ ZAPPY_COLLECTION = {
     2629479086: {
         'name': 'Zappy #61',
         'unit_name': 'ZAPP0061',
-        'image_url': 'https://ipfs.io/ipfs/bafybeibejdla3xzwwjehrlpxl7jcqp2eao4kbhnertpderjtovtrcyqg4y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629479086.jpg',
         'background': 'Chroma',
         'body': 'Striped Sweater',
         'earring': 'Rainbow',
@@ -17532,7 +17532,7 @@ ZAPPY_COLLECTION = {
     2629479394: {
         'name': 'Zappy #2039',
         'unit_name': 'ZAPP2039',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidlgswosqm7psl343m3scb4qbz6peaw7g3d6ospua7wkiolpghv4i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629479394.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Ghost',
@@ -17545,7 +17545,7 @@ ZAPPY_COLLECTION = {
     2629479495: {
         'name': 'Zappy #1045',
         'unit_name': 'ZAPP1045',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihtizzdfxnjvvjbd4iv2rembwo3xtpbdzbwthkprvaky54olwwgku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629479495.jpg',
         'background': 'Blue',
         'body': 'Clouds',
         'earring': 'Party Popper',
@@ -17558,7 +17558,7 @@ ZAPPY_COLLECTION = {
     2629479796: {
         'name': 'Zappy #1641',
         'unit_name': 'ZAPP1641',
-        'image_url': 'https://ipfs.io/ipfs/bafkreide7vnbn2jzjq4hwmmjhxc3ctqnwfk7vp2atrm6ygv52pkrnajn74',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629479796.jpg',
         'background': 'Orange',
         'body': 'Warning Tape',
         'earring': 'Diamond',
@@ -17571,7 +17571,7 @@ ZAPPY_COLLECTION = {
     2629479875: {
         'name': 'Zappy #1877',
         'unit_name': 'ZAPP1877',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie4m26fuadhd7tdxjg3xmpriyeoszv5f7przxet3ipa4y7zucapum',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629479875.jpg',
         'background': 'Purple',
         'body': 'Puffer Coat',
         'earring': 'Hashtag',
@@ -17584,7 +17584,7 @@ ZAPPY_COLLECTION = {
     2629480226: {
         'name': 'Zappy #2000',
         'unit_name': 'ZAPP2000',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieigqn7gaa4kebajwx4m6wxrxzdm33w4tjpzz2gma6amtrvfw4xie',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629480226.jpg',
         'background': 'Blue',
         'body': 'Naked',
         'earring': 'Double Helix',
@@ -17597,7 +17597,7 @@ ZAPPY_COLLECTION = {
     2629480448: {
         'name': 'Zappy #1482',
         'unit_name': 'ZAPP1482',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif6kck2zzflojmznzlp7eeolhqzmp4n2rp6kwfbbt3dk2wingljpq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629480448.jpg',
         'background': 'Blue',
         'body': 'Wool Collar Jacket',
         'earring': 'Rainbow',
@@ -17610,7 +17610,7 @@ ZAPPY_COLLECTION = {
     2629480820: {
         'name': 'Zappy #1913',
         'unit_name': 'ZAPP1913',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib7ltuoxrgv4uyygy4ed32nfql5q5uunyr5kisgic4uqpqms7xim4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629480820.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Number One',
@@ -17623,7 +17623,7 @@ ZAPPY_COLLECTION = {
     2629481256: {
         'name': 'Zappy #174',
         'unit_name': 'ZAPP0174',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic5u73bssdqwicjdgafmar6qjql6pkcwybhci6nkdxzwy7k7ceoku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2629481256.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Left Ring',
@@ -17636,7 +17636,7 @@ ZAPPY_COLLECTION = {
     2631028477: {
         'name': 'Zappy #1385',
         'unit_name': 'ZAPP1385',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigdq7ijhxlxpbrnzhlb7v74wlhqbtkhdsiig42fkljkr4tartxahi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631028477.jpg',
         'background': 'Green',
         'body': 'Scarf',
         'earring': 'Rainbow',
@@ -17649,7 +17649,7 @@ ZAPPY_COLLECTION = {
     2631029121: {
         'name': 'Zappy #609',
         'unit_name': 'ZAPP0609',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieelul7zr52vxoll6mbowt3en7p3ykf7bimjyf6efec2p5dlbh3gm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631029121.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Serious',
@@ -17662,7 +17662,7 @@ ZAPPY_COLLECTION = {
     2631029832: {
         'name': 'Zappy #27',
         'unit_name': 'ZAPP0027',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif6lieia7e6kknsrzgh7ct7eh4bv2mjigvd42wufwn7tsxtskn3bi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631029832.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Daisy',
@@ -17675,7 +17675,7 @@ ZAPPY_COLLECTION = {
     2631030595: {
         'name': 'Zappy #821',
         'unit_name': 'ZAPP0821',
-        'image_url': 'https://ipfs.io/ipfs/bafkreievmzatx2xfqyyg2lavtkxnlayev4hu5qzrs427jvooippptdripq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631030595.jpg',
         'background': 'Red',
         'body': 'Scarf',
         'earring': 'Bananas',
@@ -17688,7 +17688,7 @@ ZAPPY_COLLECTION = {
     2631031386: {
         'name': 'Zappy #1481',
         'unit_name': 'ZAPP1481',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibz3oheck5pqdhgjhddzp633gpqvyn63qcz2lhfoekmcate4ecgta',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631031386.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'Happy',
@@ -17701,7 +17701,7 @@ ZAPPY_COLLECTION = {
     2631032022: {
         'name': 'Zappy #511',
         'unit_name': 'ZAPP0511',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnxoxy3vub25yidxagdfttkmkwuexvkd26hlanka5yxhtp5y4rmy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631032022.jpg',
         'background': 'Yellow',
         'body': 'Scarf',
         'earring': 'Skull',
@@ -17714,7 +17714,7 @@ ZAPPY_COLLECTION = {
     2631032494: {
         'name': 'Zappy #1579',
         'unit_name': 'ZAPP1579',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid3hrgrp223uixrnpvicjevmeb4n37lsfgzpooeuzcbcun5ykf74y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631032494.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'Hashtag',
@@ -17727,7 +17727,7 @@ ZAPPY_COLLECTION = {
     2631033450: {
         'name': 'Zappy #417',
         'unit_name': 'ZAPP0417',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiflf4ziw2pcb3jswf73frca5pajqvnyql5nwd25jhjhxupqqsn6h4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631033450.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Daisy',
@@ -17740,7 +17740,7 @@ ZAPPY_COLLECTION = {
     2631033891: {
         'name': 'Zappy #772',
         'unit_name': 'ZAPP0772',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie52s5vbysgjz6bz74fawjch5m4sebcbyzki3vpwvjellf3ltr5nm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631033891.jpg',
         'background': 'Orange',
         'body': 'Polo Shirt',
         'earring': 'Ghost',
@@ -17753,7 +17753,7 @@ ZAPPY_COLLECTION = {
     2631034880: {
         'name': 'Zappy #91',
         'unit_name': 'ZAPP0091',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidgxhbual34jcd3rdcokhl6oqr7sfc2d22tg22a2vcuzrqhwtybcu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631034880.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Happy',
@@ -17766,7 +17766,7 @@ ZAPPY_COLLECTION = {
     2631035537: {
         'name': 'Zappy #114',
         'unit_name': 'ZAPP0114',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiecin5cwdz2h5c7xfizycecufpgp7u7gecnsark6ov6takyqmsvdi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631035537.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Right Ring',
@@ -17779,7 +17779,7 @@ ZAPPY_COLLECTION = {
     2631036226: {
         'name': 'Zappy #1445',
         'unit_name': 'ZAPP1445',
-        'image_url': 'https://ipfs.io/ipfs/bafkreietzfadqzm5q4cibipxodsh2mmuoautkq3wuozfiq5uhlg5euvale',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631036226.jpg',
         'background': 'Blue',
         'body': 'Daisy Shirt',
         'earring': 'Party Popper',
@@ -17792,7 +17792,7 @@ ZAPPY_COLLECTION = {
     2631037043: {
         'name': 'Zappy #1454',
         'unit_name': 'ZAPP1454',
-        'image_url': 'https://ipfs.io/ipfs/bafybeifarqnjag3nm4zk5fh5oipvbgdw5clcf2eidcmqocd2ccth4pkz5i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631037043.jpg',
         'background': 'Chroma',
         'body': 'Polo Shirt',
         'earring': 'Serious',
@@ -17805,7 +17805,7 @@ ZAPPY_COLLECTION = {
     2631037872: {
         'name': 'Zappy #1371',
         'unit_name': 'ZAPP1371',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiamnl5nuv4xjrxmvcgc6kobvog2bb7bibkrmwaxsqpxf4qdrxcy7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631037872.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Bananas',
@@ -17818,7 +17818,7 @@ ZAPPY_COLLECTION = {
     2631038612: {
         'name': 'Zappy #649',
         'unit_name': 'ZAPP0649',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaanfhbjn7rbsgfo6v2nkp74lo2epqqyn3o4ixljdl63rm7uxgx3q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631038612.jpg',
         'background': 'Blue',
         'body': 'Fanny Pack',
         'earring': 'None',
@@ -17831,7 +17831,7 @@ ZAPPY_COLLECTION = {
     2631039027: {
         'name': 'Zappy #503',
         'unit_name': 'ZAPP0503',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif45uurgufylal6keljwpdmdb5zzhmh73hnypx3uou6fhbybfwosm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631039027.jpg',
         'background': 'Orange',
         'body': 'Striped Sweater',
         'earring': 'Pyramid',
@@ -17844,7 +17844,7 @@ ZAPPY_COLLECTION = {
     2631039328: {
         'name': 'Zappy #682',
         'unit_name': 'ZAPP0682',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibvoo4sgabstug2him5urk5rvllk3t7p5fy22ozqpbasslnccbrge',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631039328.jpg',
         'background': 'Orange',
         'body': 'Leather Vest',
         'earring': 'Lightning',
@@ -17857,7 +17857,7 @@ ZAPPY_COLLECTION = {
     2631039621: {
         'name': 'Zappy #755',
         'unit_name': 'ZAPP0755',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigu4abfg5edal3tqpclgz2tzzlsyc5firdpt5n27apxkgc573xqpy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631039621.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Double Helix',
@@ -17870,7 +17870,7 @@ ZAPPY_COLLECTION = {
     2631040151: {
         'name': 'Zappy #1543',
         'unit_name': 'ZAPP1543',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiddtty5ulk7ltqpibraykpedbgybmvhasuzgpxp2s2lubmxzvs63a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631040151.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Happy',
@@ -17883,7 +17883,7 @@ ZAPPY_COLLECTION = {
     2631041525: {
         'name': 'Zappy #1501',
         'unit_name': 'ZAPP1501',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifq7cy5jfpinwjhofqnjw4jc7xod7b55wabtblw6rrc3fds56zrii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631041525.jpg',
         'background': 'Purple',
         'body': 'Striped Sweater',
         'earring': 'Number One',
@@ -17896,7 +17896,7 @@ ZAPPY_COLLECTION = {
     2631418462: {
         'name': 'Zappy #143',
         'unit_name': 'ZAPP0143',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgsmdlw6jyle4h4hwehcj4gcppi2htlcbek3loc7dphkbzxyckkm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631418462.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Knife',
@@ -17909,7 +17909,7 @@ ZAPPY_COLLECTION = {
     2631418658: {
         'name': 'Zappy #43',
         'unit_name': 'ZAPP0043',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihck3236j7iu5dydzwsjhvc7pdytkhu3rfpuosf3bzt4kp3parhby',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631418658.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Pyramid',
@@ -17922,7 +17922,7 @@ ZAPPY_COLLECTION = {
     2631418788: {
         'name': 'Zappy #473',
         'unit_name': 'ZAPP0473',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieenmqjkl2fkun7jskvdh4z4ojtcgtjmewebu3lo4kzajmx6cllvu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631418788.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Zappies',
@@ -17935,7 +17935,7 @@ ZAPPY_COLLECTION = {
     2631419091: {
         'name': 'Zappy #44',
         'unit_name': 'ZAPP0044',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidij52kip7pls6jt23dmy67gmxdlwzs3mdf34gqliqdwufzhx5rwu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631419091.jpg',
         'background': 'Purple',
         'body': 'Trash Can',
         'earring': 'Pepper',
@@ -17948,7 +17948,7 @@ ZAPPY_COLLECTION = {
     2631419259: {
         'name': 'Zappy #335',
         'unit_name': 'ZAPP0335',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidnyarda2l335jaalbi5pkr4rjgjxvyulwt6dky45v3uk3r3ovqku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631419259.jpg',
         'background': 'Blue',
         'body': 'Leather Vest',
         'earring': 'Star',
@@ -17961,7 +17961,7 @@ ZAPPY_COLLECTION = {
     2631427542: {
         'name': 'Zappy #1025',
         'unit_name': 'ZAPP1025',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicgbjpdci7cqmw4emikfcjyc3flgrrbrrbby7q2bosz5nmybjy63q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631427542.jpg',
         'background': 'Green',
         'body': 'Hoodie',
         'earring': 'Star',
@@ -17974,7 +17974,7 @@ ZAPPY_COLLECTION = {
     2631427597: {
         'name': 'Zappy #820',
         'unit_name': 'ZAPP0820',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihhcfavnscbjbmg34hy7nnu7nqxllnrk7piqwzlonswnjbw6tlddy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631427597.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Pepper',
@@ -17987,7 +17987,7 @@ ZAPPY_COLLECTION = {
     2631427696: {
         'name': 'Zappy #1043',
         'unit_name': 'ZAPP1043',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiggdjiynxj5a2h2h5olj3dk25xsd4gcjg6pxfef4f6cf4jmnc2d34',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631427696.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Serious',
@@ -18000,7 +18000,7 @@ ZAPPY_COLLECTION = {
     2631427755: {
         'name': 'Zappy #539',
         'unit_name': 'ZAPP0539',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieyweulhdi7xbxn2vlqpxpuxm2r3hlntrdykwyea25tndgjx7ahqe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631427755.jpg',
         'background': 'Red',
         'body': 'Oversize Sweater',
         'earring': 'Serious',
@@ -18013,7 +18013,7 @@ ZAPPY_COLLECTION = {
     2631428733: {
         'name': 'Zappy #721',
         'unit_name': 'ZAPP0721',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidjmy5nba73eu64zea4f56ik66wvvafa44bamrsz4ws5q3dmxbxzq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631428733.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'Sunrise',
@@ -18026,7 +18026,7 @@ ZAPPY_COLLECTION = {
     2631435047: {
         'name': 'Zappy #1294',
         'unit_name': 'ZAPP1294',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihftdgwku25u57n5eurhcwsgb5x6nr62h6tjdgfthzg7pblvgycma',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631435047.jpg',
         'background': 'Blue',
         'body': 'Choker',
         'earring': 'Rainbow',
@@ -18039,7 +18039,7 @@ ZAPPY_COLLECTION = {
     2631435174: {
         'name': 'Zappy #1118',
         'unit_name': 'ZAPP1118',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia2ivi7tiiuvj2eri5tkzhu4xzs3fpemzo7enm46rv7kp42rthd4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631435174.jpg',
         'background': 'Green',
         'body': 'Colorful Jacket',
         'earring': 'Party Popper',
@@ -18052,7 +18052,7 @@ ZAPPY_COLLECTION = {
     2631435328: {
         'name': 'Zappy #1331',
         'unit_name': 'ZAPP1331',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicoxpppowzwipkpyn4gbtv33nigyqsezisj5z7myr4cz2jab5w2cu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631435328.jpg',
         'background': 'Orange',
         'body': 'Warning Tape',
         'earring': 'Pepper',
@@ -18065,7 +18065,7 @@ ZAPPY_COLLECTION = {
     2631435729: {
         'name': 'Zappy #1275',
         'unit_name': 'ZAPP1275',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiff6dspdabvrv6d3pkw4b4wuu3iowwwvwbxmjmuyqmqeh3jf3rqia',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631435729.jpg',
         'background': 'Yellow',
         'body': 'Polo Shirt',
         'earring': 'Sunrise',
@@ -18078,7 +18078,7 @@ ZAPPY_COLLECTION = {
     2631435864: {
         'name': 'Zappy #1177',
         'unit_name': 'ZAPP1177',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie5wovigvdvmtsq2gpaelzkcd2gtam5vfsnsst3q3o4x7e2r6nenu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631435864.jpg',
         'background': 'Blue',
         'body': 'Daisy Shirt',
         'earring': 'Happy',
@@ -18091,7 +18091,7 @@ ZAPPY_COLLECTION = {
     2631443771: {
         'name': 'Zappy #2010',
         'unit_name': 'ZAPP2010',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicqsa2hca5nrm5opdzndmehwrbf3mg4cgggmlx676fsh5sip4pls4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631443771.jpg',
         'background': 'Orange',
         'body': 'Muscle Suit',
         'earring': 'Double Helix',
@@ -18104,7 +18104,7 @@ ZAPPY_COLLECTION = {
     2631443854: {
         'name': 'Zappy #1592',
         'unit_name': 'ZAPP1592',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif2y7vr4egud2x3ixibztidqidkx5r54bty6xsbe6srssw4s2if2y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631443854.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Lightning',
@@ -18117,7 +18117,7 @@ ZAPPY_COLLECTION = {
     2631443921: {
         'name': 'Zappy #1867',
         'unit_name': 'ZAPP1867',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib6sa3jxyobm5wkynpxph5gmlyziqe7a4fh3dfg62ezqkm3ovovoq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631443921.jpg',
         'background': 'Green',
         'body': 'Oversize Sweater',
         'earring': 'Skull',
@@ -18130,7 +18130,7 @@ ZAPPY_COLLECTION = {
     2631443992: {
         'name': 'Zappy #1529',
         'unit_name': 'ZAPP1529',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia43gphiyt22oxtdxyx5gbq7dtyecdhaui7tf5ppusp4atgvcsbs4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631443992.jpg',
         'background': 'Green',
         'body': 'Oversize Sweater',
         'earring': 'Sunrise',
@@ -18143,7 +18143,7 @@ ZAPPY_COLLECTION = {
     2631444302: {
         'name': 'Zappy #1370',
         'unit_name': 'ZAPP1370',
-        'image_url': 'https://ipfs.io/ipfs/bafybeia7raj7jsbk5ktftjghivctna4q3py3pmgusuhwdcby3uxh7wl3la',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631444302.jpg',
         'background': 'Chroma',
         'body': 'Ribbon Tie',
         'earring': 'Star',
@@ -18156,7 +18156,7 @@ ZAPPY_COLLECTION = {
     2631449203: {
         'name': 'Zappy #2202',
         'unit_name': 'ZAPP2202',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifeg5eou24bfx7ubnjwt3vpt5qk3mbbvlx5bj4bgumwcgtbrt623m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2631449203.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Diamond',
@@ -18169,7 +18169,7 @@ ZAPPY_COLLECTION = {
     2638755604: {
         'name': 'Zappy #1088',
         'unit_name': 'ZAPP1088',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidmar4rn5qftp4fv2c76nhx7zummydp7m5skxmcndnbfmnrpssn4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2638755604.jpg',
         'background': 'Green',
         'body': 'Cat Suit',
         'earring': 'Serious',
@@ -18182,7 +18182,7 @@ ZAPPY_COLLECTION = {
     2638755795: {
         'name': 'Zappy #700',
         'unit_name': 'ZAPP0700',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifp7y2s2pkdzxqw2tzt624vtlh4pmrkomfafre3g4n4dyd5mpgwga',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2638755795.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Hashtag',
@@ -18195,7 +18195,7 @@ ZAPPY_COLLECTION = {
     2638756370: {
         'name': 'Zappy #916',
         'unit_name': 'ZAPP0916',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihsgwymgm6xtrhythkdhlzm6l3adqaimctvyfbkewgxev6w5uxvw4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2638756370.jpg',
         'background': 'Purple',
         'body': 'Armband',
         'earring': 'Daisy',
@@ -18208,7 +18208,7 @@ ZAPPY_COLLECTION = {
     2638760141: {
         'name': 'Zappy #1088',
         'unit_name': 'ZAPP1088',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidmar4rn5qftp4fv2c76nhx7zummydp7m5skxmcndnbfmnrpssn4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2638760141.jpg',
         'background': 'Green',
         'body': 'Cat Suit',
         'earring': 'Serious',
@@ -18221,7 +18221,7 @@ ZAPPY_COLLECTION = {
     2638760220: {
         'name': 'Zappy #700',
         'unit_name': 'ZAPP0700',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifp7y2s2pkdzxqw2tzt624vtlh4pmrkomfafre3g4n4dyd5mpgwga',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2638760220.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Hashtag',
@@ -18234,7 +18234,7 @@ ZAPPY_COLLECTION = {
     2638760360: {
         'name': 'Zappy #916',
         'unit_name': 'ZAPP0916',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihsgwymgm6xtrhythkdhlzm6l3adqaimctvyfbkewgxev6w5uxvw4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2638760360.jpg',
         'background': 'Purple',
         'body': 'Armband',
         'earring': 'Daisy',
@@ -18247,7 +18247,7 @@ ZAPPY_COLLECTION = {
     2643171514: {
         'name': 'Zappy #69',
         'unit_name': 'ZAPP0069',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicm3z4wdipccxr64ezolv5p7kca7clo6uzvsng543mynviiijmlba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643171514.jpg',
         'background': 'Orange',
         'body': 'Oversize Sweater',
         'earring': 'Number One',
@@ -18260,7 +18260,7 @@ ZAPPY_COLLECTION = {
     2643178751: {
         'name': 'Zappy #1665',
         'unit_name': 'ZAPP1665',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicrf42dmepqb4avarg5p5kqg4aeq4jm7hh5rvzktwq5nr5ioqm6qi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643178751.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Right Ring',
@@ -18273,7 +18273,7 @@ ZAPPY_COLLECTION = {
     2643178813: {
         'name': 'Zappy #1504',
         'unit_name': 'ZAPP1504',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibfnxrpdmbjwmh2sf5etzgjrsdoq3dznsrcxk2trttkvhztksqcq4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643178813.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Pepper',
@@ -18286,7 +18286,7 @@ ZAPPY_COLLECTION = {
     2643178996: {
         'name': 'Zappy #440',
         'unit_name': 'ZAPP0440',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicmbirbt5dxxcihe6eys2jp36m6wunyjuzpkxekku7edgc5qtcyoy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643178996.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Pyramid',
@@ -18299,7 +18299,7 @@ ZAPPY_COLLECTION = {
     2643179087: {
         'name': 'Zappy #1245',
         'unit_name': 'ZAPP1245',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie56crhdcwasmtw2yzy5qwxrvbdxatz55lh6gz7ctde6jhqnsqfy4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643179087.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Zappies',
@@ -18312,7 +18312,7 @@ ZAPPY_COLLECTION = {
     2643179250: {
         'name': 'Zappy #788',
         'unit_name': 'ZAPP0788',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigpg2mv4u2notlsoyhzf4gadu5iys5xc4bbmev6gci4teqhjq4bhi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643179250.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Right Helix',
@@ -18325,7 +18325,7 @@ ZAPPY_COLLECTION = {
     2643179492: {
         'name': 'Zappy #2025',
         'unit_name': 'ZAPP2025',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid6u7yhv6cbogr222all2orrmqlbbojh2sed3ipjsdul377hc7yre',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643179492.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Zappies',
@@ -18338,7 +18338,7 @@ ZAPPY_COLLECTION = {
     2643179543: {
         'name': 'Zappy #131',
         'unit_name': 'ZAPP0131',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigfl727ew35ru6v5atujw6czl6l53thzc6ud7appuzh6kwrocukbe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643179543.jpg',
         'background': 'Green',
         'body': 'Polo Overalls',
         'earring': 'Pepper',
@@ -18351,7 +18351,7 @@ ZAPPY_COLLECTION = {
     2643179717: {
         'name': 'Zappy #1387',
         'unit_name': 'ZAPP1387',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieimctdwwynidh4jbayovniyczgg4kfnnwb6oe4hky3xnms6ptzka',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643179717.jpg',
         'background': 'Purple',
         'body': 'Bowling Shirt',
         'earring': 'Happy',
@@ -18364,7 +18364,7 @@ ZAPPY_COLLECTION = {
     2643179774: {
         'name': 'Zappy #2077',
         'unit_name': 'ZAPP2077',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihjzv4scopouwyzunwt3etzu34xpqoxcpsecin4wo53btcphvv2ta',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643179774.jpg',
         'background': 'Blue',
         'body': 'Ribbon Tie',
         'earring': 'Knife',
@@ -18377,7 +18377,7 @@ ZAPPY_COLLECTION = {
     2643179954: {
         'name': 'Zappy #2080',
         'unit_name': 'ZAPP2080',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifotdb5v5d3pzdj6v6y3dwtqtuyn2m656dkvpbkehhzqh7epjfaya',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643179954.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Hashtag',
@@ -18390,7 +18390,7 @@ ZAPPY_COLLECTION = {
     2643180040: {
         'name': 'Zappy #749',
         'unit_name': 'ZAPP0749',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidrw7zq4qwmhuwzfdnuk7icrf2hplelhjf6jpds2uz6c64vmwiwtq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643180040.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'None',
@@ -18403,7 +18403,7 @@ ZAPPY_COLLECTION = {
     2643180112: {
         'name': 'Zappy #1051',
         'unit_name': 'ZAPP1051',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidj57riwfrivvtebwdksyqf73izooyip4tqmh5bi2rjw2npgykbjm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643180112.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Knife',
@@ -18416,7 +18416,7 @@ ZAPPY_COLLECTION = {
     2643180205: {
         'name': 'Zappy #1460',
         'unit_name': 'ZAPP1460',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibcirotdnfh6ymilxcv226mqkzkkvfc7j2y3s2oixleo4t452jxkq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643180205.jpg',
         'background': 'Green',
         'body': 'Armor',
         'earring': 'Left Helix',
@@ -18429,7 +18429,7 @@ ZAPPY_COLLECTION = {
     2643180406: {
         'name': 'Zappy #134',
         'unit_name': 'ZAPP0134',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihcbkqnvmeurvqfsynwrwioz4qxdydaxqoy4ecyowtrmtlg5irviq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643180406.jpg',
         'background': 'Purple',
         'body': 'Hoodie',
         'earring': 'Star',
@@ -18442,7 +18442,7 @@ ZAPPY_COLLECTION = {
     2643204010: {
         'name': 'Zappy #1447',
         'unit_name': 'ZAPP1447',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia2cn6eq2rollwo2irokjem3yibsq45pikqmelvdjk2p3bdgxv3n4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643204010.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Hashtag',
@@ -18455,7 +18455,7 @@ ZAPPY_COLLECTION = {
     2643204145: {
         'name': 'Zappy #477',
         'unit_name': 'ZAPP0477',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib7npkoqockf6gvih4hadbzf4fjbu2qj4rvmxguthxulpt2i3ky7u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643204145.jpg',
         'background': 'Purple',
         'body': 'Armband',
         'earring': 'Number One',
@@ -18468,7 +18468,7 @@ ZAPPY_COLLECTION = {
     2643427016: {
         'name': 'Zappy #745',
         'unit_name': 'ZAPP0745',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibw726rciidhekqnjaka2o3vvtpnpcwtvsgipq3lnkltwlcg4gjei',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643427016.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Daisy',
@@ -18481,7 +18481,7 @@ ZAPPY_COLLECTION = {
     2643427202: {
         'name': 'Zappy #1433',
         'unit_name': 'ZAPP1433',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig55yhydq4b6amy7qbkcf36rqax37q3cfy6jits7e7dmpki3xtp2y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643427202.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Diamond',
@@ -18494,7 +18494,7 @@ ZAPPY_COLLECTION = {
     2643427397: {
         'name': 'Zappy #1049',
         'unit_name': 'ZAPP1049',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibnszdf3jsuvmgpez6xtybwm72u5kipaiwdagsgjc7kjrbdecfm34',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643427397.jpg',
         'background': 'Red',
         'body': 'Daisy Shirt',
         'earring': 'Pepper',
@@ -18507,7 +18507,7 @@ ZAPPY_COLLECTION = {
     2643427561: {
         'name': 'Zappy #1530',
         'unit_name': 'ZAPP1530',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnki2x6eitros6gshnhbs5rlwmfvvfzgyfa5bvavquzhkhxj3rvu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643427561.jpg',
         'background': 'Blue',
         'body': 'Puffer Coat',
         'earring': 'Serious',
@@ -18520,7 +18520,7 @@ ZAPPY_COLLECTION = {
     2643427649: {
         'name': 'Zappy #1061',
         'unit_name': 'ZAPP1061',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibhmit7ulpirj6dllyzap3ekob4zkfofkk3cx7djdo4cuvcuvx5fm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643427649.jpg',
         'background': 'Green',
         'body': 'Muscle Suit',
         'earring': 'Zappies',
@@ -18533,7 +18533,7 @@ ZAPPY_COLLECTION = {
     2643440889: {
         'name': 'Zappy #1675',
         'unit_name': 'ZAPP1675',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiatarl4kdrpa55lniauq3gfnr7yr5bzyjugv3epchjnfxteq3pq3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643440889.jpg',
         'background': 'Red',
         'body': 'Tracksuit Top',
         'earring': 'Carton Cup',
@@ -18546,7 +18546,7 @@ ZAPPY_COLLECTION = {
     2643441010: {
         'name': 'Zappy #1882',
         'unit_name': 'ZAPP1882',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieamyauytdcrwnonie6mel63vujznzxtmzc6x3bollsqn6ao7bd3u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643441010.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Bananas',
@@ -18559,7 +18559,7 @@ ZAPPY_COLLECTION = {
     2643441118: {
         'name': 'Zappy #1645',
         'unit_name': 'ZAPP1645',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigr3b4fb34clstwf5sucbg6v6eaw6ttwdsmjffxquvktybio4t5im',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643441118.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'Strawberry',
@@ -18572,7 +18572,7 @@ ZAPPY_COLLECTION = {
     2643522385: {
         'name': 'Zappy #1261',
         'unit_name': 'ZAPP1261',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiedntksoms63ibhxiwv3akaubjm6tqy3zqcnozty3fngxutlpg4ae',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643522385.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Hashtag',
@@ -18585,7 +18585,7 @@ ZAPPY_COLLECTION = {
     2643522457: {
         'name': 'Zappy #857',
         'unit_name': 'ZAPP0857',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibx23xia3ovzlzzfasp5hz2ngqmzf7cr36xotsoaqo2yihxpuyrm4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643522457.jpg',
         'background': 'Green',
         'body': 'Turtleneck Sweater',
         'earring': 'Skull',
@@ -18598,7 +18598,7 @@ ZAPPY_COLLECTION = {
     2643522825: {
         'name': 'Zappy #53',
         'unit_name': 'ZAPP0053',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib4qewojepown5yu2jjw6r2dl6d4idg7oymycsu4id3t655hl4q5e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643522825.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Pepper',
@@ -18611,7 +18611,7 @@ ZAPPY_COLLECTION = {
     2643523547: {
         'name': 'Zappy #378',
         'unit_name': 'ZAPP0378',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifyddbdaost6qw3wprcuwcfghugmpxwar77xlu4sbmabjcqteudly',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643523547.jpg',
         'background': 'Green',
         'body': 'Oversize Sweater',
         'earring': 'None',
@@ -18624,7 +18624,7 @@ ZAPPY_COLLECTION = {
     2643887591: {
         'name': 'Zappy #1966',
         'unit_name': 'ZAPP1966',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicyb3eh464rpsyzga7khcwwboqrdvsmwm5giy2pm4fkezl4o66jcq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643887591.jpg',
         'background': 'Purple',
         'body': 'Kimono',
         'earring': 'Right Helix',
@@ -18637,7 +18637,7 @@ ZAPPY_COLLECTION = {
     2643983379: {
         'name': 'Zappy #1035',
         'unit_name': 'ZAPP1035',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifpfd7qmivamrzzegyiek73rcrzgv3yyg4vsijlaf35glzdldjfu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2643983379.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Daisy',
@@ -18650,7 +18650,7 @@ ZAPPY_COLLECTION = {
     2644034758: {
         'name': 'Zappy #49',
         'unit_name': 'ZAPP0049',
-        'image_url': 'https://ipfs.io/ipfs/bafkreif7pxt7xnbnbz3itlrwcfx6dlclqpg5c6rdk2f5asf6tbjjw27wj4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644034758.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Carton Cup',
@@ -18663,7 +18663,7 @@ ZAPPY_COLLECTION = {
     2644039660: {
         'name': 'Zappy #1474',
         'unit_name': 'ZAPP1474',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibn7xapqzlzf2g7qj2zxsteisiwafuimn2x25jjha3kojzwdibn44',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644039660.jpg',
         'background': 'Orange',
         'body': 'Armband',
         'earring': 'Ghost',
@@ -18676,7 +18676,7 @@ ZAPPY_COLLECTION = {
     2644039924: {
         'name': 'Zappy #1679',
         'unit_name': 'ZAPP1679',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidn5ykytxkwf5dhm2amk7ac2uxhw6taja6ke6hibsiyjxiugcsof4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644039924.jpg',
         'background': 'Yellow',
         'body': 'Daisy Shirt',
         'earring': 'Zappies',
@@ -18689,7 +18689,7 @@ ZAPPY_COLLECTION = {
     2644040363: {
         'name': 'Zappy #1050',
         'unit_name': 'ZAPP1050',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig4uqv6kpew5rwqr5hpnlje5p2fzgjzt5hv32of6wxfjkcggarpze',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644040363.jpg',
         'background': 'Purple',
         'body': 'Rabbit Suit',
         'earring': 'Carton Cup',
@@ -18702,7 +18702,7 @@ ZAPPY_COLLECTION = {
     2644040786: {
         'name': 'Zappy #241',
         'unit_name': 'ZAPP0241',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieyubru6gvqerz6swzmp3sw5j7eoavguwbgekrwzen2ee4szwl6eq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644040786.jpg',
         'background': 'Red',
         'body': 'Clouds',
         'earring': 'Zappies',
@@ -18715,7 +18715,7 @@ ZAPPY_COLLECTION = {
     2644041112: {
         'name': 'Zappy #374',
         'unit_name': 'ZAPP0374',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibozb2buzy4klhcr2ue24iyn2hbvo7bckf4jbwsr2rhugciy7a24u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644041112.jpg',
         'background': 'Green',
         'body': 'Daisy Shirt',
         'earring': 'None',
@@ -18728,7 +18728,7 @@ ZAPPY_COLLECTION = {
     2644041192: {
         'name': 'Zappy #1139',
         'unit_name': 'ZAPP1139',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiggsnbc7gxtmdtxjwcq5hbepsm5tzgdewhgldxumr35qibk6qv46m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644041192.jpg',
         'background': 'Green',
         'body': 'Ribbon Tie',
         'earring': 'Left Ring',
@@ -18741,7 +18741,7 @@ ZAPPY_COLLECTION = {
     2644041549: {
         'name': 'Zappy #1039',
         'unit_name': 'ZAPP1039',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihlbzmxqbubeilhlbbr24wjc7bn54szqctccfcd27le5qdtvpk274',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644041549.jpg',
         'background': 'Green',
         'body': 'Fanny Pack',
         'earring': 'Right Helix',
@@ -18754,7 +18754,7 @@ ZAPPY_COLLECTION = {
     2644041659: {
         'name': 'Zappy #1411',
         'unit_name': 'ZAPP1411',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifuugv5q4wamseilrskat4w5nycts3pxw6ry3wk3blu2be7je3sxu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644041659.jpg',
         'background': 'Purple',
         'body': 'Muscle Suit',
         'earring': 'Carton Cup',
@@ -18767,7 +18767,7 @@ ZAPPY_COLLECTION = {
     2644041968: {
         'name': 'Zappy #123',
         'unit_name': 'ZAPP0123',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihmvkiug3avdnhhbkrrjfmg6pymet2t64wmm4n6y3vb5n7y6zvnpy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644041968.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Lightning',
@@ -18780,7 +18780,7 @@ ZAPPY_COLLECTION = {
     2644042218: {
         'name': 'Zappy #868',
         'unit_name': 'ZAPP0868',
-        'image_url': 'https://ipfs.io/ipfs/bafkreielzpijm7r3fmcowyqwtobx22ejxhncaseuwsmogiikg6m454ltby',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644042218.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Happy',
@@ -18793,7 +18793,7 @@ ZAPPY_COLLECTION = {
     2644042337: {
         'name': 'Zappy #42',
         'unit_name': 'ZAPP0042',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifx7gptgzboouwvlnyzativnlnnmvzfvozbssajlwqpxejtn4wese',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644042337.jpg',
         'background': 'Purple',
         'body': 'Crocodile Suit',
         'earring': 'Sad',
@@ -18806,7 +18806,7 @@ ZAPPY_COLLECTION = {
     2644042639: {
         'name': 'Zappy #854',
         'unit_name': 'ZAPP0854',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibutqqquikiw5fsikguaob5pn4ouepfoaq5oidikwjxynggtm6cxe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644042639.jpg',
         'background': 'Blue',
         'body': 'Leather Vest',
         'earring': 'Right Ring',
@@ -18819,7 +18819,7 @@ ZAPPY_COLLECTION = {
     2644045698: {
         'name': 'Zappy #154',
         'unit_name': 'ZAPP0154',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigcscrkjzk6m6xvboflutqesk7r2fpaks24xgtrsutah3xsbfmo5y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644045698.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Number One',
@@ -18832,7 +18832,7 @@ ZAPPY_COLLECTION = {
     2644045782: {
         'name': 'Zappy #552',
         'unit_name': 'ZAPP0552',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibjw2gqmi7ntupu52nb7lz6f4sm6bse6ehmxpstemo5pelxurze6u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2644045782.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Strawberry',
@@ -18845,7 +18845,7 @@ ZAPPY_COLLECTION = {
     2645163571: {
         'name': 'Zappy #1624',
         'unit_name': 'ZAPP1624',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihuis2xtjm5h6este3qmfgyhy7uyegkyapzp6yd2ensnltpizybau',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2645163571.jpg',
         'background': 'Purple',
         'body': 'Trench Coat',
         'earring': 'Twin Rings',
@@ -18858,7 +18858,7 @@ ZAPPY_COLLECTION = {
     2645163663: {
         'name': 'Zappy #1608',
         'unit_name': 'ZAPP1608',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieqbjdbd75qve2tgayx6gnt2dcntqzquxnicfequpdromdn2el5dm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2645163663.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Strawberry',
@@ -18871,7 +18871,7 @@ ZAPPY_COLLECTION = {
     2645163760: {
         'name': 'Zappy #1866',
         'unit_name': 'ZAPP1866',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiczk5ikyzcidfa4zrjp67wtokrjaewskjdodhzszgnjjbk2zo4dy4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2645163760.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Skull',
@@ -18884,7 +18884,7 @@ ZAPPY_COLLECTION = {
     2645163841: {
         'name': 'Zappy #1917',
         'unit_name': 'ZAPP1917',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifwjbdq6ojhzusp7lpigrpiuf26u3nxqu5gvpr7wyiizqwcfvmhcu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2645163841.jpg',
         'background': 'Blue',
         'body': 'Striped Sweater',
         'earring': 'Rainbow',
@@ -18897,7 +18897,7 @@ ZAPPY_COLLECTION = {
     2645163940: {
         'name': 'Zappy #2049',
         'unit_name': 'ZAPP2049',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid6vuj6xrxxtwgoko7mmg5y5uuy7ufxics76rssiyj7tczw6vbq6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2645163940.jpg',
         'background': 'Green',
         'body': 'Ribbon Tie',
         'earring': 'Star',
@@ -18910,7 +18910,7 @@ ZAPPY_COLLECTION = {
     2645163989: {
         'name': 'Zappy #2156',
         'unit_name': 'ZAPP2156',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihcqyxa3mn2iabkgx2xlz37z6dqkyext62kutxkj35qh7zi5fxruq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2645163989.jpg',
         'background': 'Yellow',
         'body': 'Sleeveless Shirt',
         'earring': 'Pyramid',
@@ -18923,7 +18923,7 @@ ZAPPY_COLLECTION = {
     2645164545: {
         'name': 'Zappy #1707',
         'unit_name': 'ZAPP1707',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifqrf3h5bazupjmwtkbpvr2fot3y3lzgf2hjnulajiemj4kjpinjy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2645164545.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Sad',
@@ -18936,7 +18936,7 @@ ZAPPY_COLLECTION = {
     2645164650: {
         'name': 'Zappy #1659',
         'unit_name': 'ZAPP1659',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibpibtld32fawxideus7tetzx5ioftwo3wpilyu2cfok2wz5vqyoe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2645164650.jpg',
         'background': 'Red',
         'body': 'Turtleneck Sweater',
         'earring': 'Hashtag',
@@ -18949,7 +18949,7 @@ ZAPPY_COLLECTION = {
     2648271086: {
         'name': 'Zappy #1725',
         'unit_name': 'ZAPP1725',
-        'image_url': 'https://ipfs.io/ipfs/bafkreici7keyzocbrxee42dfluhozzir5tjpeo6vzgukgevbkciuwcgkwy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648271086.jpg',
         'background': 'Red',
         'body': 'Naked',
         'earring': 'Sad',
@@ -18962,7 +18962,7 @@ ZAPPY_COLLECTION = {
     2648271199: {
         'name': 'Zappy #2181',
         'unit_name': 'ZAPP2181',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiek6x7nocgknbojvklugrglgq3u3f7ofibyagyi3qx45lty6m5bta',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648271199.jpg',
         'background': 'Yellow',
         'body': 'Scarf',
         'earring': 'Hashtag',
@@ -18975,7 +18975,7 @@ ZAPPY_COLLECTION = {
     2648271317: {
         'name': 'Zappy #1151',
         'unit_name': 'ZAPP1151',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihucuxwn7e4w6phrtpelom7wjk3jgso7gl3nuhppv5wks3impawqe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648271317.jpg',
         'background': 'Red',
         'body': 'Bowling Shirt',
         'earring': 'Pyramid',
@@ -18988,7 +18988,7 @@ ZAPPY_COLLECTION = {
     2648271536: {
         'name': 'Zappy #129',
         'unit_name': 'ZAPP0129',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifivyzveo2qqnsuptz5m5xumwzeqgrzegzfg5p2rpvq4xgikmpoj4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648271536.jpg',
         'background': 'Purple',
         'body': 'Polo Overalls',
         'earring': 'Rainbow',
@@ -19001,7 +19001,7 @@ ZAPPY_COLLECTION = {
     2648271723: {
         'name': 'Zappy #992',
         'unit_name': 'ZAPP0992',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiakxiodubqxjdyapw4xf4phnyr6kgshtk3pup3zmchxsqll2xa63q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648271723.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Lightning',
@@ -19014,7 +19014,7 @@ ZAPPY_COLLECTION = {
     2648271861: {
         'name': 'Zappy #78',
         'unit_name': 'ZAPP0078',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihw3yrfqztbhyehlsiuqz33anepnroaplwk6yacrtbx22itog3nca',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648271861.jpg',
         'background': 'Blue',
         'body': 'Sweater',
         'earring': 'Right Helix',
@@ -19027,7 +19027,7 @@ ZAPPY_COLLECTION = {
     2648271913: {
         'name': 'Zappy #774',
         'unit_name': 'ZAPP0774',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieamdrr5imqnghjcyq2i6myl5qdv7htxhmm2lqa2guy3i4itzazl4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648271913.jpg',
         'background': 'Red',
         'body': 'Wool Collar Jacket',
         'earring': 'Happy',
@@ -19040,7 +19040,7 @@ ZAPPY_COLLECTION = {
     2648271989: {
         'name': 'Zappy #435',
         'unit_name': 'ZAPP0435',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiecvwflf74p55vv2itvpp2eidvccqtmp3rst3t2wded2z5nob6wom',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648271989.jpg',
         'background': 'Red',
         'body': 'Sweater',
         'earring': 'Serious',
@@ -19053,7 +19053,7 @@ ZAPPY_COLLECTION = {
     2648333711: {
         'name': 'Zappy #726',
         'unit_name': 'ZAPP0726',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicoav3vrbw3vi4lg7gb2opcew45nprqvkwze4h7ccqsripuwozeey',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648333711.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Bananas',
@@ -19066,7 +19066,7 @@ ZAPPY_COLLECTION = {
     2648535507: {
         'name': 'Zappy #1337',
         'unit_name': 'ZAPP1337',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidopizxikowxlz24hxtv2sxlm34vd4ueicuaob4pq7ucv4ynctafi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648535507.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Right Ring',
@@ -19079,7 +19079,7 @@ ZAPPY_COLLECTION = {
     2648940225: {
         'name': 'Zappy #1587',
         'unit_name': 'ZAPP1587',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiemeikvwi76k7arhxcxfznp7ehnd5gy72mr2jmnwiqlpacr7o66zi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648940225.jpg',
         'background': 'Purple',
         'body': 'Fur Coat',
         'earring': 'Carton Cup',
@@ -19092,7 +19092,7 @@ ZAPPY_COLLECTION = {
     2648940765: {
         'name': 'Zappy #280',
         'unit_name': 'ZAPP0280',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifj2tug2yaidejf3gxtvv4csrnovcqt6dwjg3ge3kacc46dsra6le',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648940765.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Left Ring',
@@ -19105,7 +19105,7 @@ ZAPPY_COLLECTION = {
     2648940861: {
         'name': 'Zappy #2090',
         'unit_name': 'ZAPP2090',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibq3o5oncruvpggj7fdprqpmfejlmlsrudtc4l24bfqlccmxqxfle',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648940861.jpg',
         'background': 'Orange',
         'body': 'Crocodile Suit',
         'earring': 'Knife',
@@ -19118,7 +19118,7 @@ ZAPPY_COLLECTION = {
     2648940973: {
         'name': 'Zappy #1823',
         'unit_name': 'ZAPP1823',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicxbe5d5ppavqucelb32vj6by6ll2ikddornfhtbcdzobvkzbofzu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648940973.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'Happy',
@@ -19131,7 +19131,7 @@ ZAPPY_COLLECTION = {
     2648941061: {
         'name': 'Zappy #675',
         'unit_name': 'ZAPP0675',
-        'image_url': 'https://ipfs.io/ipfs/bafkreielwzn3blrhluv3sgma4lzdxzwybaoxv7ygs4hx2kig5puvfcw5ey',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648941061.jpg',
         'background': 'Blue',
         'body': 'Trench Coat',
         'earring': 'Party Popper',
@@ -19144,7 +19144,7 @@ ZAPPY_COLLECTION = {
     2648941152: {
         'name': 'Zappy #337',
         'unit_name': 'ZAPP0337',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifgyfrqi47pynbo5eeslvizwgzebeojvwoyj3uk4ylhadvydx6aoe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2648941152.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Bananas',
@@ -19157,7 +19157,7 @@ ZAPPY_COLLECTION = {
     2652796735: {
         'name': 'Zappy #325',
         'unit_name': 'ZAPP0325',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibdftb6xcc5gpsjipfseh5rukorxrpg62vt5dpjflakgi6e2zjtvq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2652796735.jpg',
         'background': 'Red',
         'body': 'Trash Can',
         'earring': 'Ghost',
@@ -19170,7 +19170,7 @@ ZAPPY_COLLECTION = {
     2654367193: {
         'name': 'Zappy #812',
         'unit_name': 'ZAPP0812',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigavxntiglzjdypfrkkrcetggrd5ero5aaibd52p3b4rswqdnmvri',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2654367193.jpg',
         'background': 'Yellow',
         'body': 'Toga',
         'earring': 'Pepper',
@@ -19183,7 +19183,7 @@ ZAPPY_COLLECTION = {
     2655370963: {
         'name': 'Zappy #273',
         'unit_name': 'ZAPP0273',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib4ildkwlpfnsczrzv4zpwflirzoqkmkwwisd7mgftsqpq4zi5sc4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655370963.jpg',
         'background': 'Yellow',
         'body': 'Striped Shirt',
         'earring': 'Left Helix',
@@ -19196,7 +19196,7 @@ ZAPPY_COLLECTION = {
     2655389933: {
         'name': 'Zappy #1456',
         'unit_name': 'ZAPP1456',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic7i5ta5op2qfavuhrxuy2naig6ymcjjtos5ugozoy5mnwz5p7h2e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655389933.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Left Ring',
@@ -19209,7 +19209,7 @@ ZAPPY_COLLECTION = {
     2655390462: {
         'name': 'Zappy #1147',
         'unit_name': 'ZAPP1147',
-        'image_url': 'https://ipfs.io/ipfs/bafkreich6fjucgpafbdmramcvfpfdak2luzlsm6rwczmsc3ceutg4vpscu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655390462.jpg',
         'background': 'Blue',
         'body': 'Armband',
         'earring': 'Strawberry',
@@ -19222,7 +19222,7 @@ ZAPPY_COLLECTION = {
     2655390517: {
         'name': 'Zappy #1031',
         'unit_name': 'ZAPP1031',
-        'image_url': 'https://ipfs.io/ipfs/bafkreignw5t3gveg74r4rniw5fyt2bhvm4nhmgoaw6px4tkbmppgmfpx5m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655390517.jpg',
         'background': 'Yellow',
         'body': 'Trench Coat',
         'earring': 'Rainbow',
@@ -19235,7 +19235,7 @@ ZAPPY_COLLECTION = {
     2655390638: {
         'name': 'Zappy #1228',
         'unit_name': 'ZAPP1228',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid4suc67lwiuffupgdxx3uhxoqfmluzxppt6ggkwoxgfo6jl6fdii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655390638.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Star',
@@ -19248,7 +19248,7 @@ ZAPPY_COLLECTION = {
     2655390943: {
         'name': 'Zappy #1623',
         'unit_name': 'ZAPP1623',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidz5tbpc77umabgfuvb6iylg6o55535ojz75dueilya3godbil7ku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655390943.jpg',
         'background': 'Yellow',
         'body': 'Sweater',
         'earring': 'Serious',
@@ -19261,7 +19261,7 @@ ZAPPY_COLLECTION = {
     2655397887: {
         'name': 'Zappy #860',
         'unit_name': 'ZAPP0860',
-        'image_url': 'https://ipfs.io/ipfs/bafkreictwaaqdgoaczltailmbwst2swsrbbo46op3tm3ltpndk6jcirijm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655397887.jpg',
         'background': 'Red',
         'body': 'Trench Coat',
         'earring': 'Happy',
@@ -19274,7 +19274,7 @@ ZAPPY_COLLECTION = {
     2655398071: {
         'name': 'Zappy #844',
         'unit_name': 'ZAPP0844',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaj3o34oyep7l2ra34q76kevwenrb3yxznd366ae6fn65hinvtfqy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655398071.jpg',
         'background': 'Green',
         'body': 'Crocodile Suit',
         'earring': 'None',
@@ -19287,7 +19287,7 @@ ZAPPY_COLLECTION = {
     2655398333: {
         'name': 'Zappy #1733',
         'unit_name': 'ZAPP1733',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihep3onc3qicc5wsgvqmymlg4la372qwtbenxdp7ks2jp2ypawmhq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655398333.jpg',
         'background': 'Red',
         'body': 'Hawaiian Shirt',
         'earring': 'Sad',
@@ -19300,7 +19300,7 @@ ZAPPY_COLLECTION = {
     2655398488: {
         'name': 'Zappy #19',
         'unit_name': 'ZAPP0019',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigww7ovspnzur3f4xhfolo7qoj7dwaiohv4tv5tlzmgc3znecioey',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655398488.jpg',
         'background': 'Purple',
         'body': 'Muscle Suit',
         'earring': 'Serious',
@@ -19313,7 +19313,7 @@ ZAPPY_COLLECTION = {
     2655398579: {
         'name': 'Zappy #835',
         'unit_name': 'ZAPP0835',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibqrs6266gpgtwtybw65stjes7l2jpqjqbdggkkoumbezfb3wbuky',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655398579.jpg',
         'background': 'Blue',
         'body': 'Choker',
         'earring': 'Strawberry',
@@ -19326,7 +19326,7 @@ ZAPPY_COLLECTION = {
     2655398687: {
         'name': 'Zappy #63',
         'unit_name': 'ZAPP0063',
-        'image_url': 'https://ipfs.io/ipfs/bafkreienlwvkgcv4rbgl4wnp7p3pdrfi5cfmikvlhmqtrk3sgrb7sjveza',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655398687.jpg',
         'background': 'Green',
         'body': 'Naked',
         'earring': 'Knife',
@@ -19339,7 +19339,7 @@ ZAPPY_COLLECTION = {
     2655421006: {
         'name': 'Zappy #101',
         'unit_name': 'ZAPP0101',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifabt63cex6g4dsyoolj3yntj73sujt4hoh2xq7anvn2ufjivy7fm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655421006.jpg',
         'background': 'Orange',
         'body': 'Polo Shirt',
         'earring': 'Left Ring',
@@ -19352,7 +19352,7 @@ ZAPPY_COLLECTION = {
     2655421117: {
         'name': 'Zappy #1940',
         'unit_name': 'ZAPP1940',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibzteesk6ahxlwrdmqx7rleoovenpksgaln4fmdrxwyyrvym5zhz4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655421117.jpg',
         'background': 'Orange',
         'body': 'Polo Overalls',
         'earring': 'Carton Cup',
@@ -19365,7 +19365,7 @@ ZAPPY_COLLECTION = {
     2655421234: {
         'name': 'Zappy #1357',
         'unit_name': 'ZAPP1357',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiho6gaohk6hw46si6ocgkhxbgxjkioa6rvhugulzeqqlyoww3bn3e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655421234.jpg',
         'background': 'Blue',
         'body': 'Hooded Jacket',
         'earring': 'Knife',
@@ -19378,7 +19378,7 @@ ZAPPY_COLLECTION = {
     2655421461: {
         'name': 'Zappy #1234',
         'unit_name': 'ZAPP1234',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigg743454v2iycyjcvavi5ndcx2wr5aqxkizop5sfxxqcsccjmore',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655421461.jpg',
         'background': 'Green',
         'body': 'Striped Shirt',
         'earring': 'Happy',
@@ -19391,7 +19391,7 @@ ZAPPY_COLLECTION = {
     2655421774: {
         'name': 'Zappy #1778',
         'unit_name': 'ZAPP1778',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiand6jic5pmsqtzofokejlskmhnjaso5du26rdc3ep453rs22lgam',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655421774.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Pepper',
@@ -19404,7 +19404,7 @@ ZAPPY_COLLECTION = {
     2655464902: {
         'name': 'Zappy #1242',
         'unit_name': 'ZAPP1242',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid6cahpcrttzqgxrxrcgxoah4jlwfhueft5g7jfkp5nal3qs2dyvi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655464902.jpg',
         'background': 'Orange',
         'body': 'Trench Coat',
         'earring': 'None',
@@ -19417,7 +19417,7 @@ ZAPPY_COLLECTION = {
     2655477600: {
         'name': 'Zappy #66',
         'unit_name': 'ZAPP0066',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigdhbpak2c2jik5mjnhmaigbgjrxzppxxtk44jc6ndpef2p4nd67q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655477600.jpg',
         'background': 'Yellow',
         'body': 'School Outfit',
         'earring': 'Number One',
@@ -19430,7 +19430,7 @@ ZAPPY_COLLECTION = {
     2655491883: {
         'name': 'Zappy #443',
         'unit_name': 'ZAPP0443',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicebsmqlt3smyc36scdmp5zxgnufzgldozldlpixjb2bhjqr4w74e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655491883.jpg',
         'background': 'Blue',
         'body': 'Hawaiian Shirt',
         'earring': 'None',
@@ -19443,7 +19443,7 @@ ZAPPY_COLLECTION = {
     2655505111: {
         'name': 'Zappy #899',
         'unit_name': 'ZAPP0899',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigtmbh6wn76kqr6swyb64eey2n5qxk2k5aqinrjyt7hm52i2myuqi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655505111.jpg',
         'background': 'Orange',
         'body': 'Bathrobe',
         'earring': 'Daisy',
@@ -19456,7 +19456,7 @@ ZAPPY_COLLECTION = {
     2655505235: {
         'name': 'Zappy #1054',
         'unit_name': 'ZAPP1054',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2575idjvbj7x2s2d5acxta7v6sysifygycacvupfonvtijrkkfi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655505235.jpg',
         'background': 'Orange',
         'body': 'Lifesaver',
         'earring': 'Hashtag',
@@ -19469,7 +19469,7 @@ ZAPPY_COLLECTION = {
     2655505342: {
         'name': 'Zappy #681',
         'unit_name': 'ZAPP0681',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigcoh2fjyhfnzjdr2xood5tnehdno5e32fb4elfsy7p4x35ellyy4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655505342.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'Right Helix',
@@ -19482,7 +19482,7 @@ ZAPPY_COLLECTION = {
     2655505497: {
         'name': 'Zappy #549',
         'unit_name': 'ZAPP0549',
-        'image_url': 'https://ipfs.io/ipfs/bafkreian6liuabmrmtsys6oq3srvevxph5yv6frxje5hvnhs4vic4lpgh4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655505497.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Hashtag',
@@ -19495,7 +19495,7 @@ ZAPPY_COLLECTION = {
     2655513507: {
         'name': 'Zappy #1325',
         'unit_name': 'ZAPP1325',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidahe5ft23gj2jqam43bngjy7pd4es6mfibhc4563ihnpcij4xwlm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655513507.jpg',
         'background': 'Red',
         'body': 'Kimono',
         'earring': 'Lightning',
@@ -19508,7 +19508,7 @@ ZAPPY_COLLECTION = {
     2655513693: {
         'name': 'Zappy #1902',
         'unit_name': 'ZAPP1902',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiheoi6tt6zqvyaiyr4tjrkd4etc7rkdhdyt56twhyhnfgqlqayuc4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655513693.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Strawberry',
@@ -19521,7 +19521,7 @@ ZAPPY_COLLECTION = {
     2655513864: {
         'name': 'Zappy #1373',
         'unit_name': 'ZAPP1373',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiebt4xawymyursktjafwe5oj4xlicetg3xw3z7jtqdxilcvvtwgfi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655513864.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Right Helix',
@@ -19534,7 +19534,7 @@ ZAPPY_COLLECTION = {
     2655514033: {
         'name': 'Zappy #1520',
         'unit_name': 'ZAPP1520',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicz5wziourfqgr5hbmfuckid5qfs7xjjztomsz6aeozbqpycouir4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655514033.jpg',
         'background': 'Yellow',
         'body': 'Striped Sweater',
         'earring': 'Right Helix',
@@ -19547,7 +19547,7 @@ ZAPPY_COLLECTION = {
     2655514134: {
         'name': 'Zappy #2024',
         'unit_name': 'ZAPP2024',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiefj5kohgqtfsinajdb66luu7rgks77cfbkmggqnj2nz5zgy3bj64',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655514134.jpg',
         'background': 'Purple',
         'body': 'Suit',
         'earring': 'Strawberry',
@@ -19560,7 +19560,7 @@ ZAPPY_COLLECTION = {
     2655613937: {
         'name': 'Zappy #1516',
         'unit_name': 'ZAPP1516',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiddvegxp6bsjsheu6n2e7okdlj3am6kpsct5pjyx4zwy23idua3dy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655613937.jpg',
         'background': 'Orange',
         'body': 'Hawaiian Shirt',
         'earring': 'Carton Cup',
@@ -19573,7 +19573,7 @@ ZAPPY_COLLECTION = {
     2655614082: {
         'name': 'Zappy #1500',
         'unit_name': 'ZAPP1500',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidqzrdmjfect2we4nsm7wqmoba4w6spqyimu5xvfbnvssn3zngrju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655614082.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'Party Popper',
@@ -19586,7 +19586,7 @@ ZAPPY_COLLECTION = {
     2655614221: {
         'name': 'Zappy #646',
         'unit_name': 'ZAPP0646',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaeirzp4ig5g2mukvahbgzk4e6j2oo7zojahsh4xgj4wys2ixv3fq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655614221.jpg',
         'background': 'Yellow',
         'body': 'Hoodie',
         'earring': 'Sad',
@@ -19599,7 +19599,7 @@ ZAPPY_COLLECTION = {
     2655695934: {
         'name': 'Zappy #1642',
         'unit_name': 'ZAPP1642',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih7sxrzfbaeajik2akjqnd5ekhf6zw65b4ip2ii7fkt6adwn2nwcm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655695934.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Star',
@@ -19612,7 +19612,7 @@ ZAPPY_COLLECTION = {
     2655696062: {
         'name': 'Zappy #1990',
         'unit_name': 'ZAPP1990',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidyfgowzakqss6o6hnjjjpt75usluhy2twqhs7wlggxwrigxkhx4u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655696062.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Double Helix',
@@ -19625,7 +19625,7 @@ ZAPPY_COLLECTION = {
     2655696231: {
         'name': 'Zappy #1175',
         'unit_name': 'ZAPP1175',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibfu2dn5gfnteuf3yiapc4g4hccldia7ta4a4siqllbbstjzthwbu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655696231.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Party Popper',
@@ -19638,7 +19638,7 @@ ZAPPY_COLLECTION = {
     2655696351: {
         'name': 'Zappy #317',
         'unit_name': 'ZAPP0317',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzo6c24ftmrfigpjom7lernz5kiovhgazbvggcux6elcb5nb5454',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655696351.jpg',
         'background': 'Yellow',
         'body': 'Striped Sweater',
         'earring': 'Daisy',
@@ -19651,7 +19651,7 @@ ZAPPY_COLLECTION = {
     2655769360: {
         'name': 'Zappy #768',
         'unit_name': 'ZAPP0768',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaftmmkr5xx5dczmm3bmbhxysw4v7nbibvlfyjerjwvaj6qksy724',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655769360.jpg',
         'background': 'Orange',
         'body': 'Clouds',
         'earring': 'Happy',
@@ -19664,7 +19664,7 @@ ZAPPY_COLLECTION = {
     2655769566: {
         'name': 'Zappy #1886',
         'unit_name': 'ZAPP1886',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnjcsomf23haohyv6nhvoej2i5ftnr2dc6dydmmxyik3xgrovpbu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655769566.jpg',
         'background': 'Yellow',
         'body': 'Bathrobe',
         'earring': 'Pyramid',
@@ -19677,7 +19677,7 @@ ZAPPY_COLLECTION = {
     2655769838: {
         'name': 'Zappy #272',
         'unit_name': 'ZAPP0272',
-        'image_url': 'https://ipfs.io/ipfs/bafybeib3zdl4qt5nsnklfnhzccioa7uvpihdlsluftez4hpil34qxs4v6i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655769838.jpg',
         'background': 'Chroma',
         'body': 'Bear Suit',
         'earring': 'Knife',
@@ -19690,7 +19690,7 @@ ZAPPY_COLLECTION = {
     2655769961: {
         'name': 'Zappy #1430',
         'unit_name': 'ZAPP1430',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicubmtoi4lkvdmhh5f6mcnoxczhp4c5of5gs6zvwymlnyh3cl462q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2655769961.jpg',
         'background': 'Purple',
         'body': 'Toga',
         'earring': 'Double Helix',
@@ -19703,7 +19703,7 @@ ZAPPY_COLLECTION = {
     2656045222: {
         'name': 'Zappy #1274',
         'unit_name': 'ZAPP1274',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifuw576qx63fzrsry5jtmmvnin6fyh546jamuwb7vrqos66ttbwlq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2656045222.jpg',
         'background': 'Green',
         'body': 'Turtleneck Sweater',
         'earring': 'Strawberry',
@@ -19716,7 +19716,7 @@ ZAPPY_COLLECTION = {
     2656788165: {
         'name': 'Zappy #2045',
         'unit_name': 'ZAPP2045',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib5u2k34jyh74xilslvxz7mai7av7pcrwfpu4xpb3kzkbcfdvmyii',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2656788165.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Left Helix',
@@ -19729,7 +19729,7 @@ ZAPPY_COLLECTION = {
     2658041193: {
         'name': 'Zappy #793',
         'unit_name': 'ZAPP0793',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigestunhp6wbwof32tt26rfczjq4me3nepskltpcbpmfclucvs4um',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2658041193.jpg',
         'background': 'Yellow',
         'body': 'Muscle Suit',
         'earring': 'Zappies',
@@ -19742,7 +19742,7 @@ ZAPPY_COLLECTION = {
     2659258903: {
         'name': 'Zappy #88',
         'unit_name': 'ZAPP0088',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibux5q2ve3725zie4mncgojuollnv2vzfqlv7yphan7fe53i3ueiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2659258903.jpg',
         'background': 'Green',
         'body': 'Turtleneck Sweater',
         'earring': 'Daisy',
@@ -19755,7 +19755,7 @@ ZAPPY_COLLECTION = {
     2662970298: {
         'name': 'Zappy #214',
         'unit_name': 'ZAPP0214',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiad6iiowaqixalcxgidonjsgx7cozmnkrou3bct3z2vrwm5kyolfe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2662970298.jpg',
         'background': 'Orange',
         'body': 'Overalls',
         'earring': 'Serious',
@@ -19768,7 +19768,7 @@ ZAPPY_COLLECTION = {
     2666911634: {
         'name': 'Zappy #483',
         'unit_name': 'ZAPP0483',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifk76whvpw75pjm2nohg63u2hcpvfo5p43tzs2do7gzfwuy2fpo2a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2666911634.jpg',
         'background': 'Orange',
         'body': 'Striped Shirt',
         'earring': 'Knife',
@@ -19781,7 +19781,7 @@ ZAPPY_COLLECTION = {
     2666911772: {
         'name': 'Zappy #1272',
         'unit_name': 'ZAPP1272',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidk4em66va7pslfj4bwiih7pinel3wwbbqw3plcxxpl2zurdqwco4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2666911772.jpg',
         'background': 'Blue',
         'body': 'Hoodie',
         'earring': 'Diamond',
@@ -19794,7 +19794,7 @@ ZAPPY_COLLECTION = {
     2666911932: {
         'name': 'Zappy #65',
         'unit_name': 'ZAPP0065',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicn6sgc4vxfpv7vdvu77dtxa5il3r32xf322tls6cpxenpplg6qve',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2666911932.jpg',
         'background': 'Green',
         'body': 'Scarf',
         'earring': 'Sunrise',
@@ -19807,7 +19807,7 @@ ZAPPY_COLLECTION = {
     2666912236: {
         'name': 'Zappy #1648',
         'unit_name': 'ZAPP1648',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigulmqlvehtqd2hqecy525owgz5tylosvj4wpvv42bngljwnsdby4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2666912236.jpg',
         'background': 'Orange',
         'body': 'Bowling Shirt',
         'earring': 'Number One',
@@ -19820,7 +19820,7 @@ ZAPPY_COLLECTION = {
     2667586932: {
         'name': 'Zappy #1309',
         'unit_name': 'ZAPP1309',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihdqvtel7adkje45k7oppspclym4xgzggjlgnofphakjufejni2pq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2667586932.jpg',
         'background': 'Red',
         'body': 'Hooded Jacket',
         'earring': 'Star',
@@ -19833,7 +19833,7 @@ ZAPPY_COLLECTION = {
     2672000516: {
         'name': 'Zappy #1109',
         'unit_name': 'ZAPP1109',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig73gu3ia757fddkz6y53kr22l74kcntyywjnwzgrsli7smo3ubai',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2672000516.jpg',
         'background': 'Blue',
         'body': 'Trash Can',
         'earring': 'Pyramid',
@@ -19846,7 +19846,7 @@ ZAPPY_COLLECTION = {
     2690774026: {
         'name': 'Zappy #1344',
         'unit_name': 'ZAPP1344',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih6vnf5jsrruhp73i55g6bl7wzap6smjterjj7oplmdl7vs4wpmim',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690774026.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'Sad',
@@ -19859,7 +19859,7 @@ ZAPPY_COLLECTION = {
     2690774374: {
         'name': 'Zappy #538',
         'unit_name': 'ZAPP0538',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid2nkivvqenkwihyfmxazpqfacxxgvl6y6uvg2bjttaenah3ir2wu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690774374.jpg',
         'background': 'Orange',
         'body': 'Naked',
         'earring': 'Hashtag',
@@ -19872,7 +19872,7 @@ ZAPPY_COLLECTION = {
     2690774943: {
         'name': 'Zappy #1089',
         'unit_name': 'ZAPP1089',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih7leyfaa3k6ed5gf3ait6y3t6c2dl4mkol5vfakfwftmftmkfjee',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690774943.jpg',
         'background': 'Blue',
         'body': 'Leather Vest',
         'earring': 'Knife',
@@ -19885,7 +19885,7 @@ ZAPPY_COLLECTION = {
     2690775456: {
         'name': 'Zappy #911',
         'unit_name': 'ZAPP0911',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifszo7zwbuepvomrxob6xeanije3px66lxist5qhsgvs7gcmqegpy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690775456.jpg',
         'background': 'Purple',
         'body': 'Hooded Jacket',
         'earring': 'Happy',
@@ -19898,7 +19898,7 @@ ZAPPY_COLLECTION = {
     2690775767: {
         'name': 'Zappy #4',
         'unit_name': 'ZAPP0004',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicpjuo2wwzvcpvecvn5ormwf3qdhoceko7hqu2y24t7f7b5n6ys34',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690775767.jpg',
         'background': 'Yellow',
         'body': 'Wool Collar Jacket',
         'earring': 'Pepper',
@@ -19911,7 +19911,7 @@ ZAPPY_COLLECTION = {
     2690775984: {
         'name': 'Zappy #742',
         'unit_name': 'ZAPP0742',
-        'image_url': 'https://ipfs.io/ipfs/bafkreici6gutms6ttbu4aspjyjmfxbi5k55gzcaoiwvoz4xvjm3du4rb6q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690775984.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Serious',
@@ -19924,7 +19924,7 @@ ZAPPY_COLLECTION = {
     2690776234: {
         'name': 'Zappy #2032',
         'unit_name': 'ZAPP2032',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid5zphmli27dkspkoh4t2t6wpj6j5mi55fxqasherfxuojyzlqndy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690776234.jpg',
         'background': 'Red',
         'body': 'Puffer Coat',
         'earring': 'Serious',
@@ -19937,7 +19937,7 @@ ZAPPY_COLLECTION = {
     2690776424: {
         'name': 'Zappy #1369',
         'unit_name': 'ZAPP1369',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2k6rdrhrap6agu7xv2lris47olzbfc3elbejxl3n4qo4ywefuf4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690776424.jpg',
         'background': 'Red',
         'body': 'Rabbit Suit',
         'earring': 'Bananas',
@@ -19950,7 +19950,7 @@ ZAPPY_COLLECTION = {
     2690776830: {
         'name': 'Zappy #531',
         'unit_name': 'ZAPP0531',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifawh7hkssspo5pyk2hn4vstqkdstnfojd7gs533rybvvqi75cmae',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690776830.jpg',
         'background': 'Red',
         'body': 'Polo Shirt',
         'earring': 'Zappies',
@@ -19963,7 +19963,7 @@ ZAPPY_COLLECTION = {
     2690777587: {
         'name': 'Zappy #1453',
         'unit_name': 'ZAPP1453',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibnbxfqomeo2256ysraxilj7qe7lz7maevgti74tgg33omwoypamy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2690777587.jpg',
         'background': 'Orange',
         'body': 'Basic Jacket',
         'earring': 'Pyramid',
@@ -19976,7 +19976,7 @@ ZAPPY_COLLECTION = {
     2692015457: {
         'name': 'Zappy #1531',
         'unit_name': 'ZAPP1531',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifznigvgfm6ewwwf54ikh2unk66e64v3if6226h5iuxp44ut7tila',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2692015457.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Pyramid',
@@ -19989,7 +19989,7 @@ ZAPPY_COLLECTION = {
     2692030756: {
         'name': 'Zappy #943',
         'unit_name': 'ZAPP0943',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihkxgbmx3ewp3nl7yedlsuu4zp36q3xrxw7tf7ibtn5wzp3bhrmxa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2692030756.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Pepper',
@@ -20002,7 +20002,7 @@ ZAPPY_COLLECTION = {
     2694689045: {
         'name': 'Zappy #1506',
         'unit_name': 'ZAPP1506',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibkp3vmkirqmfuhfotvo3oxgjiurfarukl4ke4gutmg6gbgzu52nq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2694689045.jpg',
         'background': 'Green',
         'body': 'Bear Suit',
         'earring': 'Diamond',
@@ -20015,7 +20015,7 @@ ZAPPY_COLLECTION = {
     2694697968: {
         'name': 'Zappy #2005',
         'unit_name': 'ZAPP2005',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgtesgpgkulttxil2ao5qc2pdi4zhnrbohtxqoeiaczder3qdddi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2694697968.jpg',
         'background': 'Purple',
         'body': 'Warning Tape',
         'earring': 'Twin Rings',
@@ -20028,7 +20028,7 @@ ZAPPY_COLLECTION = {
     2722801581: {
         'name': 'Zappy #2195',
         'unit_name': 'ZAPP2195',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifophwt4ookcx4osrhqhowhvrrh33xaqe7qfanq2qd7xnix7v3jxq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2722801581.jpg',
         'background': 'Purple',
         'body': 'Warning Tape',
         'earring': 'Party Popper',
@@ -20041,7 +20041,7 @@ ZAPPY_COLLECTION = {
     2722801697: {
         'name': 'Zappy #1804',
         'unit_name': 'ZAPP1804',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid3zqr7rds4s6eceolq3kkv3ez2lh6sv7tza5wddcp57ierynxoai',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2722801697.jpg',
         'background': 'Red',
         'body': 'Ribbon Tie',
         'earring': 'None',
@@ -20054,7 +20054,7 @@ ZAPPY_COLLECTION = {
     2733453167: {
         'name': 'Zappy #1631',
         'unit_name': 'ZAPP1631',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnmgr2wpduleahaylwecyabjwz3halcuv4bphr5la6mxz77zwkci',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2733453167.jpg',
         'background': 'Red',
         'body': 'Fanny Pack',
         'earring': 'Diamond',
@@ -20067,7 +20067,7 @@ ZAPPY_COLLECTION = {
     2734427687: {
         'name': 'Zappy #487',
         'unit_name': 'ZAPP0487',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifdmj23pdwmtbg467grcamieb2wlcpmry24krwc5asm432qakcv2a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2734427687.jpg',
         'background': 'Green',
         'body': 'Bowling Shirt',
         'earring': 'Ghost',
@@ -20080,7 +20080,7 @@ ZAPPY_COLLECTION = {
     2734427754: {
         'name': 'Zappy #454',
         'unit_name': 'ZAPP0454',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia37z37slpzorcjgshrnpacedenyc6zl676iyag3qq2vs4nhrqp2m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2734427754.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Skull',
@@ -20093,7 +20093,7 @@ ZAPPY_COLLECTION = {
     2740365474: {
         'name': 'Zappy #2204',
         'unit_name': 'ZAPP2204',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibwl4nocfgdogsrisfqpx64vy2wmf3aownd6wsyifbkpts4yahrgi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2740365474.jpg',
         'background': 'Green',
         'body': 'Wool Collar Jacket',
         'earring': 'Number One',
@@ -20106,7 +20106,7 @@ ZAPPY_COLLECTION = {
     2740365596: {
         'name': 'Zappy #1957',
         'unit_name': 'ZAPP1957',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiapfr6ad5akud3vzwq4oqse6t4no2bdemtis3hlgvusj74eqxxise',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2740365596.jpg',
         'background': 'Orange',
         'body': 'Bathrobe',
         'earring': 'Pepper',
@@ -20119,7 +20119,7 @@ ZAPPY_COLLECTION = {
     2747722869: {
         'name': 'Zappy #553',
         'unit_name': 'ZAPP0553',
-        'image_url': 'https://ipfs.io/ipfs/bafkreics7rocae7ddhxxmfeqie3zqhtyq5qrt6q73e333zmgbm3i32mwiu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2747722869.jpg',
         'background': 'Blue',
         'body': 'Bear Suit',
         'earring': 'Number One',
@@ -20132,7 +20132,7 @@ ZAPPY_COLLECTION = {
     2747722999: {
         'name': 'Zappy #1110',
         'unit_name': 'ZAPP1110',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicp35j6lbo6cabdi6ll2ui4yclp3aib6k5ujduut3nexrvvjmc52i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2747722999.jpg',
         'background': 'Chroma',
         'body': 'Trench Coat',
         'earring': 'Lightning',
@@ -20145,7 +20145,7 @@ ZAPPY_COLLECTION = {
     2747723220: {
         'name': 'Zappy #196',
         'unit_name': 'ZAPP0196',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaj2epemy2k2yen5e45dhbtb542vp7vubf6gfhai4gvuaxiospnvq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2747723220.jpg',
         'background': 'Purple',
         'body': 'Bathrobe',
         'earring': 'Left Ring',
@@ -20158,7 +20158,7 @@ ZAPPY_COLLECTION = {
     2747723446: {
         'name': 'Zappy #169',
         'unit_name': 'ZAPP0169',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidul2axntn35cehkcwggu6l3owpdetzet3wss3fev6jsah5wyuldq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2747723446.jpg',
         'background': 'Yellow',
         'body': 'Ribbon Tie',
         'earring': 'Right Ring',
@@ -20171,7 +20171,7 @@ ZAPPY_COLLECTION = {
     2747723848: {
         'name': 'Zappy #1428',
         'unit_name': 'ZAPP1428',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihmfnbvda5z7xqh437dy5u5l4ri5ipvyzz6vhsat5fzx6aazjmqbe',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2747723848.jpg',
         'background': 'Purple',
         'body': 'Leather Vest',
         'earring': 'Hashtag',
@@ -20184,7 +20184,7 @@ ZAPPY_COLLECTION = {
     2748003874: {
         'name': 'Zappy #393',
         'unit_name': 'ZAPP0393',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibqyagbrcloa7wrstodf5kre22i4ubms7wth5sxwd34puvsbqfej4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2748003874.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Bananas',
@@ -20197,7 +20197,7 @@ ZAPPY_COLLECTION = {
     2748003985: {
         'name': 'Zappy #1162',
         'unit_name': 'ZAPP1162',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifeobekvnbadxrmx5iwbl4hwianwnrpvcst3t6sn2tw7e7lrsiyqa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2748003985.jpg',
         'background': 'Green',
         'body': 'Polo Overalls',
         'earring': 'Diamond',
@@ -20210,7 +20210,7 @@ ZAPPY_COLLECTION = {
     2748004083: {
         'name': 'Zappy #1301',
         'unit_name': 'ZAPP1301',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibgbiizgcgaub57lxxtghx7icqhdjbvxl6qogj4xhpaugpxcbj5le',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2748004083.jpg',
         'background': 'Purple',
         'body': 'Scarf',
         'earring': 'None',
@@ -20223,7 +20223,7 @@ ZAPPY_COLLECTION = {
     2758638288: {
         'name': 'Zappy #70',
         'unit_name': 'ZAPP0070',
-        'image_url': 'https://ipfs.io/ipfs/bafybeidwjqbljhgx3ssgludwwlgrcavhoc3f7d4stzlldjxpel6zgxj5ma',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2758638288.jpg',
         'background': 'Chroma',
         'body': 'Hawaiian Shirt',
         'earring': 'Number One',
@@ -20236,7 +20236,7 @@ ZAPPY_COLLECTION = {
     2758638468: {
         'name': 'Zappy #401',
         'unit_name': 'ZAPP0401',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieue5plwja65c3agys5rsw3z3vqg5ncgsgo2tpb3gvwrwbfeafu6m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2758638468.jpg',
         'background': 'Purple',
         'body': 'Hoodie',
         'earring': 'Pepper',
@@ -20249,7 +20249,7 @@ ZAPPY_COLLECTION = {
     2758638645: {
         'name': 'Zappy #1806',
         'unit_name': 'ZAPP1806',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihzeukbn7ykdei6yshj7usyxhsvepplljmqpbxlpwd4jf7lkkhdyi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2758638645.jpg',
         'background': 'Green',
         'body': 'Sleeveless Shirt',
         'earring': 'Double Helix',
@@ -20262,7 +20262,7 @@ ZAPPY_COLLECTION = {
     2759592696: {
         'name': 'Zappy #1472',
         'unit_name': 'ZAPP1472',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihceam5rmf6geprcjai4ujckf5xzg6imwwuvwadh7ielf3b3tiw7y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2759592696.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Zappies',
@@ -20275,7 +20275,7 @@ ZAPPY_COLLECTION = {
     2767199372: {
         'name': 'Zappy #1484',
         'unit_name': 'ZAPP1484',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibwvnpj6h6lgshxfdprtirroob4ainy74heod2k42ddigktzirvq4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2767199372.jpg',
         'background': 'Yellow',
         'body': 'Oversize Sweater',
         'earring': 'Pepper',
@@ -20288,7 +20288,7 @@ ZAPPY_COLLECTION = {
     2819335300: {
         'name': 'Zappy #2200',
         'unit_name': 'ZAPP2200',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigdflqbvwjoicwbug4oonyn4ak6ayryhbedchcw7nvsd7jxeht73i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2819335300.jpg',
         'background': 'Blue',
         'body': 'Bathrobe',
         'earring': 'Rainbow',
@@ -20301,7 +20301,7 @@ ZAPPY_COLLECTION = {
     2825394479: {
         'name': 'Zappy #1986',
         'unit_name': 'ZAPP1986',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiebdhsiz5cw6x3s47lao6bjmtvddqxgxeb4izfx4gjspio5ya2vau',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2825394479.jpg',
         'background': 'Yellow',
         'body': 'Suit',
         'earring': 'Strawberry',
@@ -20314,7 +20314,7 @@ ZAPPY_COLLECTION = {
     2825394540: {
         'name': 'Zappy #1985',
         'unit_name': 'ZAPP1985',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibgpljcvjczuceqftpxhwanrb6cgyqxnp7hqmlmlurvz4fsmiymiu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2825394540.jpg',
         'background': 'Red',
         'body': 'Armband',
         'earring': 'None',
@@ -20327,7 +20327,7 @@ ZAPPY_COLLECTION = {
     2825394643: {
         'name': 'Zappy #2178',
         'unit_name': 'ZAPP2178',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic2zrj7mtjtzlchavwqjfbji7c4xfp25szyehvwfkghainthb3etu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2825394643.jpg',
         'background': 'Orange',
         'body': 'Striped Sweater',
         'earring': 'Star',
@@ -20340,7 +20340,7 @@ ZAPPY_COLLECTION = {
     2825394761: {
         'name': 'Zappy #2078',
         'unit_name': 'ZAPP2078',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidnghrmbltbyg35vv7zhmkprnc7xzcii5x5jars7xhve67rvkyjeu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2825394761.jpg',
         'background': 'Blue',
         'body': 'Puffer Coat',
         'earring': 'Pepper',
@@ -20353,7 +20353,7 @@ ZAPPY_COLLECTION = {
     2825395447: {
         'name': 'Zappy #2015',
         'unit_name': 'ZAPP2015',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifqqv3y76d2ikesdbi6pasvfr5e2mq3xqsauspdbp7wjmaqhn4z44',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2825395447.jpg',
         'background': 'Yellow',
         'body': 'Overalls',
         'earring': 'Pyramid',
@@ -20366,7 +20366,7 @@ ZAPPY_COLLECTION = {
     2836961710: {
         'name': 'Zappy #344',
         'unit_name': 'ZAPP0344',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifpr4cn2ynpa2xmk2m24c4jushou5ub2zkjumctinw5goa7ihksde',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2836961710.jpg',
         'background': 'Purple',
         'body': 'Sweater',
         'earring': 'Diamond',
@@ -20379,7 +20379,7 @@ ZAPPY_COLLECTION = {
     2836996533: {
         'name': 'Zappy #330',
         'unit_name': 'ZAPP0330',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic46o2ntv6drlly42hekx2lvxhtkvka76smtahg4abaydi4wiynba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2836996533.jpg',
         'background': 'Purple',
         'body': 'Wool Collar Jacket',
         'earring': 'Star',
@@ -20392,7 +20392,7 @@ ZAPPY_COLLECTION = {
     2861949970: {
         'name': 'Zappy #661',
         'unit_name': 'ZAPP0661',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicf5vchqt3x2mv6rlixhcoknsmt7bjffhs75vapfnpcthotjpnt3u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2861949970.jpg',
         'background': 'Red',
         'body': 'Armband',
         'earring': 'Double Helix',
@@ -20405,7 +20405,7 @@ ZAPPY_COLLECTION = {
     2861950246: {
         'name': 'Zappy #1429',
         'unit_name': 'ZAPP1429',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicwltud3yfydlf42n54at3phaloanzr5i56wrqvu4tqzr6c5dtddi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2861950246.jpg',
         'background': 'Orange',
         'body': 'Armband',
         'earring': 'Star',
@@ -20418,7 +20418,7 @@ ZAPPY_COLLECTION = {
     2861950403: {
         'name': 'Zappy #770',
         'unit_name': 'ZAPP0770',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihenftyyqbyywbawieoyjl3tempkzgzgaxzkfx4rbpked6imhtysq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/2861950403.jpg',
         'background': 'Green',
         'body': 'Polo Overalls',
         'earring': 'Star',
@@ -20431,7 +20431,7 @@ ZAPPY_COLLECTION = {
     3219550333: {
         'name': 'Zappy #1293',
         'unit_name': 'ZAPP1293',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihepudr6ldzwayu5467iavcmqdpv2ie342onvlny52jbmih6sq3xy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3219550333.jpg',
         'background': 'Orange',
         'body': 'Hoodie',
         'earring': 'Serious',
@@ -20444,7 +20444,7 @@ ZAPPY_COLLECTION = {
     3219550394: {
         'name': 'Zappy #1922',
         'unit_name': 'ZAPP1922',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiftfeh5vheumhlcsk2wfo3fiqoznpdr2iesrjtkl26r7mxvugggw4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3219550394.jpg',
         'background': 'Red',
         'body': 'Bathrobe',
         'earring': 'Diamond',
@@ -20457,7 +20457,7 @@ ZAPPY_COLLECTION = {
     3219550569: {
         'name': 'Zappy #1452',
         'unit_name': 'ZAPP1452',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiezx47hjwcnydtpvsptp4zjtdydshxah3cuktrly42ppj5npcdnrm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3219550569.jpg',
         'background': 'Green',
         'body': 'Sweater',
         'earring': 'None',
@@ -20470,7 +20470,7 @@ ZAPPY_COLLECTION = {
     3219872818: {
         'name': 'Zappy #1549',
         'unit_name': 'ZAPP1549',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiabhkr4j34wlkiep6vskd4ca2gugkklat73wroi2ti3ee4e6ibqba',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3219872818.jpg',
         'background': 'Blue',
         'body': 'Ribbon Tie',
         'earring': 'None',
@@ -20483,7 +20483,7 @@ ZAPPY_COLLECTION = {
     3219891452: {
         'name': 'Zappy #1569',
         'unit_name': 'ZAPP1569',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifm72zidjvjdocxo3ls4ozmdaxsnvh66tcbh4sywvjjposz3u4goq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3219891452.jpg',
         'background': 'Purple',
         'body': 'Basic Jacket',
         'earring': 'Daisy',
@@ -20496,7 +20496,7 @@ ZAPPY_COLLECTION = {
     3300405851: {
         'name': 'Zappy #1423',
         'unit_name': 'ZAPP1423',
-        'image_url': 'https://ipfs.io/ipfs/bafybeihte5wi37s6ochh4or2gbq5fukornsxcveb2tfglig4ah4wzb3usu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3300405851.jpg',
         'background': 'Chroma',
         'body': 'Hawaiian Shirt',
         'earring': 'Knife',
@@ -20509,7 +20509,7 @@ ZAPPY_COLLECTION = {
     3300405901: {
         'name': 'Zappy #614',
         'unit_name': 'ZAPP0614',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia4k7yu5alk4xv4jt4tqo4grvzwszffgjpxtnfmkme7puue3z432m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3300405901.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Bananas',
@@ -20522,7 +20522,7 @@ ZAPPY_COLLECTION = {
     3300405977: {
         'name': 'Zappy #718',
         'unit_name': 'ZAPP0718',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicxedcd5hcortv7lzrmix3vr6ra5vscllyyct2wwhqqibjwlvcb3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3300405977.jpg',
         'background': 'Green',
         'body': 'Turtleneck Sweater',
         'earring': 'Sad',
@@ -20535,7 +20535,7 @@ ZAPPY_COLLECTION = {
     3300406012: {
         'name': 'Zappy #2169',
         'unit_name': 'ZAPP2169',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia4naoppsvy4xtguilr3qmkbncoxdgitasqrfqn5hvakdeadieop4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3300406012.jpg',
         'background': 'Purple',
         'body': 'Sleeveless Shirt',
         'earring': 'Happy',
@@ -20548,7 +20548,7 @@ ZAPPY_COLLECTION = {
     3369878108: {
         'name': 'Zappy #164',
         'unit_name': 'ZAPP0164',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigml7xemi2jtobgguidknfrciqiljigg5svx6gghvxnfeett6lgja',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3369878108.jpg',
         'background': 'Green',
         'body': 'Oversize Sweater',
         'earring': 'Pyramid',
@@ -20561,7 +20561,7 @@ ZAPPY_COLLECTION = {
     3369878191: {
         'name': 'Zappy #1542',
         'unit_name': 'ZAPP1542',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie7k263xxuww5xyb53x6vvug6mwi7owusdj65ycc6fli3jyxlp2eu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3369878191.jpg',
         'background': 'Yellow',
         'body': 'Wool Collar Jacket',
         'earring': 'Rainbow',
@@ -20574,7 +20574,7 @@ ZAPPY_COLLECTION = {
     3369878361: {
         'name': 'Zappy #1490',
         'unit_name': 'ZAPP1490',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifxd6y27qhvlslkhglrs3eoy32vuzm2fjloiqgqheq5fbi27yfs2a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3369878361.jpg',
         'background': 'Blue',
         'body': 'Striped Shirt',
         'earring': 'Knife',
@@ -20587,7 +20587,7 @@ ZAPPY_COLLECTION = {
     3445996620: {
         'name': 'Zappy #285',
         'unit_name': 'ZAPP0285',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiabda4fq4ydlgf5zujp4rq7oydstrjyuzki2jsollzpv5pythp4ku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3445996620.jpg',
         'background': 'Purple',
         'body': 'Choker',
         'earring': 'Happy',
@@ -20600,7 +20600,7 @@ ZAPPY_COLLECTION = {
     3480112981: {
         'name': 'Zappy #1842',
         'unit_name': 'ZAPP1842',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaolf2lbpes7j5ty6iykp6xkcqf7pr6uxyre6lv2uzcbd74zugsji',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3480112981.jpg',
         'background': 'Red',
         'body': 'Trash Can',
         'earring': 'Daisy',
@@ -20613,7 +20613,7 @@ ZAPPY_COLLECTION = {
     3491751894: {
         'name': 'Zappy #5',
         'unit_name': 'ZAPP0005',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigycq6hz52dv2uwjrobwr2tnwv56kkpoliunb2aerpeby42lkcipu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491751894.jpg',
         'background': 'Yellow',
         'body': 'Sleeveless Shirt',
         'earring': 'Right Ring',
@@ -20626,7 +20626,7 @@ ZAPPY_COLLECTION = {
     3491756232: {
         'name': 'Zappy #1047',
         'unit_name': 'ZAPP1047',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidoe4h3deve2e6iqnspigng5fjjnrlbqqpltpdqpoxmjfchi6jwr4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756232.jpg',
         'background': 'Blue',
         'body': 'Wool Collar Jacket',
         'earring': 'Hashtag',
@@ -20639,7 +20639,7 @@ ZAPPY_COLLECTION = {
     3491756292: {
         'name': 'Zappy #427',
         'unit_name': 'ZAPP0427',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidjfgvxj7ml5hpxwix4k7sxt4cneu7lmmhsl3kgkt5t5amaduzp3y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756292.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Hashtag',
@@ -20652,7 +20652,7 @@ ZAPPY_COLLECTION = {
     3491756356: {
         'name': 'Zappy #245',
         'unit_name': 'ZAPP0245',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgiqlrwlmfsnkes2ss54gf7tp4tod62ta7qvywiguvhzadlukgr4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756356.jpg',
         'background': 'Yellow',
         'body': 'Colorful Jacket',
         'earring': 'Right Helix',
@@ -20665,7 +20665,7 @@ ZAPPY_COLLECTION = {
     3491756411: {
         'name': 'Zappy #1215',
         'unit_name': 'ZAPP1215',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigwuuzir3yu5gine3zsucu7nbrj3bxkr4vaduuawdvk7tlromlaua',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756411.jpg',
         'background': 'Red',
         'body': 'Armband',
         'earring': 'Bananas',
@@ -20678,7 +20678,7 @@ ZAPPY_COLLECTION = {
     3491756511: {
         'name': 'Zappy #558',
         'unit_name': 'ZAPP0558',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigwggvk3eubtvu6dhr7vlhg43xbji2oshcvl4ijk5srtmcfwmk3c4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756511.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Pyramid',
@@ -20691,7 +20691,7 @@ ZAPPY_COLLECTION = {
     3491756568: {
         'name': 'Zappy #96',
         'unit_name': 'ZAPP0096',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihsbrd7zvheuwfskiostv5vorv4tjylf4aqmjn7gbzeryxesobkim',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756568.jpg',
         'background': 'Purple',
         'body': 'Ribbon Tie',
         'earring': 'Right Helix',
@@ -20704,7 +20704,7 @@ ZAPPY_COLLECTION = {
     3491756633: {
         'name': 'Zappy #906',
         'unit_name': 'ZAPP0906',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiciajptdbubrn6xp7uibdfu55cvriujmxbcwgphkigaw6kdnxitoa',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756633.jpg',
         'background': 'Orange',
         'body': 'Polo Shirt',
         'earring': 'Right Ring',
@@ -20717,7 +20717,7 @@ ZAPPY_COLLECTION = {
     3491756685: {
         'name': 'Zappy #1130',
         'unit_name': 'ZAPP1130',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifnnzqqr5ubfyegvjidk7lce2fy5nkoxfpv7b3slwxepn23xmg3ku',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756685.jpg',
         'background': 'Purple',
         'body': 'Puffer Coat',
         'earring': 'None',
@@ -20730,7 +20730,7 @@ ZAPPY_COLLECTION = {
     3491756832: {
         'name': 'Zappy #711',
         'unit_name': 'ZAPP0711',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiciqm45dc26c75eyd4yktq3zgo7bk7dx27qj5sbebvshj437mv6yq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756832.jpg',
         'background': 'Chroma',
         'body': 'Sweater',
         'earring': 'Sad',
@@ -20743,7 +20743,7 @@ ZAPPY_COLLECTION = {
     3491756898: {
         'name': 'Zappy #79',
         'unit_name': 'ZAPP0079',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia3eub7uru2u6cgwwmbddouylgxsfjc7bbqv5beivvzuzo6bfxnzy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756898.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Hashtag',
@@ -20756,7 +20756,7 @@ ZAPPY_COLLECTION = {
     3491756951: {
         'name': 'Zappy #1414',
         'unit_name': 'ZAPP1414',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibs7wbfh5rzyirraflqfj4fescnc6tiljrecu6q2xjjqvoedgya4i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491756951.jpg',
         'background': 'Green',
         'body': 'Daisy Shirt',
         'earring': 'Strawberry',
@@ -20769,7 +20769,7 @@ ZAPPY_COLLECTION = {
     3491757030: {
         'name': 'Zappy #1129',
         'unit_name': 'ZAPP1129',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidweez6pjeu5dmq5i7qabhhhihzz3447ttozokyg6tf5nmjhf5smu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757030.jpg',
         'background': 'Green',
         'body': 'Leather Vest',
         'earring': 'Daisy',
@@ -20782,7 +20782,7 @@ ZAPPY_COLLECTION = {
     3491757115: {
         'name': 'Zappy #901',
         'unit_name': 'ZAPP0901',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifahf62sttdrft5mhk6ewzyk6m2zrwmunbvf36u2fpee6uhjpzmsi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757115.jpg',
         'background': 'Green',
         'body': 'Polo Shirt',
         'earring': 'Skull',
@@ -20795,7 +20795,7 @@ ZAPPY_COLLECTION = {
     3491757176: {
         'name': 'Zappy #641',
         'unit_name': 'ZAPP0641',
-        'image_url': 'https://ipfs.io/ipfs/bafybeiefjfvrw2mnuxistdikpl6i266g2go5lx7nvqvwqys65bt6uvp32y',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757176.jpg',
         'background': 'Chroma',
         'body': 'Trash Can',
         'earring': 'Left Ring',
@@ -20808,7 +20808,7 @@ ZAPPY_COLLECTION = {
     3491757364: {
         'name': 'Zappy #14',
         'unit_name': 'ZAPP0014',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibehjvnzf2owoxvemsojvopiok7x7nxfbrxvuyrqxh6ssnwyi5i3a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757364.jpg',
         'background': 'Green',
         'body': 'Choker',
         'earring': 'Diamond',
@@ -20821,7 +20821,7 @@ ZAPPY_COLLECTION = {
     3491757458: {
         'name': 'Zappy #863',
         'unit_name': 'ZAPP0863',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicktx7yj3ot2vf2euzqoc5lodnkbthl5nng4cc5wt537dl24s3g3e',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757458.jpg',
         'background': 'Yellow',
         'body': 'Polo Overalls',
         'earring': 'Right Helix',
@@ -20834,7 +20834,7 @@ ZAPPY_COLLECTION = {
     3491757563: {
         'name': 'Zappy #308',
         'unit_name': 'ZAPP0308',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie7x3dgbxgtlfunnjc4t7mt3kbotcpwwldv2qjrs4njnmjixuuhwi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757563.jpg',
         'background': 'Blue',
         'body': 'Naked',
         'earring': 'Double Helix',
@@ -20847,7 +20847,7 @@ ZAPPY_COLLECTION = {
     3491757664: {
         'name': 'Zappy #438',
         'unit_name': 'ZAPP0438',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig7xbfmoc26sc2ialrftg3zcjzu5li5b35chwgx5cmqxqa6a32amu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757664.jpg',
         'background': 'Blue',
         'body': 'Choker',
         'earring': 'Double Helix',
@@ -20860,7 +20860,7 @@ ZAPPY_COLLECTION = {
     3491757764: {
         'name': 'Zappy #1363',
         'unit_name': 'ZAPP1363',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgnvufwubihxbkwmzowvky2e5lhhjda55mvrbou7txy4cxtazr2i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757764.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Right Ring',
@@ -20873,7 +20873,7 @@ ZAPPY_COLLECTION = {
     3491757837: {
         'name': 'Zappy #1048',
         'unit_name': 'ZAPP1048',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicbfwgkzrzmxomdvnzp7m3b4ez4mr2pi5juiqrrl3gdtoy3clqgmq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491757837.jpg',
         'background': 'Blue',
         'body': 'Polo Shirt',
         'earring': 'Left Ring',
@@ -20886,7 +20886,7 @@ ZAPPY_COLLECTION = {
     3491766059: {
         'name': 'Zappy #1864',
         'unit_name': 'ZAPP1864',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiac3u5whwkksy6fjxu4j2o2puqtksja26r3hyiutovddyflo2spae',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766059.jpg',
         'background': 'Red',
         'body': 'Striped Sweater',
         'earring': 'Strawberry',
@@ -20899,7 +20899,7 @@ ZAPPY_COLLECTION = {
     3491766153: {
         'name': 'Zappy #1934',
         'unit_name': 'ZAPP1934',
-        'image_url': 'https://ipfs.io/ipfs/bafybeihkb3uvwzyeu2xsmnd6ebvgqdcze3yrmscoajphokikbxidrtophm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766153.jpg',
         'background': 'Chroma',
         'body': 'Sweater',
         'earring': 'None',
@@ -20912,7 +20912,7 @@ ZAPPY_COLLECTION = {
     3491766273: {
         'name': 'Zappy #2018',
         'unit_name': 'ZAPP2018',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihm4wxsq74jb6fr6yo5ne4c6nz32czgh2u5pzwiycx2bhovinqnwy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766273.jpg',
         'background': 'Green',
         'body': 'Striped Sweater',
         'earring': 'Zappies',
@@ -20925,7 +20925,7 @@ ZAPPY_COLLECTION = {
     3491766374: {
         'name': 'Zappy #1692',
         'unit_name': 'ZAPP1692',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid4bpmtli2sydje2kgflfnvsg2uaedch7pm2rvu33dvcgkccdsem4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766374.jpg',
         'background': 'Red',
         'body': 'Suit',
         'earring': 'Serious',
@@ -20938,7 +20938,7 @@ ZAPPY_COLLECTION = {
     3491766440: {
         'name': 'Zappy #1771',
         'unit_name': 'ZAPP1771',
-        'image_url': 'https://ipfs.io/ipfs/bafybeialq56kid2erbculvbgaxw3nd4vev77yltsutowdjieunuymsr6ka',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766440.jpg',
         'background': 'Chroma',
         'body': 'Overalls',
         'earring': 'None',
@@ -20951,7 +20951,7 @@ ZAPPY_COLLECTION = {
     3491766530: {
         'name': 'Zappy #1513',
         'unit_name': 'ZAPP1513',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih7cgkb5y456b73si4y7o6obrcuojnbvufd7itkmtbcmn4qyvpxsu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766530.jpg',
         'background': 'Purple',
         'body': 'Tracksuit Top',
         'earring': 'Sunrise',
@@ -20964,7 +20964,7 @@ ZAPPY_COLLECTION = {
     3491766620: {
         'name': 'Zappy #1682',
         'unit_name': 'ZAPP1682',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic26tfsk5hv2zdxnqgv5lcjwffvjkvy6ezs7vcv43ctp5ltprfqay',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766620.jpg',
         'background': 'Blue',
         'body': 'School Outfit',
         'earring': 'Strawberry',
@@ -20977,7 +20977,7 @@ ZAPPY_COLLECTION = {
     3491766699: {
         'name': 'Zappy #2176',
         'unit_name': 'ZAPP2176',
-        'image_url': 'https://ipfs.io/ipfs/bafkreid6jkwi5mdpqioivx6maftshqyb2d62bxkfm23zex5auojc26gpyq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766699.jpg',
         'background': 'Red',
         'body': 'Polo Overalls',
         'earring': 'Left Helix',
@@ -20990,7 +20990,7 @@ ZAPPY_COLLECTION = {
     3491766820: {
         'name': 'Zappy #1617',
         'unit_name': 'ZAPP1617',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidt5h6gglvpmzutq5p2h545srq335ynn6cj2nyo4mftmircqvyuqu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766820.jpg',
         'background': 'Red',
         'body': 'Basic Jacket',
         'earring': 'Left Ring',
@@ -21003,7 +21003,7 @@ ZAPPY_COLLECTION = {
     3491766921: {
         'name': 'Zappy #1473',
         'unit_name': 'ZAPP1473',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibhkzumifyslnffwki3n4kmzavyemjz5caxybylaflrmg6q4osjxy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766921.jpg',
         'background': 'Green',
         'body': 'Overalls',
         'earring': 'Right Helix',
@@ -21016,7 +21016,7 @@ ZAPPY_COLLECTION = {
     3491766989: {
         'name': 'Zappy #1875',
         'unit_name': 'ZAPP1875',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieauom2nsyt3suiokj42lircq4me4pkjwj4vuc22arbtg5jtpaob4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491766989.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Zappies',
@@ -21029,7 +21029,7 @@ ZAPPY_COLLECTION = {
     3491767052: {
         'name': 'Zappy #2217',
         'unit_name': 'ZAPP2217',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaexifzbflyvrp4knewxwo5zstyqmnhs6tp7nxmwol6ape7u57lmy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491767052.jpg',
         'background': 'Purple',
         'body': 'Striped Sweater',
         'earring': 'None',
@@ -21042,7 +21042,7 @@ ZAPPY_COLLECTION = {
     3491767128: {
         'name': 'Zappy #2038',
         'unit_name': 'ZAPP2038',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigkizxx3ne3q7c27dp5wu7tt53ogrjmbraium6onpee5h6e4n3trq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491767128.jpg',
         'background': 'Green',
         'body': 'School Outfit',
         'earring': 'Left Helix',
@@ -21055,7 +21055,7 @@ ZAPPY_COLLECTION = {
     3491767190: {
         'name': 'Zappy #2165',
         'unit_name': 'ZAPP2165',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieosyizo6qtbd4xkm2w2ycfgybdxhea6jplzkgztlvauklipsrrau',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3491767190.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Sunrise',
@@ -21068,7 +21068,7 @@ ZAPPY_COLLECTION = {
     3497181945: {
         'name': 'Zappy #51',
         'unit_name': 'ZAPP0051',
-        'image_url': 'https://ipfs.io/ipfs/bafkreico3p5ks65kl5vr4qpp3i72rah4fo6ixqwlcxh2adopnkwnxpi3ka',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497181945.jpg',
         'background': 'Orange',
         'body': 'Bowling Shirt',
         'earring': 'Pepper',
@@ -21081,7 +21081,7 @@ ZAPPY_COLLECTION = {
     3497182020: {
         'name': 'Zappy #186',
         'unit_name': 'ZAPP0186',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibidjpx7wplb3w2emrzcxgysfgf2ncwklxi62w55ashmy552f5zua',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497182020.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Bananas',
@@ -21094,7 +21094,7 @@ ZAPPY_COLLECTION = {
     3497182121: {
         'name': 'Zappy #68',
         'unit_name': 'ZAPP0068',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigq3tknwwdswngk3zrrfpooe77n6soe6twjrgmyy56sajeqhzjhqm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497182121.jpg',
         'background': 'Yellow',
         'body': 'Ribbon Tie',
         'earring': 'Party Popper',
@@ -21107,7 +21107,7 @@ ZAPPY_COLLECTION = {
     3497182210: {
         'name': 'Zappy #201',
         'unit_name': 'ZAPP0201',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifvenbyln5dz7clcvk6u7alu7cheaagx46uvxiw2zx4ulqfstmyce',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497182210.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Pyramid',
@@ -21120,7 +21120,7 @@ ZAPPY_COLLECTION = {
     3497182297: {
         'name': 'Zappy #210',
         'unit_name': 'ZAPP0210',
-        'image_url': 'https://ipfs.io/ipfs/bafybeieqvtkdgcahawilhc5dwgp63nshi2o5shz72xyjel7sr4beo6ldui',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497182297.jpg',
         'background': 'Chroma',
         'body': 'Basic Jacket',
         'earring': 'Ghost',
@@ -21133,7 +21133,7 @@ ZAPPY_COLLECTION = {
     3497188612: {
         'name': 'Zappy #275',
         'unit_name': 'ZAPP0275',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiefagimu3md2xvrgqsm27w7xcxcvbkudjwq5gwm5uvidl7r3wulde',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497188612.jpg',
         'background': 'Purple',
         'body': 'Fanny Pack',
         'earring': 'Sunrise',
@@ -21146,7 +21146,7 @@ ZAPPY_COLLECTION = {
     3497188662: {
         'name': 'Zappy #303',
         'unit_name': 'ZAPP0303',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifkq4wtv6i7dazfyretedniglxjydppozbfo3atblbfblkupaalcy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497188662.jpg',
         'background': 'Blue',
         'body': 'Polo Overalls',
         'earring': 'Party Popper',
@@ -21159,7 +21159,7 @@ ZAPPY_COLLECTION = {
     3497188791: {
         'name': 'Zappy #350',
         'unit_name': 'ZAPP0350',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiafyfs4zqrc7pqgtctykx23n2bsnloo2rmhvpljjcxw3uncfvpa2q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497188791.jpg',
         'background': 'Green',
         'body': 'Sweater',
         'earring': 'Number One',
@@ -21172,7 +21172,7 @@ ZAPPY_COLLECTION = {
     3497188850: {
         'name': 'Zappy #625',
         'unit_name': 'ZAPP0625',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaqsdk46w4pjn6lecdgcys6jwxzlqzfv6bkiieurcozrdv4vo7x7i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497188850.jpg',
         'background': 'Red',
         'body': 'Dino Suit',
         'earring': 'Knife',
@@ -21185,7 +21185,7 @@ ZAPPY_COLLECTION = {
     3497188936: {
         'name': 'Zappy #662',
         'unit_name': 'ZAPP0662',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihg75zby2b7cvj64bo3nxrs4qfnchglgl3ykp3zydoenl2jlnlici',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497188936.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Hashtag',
@@ -21198,7 +21198,7 @@ ZAPPY_COLLECTION = {
     3497200335: {
         'name': 'Zappy #713',
         'unit_name': 'ZAPP0713',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieaqamnhbnlruvtkw2cfvkj7vu5ggzjvgqxcfc7csi3vbkxajhw2q',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497200335.jpg',
         'background': 'Orange',
         'body': 'Tracksuit Top',
         'earring': 'Strawberry',
@@ -21211,7 +21211,7 @@ ZAPPY_COLLECTION = {
     3497200407: {
         'name': 'Zappy #761',
         'unit_name': 'ZAPP0761',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie5c5aqs25bnnjm7l5an5kzkew4cq2q3zqsuahbd5uh4fzuxva3mi',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497200407.jpg',
         'background': 'Green',
         'body': 'Trench Coat',
         'earring': 'Left Helix',
@@ -21224,7 +21224,7 @@ ZAPPY_COLLECTION = {
     3497200469: {
         'name': 'Zappy #961',
         'unit_name': 'ZAPP0961',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiar5zahe2nlrqpvndr45oxmtb4meih5it4kdir7awf7zrjsozv37u',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497200469.jpg',
         'background': 'Yellow',
         'body': 'Fanny Pack',
         'earring': 'Diamond',
@@ -21237,7 +21237,7 @@ ZAPPY_COLLECTION = {
     3497200586: {
         'name': 'Zappy #757',
         'unit_name': 'ZAPP0757',
-        'image_url': 'https://ipfs.io/ipfs/bafybeifdurdby5xqzyfuultr2nx3hrocl2wfhymkfiqeepd3tw7duughlq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497200586.jpg',
         'background': 'Chroma',
         'body': 'Scarf',
         'earring': 'Party Popper',
@@ -21250,7 +21250,7 @@ ZAPPY_COLLECTION = {
     3497200639: {
         'name': 'Zappy #1057',
         'unit_name': 'ZAPP1057',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiffe2ajbmll4skfnsczxebyktosg57wi37nq2we2buiztzbdxyxgq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497200639.jpg',
         'background': 'Purple',
         'body': 'Polo Overalls',
         'earring': 'Number One',
@@ -21263,7 +21263,7 @@ ZAPPY_COLLECTION = {
     3497205058: {
         'name': 'Zappy #1577',
         'unit_name': 'ZAPP1577',
-        'image_url': 'https://ipfs.io/ipfs/bafybeicbhkurph3acxrd735y7xvmydihkxhuh6ahkvvotq2rvypbjdaeoy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205058.jpg',
         'background': 'Chroma',
         'body': 'Naked',
         'earring': 'Lightning',
@@ -21276,7 +21276,7 @@ ZAPPY_COLLECTION = {
     3497205120: {
         'name': 'Zappy #1324',
         'unit_name': 'ZAPP1324',
-        'image_url': 'https://ipfs.io/ipfs/bafkreieb7cb4zjs4jxqvurbrwjiznlag43zbon2jaipukx4o57xtxbczlm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205120.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Carton Cup',
@@ -21289,7 +21289,7 @@ ZAPPY_COLLECTION = {
     3497205231: {
         'name': 'Zappy #1125',
         'unit_name': 'ZAPP1125',
-        'image_url': 'https://ipfs.io/ipfs/bafkreig35eiwid7ko7ejw2jdpjbrtruunbbbhcxsxrsbzau2kljz72cfpy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205231.jpg',
         'background': 'Purple',
         'body': 'Overalls',
         'earring': 'Bananas',
@@ -21302,7 +21302,7 @@ ZAPPY_COLLECTION = {
     3497205257: {
         'name': 'Zappy #1128',
         'unit_name': 'ZAPP1128',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiee4dlukv5nm4yekidyzes423iyr6dzq4hkfiqvp2j3k3xwbdksfy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205257.jpg',
         'background': 'Red',
         'body': 'Hoodie',
         'earring': 'Carton Cup',
@@ -21315,7 +21315,7 @@ ZAPPY_COLLECTION = {
     3497205309: {
         'name': 'Zappy #1122',
         'unit_name': 'ZAPP1122',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia6i7q77nhb2l2vtpkppyzgfvcznvmwzdxpm6ikyz2uttauepfbcy',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205309.jpg',
         'background': 'Purple',
         'body': 'Oversize Sweater',
         'earring': 'Hashtag',
@@ -21328,7 +21328,7 @@ ZAPPY_COLLECTION = {
     3497205500: {
         'name': 'Zappy #1107',
         'unit_name': 'ZAPP1107',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaq3lg7asegriwrtynfca4miwelg5vgbzhwv5mjijot7r4hsjqye4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205500.jpg',
         'background': 'Blue',
         'body': 'Armor',
         'earring': 'Daisy',
@@ -21341,7 +21341,7 @@ ZAPPY_COLLECTION = {
     3497205546: {
         'name': 'Zappy #1396',
         'unit_name': 'ZAPP1396',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic4oipl4dwggc7fpzgqafmyizgxyycex3ac4cmp35cx4wm3wzuuva',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205546.jpg',
         'background': 'Orange',
         'body': 'Armband',
         'earring': 'Bananas',
@@ -21354,7 +21354,7 @@ ZAPPY_COLLECTION = {
     3497205586: {
         'name': 'Zappy #1341',
         'unit_name': 'ZAPP1341',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifffu6nv2aqrn5cucyquubcwtxyxdwntvm255dsha4jihdkl665aq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205586.jpg',
         'background': 'Orange',
         'body': 'Sleeveless Shirt',
         'earring': 'Strawberry',
@@ -21367,7 +21367,7 @@ ZAPPY_COLLECTION = {
     3497205620: {
         'name': 'Zappy #1384',
         'unit_name': 'ZAPP1384',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiaxzfhozezkc6mgtpdixmsrodhpxpmladuv6hxrz3pnbaj2quxfiu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205620.jpg',
         'background': 'Blue',
         'body': 'Overalls',
         'earring': 'Strawberry',
@@ -21380,7 +21380,7 @@ ZAPPY_COLLECTION = {
     3497205678: {
         'name': 'Zappy #1279',
         'unit_name': 'ZAPP1279',
-        'image_url': 'https://ipfs.io/ipfs/bafkreidt2pbyeqwxif7sqx2o7b6pjtxaw4shw3llqbsvl6wndvgwxfmude',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497205678.jpg',
         'background': 'Orange',
         'body': 'School Outfit',
         'earring': 'Sad',
@@ -21393,7 +21393,7 @@ ZAPPY_COLLECTION = {
     3497215718: {
         'name': 'Zappy #1596',
         'unit_name': 'ZAPP1596',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicot3h5iabgtq4ysgvzma4eu7m7spa37aysksmhruulkghuicp3ha',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497215718.jpg',
         'background': 'Yellow',
         'body': 'Ribbon Tie',
         'earring': 'Left Helix',
@@ -21406,7 +21406,7 @@ ZAPPY_COLLECTION = {
     3497215873: {
         'name': 'Zappy #1582',
         'unit_name': 'ZAPP1582',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia47wi66g7xxu5cpwikyxuwnm5w3vqw3pogknbqeh2jxopka25v2m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497215873.jpg',
         'background': 'Orange',
         'body': 'Wool Collar Jacket',
         'earring': 'Double Helix',
@@ -21419,7 +21419,7 @@ ZAPPY_COLLECTION = {
     3497215958: {
         'name': 'Zappy #1595',
         'unit_name': 'ZAPP1595',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihv6oaouu7pushaamibnt3nh2gp35uw3neu2oci6ycqekke5jt4sm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497215958.jpg',
         'background': 'Purple',
         'body': 'Striped Shirt',
         'earring': 'Carton Cup',
@@ -21432,7 +21432,7 @@ ZAPPY_COLLECTION = {
     3497216055: {
         'name': 'Zappy #1916',
         'unit_name': 'ZAPP1916',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiatlue54vv2u7fcpcwazd5m72gtr5cb2zhvfycywljyufhekaagja',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497216055.jpg',
         'background': 'Orange',
         'body': 'Sweater',
         'earring': 'Right Helix',
@@ -21445,7 +21445,7 @@ ZAPPY_COLLECTION = {
     3497216109: {
         'name': 'Zappy #1644',
         'unit_name': 'ZAPP1644',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihnk2mckrtwiqymb725x2nugjkqvzh3il6qi2g7rw4ccm5eiakafu',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497216109.jpg',
         'background': 'Orange',
         'body': 'Striped Shirt',
         'earring': 'Sad',
@@ -21458,7 +21458,7 @@ ZAPPY_COLLECTION = {
     3497216179: {
         'name': 'Zappy #1824',
         'unit_name': 'ZAPP1824',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicprjprlgmnqmub2d3kppfqusx4qdfwapnuzd4uysps2bwfl7o3bq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497216179.jpg',
         'background': 'Purple',
         'body': 'Striped Sweater',
         'earring': 'Bananas',
@@ -21471,7 +21471,7 @@ ZAPPY_COLLECTION = {
     3497216244: {
         'name': 'Zappy #1881',
         'unit_name': 'ZAPP1881',
-        'image_url': 'https://ipfs.io/ipfs/bafkreielorul2e6522pqkveyo7was5jaeuattwvnidnjkvfnwztjatof7i',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497216244.jpg',
         'background': 'Red',
         'body': 'Trench Coat',
         'earring': 'Left Ring',
@@ -21484,7 +21484,7 @@ ZAPPY_COLLECTION = {
     3497216315: {
         'name': 'Zappy #1801',
         'unit_name': 'ZAPP1801',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigwo6lbq6emy2vbdalpytoke2imkplvac5p4undnbak6wyyyoxhnm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497216315.jpg',
         'background': 'Purple',
         'body': 'School Outfit',
         'earring': 'Skull',
@@ -21497,7 +21497,7 @@ ZAPPY_COLLECTION = {
     3497216405: {
         'name': 'Zappy #1746',
         'unit_name': 'ZAPP1746',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiecslltz4hb5shyz2brurssnbbmejbggbr7hcy7prt7jvht4h3yu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497216405.jpg',
         'background': 'Blue',
         'body': 'Colorful Jacket',
         'earring': 'Happy',
@@ -21510,7 +21510,7 @@ ZAPPY_COLLECTION = {
     3497216577: {
         'name': 'Zappy #1973',
         'unit_name': 'ZAPP1973',
-        'image_url': 'https://ipfs.io/ipfs/bafkreic6jwote5bdya634psjooomhbnznch2fy2b5mvthyj3xbvjowmzae',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497216577.jpg',
         'background': 'Blue',
         'body': 'Toga',
         'earring': 'Diamond',
@@ -21523,7 +21523,7 @@ ZAPPY_COLLECTION = {
     3497226266: {
         'name': 'Zappy #2022',
         'unit_name': 'ZAPP2022',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicn6jz3voqz2owl7bclgxpzim2lwyc37zn3olhcba2edbc5sbumju',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497226266.jpg',
         'background': 'Green',
         'body': 'Toga',
         'earring': 'Diamond',
@@ -21536,7 +21536,7 @@ ZAPPY_COLLECTION = {
     3497226354: {
         'name': 'Zappy #2188',
         'unit_name': 'ZAPP2188',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicztocdgzuj2l7pthyhzuq7icjz4fx2y6luhp3oaalqguzxeatqru',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497226354.jpg',
         'background': 'Green',
         'body': 'Trench Coat',
         'earring': 'Sunrise',
@@ -21549,7 +21549,7 @@ ZAPPY_COLLECTION = {
     3497226441: {
         'name': 'Zappy #2026',
         'unit_name': 'ZAPP2026',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiea2kvk7n2fl5k2ncijl6u5bcijtdzft2w7o6m7k3aarh5a42j32m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497226441.jpg',
         'background': 'Green',
         'body': 'Hooded Jacket',
         'earring': 'Rainbow',
@@ -21562,7 +21562,7 @@ ZAPPY_COLLECTION = {
     3497226537: {
         'name': 'Zappy #2111',
         'unit_name': 'ZAPP2111',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie2frjlqfm7ledpajfctygywmdob4l3hxasetzlhhygso5rvjlrme',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497226537.jpg',
         'background': 'Blue',
         'body': 'Sleeveless Shirt',
         'earring': 'Happy',
@@ -21575,7 +21575,7 @@ ZAPPY_COLLECTION = {
     3497226641: {
         'name': 'Zappy #2103',
         'unit_name': 'ZAPP2103',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibcc25y5tnx2yp4sur7o5mudapeyb4mlmobow4m2wiy5onyn7apey',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497226641.jpg',
         'background': 'Green',
         'body': 'Cat Suit',
         'earring': 'Hashtag',
@@ -21588,7 +21588,7 @@ ZAPPY_COLLECTION = {
     3497226730: {
         'name': 'Zappy #1983',
         'unit_name': 'ZAPP1983',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiew43mgyw2kx4fiozgxpw4b65cxjufohyat4voofstfnxbvrgrzje',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497226730.jpg',
         'background': 'Orange',
         'body': 'Turtleneck Sweater',
         'earring': 'Serious',
@@ -21601,7 +21601,7 @@ ZAPPY_COLLECTION = {
     3497288955: {
         'name': 'Zappy #1947',
         'unit_name': 'ZAPP1947',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih6lburm5z2fmfw2lidlziou5wnhsjfgtg6bie7vig3kezwozeive',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3497288955.jpg',
         'background': 'Yellow',
         'body': 'Wool Collar Jacket',
         'earring': 'Happy',
@@ -21614,7 +21614,7 @@ ZAPPY_COLLECTION = {
     3498467950: {
         'name': 'Zappy #2094',
         'unit_name': 'ZAPP2094',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibzwvdgnjswwlox7rrupjt3rimtsvldbo4rrogfeskeg3kjbpua6m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3498467950.jpg',
         'background': 'Blue',
         'body': 'Striped Sweater',
         'earring': 'Skull',
@@ -21627,7 +21627,7 @@ ZAPPY_COLLECTION = {
     3498468035: {
         'name': 'Zappy #1576',
         'unit_name': 'ZAPP1576',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiapyt5zzlbmgmm5byv4uw6xbsb3f3hn5lxe7p7uqqnnurizn4tjny',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3498468035.jpg',
         'background': 'Purple',
         'body': 'Polo Overalls',
         'earring': 'None',
@@ -21640,7 +21640,7 @@ ZAPPY_COLLECTION = {
     3498785966: {
         'name': 'Zappy #58',
         'unit_name': 'ZAPP0058',
-        'image_url': 'https://ipfs.io/ipfs/bafkreib2y7ivvchoc5dsckh6qf3mxngotuobe47oi5uznritw3uc6ndu4a',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3498785966.jpg',
         'background': 'Green',
         'body': 'Sweater',
         'earring': 'Zappies',
@@ -21653,7 +21653,7 @@ ZAPPY_COLLECTION = {
     3498786024: {
         'name': 'Zappy #672',
         'unit_name': 'ZAPP0672',
-        'image_url': 'https://ipfs.io/ipfs/bafkreih2thtqvglxrxpuw2kbe6rvyihqgfcz4yfie3ymbyryzj5qk6jide',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3498786024.jpg',
         'background': 'Purple',
         'body': 'Muscle Suit',
         'earring': 'Left Ring',
@@ -21666,7 +21666,7 @@ ZAPPY_COLLECTION = {
     3498786067: {
         'name': 'Zappy #997',
         'unit_name': 'ZAPP0997',
-        'image_url': 'https://ipfs.io/ipfs/bafkreihgmqjn4kyide72mk46rrz27whsrye2b2kfig2knkjlhlihybq2uq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3498786067.jpg',
         'background': 'Yellow',
         'body': 'Funky Coat',
         'earring': 'Knife',
@@ -21679,7 +21679,7 @@ ZAPPY_COLLECTION = {
     3530299114: {
         'name': 'Zappy #1448',
         'unit_name': 'ZAPP1448',
-        'image_url': 'https://ipfs.io/ipfs/bafkreicxxdlwumujirdmmmw7nid4ww6vhyo5haiaklz4yvnvndyf6mw7oq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3530299114.jpg',
         'background': 'Purple',
         'body': 'Crocodile Suit',
         'earring': 'Ghost',
@@ -21692,7 +21692,7 @@ ZAPPY_COLLECTION = {
     3539526503: {
         'name': 'Zappy #1009',
         'unit_name': 'ZAPP1009',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifmtjiq4dlh5jrmd7ttvlqwllmpykv4agznrr6pohm5uddrgm4s7m',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3539526503.jpg',
         'background': 'Purple',
         'body': 'Trench Coat',
         'earring': 'Number One',
@@ -21705,7 +21705,7 @@ ZAPPY_COLLECTION = {
     3539588155: {
         'name': 'Zappy #1291',
         'unit_name': 'ZAPP1291',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiehtsmqch5ghaq3j27bnxuhsuiwblxk3fde3sbzv4x5h63743p5zm',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3539588155.jpg',
         'background': 'Red',
         'body': 'Sleeveless Shirt',
         'earring': 'Happy',
@@ -21718,7 +21718,7 @@ ZAPPY_COLLECTION = {
     3539588338: {
         'name': 'Zappy #148',
         'unit_name': 'ZAPP0148',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiekokgnaauqnqobre5l3amnsul6ghecsu325w2vkk3v54wz7gqei4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3539588338.jpg',
         'background': 'Orange',
         'body': 'Colorful Jacket',
         'earring': 'Knife',
@@ -21731,7 +21731,7 @@ ZAPPY_COLLECTION = {
     3542251269: {
         'name': 'Zappy #1594',
         'unit_name': 'ZAPP1594',
-        'image_url': 'https://ipfs.io/ipfs/bafkreia2izeotqepfucormmdtjdzic5ldvmybev7x3hwxd4djkxtfybqg4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3542251269.jpg',
         'background': 'Green',
         'body': 'Muscle Suit',
         'earring': 'Rainbow',
@@ -21744,7 +21744,7 @@ ZAPPY_COLLECTION = {
     3548617018: {
         'name': 'Zappy #880',
         'unit_name': 'ZAPP0880',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiecjhlzyyizd6dy3pborbd5b33iolkymdra4dwlf7e7s2lscxqfnq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3548617018.jpg',
         'background': 'Green',
         'body': 'Tracksuit Top',
         'earring': 'Carton Cup',
@@ -21757,7 +21757,7 @@ ZAPPY_COLLECTION = {
     3562991430: {
         'name': 'Zappy #1200',
         'unit_name': 'ZAPP1200',
-        'image_url': 'https://ipfs.io/ipfs/bafkreigcttprs4l6u3u3htz2gnichctwvyduehg4kd2ys6dtzob3q6awqq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3562991430.jpg',
         'background': 'Blue',
         'body': 'Royal Robe',
         'earring': 'None',
@@ -21770,7 +21770,7 @@ ZAPPY_COLLECTION = {
     3562991490: {
         'name': 'Zappy #2138',
         'unit_name': 'ZAPP2138',
-        'image_url': 'https://ipfs.io/ipfs/bafkreie62vudefhhkraukh7ifhbgycy675flc5b7ceievem5nldq7rmkke',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3562991490.jpg',
         'background': 'Yellow',
         'body': 'Funky Coat',
         'earring': 'Lightning',
@@ -21783,7 +21783,7 @@ ZAPPY_COLLECTION = {
     3562991607: {
         'name': 'Zappy #48',
         'unit_name': 'ZAPP0048',
-        'image_url': 'https://ipfs.io/ipfs/bafkreibxsuqine55wy2r6iajsj5zqovsnpb5x3zo4y4ukkcrrj72p3daiq',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3562991607.jpg',
         'background': 'Red',
         'body': 'Kimono',
         'earring': 'Twin Rings',
@@ -21796,7 +21796,7 @@ ZAPPY_COLLECTION = {
     3599115511: {
         'name': 'Zappy #688',
         'unit_name': 'ZAPP0688',
-        'image_url': 'https://ipfs.io/ipfs/bafkreiehw3hqwtbpfldpp4vhevyd3d4bpmh7lzyqmvbyvce2d7gish3hu4',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3599115511.jpg',
         'background': 'Yellow',
         'body': 'Sleeveless Shirt',
         'earring': 'Double Helix',
@@ -21809,7 +21809,7 @@ ZAPPY_COLLECTION = {
     3599503101: {
         'name': 'Zappy #1334',
         'unit_name': 'ZAPP1334',
-        'image_url': 'https://ipfs.io/ipfs/bafkreifjs22trnxpqina3wsgfbnublqxtpscxthlrnwtqx73b3coi2stre',
+        'image_url': 'https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/3599503101.jpg',
         'background': 'Purple',
         'body': 'Colorful Jacket',
         'earring': 'Daisy',

@@ -43,21 +43,21 @@ COLLAB_ASSET_IDS = {
 
 # Hero image URLs — hardcoded since they're not in the CSV
 HERO_IMAGES = {
-    "Bear":       "https://ipfs-pera.algonode.dev/ipfs/bafkreidtl5ha7is6ze5lfgs6fpfagzvtpkjsx3327urgvge463c2kmimem?optimizer=image&width=1152&quality=70",
-    "Crocodile":  "https://ipfs-pera.algonode.dev/ipfs/bafkreibelcalckqcxpabntsja6ejdsdbs7aqg6wtjjx7nr5swdaabkxcpe?optimizer=image&width=1152&quality=70",
-    "Cat":        "https://ipfs-pera.algonode.dev/ipfs/bafkreiendbzef6gm3idxel5xl5bcbzf6xofns3qfvlqx7jmg6eqdnjfjvu?optimizer=image&width=1152&quality=70",
-    "Rabbit":     "https://ipfs-pera.algonode.dev/ipfs/bafkreictcu7ipijiknqaofjhbubjjylxg26zrvjrgdheycubp44kgx2g4a?optimizer=image&width=1152&quality=70",
-    "Wolf":       "https://ipfs-pera.algonode.dev/ipfs/bafybeiez2pgydvo5bza6egakwxciqww6q62c4jeatd7agrwxsyut2lhqbm?optimizer=image&width=1152&quality=70",
-    "Frog":       "https://ipfs-pera.algonode.dev/ipfs/bafybeiap4ffb5ywlaifxz5lmj3wkqwsej6xwqdhwo3nll2nmww27rpashi?optimizer=image&width=1152&quality=70",
-    "Eagle":      "https://ipfs-pera.algonode.dev/ipfs/bafybeifg2ksv46ad7uwhtasjtkbqnbqvvbo64adbwczh24unjrtgjxp44q?optimizer=image&width=1152&quality=70",
-    "Buck":       "https://ipfs-pera.algonode.dev/ipfs/bafybeihumzywdl3eogvon3c7dwtmmcfxyi2in7a2ibfnkjekkfdxq6ydwq?optimizer=image&width=1152&quality=70",
-    "Snake":      "https://ipfs-pera.algonode.dev/ipfs/bafybeifgmwm45kg3hg3tan3hvrdqsh6e2jijrm2zuy2tnhhij6krvvzdda?optimizer=image&width=1152&quality=70",
-    "Shark":      "https://ipfs-pera.algonode.dev/ipfs/bafybeigtp5qmpaxgqvagk5cuty63i4vzsrwy3tc6s3ryoppvlekubzt5ki?optimizer=image&width=1152&quality=70",
-    "Alien":      "https://ipfs-pera.algonode.dev/ipfs/bafybeihdcn4muqxjtyzvmsqs3zy27xnopko54dqghjwmtppgcxyhppfnji?optimizer=image&width=1152&quality=70",
+    "Bear":       "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Bear.jpg",
+    "Crocodile":  "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Crocodile.jpg",
+    "Cat":        "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Cat.jpg",
+    "Rabbit":     "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Rabbit.jpg",
+    "Wolf":       "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Wolf.jpg",
+    "Frog":       "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Frog.jpg",
+    "Eagle":      "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Eagle.jpg",
+    "Buck":       "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Buck.jpg",
+    "Snake":      "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Snake.jpg",
+    "Shark":      "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Shark.jpg",
+    "Alien":      "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Alien.jpg",
 }
 
 COLLAB_IMAGES = {
-    "ShittyKitties": "https://ipfs-pera.algonode.dev/ipfs/bafkreian2vjr2pzyzuvc4gz4pfyk7ddu2tfqvk7uzbwly3eospixvlawzq?optimizer=image&width=1152&quality=70",
+    "ShittyKitties": "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/collab_ShittyKitties.jpg",
 }
 
 # In-memory cache (traits are already local, but cache computed stats)
