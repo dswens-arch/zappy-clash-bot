@@ -64,28 +64,23 @@ def _font(name, size):
     return ImageFont.load_default()
 
 # ─────────────────────────────────────────────
-# IPFS gateway fetch with fallbacks
+# Image fetch — direct GET, self-hosted on GitHub
 # ─────────────────────────────────────────────
-_GATEWAYS = [
-    "https://ipfs-pera.algonode.dev/ipfs/{cid}?optimizer=image&width=1024&quality=90",
-    "https://cloudflare-ipfs.com/ipfs/{cid}",
-    "https://gateway.pinata.cloud/ipfs/{cid}",
-]
+# See clash_entry_card.py for the full explanation — every image_url now
+# points at a permanent file in this repo's zappy-images-full/, so the
+# old multi-gateway IPFS fallback list is no longer needed.
 
 async def _fetch_image(url: str) -> Image.Image | None:
     if not url:
         return None
-    cid  = url.split("/ipfs/")[-1].split("?")[0].strip() if "/ipfs/" in url else None
-    urls = [g.format(cid=cid) for g in _GATEWAYS] if cid else [url]
-    for u in urls:
-        try:
-            async with aiohttp.ClientSession() as s:
-                async with s.get(u, timeout=aiohttp.ClientTimeout(total=10)) as r:
-                    if r.status == 200:
-                        return Image.open(io.BytesIO(await r.read())).convert("RGBA")
-                    print(f"[winner_card] {r.status} {u}")
-        except Exception as e:
-            print(f"[winner_card] fetch failed {u}: {e}")
+    try:
+        async with aiohttp.ClientSession() as s:
+            async with s.get(url, timeout=aiohttp.ClientTimeout(total=10)) as r:
+                if r.status == 200:
+                    return Image.open(io.BytesIO(await r.read())).convert("RGBA")
+                print(f"[winner_card] {r.status} {url}")
+    except Exception as e:
+        print(f"[winner_card] fetch failed {url}: {e}")
     return None
 
 # ─────────────────────────────────────────────
