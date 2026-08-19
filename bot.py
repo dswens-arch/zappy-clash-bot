@@ -107,13 +107,13 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-def _ipfs_url(url: str) -> str:
-    """Rewrite any IPFS gateway URL to the reliable Pera gateway."""
-    if url and "/ipfs/" in url:
-        cid = url.split("/ipfs/")[-1].split("?")[0].strip()
-        return f"https://ipfs-pera.algonode.dev/ipfs/{cid}?optimizer=image&width=512&quality=80"
-    return url
-
+# NOTE: _ipfs_url() (rewrote any IPFS URL to the AlgoNode Pera gateway)
+# was removed once every image_url in zappy_collection.py / algorand_lookup.py
+# was migrated to self-hosted GitHub-raw URLs (see sync-zappy-images.yml).
+# Nothing here points at a raw IPFS CID anymore, so the rewrite is dead
+# weight -- and AlgoNode's IPFS gateway also counted against the same
+# daily quota as payouts/wallet lookups, so removing it is a real win,
+# not just cleanup.
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
@@ -557,7 +557,7 @@ async def cmd_clash(interaction: discord.Interaction):
             ab = stats["ability"]
             confirm.add_field(name=f"⚡ {ab.get('name','Ability')}", value=ab.get("desc",""), inline=False)
         if zappy.get("image_url"):
-            confirm.set_thumbnail(url=_ipfs_url(zappy["image_url"]))
+            confirm.set_thumbnail(url=zappy["image_url"])
         confirm.set_footer(text=f"Fights start when registration closes · Watch <#{CLASH_CHANNEL}>")
         await inter.followup.send(embed=confirm, ephemeral=True)
 
@@ -690,7 +690,7 @@ async def cmd_clash(interaction: discord.Interaction):
                     inline=False,
                 )
             if zappy.get("image_url"):
-                preview.set_thumbnail(url=_ipfs_url(zappy["image_url"]))
+                preview.set_thumbnail(url=zappy["image_url"])
             preview.set_footer(text=f"ASA {entered_id} · Is this the one?")
 
             await inter.response.send_message(
@@ -819,7 +819,7 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
 
     image_url = zappy.get("image_url", "")
     if image_url:
-        embed.set_thumbnail(url=_ipfs_url(image_url))
+        embed.set_thumbnail(url=image_url)
 
     embed.set_footer(text=f"ASA {chosen_id}")
     await interaction.followup.send(embed=embed, ephemeral=True)
@@ -3334,7 +3334,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                     inline=False,
                 )
                 if fighter.image_url:
-                    embed.set_thumbnail(url=_ipfs_url(fighter.image_url))
+                    embed.set_thumbnail(url=fighter.image_url)
                 return embed
 
             embed_a = _build_fighter_embed(fighter_a, name_a)
@@ -3634,7 +3634,7 @@ async def close_and_resolve(channel: discord.TextChannel):
                         color=0xF5E642,
                     )
                     if winner.image_url:
-                        win_embed.set_image(url=_ipfs_url(winner.image_url))
+                        win_embed.set_image(url=winner.image_url)
                     win_embed.set_footer(text="Use /rank to check your CP · /streak for daily streak")
                     await channel.send(embed=win_embed)
                 except Exception as embed_err:
