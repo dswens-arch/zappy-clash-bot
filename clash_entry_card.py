@@ -59,28 +59,25 @@ _FL = _font("Poppins-Bold.ttf",    10 * SCALE)
 _FV = _font("Poppins-Bold.ttf",    12 * SCALE)
 
 # ─────────────────────────────────────────────
-# Gateway fetch with fallbacks
+# Image fetch — direct GET, self-hosted on GitHub
 # ─────────────────────────────────────────────
-_GATEWAYS = [
-    "https://ipfs-pera.algonode.dev/ipfs/{cid}?optimizer=image&width=512&quality=90",
-    "https://cloudflare-ipfs.com/ipfs/{cid}",
-    "https://gateway.pinata.cloud/ipfs/{cid}",
-]
+# Previously tried a list of IPFS gateways in order (algonode -> cloudflare
+# -> pinata) since any single one could be down or rate-limited. Now that
+# every image_url points at a permanent self-hosted file in this repo's
+# own zappy-images-full/ folder (see sync-zappy-images.yml), there's only
+# ever one real URL to fetch -- no fallback list needed.
 
 async def _fetch_image(url: str) -> Image.Image | None:
     if not url:
         return None
-    cid  = url.split("/ipfs/")[-1].split("?")[0].strip() if "/ipfs/" in url else None
-    urls = [g.format(cid=cid) for g in _GATEWAYS] if cid else [url]
-    for u in urls:
-        try:
-            async with aiohttp.ClientSession() as s:
-                async with s.get(u, timeout=aiohttp.ClientTimeout(total=8)) as r:
-                    if r.status == 200:
-                        return Image.open(io.BytesIO(await r.read())).convert("RGBA")
-                    print(f"[entry_card] {r.status} {u}")
-        except Exception as e:
-            print(f"[entry_card] failed {u}: {e}")
+    try:
+        async with aiohttp.ClientSession() as s:
+            async with s.get(url, timeout=aiohttp.ClientTimeout(total=8)) as r:
+                if r.status == 200:
+                    return Image.open(io.BytesIO(await r.read())).convert("RGBA")
+                print(f"[entry_card] {r.status} {url}")
+    except Exception as e:
+        print(f"[entry_card] failed {url}: {e}")
     return None
 
 # ─────────────────────────────────────────────
