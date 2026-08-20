@@ -651,17 +651,17 @@ class VoltballCog(commands.Cog):
             record_injuries(team_b_row["id"], season["id"], result["injured_b"], week)
 
             if channel:
-                # Reusable link — site resolves "current" to whichever
-                # resolved-but-not-yet-recapped match has the soonest
-                # playback_starts_at (see results.html). Assumes one game
-                # airs at a time; if two ever resolve in the same run,
-                # both kickoff posts point at the earlier one until it's
-                # recapped, then "current" rolls to the next. Fine for a
-                # one-at-a-time cadence, worth revisiting if that changes.
-                # The final "Watch Replay" post below still links the
-                # specific match_id, since it needs to keep working once
-                # this game is no longer "current".
-                link = f"{SITE_BASE_URL}results.html?live=current"
+                # Match-specific link, not the shared "?live=current" this
+                # used before. That reuse assumed one game airs at a time;
+                # a real multi-team league resolving several matches in
+                # the same run breaks that immediately -- all the kickoff
+                # posts would share one URL and "current" would resolve
+                # to whichever match happens to have the soonest
+                # playback_starts_at, meaning most of the posts would
+                # link to the WRONG game. Match-specific avoids that
+                # entirely and matches what the "Watch Replay" post
+                # already correctly does below.
+                link = f"{SITE_BASE_URL}results.html?live={match_row['id']}"
                 kickoff_embed = build_kickoff_embed(team_a_row["team_name"], team_b_row["team_name"], week, is_playoff_week, link)
                 await channel.send(embed=kickoff_embed)
                 # The full recap (score, highlights, "watch replay" link)
@@ -728,13 +728,14 @@ class VoltballCog(commands.Cog):
 
         db.table("voltball_seasons").update({"current_week": new_week, "status": new_status}).eq("id", season["id"]).execute()
 
-        if channel:
-            if new_status == "complete" and champion_name:
-                await channel.send(embed=build_champion_embed(season, champion_name))
-            updated_season = {**season, "current_week": new_week, "status": new_status}
-            standings_rows = get_standings(season["id"])
-            standings_embed = build_standings_embed(updated_season, standings_rows)
-            await channel.send(embed=standings_embed)
+        # Standings/champion announcement is deliberately NOT sent here.
+        # This function returns as soon as matches are resolved (seconds
+        # after the kickoff posts), but a match's actual outcome isn't
+        # supposed to be visible in Discord until its "watch live" window
+        # has played out. Standings (wins, PF/PA) leak the outcome just as
+        # much as the recap does, so it waits for the same signal the
+        # recap post waits for -- see post_ready_recaps, which posts
+        # standings/champion once every match this week has actually aired.
 
     @weekly_resolution.before_loop
     async def before_weekly_resolution(self):
@@ -793,6 +794,51 @@ class VoltballCog(commands.Cog):
                     match["week_number"], match["is_playoff"], link,
                 )
                 await channel.send(embed=embed)
+
+                # Standings (and a champion announcement) reveal the
+                # outcome just as much as the recap does -- wins, PF/PA
+                # all shift the moment they post. So they wait for the
+                # SAME thing the recap waited for, plus one more
+                # condition: every other match in this same
+                # (season, week) has also finished airing, not just this
+                # one. A week with two simultaneous games shouldn't have
+                # its standings spoiled by whichever game's replay
+                # finishes first.
+                still_pending = (
+                    db.table("voltball_matches")
+                    .select("id")
+                    .eq("season_id", match["season_id"])
+                    .eq("week_number", match["week_number"])
+                    .is_("recap_posted_at", "null")
+                    .execute()
+                    .data
+                ) or []
+                # (`still_pending` includes this match, since we haven't
+                # set its recap_posted_at yet -- that happens in `finally`
+                # below. So "only this one left" means the count is 1.)
+                if len(still_pending) <= 1:
+                    full_season = db.table("voltball_seasons").select("*").eq("id", match["season_id"]).execute().data
+                    if full_season and full_season[0].get("last_standings_posted_week") != match["week_number"]:
+                        full_season = full_season[0]
+                        if full_season["status"] == "complete":
+                            champ_match = (
+                                db.table("voltball_matches")
+                                .select("winner_team_id")
+                                .eq("season_id", match["season_id"])
+                                .eq("is_playoff", True)
+                                .eq("week_number", match["week_number"])
+                                .execute()
+                                .data
+                            )
+                            if champ_match:
+                                champ_team = get_team_by_id(champ_match[0]["winner_team_id"])
+                                if champ_team:
+                                    await channel.send(embed=build_champion_embed(full_season, champ_team["team_name"]))
+                        standings_rows = get_standings(match["season_id"])
+                        await channel.send(embed=build_standings_embed(full_season, standings_rows))
+                        db.table("voltball_seasons").update(
+                            {"last_standings_posted_week": match["week_number"]}
+                        ).eq("id", match["season_id"]).execute()
             except Exception as e:
                 # One bad match shouldn't block the rest of the due batch,
                 # and shouldn't get silently retried forever either -- log
