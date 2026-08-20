@@ -753,15 +753,42 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
         # voltage_b just computed above, purely qualitative (no invented
         # number), so it can never disagree with the score the way a fake
         # per-event delta would.
+        #
+        # Phrasing rotates deterministically by quarter number (not
+        # random) -- a team that's ahead every single quarter should
+        # still get 4 different sentences across the match, not the
+        # exact same one four times in a row.
         margin = abs(voltage_a - voltage_b)
         bigger = max(voltage_a, voltage_b, 0.01)
         ratio = margin / bigger
         if ratio < 0.12:
-            summary_team, summary_text = None, f"An even quarter — {team_a.name} and {team_b.name} trade blows."
+            summary_team = None
+            even_phrasings = [
+                "An even quarter — {a} and {b} trade blows.",
+                "{a} and {b} go blow for blow this quarter.",
+                "Nothing separates {a} and {b} this quarter.",
+                "A dead heat between {a} and {b}.",
+            ]
+            summary_text = even_phrasings[(q - 1) % len(even_phrasings)].format(a=team_a.name, b=team_b.name)
         else:
             leader, leader_key = (team_a, "a") if voltage_a >= voltage_b else (team_b, "b")
             summary_team = leader_key
-            summary_text = f"{leader.name} dominates the quarter." if ratio >= 0.35 else f"{leader.name} edges the quarter."
+            if ratio >= 0.35:
+                dominant_phrasings = [
+                    "{leader} dominates the quarter.",
+                    "{leader} pulls away.",
+                    "{leader} takes total control of the quarter.",
+                    "{leader} runs away with it this quarter.",
+                ]
+                summary_text = dominant_phrasings[(q - 1) % len(dominant_phrasings)].format(leader=leader.name)
+            else:
+                edge_phrasings = [
+                    "{leader} edges the quarter.",
+                    "{leader} keeps a slim lead.",
+                    "{leader} stays a step ahead.",
+                    "{leader}'s advantage stays narrow but real.",
+                ]
+                summary_text = edge_phrasings[(q - 1) % len(edge_phrasings)].format(leader=leader.name)
         events.append({"quarter": q, "kind": "quarter_summary", "icon": "📊", "team": summary_team,
                         "text": summary_text, "delta": None})
 
