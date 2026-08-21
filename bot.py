@@ -2264,6 +2264,55 @@ async def _run_expedition_beat(
         await interaction.followup.send(embed=scene_embed, view=view, ephemeral=True)
 
 
+async def _get_claim_image_file(asset_id: int) -> discord.File | None:
+    """
+    Fetch the image for a claimed Zappy/NFT and return it as a discord.File
+    ready to attach to the holder-channel announcement.
+    Checks the cached ZAPPY_COLLECTION first (covers buddy-pool drops),
+    then falls back to fetch_zappy_traits() for prize NFTs that aren't
+    part of the tracked collection (Clash / Spark Jobs / Zone 5 prizes).
+    Returns None if no image can be found or the download fails.
+    """
+    if not asset_id:
+        return None
+
+    import aiohttp, io
+
+    image_url = None
+
+    try:
+        from zappy_collection import ZAPPY_COLLECTION
+        entry = ZAPPY_COLLECTION.get(int(asset_id))
+        if entry:
+            image_url = entry.get("image_url")
+    except Exception:
+        pass
+
+    if not image_url:
+        try:
+            zappy_data = await fetch_zappy_traits(int(asset_id))
+            if zappy_data:
+                image_url = zappy_data.get("image_url")
+        except Exception as e:
+            print(f"⚠️ Could not fetch traits for claim image (asset {asset_id}): {e}")
+
+    if not image_url:
+        return None
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(image_url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                if resp.status != 200:
+                    return None
+                data = await resp.read()
+    except Exception as e:
+        print(f"⚠️ Could not download claim image for asset {asset_id}: {e}")
+        return None
+
+    ext = os.path.splitext(image_url.split("?")[0])[1] or ".png"
+    return discord.File(io.BytesIO(data), filename=f"zappy_{asset_id}{ext}")
+
+
 @tree.command(name="claimnft", description="Claim a pending Zappy Buddy or NFT prize")
 async def cmd_claimnft(interaction: discord.Interaction):
     if not check_expedition_channel(interaction):
@@ -2291,25 +2340,31 @@ async def cmd_claimnft(interaction: discord.Interaction):
     if result.get("success"):
         channel = bot.get_channel(HOLDER_CHANNEL)
         if channel:
+            claim_image = await _get_claim_image_file(result.get("asset_id"))
+            image_kwargs = {"file": claim_image} if claim_image else {}
             if result.get("is_buddy"):
                 await channel.send(
                     f"🐾 <@{user_id}> just claimed their Zappy Buddy: "
-                    f"**{result['name']}**! They found a friend on their expedition. ⚡"
+                    f"**{result['name']}**! They found a friend on their expedition. ⚡",
+                    **image_kwargs,
                 )
             elif result.get("source") == "clash":
                 await channel.send(
                     f"🎁 <@{user_id}> just claimed their Clash champion NFT prize: "
-                    f"**{result['name']}**! ⚡🏆"
+                    f"**{result['name']}**! ⚡🏆",
+                    **image_kwargs,
                 )
             elif result.get("source") == "spark_jobs":
                 await channel.send(
                     f"🎁 <@{user_id}> just claimed their Spark Jobs NFT prize: "
-                    f"**{result['name']}**! ⚡💼"
+                    f"**{result['name']}**! ⚡💼",
+                    **image_kwargs,
                 )
             else:
                 await channel.send(
                     f"🎉 <@{user_id}> just claimed their Zone 5 NFT prize: "
-                    f"**{result['name']}**! 🏔️⚡"
+                    f"**{result['name']}**! 🏔️⚡",
+                    **image_kwargs,
                 )
 
 
