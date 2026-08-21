@@ -543,7 +543,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 would_fire = (
                     trigger == round_num or
                     (trigger == "random" and not attacker.ability_used) or
-                    (trigger == "weighted_1_2" and round_num == _resolve_abduction_round(attacker))
+                    (trigger == "weighted_1_2" and round_num == _resolve_abduction_round(attacker)) or
+                    (trigger == "every" and not attacker.ability_blocked_this_round)
                 )
                 if would_fire and defender.spark_type == "null" and defender.spark_tier > 0 and not defender.spark_triggered:
                     cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[defender.spark_tier]
@@ -625,7 +626,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             fighter_b.hp -= dmg_a
 
             # Feeding Frenzy — bonus scales with how much HP fighter_b has already lost
-            if fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Feeding Frenzy" and fighter_b.hp > 0:
+            if fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Feeding Frenzy" and fighter_b.hp > 0 and not fighter_a.ability_blocked_this_round:
                 missing_pct = 1 - (fighter_b.hp / STARTING_HP)
                 frenzy_bonus = int(dmg_a * missing_pct)
                 if frenzy_bonus > 0:
@@ -688,7 +689,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             fighter_a.hp -= dmg_b
 
             # Feeding Frenzy — bonus scales with how much HP fighter_a has already lost
-            if fighter_b.ability and isinstance(fighter_b.ability, dict) and fighter_b.ability.get("name") == "Feeding Frenzy" and fighter_a.hp > 0:
+            if fighter_b.ability and isinstance(fighter_b.ability, dict) and fighter_b.ability.get("name") == "Feeding Frenzy" and fighter_a.hp > 0 and not fighter_b.ability_blocked_this_round:
                 missing_pct = 1 - (fighter_a.hp / STARTING_HP)
                 frenzy_bonus = int(dmg_b * missing_pct)
                 if frenzy_bonus > 0:
