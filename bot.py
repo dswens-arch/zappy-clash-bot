@@ -190,6 +190,151 @@ def get_bracket_id(session: str) -> str:
 
 
 # ---------------------------------------------
+# SHARED UI: Zappy dropdown picker
+# ---------------------------------------------
+# Used by /stats, /clash, and /expedition ("see more") to let a player pick
+# a Zappy from a dropdown instead of typing an ASA number. Discord selects
+# cap out at 25 options, so this paginates automatically for bigger wallets,
+# and optionally offers a manual ASA-entry modal as a fallback / for looking
+# up a Zappy that isn't in the list at all.
+
+def _zappy_option_desc(z: dict) -> str:
+    """Build the short stat line shown under each dropdown option."""
+    stats = z.get("stats") or {}
+    if stats:
+        return f"VLT {stats.get('VLT','?')} · INS {stats.get('INS','?')} · SPK {stats.get('SPK','?')}"
+    return f"ASA {z.get('asset_id', '?')}"
+
+
+class ManualAsaModal(discord.ui.Modal, title="Enter a Zappy's ASA Number"):
+    asa_field = discord.ui.TextInput(
+        label="ASA ID",
+        placeholder="e.g. 12345678",
+        min_length=1,
+        max_length=20,
+        required=True,
+    )
+
+    def __init__(self, on_submit_id):
+        super().__init__()
+        self._on_submit_id = on_submit_id
+
+    async def on_submit(self, interaction: discord.Interaction):
+        raw = self.asa_field.value.strip()
+        if not raw.isdigit():
+            await interaction.response.send_message(
+                "❌ That doesn't look like a valid ASA ID — numbers only.", ephemeral=True
+            )
+            return
+        await self._on_submit_id(interaction, int(raw))
+
+
+class ZappyDropdownView(discord.ui.View):
+    """
+    Generic dropdown Zappy picker.
+    - zappies: list of dicts with at least 'asset_id' and 'name' (and ideally 'stats')
+    - on_pick(interaction, asset_id): called once a Zappy is chosen from the dropdown
+    - on_manual(interaction, asset_id): called when a manually-typed ASA is submitted
+      (defaults to on_pick if not provided). Pass allow_manual=False to hide the button.
+    """
+    PAGE_SIZE = 25
+
+    def __init__(self, zappies: list, on_pick, *, on_manual=None,
+                 allow_manual=True, placeholder="Choose a Zappy...", timeout=120):
+        super().__init__(timeout=timeout)
+        self.zappies     = zappies
+        self.on_pick     = on_pick
+        self.on_manual   = on_manual or on_pick
+        self.allow_manual = allow_manual
+        self.placeholder = placeholder
+        self.page        = 0
+        self.total_pages = max(1, (len(zappies) + self.PAGE_SIZE - 1) // self.PAGE_SIZE)
+        self.resolved    = False
+        self._render()
+
+    def _render(self):
+        self.clear_items()
+        start = self.page * self.PAGE_SIZE
+        page_zappies = self.zappies[start:start + self.PAGE_SIZE]
+
+        options = []
+        for z in page_zappies:
+            name = z.get("name", z.get("unit_name", f"ASA {z['asset_id']}"))
+            options.append(discord.SelectOption(
+                label=str(name)[:100],
+                description=_zappy_option_desc(z)[:100],
+                value=str(z["asset_id"]),
+            ))
+
+        label = self.placeholder
+        if self.total_pages > 1:
+            label = f"{self.placeholder} (page {self.page + 1}/{self.total_pages})"
+
+        select = discord.ui.Select(placeholder=label[:150], options=options, row=0)
+        select.callback = self._select_callback
+        self.add_item(select)
+
+        if self.total_pages > 1:
+            if self.page > 0:
+                prev_btn = discord.ui.Button(label="◀ Prev", style=discord.ButtonStyle.secondary, row=1)
+                prev_btn.callback = self._prev
+                self.add_item(prev_btn)
+            if self.page < self.total_pages - 1:
+                next_btn = discord.ui.Button(label="Next ▶", style=discord.ButtonStyle.secondary, row=1)
+                next_btn.callback = self._next
+                self.add_item(next_btn)
+
+        if self.allow_manual:
+            manual_btn = discord.ui.Button(label="🔍 Enter ASA number", style=discord.ButtonStyle.secondary, row=2)
+            manual_btn.callback = self._manual_button
+            self.add_item(manual_btn)
+
+    async def _select_callback(self, interaction: discord.Interaction):
+        if self.resolved:
+            await interaction.response.send_message("Already picked!", ephemeral=True)
+            return
+        asset_id = int(interaction.data["values"][0])
+        self.resolved = True
+        for item in self.children:
+            item.disabled = True
+        try:
+            await interaction.response.defer(ephemeral=True)
+        except discord.errors.NotFound:
+            return
+        await self.on_pick(interaction, asset_id)
+
+    async def _prev(self, interaction: discord.Interaction):
+        self.page -= 1
+        self._render()
+        await interaction.response.edit_message(view=self)
+
+    async def _next(self, interaction: discord.Interaction):
+        self.page += 1
+        self._render()
+        await interaction.response.edit_message(view=self)
+
+    async def _manual_button(self, interaction: discord.Interaction):
+        if self.resolved:
+            await interaction.response.send_message("Already picked!", ephemeral=True)
+            return
+
+        async def _handle(modal_inter: discord.Interaction, asset_id: int):
+            if self.resolved:
+                await modal_inter.response.send_message("Already picked!", ephemeral=True)
+                return
+            self.resolved = True
+            for item in self.children:
+                item.disabled = True
+            try:
+                await modal_inter.response.defer(ephemeral=True)
+            except discord.errors.NotFound:
+                return
+            await self.on_manual(modal_inter, asset_id)
+
+        await interaction.response.send_modal(ManualAsaModal(_handle))
+
+
+# ---------------------------------------------
 # SLASH COMMANDS
 # ---------------------------------------------
 
@@ -386,37 +531,27 @@ async def cmd_clash(interaction: discord.Interaction):
         )
         return
 
-    # Sort by score, take top 5
-    top5 = sorted(scored, key=lambda x: x["score"], reverse=True)[:5]
+    # Rank all eligible Zappies (dropdown shows all of them, not just a top 5)
+    ranked_all = sorted(scored, key=lambda x: x["score"], reverse=True)
 
-    # Build selection embed
     embed = discord.Embed(
         title="⚡ Choose your Zappy for the Clash!",
-        description="Your top Zappies ranked by combined stats. Pick one to enter the bracket.",
+        description=(
+            f"You have **{len(ranked_all)}** eligible Zappy(ies). "
+            "Pick one from the dropdown below to enter the bracket."
+        ),
         color=0xF5E642,
     )
-    for i, z in enumerate(top5, 1):
-        s = z["stats"]
-        embed.add_field(
-            name=f"{i}. {z['name']}",
-            value=f"⚡ VLT {s.get('VLT','?')} · 🛡️ INS {s.get('INS','?')} · 🎲 SPK {s.get('SPK','?')}",
-            inline=False,
-        )
 
     # Build a lookup dict of all eligible asset_ids for ASA manual entry validation
     scored_ids = {z["asset_id"]: z for z in scored}
 
     # ── Shared registration helper (used by both pick paths) ──────────────────
-    async def _do_register(inter: discord.Interaction, zappy: dict, pick_view=None):
-        """Register a zappy and send confirmation. Optionally disables pick_view."""
+    async def _do_register(inter: discord.Interaction, zappy: dict):
+        """Register a zappy and send confirmation."""
         asset_id = zappy["asset_id"]
         stats    = zappy["stats"]
         name     = zappy["name"]
-
-        if pick_view:
-            pick_view.chosen = True
-            for item in pick_view.children:
-                item.disabled = True
 
         # ── Check for Sparks in wallet ────────────────────────────────────────
         from database import get_sparks_for_wallet
@@ -592,13 +727,12 @@ async def cmd_clash(interaction: discord.Interaction):
             )
             await clash_ch.send(file=discord.File(card_buf, filename="entry.png"))
 
-    # ── Confirm/Cancel view shown after ASA lookup ────────────────────────────
+    # ── Confirm/Cancel view shown after manual ASA lookup ─────────────────────
     class ConfirmAsaView(discord.ui.View):
-        def __init__(self, zappy: dict, pick_view):
+        def __init__(self, zappy: dict):
             super().__init__(timeout=60)
-            self.zappy     = zappy
-            self.pick_view = pick_view
-            self.resolved  = False
+            self.zappy    = zappy
+            self.resolved = False
 
         @discord.ui.button(label="✅ Confirm — Enter Bracket", style=discord.ButtonStyle.success)
         async def confirm(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -612,7 +746,7 @@ async def cmd_clash(interaction: discord.Interaction):
             self.resolved = True
             for item in self.children:
                 item.disabled = True
-            await _do_register(inter, self.zappy, pick_view=self.pick_view)
+            await _do_register(inter, self.zappy)
 
         @discord.ui.button(label="❌ Cancel", style=discord.ButtonStyle.secondary)
         async def cancel(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -620,173 +754,72 @@ async def cmd_clash(interaction: discord.Interaction):
             for item in self.children:
                 item.disabled = True
             await inter.response.edit_message(
-                content="Cancelled. You can still pick from the list above.",
+                content="Cancelled. You can still pick from the dropdown above.",
                 embed=None,
                 view=self,
             )
 
-    # ── Modal for manual ASA entry ────────────────────────────────────────────
-    class AsaInputModal(discord.ui.Modal, title="Enter your Zappy's ASA Number"):
-        asa_field = discord.ui.TextInput(
-            label="ASA ID",
-            placeholder="e.g. 12345678",
-            min_length=1,
-            max_length=20,
-            required=True,
+    # ── Dropdown pick ───────────────────────────────────────────────────────
+    async def on_pick(pick_inter: discord.Interaction, picked_id: int):
+        zappy = scored_ids.get(picked_id)
+        if not zappy:
+            await pick_inter.followup.send("❌ That Zappy isn't eligible right now.", ephemeral=True)
+            return
+        await _do_register(pick_inter, zappy)
+
+    # ── Manual ASA entry — still validated + shown with a confirm step ────────
+    async def on_manual(manual_inter: discord.Interaction, entered_id: int):
+        zappy = scored_ids.get(entered_id)
+        if not zappy:
+            all_asset_ids = [z["asset_id"] for z in (
+                ownership["zappies"] +
+                [{"asset_id": h["asset_id"]} for h in ownership.get("heroes", [])] +
+                [{"asset_id": c["asset_id"]} for c in ownership.get("collabs", [])]
+            )]
+            if entered_id not in all_asset_ids:
+                msg = "❌ That ASA isn't in your linked wallet."
+            else:
+                msg = "❌ That Zappy is on cooldown or isn't in the collection data."
+            await manual_inter.followup.send(msg, ephemeral=True)
+            return
+
+        stats = zappy["stats"]
+        name  = zappy["name"]
+        preview = discord.Embed(
+            title=f"🔍 {name}",
+            description=(
+                f"⚡ VLT {stats.get('VLT','?')} · "
+                f"🛡️ INS {stats.get('INS','?')} · "
+                f"🎲 SPK {stats.get('SPK','?')}"
+            ),
+            color=0xF5E642,
         )
-
-        def __init__(self, pick_view):
-            super().__init__()
-            self.pick_view = pick_view
-
-        async def on_submit(self, inter: discord.Interaction):
-            raw = self.asa_field.value.strip()
-
-            # Validate it's a number
-            if not raw.isdigit():
-                await inter.response.send_message(
-                    "❌ That doesn't look like a valid ASA ID — numbers only.",
-                    ephemeral=True,
-                )
-                return
-
-            entered_id = int(raw)
-
-            # Check against the user's eligible Zappies
-            zappy = scored_ids.get(entered_id)
-            if not zappy:
-                # Give a specific reason if we can tell why
-                all_asset_ids = [z["asset_id"] for z in (
-                    ownership["zappies"] +
-                    [{"asset_id": h["asset_id"]} for h in ownership.get("heroes", [])] +
-                    [{"asset_id": c["asset_id"]} for c in ownership.get("collabs", [])]
-                )]
-                if entered_id not in all_asset_ids:
-                    msg = "❌ That ASA isn't in your linked wallet."
-                else:
-                    msg = "❌ That Zappy is on cooldown or isn't in the collection data."
-                await inter.response.send_message(msg, ephemeral=True)
-                return
-
-            # Build stat preview embed
-            stats = zappy["stats"]
-            name  = zappy["name"]
-            preview = discord.Embed(
-                title=f"🔍 {name}",
-                description=(
-                    f"⚡ VLT {stats.get('VLT','?')} · "
-                    f"🛡️ INS {stats.get('INS','?')} · "
-                    f"🎲 SPK {stats.get('SPK','?')}"
-                ),
-                color=0xF5E642,
+        if stats.get("combo"):
+            preview.add_field(name="Combo", value=stats["combo"], inline=False)
+        if stats.get("ability") and isinstance(stats["ability"], dict):
+            ab = stats["ability"]
+            preview.add_field(
+                name=f"⚡ Ability: {ab.get('name','?')}",
+                value=ab.get("desc",""),
+                inline=False,
             )
-            if stats.get("combo"):
-                preview.add_field(name="Combo", value=stats["combo"], inline=False)
-            if stats.get("ability") and isinstance(stats["ability"], dict):
-                ab = stats["ability"]
-                preview.add_field(
-                    name=f"⚡ Ability: {ab.get('name','?')}",
-                    value=ab.get("desc",""),
-                    inline=False,
-                )
-            if zappy.get("image_url"):
-                preview.set_thumbnail(url=zappy["image_url"])
-            preview.set_footer(text=f"ASA {entered_id} · Is this the one?")
+        if zappy.get("image_url"):
+            preview.set_thumbnail(url=zappy["image_url"])
+        preview.set_footer(text=f"ASA {entered_id} · Is this the one?")
 
-            await inter.response.send_message(
-                embed=preview,
-                view=ConfirmAsaView(zappy, self.pick_view),
-                ephemeral=True,
-            )
+        await manual_inter.followup.send(embed=preview, view=ConfirmAsaView(zappy), ephemeral=True)
 
-    # ── Main pick view (top 5 + manual entry button) ──────────────────────────
-    class ClashPickView(discord.ui.View):
-        def __init__(self):
-            super().__init__(timeout=60)
-            self.chosen = False
-
-            for z in top5:
-                btn = discord.ui.Button(
-                    label=z["name"][:60],
-                    style=discord.ButtonStyle.primary,
-                    custom_id=f"clash_pick_{z['asset_id']}",
-                )
-                btn.callback = self._make_callback(z)
-                self.add_item(btn)
-
-            # Manual ASA entry button — always last
-            asa_btn = discord.ui.Button(
-                label="🔍 Enter ASA number",
-                style=discord.ButtonStyle.secondary,
-                row=4,
-            )
-            asa_btn.callback = self._asa_button_callback
-            self.add_item(asa_btn)
-
-        def _make_callback(self, zappy: dict):
-            async def callback(inter: discord.Interaction):
-                if self.chosen:
-                    await inter.response.send_message("Already picked!", ephemeral=True)
-                    return
-                try:
-                    await inter.response.defer(ephemeral=True)
-                except discord.errors.NotFound:
-                    return
-                self.chosen = True
-                for item in self.children:
-                    item.disabled = True
-                await _do_register(inter, zappy, pick_view=None)
-            return callback
-
-        async def _asa_button_callback(self, inter: discord.Interaction):
-            if self.chosen:
-                await inter.response.send_message("Already picked!", ephemeral=True)
-                return
-            await inter.response.send_modal(AsaInputModal(pick_view=self))
-
-    await interaction.followup.send(embed=embed, view=ClashPickView(), ephemeral=True)
+    view = ZappyDropdownView(
+        ranked_all, on_pick, on_manual=on_manual,
+        placeholder="Choose your Zappy for Clash...",
+    )
+    await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
 
-@tree.command(name="stats", description="Preview your Zappy's battle stats")
-@app_commands.describe(asset_id="Your Zappy's ASA ID (optional if you only have one)")
-async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = None):
-    """Show a Zappy's stats without registering."""
-    if not check_clash_channel(interaction):
-        await interaction.response.send_message(
-            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
-        )
-        return
-    await interaction.response.defer(ephemeral=True)
 
-    user_id = str(interaction.user.id)
-    wallet  = get_wallet(user_id)
-
-    if not wallet:
-        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
-        return
-
-    # Use local collection table - no indexer call needed
-    from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
-    from algorand_lookup import HERO_ASSET_IDS
-
-    if asset_id:
-        chosen_id = asset_id
-    else:
-        # Find all Zappies in local table that might belong to this wallet
-        # We can't know without indexer, so prompt for asset_id if ambiguous
-        await interaction.followup.send(
-            "Use `/stats asset_id:XXXXX` with your Zappy's ASA ID, "
-            "or use `/myzappies` to see all your Zappies and their IDs.",
-            ephemeral=True
-        )
-        return
-
-    zappy = await fetch_zappy_traits(chosen_id)
-    if not zappy:
-        await interaction.followup.send("❌ Couldn't load traits. Try again.", ephemeral=True)
-        return
-
-    stats = zappy.get("stats", {})
+def _build_stats_embed(zappy: dict, chosen_id: int) -> discord.Embed:
+    """Build the stats/traits embed for a single Zappy. Shared by all /stats paths."""
+    stats  = zappy.get("stats", {})
     traits = zappy.get("traits", {})
     name   = zappy.get("name", f"ASA {chosen_id}")
 
@@ -822,7 +855,89 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
         embed.set_thumbnail(url=image_url)
 
     embed.set_footer(text=f"ASA {chosen_id}")
-    await interaction.followup.send(embed=embed, ephemeral=True)
+    return embed
+
+
+@tree.command(name="stats", description="Preview your Zappy's battle stats")
+@app_commands.describe(asset_id="Look up a specific ASA ID (optional — omit to pick from your wallet)")
+async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = None):
+    """Show a Zappy's stats. No ASA given -> dropdown of everything in your wallet."""
+    if not check_clash_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{CLASH_CHANNEL}> for Clash commands.", ephemeral=True
+        )
+        return
+    await interaction.response.defer(ephemeral=True)
+
+    user_id = str(interaction.user.id)
+    wallet  = get_wallet(user_id)
+
+    if not wallet:
+        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+        return
+
+    # Direct lookup — explicit ASA given (works for Zappies not in your wallet too)
+    if asset_id:
+        zappy = await fetch_zappy_traits(asset_id)
+        if not zappy:
+            await interaction.followup.send("❌ Couldn't load traits. Try again.", ephemeral=True)
+            return
+        await interaction.followup.send(embed=_build_stats_embed(zappy, asset_id), ephemeral=True)
+        return
+
+    # No ASA given — pull wallet ownership and let them pick from a dropdown
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+    import time as _t
+    now = _t.monotonic()
+    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+        ownership = _wallet_cache[wallet]
+    else:
+        ownership = await verify_wallet(user_id, wallet)
+
+    if not ownership["owns"]:
+        await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
+        return
+
+    all_assets = ownership["zappies"] + ownership["heroes"] + ownership["collabs"]
+
+    # Fetch stats for every owned Zappy in parallel so the dropdown can show them
+    zappy_data_list = await asyncio.gather(
+        *(fetch_zappy_traits(z["asset_id"]) for z in all_assets)
+    )
+    pickable = [
+        {**z, "stats": zd.get("stats", {}), "name": zd.get("name", z.get("name", f"ASA {z['asset_id']}"))}
+        for z, zd in zip(all_assets, zappy_data_list) if zd
+    ]
+    pickable.sort(key=lambda z: z["name"])
+
+    if not pickable:
+        await interaction.followup.send("❌ Couldn't load any of your Zappies' traits. Try again.", ephemeral=True)
+        return
+
+    async def on_pick(pick_inter: discord.Interaction, picked_id: int):
+        zappy = await fetch_zappy_traits(picked_id)
+        if not zappy:
+            await pick_inter.followup.send("❌ Couldn't load traits. Try again.", ephemeral=True)
+            return
+        await pick_inter.followup.send(embed=_build_stats_embed(zappy, picked_id), ephemeral=True)
+
+    async def on_manual(manual_inter: discord.Interaction, typed_id: int):
+        # Manual entry can look up ANY Zappy, not just ones in the wallet
+        zappy = await fetch_zappy_traits(typed_id)
+        if not zappy:
+            await manual_inter.followup.send("❌ Couldn't find that ASA. Try again.", ephemeral=True)
+            return
+        await manual_inter.followup.send(embed=_build_stats_embed(zappy, typed_id), ephemeral=True)
+
+    view = ZappyDropdownView(
+        pickable, on_pick, on_manual=on_manual,
+        placeholder="Choose one of your Zappies...",
+    )
+    await interaction.followup.send(
+        f"⚡ You have **{len(pickable)}** Zappies. Pick one below, "
+        "or look up a different ASA (even one you don't own).",
+        view=view, ephemeral=True,
+    )
 
 
 @tree.command(name="rank", description="Check your Clash Points and rank")
@@ -1251,7 +1366,7 @@ async def cmd_myzappies(interaction: discord.Interaction):
         collab_lines = [f"🐱 **Shitty Zappy Kitty** `{c['asset_id']}`" for c in collabs]
         embed.add_field(name="Collabs", value="\n".join(collab_lines), inline=False)
 
-    embed.set_footer(text="Use /stats asset_id:XXXXX to see a Zappy's battle stats")
+    embed.set_footer(text="Use /stats to pick a Zappy from a dropdown and see its battle stats")
     await interaction.followup.send(embed=embed, ephemeral=True)
 
 
@@ -1890,10 +2005,10 @@ ZONE_STAT_REASON = {
 }
 
 
-async def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
+async def rank_zappies_for_zone(zappies: list, zone_num: int, limit: int | None = 5) -> list:
     """
     Rank a list of Zappies by their suitability for a specific zone.
-    Returns top 5 with scores and explanations.
+    Returns the top `limit` with scores and explanations (pass limit=None for the full ranked list).
     Uses fetch_zappy_traits() — the same single source of truth used by
     /stats and /clash — so Heroes, Collabs, regular Zappies, and any
     Zappy merged in from extra_zappies all resolve identically.
@@ -1925,7 +2040,7 @@ async def rank_zappies_for_zone(zappies: list, zone_num: int) -> list:
         })
 
     ranked.sort(key=lambda x: x["score"], reverse=True)
-    return ranked[:5]
+    return ranked if limit is None else ranked[:limit]
 
 
 def build_zappy_reason(zappy: dict, zone_num: int) -> str:
@@ -1946,12 +2061,14 @@ def build_zappy_reason(zappy: dict, zone_num: int) -> str:
 
 
 class SmartZappyView(discord.ui.View):
-    """Button view showing top 5 Zappies for a zone with explanations."""
+    """Button view showing top 5 Zappies for a zone with explanations, plus a
+    'see more' dropdown for anyone who owns more than 5 eligible Zappies."""
 
-    def __init__(self, ranked_zappies: list, zone_num: int, on_zappy_callback):
+    def __init__(self, ranked_zappies: list, full_ranked: list, zone_num: int, on_zappy_callback):
         super().__init__(timeout=120)
-        self.callback = on_zappy_callback
-        self.chosen   = False
+        self.callback    = on_zappy_callback
+        self.chosen      = False
+        self.full_ranked = full_ranked
 
         for z in ranked_zappies:
             name = z.get("name", z.get("unit_name", f"ASA {z['asset_id']}"))
@@ -1962,6 +2079,14 @@ class SmartZappyView(discord.ui.View):
             )
             btn.callback = self._make_callback(z["asset_id"])
             self.add_item(btn)
+
+        # Only worth showing if there's actually more to see
+        if len(full_ranked) > len(ranked_zappies):
+            more_btn = discord.ui.Button(
+                label="🔍 See more Zappies", style=discord.ButtonStyle.secondary, row=1
+            )
+            more_btn.callback = self._see_more
+            self.add_item(more_btn)
 
     def _make_callback(self, asset_id: int):
         async def button_callback(interaction: discord.Interaction):
@@ -1974,6 +2099,27 @@ class SmartZappyView(discord.ui.View):
             await self.callback(interaction, asset_id)
         return button_callback
 
+    async def _see_more(self, interaction: discord.Interaction):
+        if self.chosen:
+            await interaction.response.send_message("Already picked!", ephemeral=True)
+            return
+
+        async def on_pick(pick_inter: discord.Interaction, asset_id: int):
+            if self.chosen:
+                await pick_inter.followup.send("Already picked!", ephemeral=True)
+                return
+            self.chosen = True
+            await self.callback(pick_inter, asset_id)
+
+        dropdown = ZappyDropdownView(
+            self.full_ranked, on_pick, allow_manual=False,
+            placeholder="Choose any of your Zappies...",
+        )
+        await interaction.response.send_message(
+            "Here's every eligible Zappy, ranked for this zone:",
+            view=dropdown, ephemeral=True,
+        )
+
 
 async def _show_smart_zappy_select(
     inter: discord.Interaction,
@@ -1984,18 +2130,20 @@ async def _show_smart_zappy_select(
     wallet: str,
     fee: int,
 ):
-    """Show the top 5 Zappies for a zone with stat explanations."""
+    """Show the top 5 Zappies for a zone with stat explanations, plus a 'see more' dropdown."""
     zone = ZONES[zone_num]
     priority = ZONE_STAT_PRIORITY.get(zone_num, ("SPK", "VLT", "INS"))
     primary  = priority[0]
 
     stat_labels = {"VLT": "Voltage (attack)", "INS": "Insulation (defense)", "SPK": "Spark (luck)"}
 
-    # Rank Zappies
-    ranked = await rank_zappies_for_zone(all_zappies, zone_num)
-    if not ranked:
+    # Rank all eligible Zappies once; top 5 drives the embed/buttons, the full
+    # list backs the "see more" dropdown for anyone who wants to try another.
+    full_ranked = await rank_zappies_for_zone(all_zappies, zone_num, limit=None)
+    if not full_ranked:
         await inter.followup.send("❌ Couldn't load Zappy stats.", ephemeral=True)
         return
+    ranked = full_ranked[:5]
 
     embed = discord.Embed(
         title       = f"{zone['emoji']} {zone['name']} - Pick your Zappy",
@@ -2003,6 +2151,7 @@ async def _show_smart_zappy_select(
             f"**Key stat for this zone: {stat_labels.get(primary, primary)}**\n"
             f"Here are your top 5 Zappies ranked for this zone. "
             f"Stats and reasons shown below."
+            + (" Use *See more Zappies* below to pick from the rest." if len(full_ranked) > 5 else "")
             + (f"\n\n💰 Entry fee: **{fee:,} ZAPP** (deducted from rewards)" if fee > 0 else "")
         ),
         color = zone["color"],
@@ -2024,7 +2173,7 @@ async def _show_smart_zappy_select(
         embed.set_thumbnail(url=ranked[0]["image_url"])
 
     async def on_zappy_chosen(chosen_inter: discord.Interaction, asset_id: int):
-        chosen = next((z for z in ranked if z["asset_id"] == asset_id), None)
+        chosen = next((z for z in full_ranked if z["asset_id"] == asset_id), None)
         if not chosen:
             await chosen_inter.followup.send("❌ Zappy not found.", ephemeral=True)
             return
@@ -2041,7 +2190,7 @@ async def _show_smart_zappy_select(
         }
         await _run_expedition_beat(chosen_inter, user_id, zone_num, zappy_data, zappy_count, entry_fee=fee)
 
-    view = SmartZappyView(ranked, zone_num, on_zappy_chosen)
+    view = SmartZappyView(ranked, full_ranked, zone_num, on_zappy_chosen)
     await inter.followup.send(embed=embed, view=view, ephemeral=True)
 
 
