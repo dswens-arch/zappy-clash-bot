@@ -2744,7 +2744,10 @@ async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: 
                                     }
                                     raw_img = metadata.get("image", "")
                                     if raw_img.startswith("ipfs://"):
-                                        image_url = IPFS_GATEWAYS[0] + raw_img.replace("ipfs://", "").split("/")[0]
+                                        img_cid = raw_img.replace("ipfs://", "").split("/")[0]
+                                        # Subdomain format (not path-style) — Discord's embed
+                                        # unfurler needs this to get a correct content-type header.
+                                        image_url = f"https://{img_cid}.ipfs.dweb.link"
                                     elif raw_img.startswith("https://"):
                                         image_url = raw_img
                                     if not image_url and asset_url.startswith("https://") or asset_url.startswith("http://"):
