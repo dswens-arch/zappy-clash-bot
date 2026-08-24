@@ -2646,6 +2646,11 @@ async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: 
                             }
                             ZAPPY_ASSET_IDS.add(asset_id)
                             added.append((asset_id, row["name"], ZAPPY_COLLECTION[asset_id]))
+                            try:
+                                import algorand_lookup
+                                algorand_lookup._zappy_cache.pop(asset_id, None)
+                            except Exception:
+                                pass
                     except Exception as _e:
                         print(f"⚠️ Could not load {asset_id} from Supabase: {_e}")
                 else:
@@ -2739,10 +2744,10 @@ async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: 
                                     }
                                     raw_img = metadata.get("image", "")
                                     if raw_img.startswith("ipfs://"):
-                                        image_url = "https://ipfs.io/ipfs/" + raw_img.replace("ipfs://", "").split("/")[0]
+                                        image_url = IPFS_GATEWAYS[0] + raw_img.replace("ipfs://", "").split("/")[0]
                                     elif raw_img.startswith("https://"):
                                         image_url = raw_img
-                                    if not image_url and "ipfs" in asset_url:
+                                    if not image_url and asset_url.startswith("https://") or asset_url.startswith("http://"):
                                         image_url = asset_url.split("#")[0]
                                     break
                         except Exception:
@@ -2762,6 +2767,16 @@ async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: 
                 ZAPPY_COLLECTION[asset_id] = entry
                 ZAPPY_ASSET_IDS.add(asset_id)
                 added.append((asset_id, name, entry))
+
+                # fetch_zappy_traits() caches results forever in algorand_lookup._zappy_cache.
+                # If /stats was ever run on this asset before this fix, that stale
+                # (image-less / trait-less) result would otherwise stick around until
+                # a bot restart. Evict it now so the next /stats call reflects this update.
+                try:
+                    import algorand_lookup
+                    algorand_lookup._zappy_cache.pop(asset_id, None)
+                except Exception:
+                    pass
 
             except Exception as e:
                 failed.append((asset_id, str(e)[:80]))
