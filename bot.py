@@ -2564,12 +2564,12 @@ async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: 
     from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
 
     IPFS_GATEWAYS = [
+        "https://ipfs-pera.algonode.dev/ipfs/",
+        "https://ipfs.algonode.dev/ipfs/",
+        "https://gateway.pinata.cloud/ipfs/",
         "https://ipfs.io/ipfs/",
         "https://dweb.link/ipfs/",
-        "https://cloudflare-ipfs.com/ipfs/",
-        "https://nftstorage.link/ipfs/",
         "https://w3s.link/ipfs/",
-        "https://gateway.pinata.cloud/ipfs/",
     ]
 
     def _encode_varint(n):
@@ -2710,18 +2710,32 @@ async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: 
                             ) as resp:
                                 if resp.status == 200:
                                     metadata = await resp.json(content_type=None)
-                                    props = metadata.get("properties", {})
-                                    if isinstance(props, list):
-                                        props = {p["trait_type"]: p["value"] for p in props if "trait_type" in p}
+
+                                    def _to_props(raw):
+                                        if not raw:
+                                            return {}
+                                        if isinstance(raw, list):
+                                            return {
+                                                (p.get("trait_type") or p.get("name")): p.get("value")
+                                                for p in raw if p.get("trait_type") or p.get("name")
+                                            }
+                                        return raw
+
+                                    _merged = {**_to_props(metadata.get("properties")), **_to_props(metadata.get("attributes"))}
+                                    _lookup = {k.lower(): v for k, v in _merged.items()}
+
+                                    def _prop(key, default=""):
+                                        return _lookup.get(key.lower(), default)
+
                                     traits = {
-                                        "background": props.get("Background", ""),
-                                        "body":       props.get("Body", ""),
-                                        "earring":    props.get("Earring", "None"),
-                                        "eyes":       props.get("Eyes", ""),
-                                        "eyewear":    props.get("Eyewear", "None"),
-                                        "head":       props.get("Head", ""),
-                                        "mouth":      props.get("Mouth", ""),
-                                        "skin":       props.get("Skin", ""),
+                                        "background": _prop("Background"),
+                                        "body":       _prop("Body"),
+                                        "earring":    _prop("Earring", "None"),
+                                        "eyes":       _prop("Eyes"),
+                                        "eyewear":    _prop("Eyewear", "None"),
+                                        "head":       _prop("Head"),
+                                        "mouth":      _prop("Mouth"),
+                                        "skin":       _prop("Skin"),
                                     }
                                     raw_img = metadata.get("image", "")
                                     if raw_img.startswith("ipfs://"):
@@ -2790,63 +2804,6 @@ async def _addzappies_background(channel, asset_ids: list, direct_metadata_url: 
             lines.append(f"  {asset_id} - {reason}")
 
     await channel.send("\n".join(lines))
-
-
-# ─── dummy placeholder so the old addzappies body below gets replaced ───
-async def _addzappies_dummy():
-    pass
-
-    import aiohttp
-    from algorand_lookup import INDEXER_URL
-    import base64, re
-
-    IPFS_GATEWAYS = [
-        "https://crustipfs.xyz/ipfs/",
-        "https://ipfs.io/ipfs/",
-        "https://dweb.link/ipfs/",
-        "https://cloudflare-ipfs.com/ipfs/",
-        "https://nftstorage.link/ipfs/",
-        "https://w3s.link/ipfs/",
-        "https://gateway.pinata.cloud/ipfs/",
-        "https://ipfs.algonode.dev/ipfs/",
-    ]
-
-    def _encode_varint(n):
-        buf = []
-        while True:
-            towrite = n & 0x7f
-            n >>= 7
-            if n:
-                buf.append(towrite | 0x80)
-            else:
-                buf.append(towrite)
-                break
-        return bytes(buf)
-
-    def _decode_arc19(asset_url, reserve_address):
-        try:
-            from algosdk import encoding as algo_encoding
-            match = re.search(r'\{ipfscid:(\d+):([^:]+):([^:]+):([^}]+)\}', asset_url)
-            if not match:
-                return None
-            version   = int(match.group(1))
-            codec_str = match.group(2)
-            hash_type = match.group(4)
-            digest    = algo_encoding.decode_address(reserve_address)
-            if version == 0:
-                import base58
-                return base58.b58encode(bytes([0x12, 0x20]) + digest).decode()
-            codec_map = {"raw": 0x55, "dag-pb": 0x70}
-            hash_map  = {"sha2-256": 0x12}
-            multihash = _encode_varint(hash_map.get(hash_type, 0x12)) + _encode_varint(len(digest)) + digest
-            cid_bytes = _encode_varint(1) + _encode_varint(codec_map.get(codec_str, 0x55)) + multihash
-            # CIDv1 base32 lower — must pad to multiple of 8 before decoding
-            b32 = base64.b32encode(cid_bytes).decode().lower()
-            return 'b' + b32.rstrip('=')
-        except Exception as e:
-            return None
-
-
 
 
 
