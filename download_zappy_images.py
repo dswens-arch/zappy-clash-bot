@@ -192,6 +192,7 @@ def fetch_extra_zappies() -> list[dict]:
     headers = {
         "apikey": SUPABASE_SERVICE_KEY,
         "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Accept-Profile": "public",
     }
     url = f"{SUPABASE_URL}/rest/v1/extra_zappies?select=asset_id,image_url"
     try:
@@ -211,6 +212,7 @@ def update_extra_zappy_image_url(asset_id: int, new_url: str) -> bool:
         "apikey": SUPABASE_SERVICE_KEY,
         "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
         "Content-Type": "application/json",
+        "Content-Profile": "public",
     }
     url = f"{SUPABASE_URL}/rest/v1/extra_zappies?asset_id=eq.{asset_id}"
     try:
