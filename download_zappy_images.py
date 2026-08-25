@@ -72,14 +72,22 @@ if SUPABASE_URL and ".supabase.co" not in SUPABASE_URL:
 CONCURRENCY = 12
 REQUEST_TIMEOUT = 15
 
-# ipfs-pera.algonode.dev goes first — confirmed to reliably serve this
-# collection's content without the bot-detection blocking seen on
-# dweb.link, and without the reliability issues seen on plain ipfs.io.
+# Path-style gateways, tried first.
 GATEWAYS = [
     "https://ipfs-pera.algonode.dev/ipfs/{cid}",
     "https://ipfs.algonode.dev/ipfs/{cid}",
     "https://dweb.link/ipfs/{cid}",
     "https://ipfs.io/ipfs/{cid}",
+]
+
+# Subdomain-style gateways, tried as a fallback if every path-style URL
+# above fails. Some gateways (dweb.link in particular) apply bot-detection
+# to path-style requests that subdomain-style requests don't hit — a real
+# case we confirmed manually (this exact pattern loaded fine in a browser
+# when the path-style URL did not).
+SUBDOMAIN_GATEWAYS = [
+    "https://{cid}.ipfs.dweb.link",
+    "https://{cid}.ipfs.w3s.link",
 ]
 
 
@@ -92,6 +100,15 @@ def extract_cid(image_url: str) -> str | None:
 def fetch_image_bytes(cid: str) -> bytes | None:
     headers = {"User-Agent": "Mozilla/5.0 (zappy-clash-bot image sync)"}
     for template in GATEWAYS:
+        url = template.format(cid=cid)
+        try:
+            resp = requests.get(url, timeout=REQUEST_TIMEOUT, headers=headers)
+            if resp.status_code == 200 and resp.content:
+                return resp.content
+        except requests.RequestException:
+            continue
+    # Path-style all failed — try subdomain-style before giving up.
+    for template in SUBDOMAIN_GATEWAYS:
         url = template.format(cid=cid)
         try:
             resp = requests.get(url, timeout=REQUEST_TIMEOUT, headers=headers)
@@ -317,10 +334,13 @@ def main():
     print("\n--- Syncing extra_zappies (new mints) ---")
     extra_succeeded, extra_failed = sync_extra_zappies()
 
-    total_failed = len(failed) + extra_failed
-    total_attempted = len(to_process) + extra_succeeded + extra_failed
-    if total_attempted and total_failed > total_attempted * 0.05:
-        print(f"\nWARNING: {total_failed} failures is more than 5% of this run -- check gateway health before trusting this run.")
+    # Only the static-collection failure rate is treated as fatal (exit 1) --
+    # extra_zappies runs are small batches where one failure can look like
+    # a huge percentage without meaning anything is actually wrong, and a
+    # fatal exit here would skip the commit step and lose whatever DID
+    # succeed this run.
+    if to_process and len(failed) > len(to_process) * 0.05:
+        print(f"\nWARNING: {len(failed)} failures is more than 5% of the static collection run -- check gateway health before trusting this run.")
         sys.exit(1)
 
 
