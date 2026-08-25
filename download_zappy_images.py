@@ -91,30 +91,45 @@ SUBDOMAIN_GATEWAYS = [
 ]
 
 
+import re as _re
+
+_SUBDOMAIN_CID_RE = _re.compile(r"^https?://([a-zA-Z0-9]+)\.ipfs\.[^/]+/?$")
+
+
 def extract_cid(image_url: str) -> str | None:
-    if "/ipfs/" not in image_url:
-        return None
-    return image_url.split("/ipfs/", 1)[1].split("?")[0].strip()
+    if "/ipfs/" in image_url:
+        return image_url.split("/ipfs/", 1)[1].split("?")[0].strip()
+    match = _SUBDOMAIN_CID_RE.match(image_url.strip())
+    if match:
+        return match.group(1)
+    return None
 
 
-def fetch_image_bytes(cid: str) -> bytes | None:
+def fetch_image_bytes(cid: str, debug: bool = False) -> bytes | None:
     headers = {"User-Agent": "Mozilla/5.0 (zappy-clash-bot image sync)"}
     for template in GATEWAYS:
         url = template.format(cid=cid)
         try:
             resp = requests.get(url, timeout=REQUEST_TIMEOUT, headers=headers)
+            if debug:
+                print(f"    [gw] {url} -> status {resp.status_code}, {len(resp.content)} bytes")
             if resp.status_code == 200 and resp.content:
                 return resp.content
-        except requests.RequestException:
+        except requests.RequestException as e:
+            if debug:
+                print(f"    [gw] {url} -> EXCEPTION {type(e).__name__}: {e}")
             continue
-    # Path-style all failed — try subdomain-style before giving up.
     for template in SUBDOMAIN_GATEWAYS:
         url = template.format(cid=cid)
         try:
             resp = requests.get(url, timeout=REQUEST_TIMEOUT, headers=headers)
+            if debug:
+                print(f"    [gw] {url} -> status {resp.status_code}, {len(resp.content)} bytes")
             if resp.status_code == 200 and resp.content:
                 return resp.content
-        except requests.RequestException:
+        except requests.RequestException as e:
+            if debug:
+                print(f"    [gw] {url} -> EXCEPTION {type(e).__name__}: {e}")
             continue
     return None
 
@@ -123,12 +138,15 @@ def already_done(key: str) -> bool:
     return os.path.exists(os.path.join(OUTPUT_DIR, f"{key}.jpg"))
 
 
-def process_one(key: str, ipfs_url: str) -> tuple[str, bool]:
+def process_one(key: str, ipfs_url: str, debug: bool = False) -> tuple[str, bool]:
     cid = extract_cid(ipfs_url)
+    if debug:
+        print(f"  [{key}] source url: {ipfs_url}")
+        print(f"  [{key}] extracted cid: {cid}")
     if not cid:
         return key, False
 
-    raw = fetch_image_bytes(cid)
+    raw = fetch_image_bytes(cid, debug=debug)
     if raw is None:
         return key, False
 
@@ -274,7 +292,7 @@ def sync_extra_zappies():
     print(f"extra_zappies: self-hosting {len(to_process)} new mint(s)...")
     succeeded, failed = [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
-        futures = {pool.submit(process_one, aid, url): aid for aid, url in to_process.items()}
+        futures = {pool.submit(process_one, aid, url, True): aid for aid, url in to_process.items()}
         for future in concurrent.futures.as_completed(futures):
             aid, ok = future.result()
             (succeeded if ok else failed).append(aid)
