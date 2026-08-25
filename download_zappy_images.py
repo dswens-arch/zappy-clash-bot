@@ -45,8 +45,29 @@ QUALITY    = 90
 
 RAW_BASE = "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full"
 
-SUPABASE_URL         = os.environ.get("SUPABASE_URL", "")
+SUPABASE_URL         = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
+
+# Diagnostics only — none of this prints the actual secret values, just
+# shapes/lengths, so it's safe to leave in and won't get masked/garbled
+# by GitHub's secret redaction.
+print(f"[diag] SUPABASE_URL length: {len(SUPABASE_URL)}")
+print(f"[diag] SUPABASE_URL has whitespace/newline: {SUPABASE_URL != SUPABASE_URL.strip()}")
+print(f"[diag] SUPABASE_URL last 3 chars: {repr(SUPABASE_URL[-3:]) if SUPABASE_URL else '(empty)'}")
+print(f"[diag] SUPABASE_SERVICE_KEY length: {len(SUPABASE_SERVICE_KEY)}")
+print(f"[diag] SUPABASE_SERVICE_KEY has whitespace/newline: {SUPABASE_SERVICE_KEY != SUPABASE_SERVICE_KEY.strip()}")
+print(f"[diag] SUPABASE_SERVICE_KEY looks like a JWT (starts 'eyJ'): {SUPABASE_SERVICE_KEY.startswith('eyJ')}")
+
+SUPABASE_URL = SUPABASE_URL.strip()
+SUPABASE_SERVICE_KEY = SUPABASE_SERVICE_KEY.strip()
+
+if SUPABASE_URL and not SUPABASE_URL.startswith("https://"):
+    print("WARNING: SUPABASE_URL doesn't start with https:// — check the secret value "
+          "(should be the 'Project URL' from Supabase Settings -> API, not a database "
+          "connection string).")
+if SUPABASE_URL and ".supabase.co" not in SUPABASE_URL:
+    print("WARNING: SUPABASE_URL doesn't contain '.supabase.co' — this may not be the "
+          "REST API Project URL.")
 
 CONCURRENCY = 12
 REQUEST_TIMEOUT = 15
@@ -179,6 +200,8 @@ def fetch_extra_zappies() -> list[dict]:
         return resp.json()
     except requests.RequestException as e:
         print(f"Failed to fetch extra_zappies from Supabase: {e}")
+        if e.response is not None:
+            print(f"  Response body: {e.response.text[:500]}")
         return []
 
 
