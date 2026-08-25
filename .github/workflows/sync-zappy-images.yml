@@ -4,22 +4,20 @@ name: Sync Zappy Images
 # on GitHub's own servers (full outbound internet access), so nothing
 # needs to be installed or configured locally.
 #
-# What it does: downloads every Zappy/Hero/Collab image from a live IPFS
-# gateway ONCE, resizes it, saves it into zappy-images-full/ in this repo,
-# and rewrites zappy_collection.py + algorand_lookup.py to point at those
-# local files instead of any IPFS URL. After this runs once, the bot never
-# depends on an external gateway -- or AlgoNode's IPFS gateway, which also
-# counts against the same daily quota as payouts/wallet lookups -- being
-# up at render time again.
+# What it does:
+#   1. Downloads any of the original ~1,690 Zappy/Hero/Collab images not
+#      yet self-hosted, saves into zappy-images-full/, rewrites
+#      zappy_collection.py + algorand_lookup.py to point at the local files.
+#   2. Downloads any NEW mint sitting in the extra_zappies Supabase table
+#      (added via /addzappies or /settraits in Discord) that isn't
+#      self-hosted yet, and updates its image_url in Supabase directly.
 #
-# Safe to re-run later too (e.g. after new Zappies mint) -- it just
-# downloads whatever's missing and re-rewrites, only committing if
-# something actually changed.
+# Safe to re-run any time -- only touches what's missing/outdated, only
+# commits if something actually changed.
 
 on:
   workflow_dispatch: {}
-  # Uncomment to also run automatically on a schedule (e.g. to pick up
-  # newly-minted Zappies without a manual trigger each time):
+  # Uncomment to also run automatically on a schedule:
   # schedule:
   #   - cron: '0 6 * * 1'  # every Monday at 06:00 UTC
 
@@ -42,6 +40,9 @@ jobs:
         run: pip install requests pillow
 
       - name: Download and process images
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python download_zappy_images.py
 
       - name: Commit results
