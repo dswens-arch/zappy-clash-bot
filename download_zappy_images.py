@@ -2,36 +2,28 @@
 download_zappy_images.py  (zappy-clash-bot repo edition)
 ----------------------------------------------------------
 Self-hosts every Zappy/Hero/Collab image in THIS repo instead of depending
-on any IPFS gateway (or AlgoNode's IPFS gateway, which also counts against
-the same daily quota Spark Jobs/Office/Clash payouts use) at runtime.
+on any IPFS gateway at runtime.
 
-Adapted from the voltball-site version of this script — see
-CLASH_BOT_HANDOFF.md for the full history of why this exists. Differences
-from the voltball-site version:
-  - Single output tier only (1000px) — voltball-site needed a separate
-    small tier for its own roster cards, but nothing in this repo needs
-    that; card compositing (clash_entry_card.py, clash_winner_card.py,
-    expedition_engine.py) all want the larger size.
-  - Also processes Heroes and the ShittyKitties collab (keys "hero_*" /
-    "collab_*" in zappy_image_sources.json), not just the main collection.
-  - Rewrites TWO source files in place instead of one JSON file:
-      * zappy_collection.py  — main collection's image_url fields
-      * algorand_lookup.py   — HERO_IMAGES / COLLAB_IMAGES dicts
-    Both are live Python files, not JSON, so the rewrite is a careful
-    per-entry text substitution rather than a json.dump.
+TWO sources of truth, handled differently:
 
-SOURCE OF TRUTH FOR CIDs: zappy_image_sources.json, NOT the files this
-script rewrites. Same reasoning as the voltball-site version — once this
-runs once, the original IPFS URLs are gone from zappy_collection.py, so
-if we ever need to re-derive a source URL (bump resolution, retry a
-failure, etc.) later, this file is the only place it still exists.
+  1. zappy_image_sources.json — the original ~1,690 mints. Static file,
+     rewrites zappy_collection.py / algorand_lookup.py in place. Unchanged
+     from before.
 
-Designed to run in GitHub Actions (see .github/workflows/sync-zappy-images.yml),
-NOT locally — needs `requests` and `pillow`, a full outbound internet
-connection, and takes a few minutes for ~1690 images.
+  2. The `extra_zappies` Supabase table — every Zappy added later via
+     /addzappies or /settraits in the Discord bot. THIS IS NEW. Previously
+     this script had no idea these existed, so new mints never got
+     self-hosted unless someone manually added an entry to the JSON file.
+     Now: pulls every row, downloads/self-hosts anything not already
+     local, and PATCHes image_url back to Supabase directly — no manual
+     file editing required for new mints, ever.
 
-Safe to re-run later (e.g. after new Zappies mint, or to bump FULL_SIZE) —
-only re-downloads what's missing, only commits if something changed.
+Needs SUPABASE_URL and SUPABASE_SERVICE_KEY as env vars (repo secrets in
+the workflow) — must be the SERVICE ROLE key, not the anon key, since it
+needs write access to PATCH image_url.
+
+Designed to run in GitHub Actions (see .github/workflows/sync-zappy-images.yml).
+Safe to re-run any time — only touches what's missing/outdated.
 """
 
 import json
@@ -51,39 +43,37 @@ OUTPUT_DIR = "zappy-images-full"
 SIZE       = (1000, 1000)
 QUALITY    = 90
 
-# Where the final files will be publicly reachable once committed & pushed.
-# Update the owner/repo/branch here if the repo ever moves.
 RAW_BASE = "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full"
 
-CONCURRENCY = 12       # parallel downloads; polite, not hammering any one gateway
-REQUEST_TIMEOUT = 15   # seconds per gateway attempt
+SUPABASE_URL         = os.environ.get("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 
-# Tried in order per image. dweb.link is the gateway Cloudflare itself
-# named as the successor when it shut cloudflare-ipfs.com down.
+CONCURRENCY = 12
+REQUEST_TIMEOUT = 15
+
+# ipfs-pera.algonode.dev goes first — confirmed to reliably serve this
+# collection's content without the bot-detection blocking seen on
+# dweb.link, and without the reliability issues seen on plain ipfs.io.
 GATEWAYS = [
+    "https://ipfs-pera.algonode.dev/ipfs/{cid}",
+    "https://ipfs.algonode.dev/ipfs/{cid}",
     "https://dweb.link/ipfs/{cid}",
     "https://ipfs.io/ipfs/{cid}",
 ]
 
 
 def extract_cid(image_url: str) -> str | None:
-    """
-    Pull the bare CID out of an IPFS URL, stripping any query string.
-    NOTE: the voltball-site version of this function didn't strip query
-    params — harmless there since none of its source URLs had any, but
-    the Hero images here do (?optimizer=image&width=...), so this version
-    strips everything after '?' to avoid mangling the CID.
-    """
     if "/ipfs/" not in image_url:
         return None
     return image_url.split("/ipfs/", 1)[1].split("?")[0].strip()
 
 
 def fetch_image_bytes(cid: str) -> bytes | None:
+    headers = {"User-Agent": "Mozilla/5.0 (zappy-clash-bot image sync)"}
     for template in GATEWAYS:
         url = template.format(cid=cid)
         try:
-            resp = requests.get(url, timeout=REQUEST_TIMEOUT)
+            resp = requests.get(url, timeout=REQUEST_TIMEOUT, headers=headers)
             if resp.status_code == 200 and resp.content:
                 return resp.content
         except requests.RequestException:
@@ -96,7 +86,6 @@ def already_done(key: str) -> bool:
 
 
 def process_one(key: str, ipfs_url: str) -> tuple[str, bool]:
-    """Downloads and saves one image. Returns (key, success)."""
     cid = extract_cid(ipfs_url)
     if not cid:
         return key, False
@@ -116,16 +105,10 @@ def process_one(key: str, ipfs_url: str) -> tuple[str, bool]:
 
 
 # ─────────────────────────────────────────────
-# Rewriting zappy_collection.py in place
+# Rewriting zappy_collection.py / algorand_lookup.py (original ~1,690)
 # ─────────────────────────────────────────────
 
 def rewrite_collection_image_urls(asset_ids_done: list[str]):
-    """
-    For each numeric asset_id that now has a local image, replaces that
-    entry's 'image_url': '...' line with the new self-hosted URL.
-    Operates on the raw text rather than re-serializing the dict, so
-    formatting/comments/ordering elsewhere in the file are untouched.
-    """
     if not asset_ids_done:
         return
     with open(COLLECTION_PATH, "r") as f:
@@ -134,8 +117,6 @@ def rewrite_collection_image_urls(asset_ids_done: list[str]):
     changed = 0
     for asset_id in asset_ids_done:
         new_url = f"{RAW_BASE}/{asset_id}.jpg"
-        # Match this specific asset's block only, up to its image_url line,
-        # so we never touch a different entry that happens to share text.
         pattern = re.compile(
             rf"({re.escape(asset_id)}:\s*\{{[^}}]*?'image_url':\s*)'[^']*'",
             re.S,
@@ -151,11 +132,6 @@ def rewrite_collection_image_urls(asset_ids_done: list[str]):
 
 
 def rewrite_hero_collab_urls(keys_done: list[str]):
-    """
-    For each 'hero_<Name>' / 'collab_<Name>' key that now has a local
-    image, rewrites the matching entry in algorand_lookup.py's
-    HERO_IMAGES / COLLAB_IMAGES dicts.
-    """
     if not keys_done:
         return
     with open(LOOKUP_PATH, "r") as f:
@@ -182,12 +158,103 @@ def rewrite_hero_collab_urls(keys_done: list[str]):
     print(f"  algorand_lookup.py: rewrote {changed}/{len(keys_done)} Hero/Collab image URLs")
 
 
+# ─────────────────────────────────────────────
+# NEW: syncing extra_zappies (mints added via /addzappies or /settraits)
+# ─────────────────────────────────────────────
+
+def fetch_extra_zappies() -> list[dict]:
+    """Pull every row from the extra_zappies Supabase table via REST."""
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        print("SUPABASE_URL / SUPABASE_SERVICE_KEY not set — skipping extra_zappies sync.")
+        return []
+
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+    }
+    url = f"{SUPABASE_URL}/rest/v1/extra_zappies?select=asset_id,image_url"
+    try:
+        resp = requests.get(url, headers=headers, timeout=15)
+        resp.raise_for_status()
+        return resp.json()
+    except requests.RequestException as e:
+        print(f"Failed to fetch extra_zappies from Supabase: {e}")
+        return []
+
+
+def update_extra_zappy_image_url(asset_id: int, new_url: str) -> bool:
+    """PATCH a single row's image_url once it's been self-hosted."""
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Content-Type": "application/json",
+    }
+    url = f"{SUPABASE_URL}/rest/v1/extra_zappies?asset_id=eq.{asset_id}"
+    try:
+        resp = requests.patch(url, headers=headers, json={"image_url": new_url}, timeout=15)
+        resp.raise_for_status()
+        return True
+    except requests.RequestException as e:
+        print(f"  [{asset_id}] Supabase PATCH failed: {e}")
+        return False
+
+
+def sync_extra_zappies():
+    """
+    Downloads/self-hosts any extra_zappies row that isn't already pointed
+    at RAW_BASE, then writes the new URL straight back to Supabase.
+    Returns (succeeded_count, failed_count).
+    """
+    rows = fetch_extra_zappies()
+    if not rows:
+        return 0, 0
+
+    to_process = {}
+    for row in rows:
+        asset_id  = str(row["asset_id"])
+        image_url = row.get("image_url") or ""
+        if image_url.startswith(RAW_BASE):
+            continue  # already self-hosted
+        if not image_url:
+            continue  # nothing to fetch yet (traits added but no image)
+        if already_done(asset_id):
+            # File exists locally but Supabase wasn't updated yet (e.g. a
+            # previous run got interrupted before the PATCH step) — just
+            # fix the DB pointer, no need to re-download.
+            update_extra_zappy_image_url(int(asset_id), f"{RAW_BASE}/{asset_id}.jpg")
+            continue
+        to_process[asset_id] = image_url
+
+    if not to_process:
+        print("extra_zappies: nothing new to self-host.")
+        return 0, 0
+
+    print(f"extra_zappies: self-hosting {len(to_process)} new mint(s)...")
+    succeeded, failed = [], []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
+        futures = {pool.submit(process_one, aid, url): aid for aid, url in to_process.items()}
+        for future in concurrent.futures.as_completed(futures):
+            aid, ok = future.result()
+            (succeeded if ok else failed).append(aid)
+
+    for asset_id in succeeded:
+        new_url = f"{RAW_BASE}/{asset_id}.jpg"
+        if update_extra_zappy_image_url(int(asset_id), new_url):
+            print(f"  [{asset_id}] self-hosted -> {new_url}")
+
+    if failed:
+        print(f"  extra_zappies: {len(failed)} failed (will retry next run): {failed}")
+
+    return len(succeeded), len(failed)
+
+
 def main():
     with open(SOURCES_PATH) as f:
         sources = json.load(f)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+    # ── Part 1: original ~1,690-mint static collection ──
     to_process = {k: v for k, v in sources.items() if not already_done(k)}
     already_done_count = len(sources) - len(to_process)
 
@@ -206,9 +273,6 @@ def main():
             if done_count % 100 == 0:
                 print(f"  ...{done_count}/{len(to_process)} processed ({len(failed)} failures so far)")
 
-    # Rewrite source files for EVERYTHING that has a local file now,
-    # including from earlier runs (covers first-run-after-rewrite and
-    # any partial-failure re-runs).
     all_done_keys = [k for k in sources if already_done(k)]
     numeric_keys  = [k for k in all_done_keys if k.isdigit()]
     hero_collab_keys = [k for k in all_done_keys if k.startswith("hero_") or k.startswith("collab_")]
@@ -217,14 +281,21 @@ def main():
     rewrite_collection_image_urls(numeric_keys)
     rewrite_hero_collab_urls(hero_collab_keys)
 
-    print(f"\nDone. {len(succeeded)} succeeded, {len(failed)} failed this run ({already_done_count} already done before this run).")
+    print(f"\nStatic collection done. {len(succeeded)} succeeded, {len(failed)} failed this run "
+          f"({already_done_count} already done before this run).")
     if failed:
-        print("Failed keys (both gateways failed this run -- will retry automatically next run):")
+        print("Failed keys (will retry automatically next run):")
         for key in failed:
             print(f"  {key}")
 
-    if to_process and len(failed) > len(to_process) * 0.05:
-        print(f"\nWARNING: {len(failed)} failures is more than 5% of this run -- check gateway health before trusting this run.")
+    # ── Part 2: new mints from extra_zappies (Supabase) ──
+    print("\n--- Syncing extra_zappies (new mints) ---")
+    extra_succeeded, extra_failed = sync_extra_zappies()
+
+    total_failed = len(failed) + extra_failed
+    total_attempted = len(to_process) + extra_succeeded + extra_failed
+    if total_attempted and total_failed > total_attempted * 0.05:
+        print(f"\nWARNING: {total_failed} failures is more than 5% of this run -- check gateway health before trusting this run.")
         sys.exit(1)
 
 
