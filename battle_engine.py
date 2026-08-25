@@ -52,6 +52,7 @@ class Fighter:
     shield_active:      bool  = field(default=False, init=False)   # Divine Shield block flag
     rot_poisoned:       bool  = field(default=False, init=False)   # Rot Touch poison flag
     venom_poisoned:     bool  = field(default=False, init=False)   # Venom Bite poison flag
+    bat_first_strike:   bool  = field(default=False, init=False)   # Echolocation: resolved this round, attacker goes first
     sweet_spot_active:  bool  = field(default=False, init=False)   # Pastel Sweet Spot heal-on-crit flag
     pure_signal_ready:  bool  = field(default=False, init=False)   # Clean Zappy no-variance first strike
     patience_guard:     bool  = field(default=False, init=False)   # Frog Patience: round 1 fired, awaiting round 2 payoff
@@ -278,6 +279,17 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         return True, f"⚡ **ZAPPY SPIRIT** — Brand loyalty pays off. All stats +5."
 
     # ── New skin abilities ──────────────────────────────────────────────────
+
+    elif name == "Echolocation":
+        # Permanent SPK debuff, every round
+        debuff = 20
+        opponent.SPK = max(10, opponent.SPK - debuff)
+        # 50% chance this round's attack order favors the Bat
+        fighter.bat_first_strike = random.random() < 0.5
+        msg = f"🦇 **ECHOLOCATION!** {fighter.display_name} pierces the dark — {opponent.display_name}'s SPK drops by {debuff} for the rest of the battle."
+        if fighter.bat_first_strike:
+            msg += f" {fighter.display_name} strikes first this round!"
+        return True, msg
 
     elif name == "Venom Bite":
         opponent.venom_poisoned = True
@@ -580,11 +592,25 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                         msg += f", SPK -{spk_debuff}"
                     round_msg.append(msg + " for the rest of the battle.")
 
+        # ── Echolocation pre-strike: if fighter_b is Bat and won this round's
+        # first-strike roll, resolve its hit now so a KO can skip fighter_a's turn. ──
+        bat_pre_strike_dmg = 0
+        if (fighter_b.ability and isinstance(fighter_b.ability, dict)
+                and fighter_b.ability.get("name") == "Echolocation"
+                and fighter_b.bat_first_strike and fighter_a.hp > 0):
+            bat_pre_strike_dmg, bat_pre_crit, _ = calculate_damage(fighter_b, fighter_a, round_num)
+            fighter_a.hp -= bat_pre_strike_dmg
+            crit_note = " — critical!" if bat_pre_crit else ""
+            round_msg.append(f"  🦇 **{fighter_b.display_name}** strikes first out of the dark — {bat_pre_strike_dmg} damage{crit_note}!")
+            fighter_b.bat_first_strike = False  # consumed for this round
+
         # ── Fighter A attacks Fighter B ──
         # Shield checked first — it should always fully block, no matter what
         # state the attacker is in (skip_next_attack shouldn't let a hit sneak
         # through underneath it).
-        if fighter_a.no_attack_this_round:
+        if fighter_a.hp <= 0:
+            dmg_a, crit_a = 0, False   # Fighter A was knocked out by Bat's first strike — no counterattack
+        elif fighter_a.no_attack_this_round:
             fighter_a.no_attack_this_round = False
             dmg_a, crit_a = 0, False
         elif fighter_b.shield_active:
@@ -647,7 +673,21 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(f"  🐸 **PATIENCE pays off!** {fighter_a.display_name}'s crit is guaranteed this round.")
 
         # ── Fighter B attacks Fighter A ──
-        if fighter_b.no_attack_this_round:
+        # If fighter_a is Bat and won this round's first-strike roll, and fighter_b
+        # was already dropped to 0 by fighter_a's attack above, fighter_b doesn't
+        # get a counterattack — Bat's speed denied it entirely.
+        bat_a_denied_b = (
+            fighter_a.ability and isinstance(fighter_a.ability, dict)
+            and fighter_a.ability.get("name") == "Echolocation"
+            and fighter_a.bat_first_strike and fighter_b.hp <= 0
+        )
+        if fighter_a.bat_first_strike and fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Echolocation":
+            fighter_a.bat_first_strike = False  # consumed for this round regardless of outcome
+
+        if bat_a_denied_b:
+            dmg_b, crit_b = 0, False
+            round_msg.append(f"  🦇 **{fighter_a.display_name}** was too fast — {fighter_b.display_name} never got the chance to swing back!")
+        elif fighter_b.no_attack_this_round:
             fighter_b.no_attack_this_round = False
             dmg_b, crit_b = 0, False
         elif fighter_a.shield_active:
