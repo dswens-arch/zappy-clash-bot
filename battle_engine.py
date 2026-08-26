@@ -166,13 +166,16 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         should_trigger = True
     elif trigger == "weighted_1_2" and round_num == _resolve_abduction_round(fighter):
         should_trigger = True
+    elif trigger == "every":
+        should_trigger = True   # Fires every round — ability_used gate below is bypassed for these (see note)
     elif trigger == "passive":
         should_trigger = True   # Passive abilities always active, handled elsewhere
 
     if not should_trigger:
         return False, ""
 
-    fighter.ability_used = True
+    if trigger != "every":
+        fighter.ability_used = True   # "every" abilities must remain eligible to fire every round
     name = ability["name"]
     desc = ability["desc"]
 
@@ -565,7 +568,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                         if spk_bonus:
                             defender.SPK = min(100, defender.SPK + spk_bonus)
                         defender.spark_triggered = True
-                        attacker.ability_used = True  # Mark used but don't apply effect
+                        if trigger != "every":
+                            attacker.ability_used = True  # Mark used but don't apply effect ("every" abilities stay eligible for future rounds)
                         attacker.ability_blocked_this_round = True  # Also gate passive side-effects handled outside apply_ability() (e.g. Pack Hunt)
                         msg = f"\U0001f311 **NULL** intercepts! {defender.display_name}'s companion cancels {attacker.display_name}'s ability before it fires!"
                         if spk_bonus:
