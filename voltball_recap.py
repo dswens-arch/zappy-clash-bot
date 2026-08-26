@@ -35,6 +35,7 @@ resolve_match(team_a, team_b) -- needs the Team objects too (for
 coach_hero_type and position pools), not just the result dict.
 """
 
+import random
 from voltball_engine import HERO_SIGNATURES, DISPLAY_NAME
 
 POSITION_STAT = {"Striker": "VLT", "Mid": "SPK", "Guard": "INS"}
@@ -182,15 +183,42 @@ def team_highlight(result: dict, team_key: str, team) -> dict:
 
 
 def _highlight_phrase(team_name: str, highlight: dict) -> str:
-    """Turns a highlight dict into one recap-ready sentence fragment."""
+    """Turns a highlight dict into one recap-ready sentence fragment.
+    Multiple phrasings per case, picked at random -- with a 6-team test
+    league, the same coach/tone combo repeats often enough that a single
+    fixed sentence reads as obviously templated within a couple weeks."""
     if highlight["type"] == "coach":
         if highlight["flavor"] == "self":
-            return f"{team_name}'s {highlight['label']} did the heavy lifting (+{highlight['impact']} Voltage)"
-        return f"{team_name}'s {highlight['label']} ground the opponent down all match (-{highlight['impact']} Voltage to them)"
+            phrasings = [
+                "{team}'s {label} did the heavy lifting (+{impact} Voltage)",
+                "{team}'s {label} was the difference-maker (+{impact} Voltage)",
+                "{team} leaned on {label} all game long (+{impact} Voltage)",
+                "{label} carried {team} down the stretch (+{impact} Voltage)",
+            ]
+        else:
+            phrasings = [
+                "{team}'s {label} ground the opponent down all match (-{impact} Voltage to them)",
+                "{team}'s {label} wore the opposition down all game (-{impact} Voltage to them)",
+                "{team}'s {label} throttled the opponent's offense (-{impact} Voltage to them)",
+                "{label} quietly drained {impact} Voltage from the other side all match",
+            ]
+        return random.choice(phrasings).format(team=team_name, label=highlight["label"], impact=highlight["impact"])
+
     pos = highlight["display_name"]
     if highlight["net_events"] > 0:
-        return f"{team_name}'s {pos}s were the story of the match"
-    return f"{team_name} leaned on their {pos}s, for better or worse"
+        phrasings = [
+            "{team}'s {pos}s were the story of the match",
+            "{team}'s {pos}s did the heavy lifting all game",
+            "It was the {pos}s' night for {team}",
+            "{team} rode their {pos}s the whole way",
+        ]
+    else:
+        phrasings = [
+            "{team} leaned on their {pos}s, for better or worse",
+            "{team}'s {pos}s had a quiet night, for better or worse",
+            "{team}'s game came down to their {pos}s tonight",
+        ]
+    return random.choice(phrasings).format(team=team_name, pos=pos)
 
 
 def build_recap(result: dict, team_a, team_b) -> dict:
@@ -227,21 +255,40 @@ def build_recap(result: dict, team_a, team_b) -> dict:
     if changes == 0:
         tone = "wire_to_wire"
         winner_phrase_cap = winner_phrase[0].upper() + winner_phrase[1:]
+        openers = [
+            "{winner} led wire-to-wire, never trailing {loser} at any point.",
+            "{winner} never trailed -- in control from the opening whistle.",
+            "{winner} set the pace early and never let go.",
+            "A statement game -- {winner} led every step of the way.",
+        ]
+        opener = random.choice(openers).format(winner=winner_name, loser=loser_name)
         text = (
-            f"{winner_name} led wire-to-wire, never trailing {loser_name} at any point. "
+            f"{opener} "
             f"{winner_phrase_cap}. Final: {winner_name} {max(score_a,score_b)}, {loser_name} {min(score_a,score_b)}."
         )
     elif changes >= 2:
         tone = "back_and_forth"
+        openers = [
+            "The lead changed hands {changes} times before {winner} pulled it out by {margin}.",
+            "{winner} and {loser} traded blows all game -- {winner} finally broke away by {margin}.",
+            "A genuine battle -- {changes} lead changes before {winner} closed it out by {margin}.",
+        ]
+        opener = random.choice(openers).format(changes=changes, winner=winner_name, loser=loser_name, margin=margin)
         text = (
-            f"The lead changed hands {changes} times before {winner_name} pulled it out by {margin}. "
+            f"{opener} "
             + turning_point_sentence
             + f"Final: {winner_name} {max(score_a,score_b)}, {loser_name} {min(score_a,score_b)}."
         )
     else:
         tone = "comeback"
+        openers = [
+            "{winner} trailed for part of the game before turning it around.",
+            "{winner} clawed back from behind to steal this one.",
+            "Down early, {winner} flipped the script.",
+        ]
+        opener = random.choice(openers).format(winner=winner_name)
         text = (
-            f"{winner_name} trailed for part of the game before turning it around. "
+            f"{opener} "
             + turning_point_sentence
             + f"Final: {winner_name} {max(score_a,score_b)}, {loser_name} {min(score_a,score_b)}, a {margin}-Voltage margin."
         )
