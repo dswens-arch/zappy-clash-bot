@@ -117,6 +117,10 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     ins_reduction = defender.INS * 0.3   # INS reduces ~30% of damage
     damage = max(1, raw_damage - ins_reduction)
 
+    # Stampede — flat bonus damage every round, no conditions, no RNG
+    if attacker.ability and isinstance(attacker.ability, dict) and attacker.ability.get("name") == "Stampede":
+        damage += 20
+
     # Crit check — Patience guarantees a crit in round 2
     if getattr(attacker, 'guaranteed_crit_next', False):
         is_crit = True
