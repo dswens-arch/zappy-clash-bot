@@ -559,7 +559,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     trigger == round_num or
                     (trigger == "random" and not attacker.ability_used) or
                     (trigger == "weighted_1_2" and round_num == _resolve_abduction_round(attacker)) or
-                    (trigger == "every" and not attacker.ability_blocked_this_round)
+                    (trigger == "every" and not attacker.ability_blocked_this_round) or
+                    (trigger == "passive" and not attacker.ability_used)
                 )
                 if would_fire and defender.spark_type == "null" and defender.spark_tier > 0 and not defender.spark_triggered:
                     cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[defender.spark_tier]
