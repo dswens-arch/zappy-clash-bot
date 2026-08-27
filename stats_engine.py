@@ -344,7 +344,8 @@ HERO_STATS = {
     "Snake":      {"VLT": 78, "INS": 72, "SPK": 80, "ability": {"name": "Venom Bite", "desc": "Poisons the opponent starting round 1 — they lose 25 HP at the start of every remaining round, regardless of INS.", "trigger_round": 1}},
     "Shark":      {"VLT": 90, "INS": 65, "SPK": 88, "ability": {"name": "Feeding Frenzy", "desc": "Bonus damage scales with how much HP the opponent has already lost. The lower they are, the harder Shark hits.", "trigger_round": "every"}},
     "Alien":      {"VLT": 78, "INS": 88, "SPK": 72, "ability": {"name": "Abduction", "desc": "30% chance to strike round 1, 70% chance to wait for round 2. Whenever it fires, beams away the opponent's VLT for that round.", "trigger_round": "weighted_1_2"}},
-    "Bat":        {"VLT": 80, "INS": 78, "SPK": 85, "ability": {"name": "Echolocation", "desc": "50% chance to strike first each round. Every round, permanently cuts the opponent's SPK by 20.", "trigger_round": "every"}},
+    "Bat":        {"VLT": 80, "INS": 78, "SPK": 85, "ability": {"name": "Echolocation", "desc": "Round 1: 50% chance to strike first, and permanently cuts the opponent's SPK by 20. One-time only.", "trigger_round": 1}},
+    "Bison":      {"VLT": 90, "INS": 80, "SPK": 60, "ability": {"name": "Stampede", "desc": "Deals flat bonus damage every round, on top of its normal attack. No conditions, no RNG.", "trigger_round": "every"}},
 }
 
 COLLAB_STATS = {
