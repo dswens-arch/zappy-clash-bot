@@ -36,6 +36,7 @@ HERO_ASSET_IDS = {
     3627104888: "Shark",
     3672860859: "Alien",
     3684236824: "Bat",
+    3686974146: "Bison",
 }
 
 COLLAB_ASSET_IDS = {
@@ -56,6 +57,7 @@ HERO_IMAGES = {
     "Shark":      "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Shark.jpg",
     "Alien":      "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Alien.jpg",
     "Bat":        "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Bat.jpg",
+    "Bison":      "https://raw.githubusercontent.com/dswens-arch/zappy-clash-bot/main/zappy-images-full/hero_Bison.jpg",
 }
 
 COLLAB_IMAGES = {
