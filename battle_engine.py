@@ -30,7 +30,7 @@ class Fighter:
     INS:         int
     SPK:         int
     image_url:   str            = ""
-    ability:     Optional[dict] = None
+    abilities:   list           = field(default_factory=list)  # 0, 1, or 2 ability dicts — a Zappy can have both a companion-head ability and a rare-skin ability
     combo:       Optional[str]  = None
     is_hero:     bool           = False
     is_collab:   bool           = False
@@ -45,7 +45,7 @@ class Fighter:
     # Battle state
     hp:              int   = field(default=STARTING_HP, init=False)
     crit_multiplier: float = field(default=CRIT_MULTIPLIER, init=False)
-    ability_used:    bool  = field(default=False, init=False)
+    ability_used:    dict  = field(default_factory=dict, init=False)  # keyed by ability name -> bool, since a fighter can have 2 abilities now
     survived_zero:   bool  = field(default=False, init=False)   # Nine Lives tracker
     iron_shell_used:    bool  = field(default=False, init=False)   # Iron Shell one-time shield tracker
     skip_next_attack:   bool  = field(default=False, init=False)   # Royal Decree weakened-attack flag
@@ -62,7 +62,7 @@ class Fighter:
     abduction_fire_round: Optional[int] = field(default=None, init=False)  # Alien Abduction: pre-rolled round (1 or 2), resolved once
     locked_stat:          Optional[str] = field(default=None, init=False)  # Alien Abduction: which stat is zeroed this round
     locked_stat_value:    int           = field(default=0,    init=False)  # Alien Abduction: original value to restore after the round
-    ability_blocked_this_round: bool = field(default=False, init=False)  # Null cancelled this fighter's ability this round — gates passive side-effects (e.g. Pack Hunt) that live outside apply_ability()
+    ability_blocked_this_round: dict = field(default_factory=dict, init=False)  # keyed by ability name -> bool. Null cancelled this specific ability this round — gates passive side-effects (e.g. Pack Hunt) that live outside apply_ability()
 
     # Spark battle state
     spark_triggered:    bool  = field(default=False, init=False)   # Spark ability fired this battle
@@ -90,7 +90,7 @@ def build_fighter(zappy_data: dict) -> Fighter:
         VLT        = stats.get("VLT", 50),
         INS        = stats.get("INS", 50),
         SPK        = stats.get("SPK", 50),
-        ability    = stats.get("ability"),
+        abilities  = stats.get("abilities", []),
         combo      = stats.get("combo"),
         is_hero    = zappy_data.get("is_hero", False),
         is_collab  = zappy_data.get("is_collab", False),
@@ -118,7 +118,7 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     damage = max(1, raw_damage - ins_reduction)
 
     # Stampede — flat bonus damage every round, no conditions, no RNG
-    if attacker.ability and isinstance(attacker.ability, dict) and attacker.ability.get("name") == "Stampede":
+    if any(isinstance(a, dict) and a.get("name") == "Stampede" for a in attacker.abilities):
         damage += 20
 
     # Crit check — Patience guarantees a crit in round 2
@@ -147,17 +147,21 @@ def _resolve_abduction_round(fighter: Fighter) -> int:
     return fighter.abduction_fire_round
 
 
-def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[bool, str]:
+def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int, ability: dict) -> tuple[bool, str]:
     """
-    Try to trigger a fighter's special ability.
+    Try to trigger ONE specific ability belonging to fighter (fighter may have
+    up to 2 abilities; the round loop calls this once per ability).
     Returns (triggered, message)
     """
-    ability = fighter.ability
-    if not ability or fighter.ability_used:
+    if not ability:
         return False, ""
 
     # Guard against legacy string format
     if isinstance(ability, str):
+        return False, ""
+
+    ability_name = ability.get("name", "")
+    if fighter.ability_used.get(ability_name, False):
         return False, ""
 
     trigger = ability.get("trigger_round")
@@ -179,7 +183,7 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int) -> tuple[
         return False, ""
 
     if trigger != "every":
-        fighter.ability_used = True   # "every" abilities must remain eligible to fire every round
+        fighter.ability_used[ability_name] = True   # "every" abilities must remain eligible to fire every round
     name = ability["name"]
     desc = ability["desc"]
 
@@ -470,8 +474,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             fighter.spark_triggered = True  # Moss is passive, mark as used
     # ── See-Through passive: pre-battle counter-read ──
     for fighter, opponent in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
-        ability = fighter.ability
-        if ability and isinstance(ability, dict) and ability.get("name") == "See-Through":
+        ability = next((a for a in fighter.abilities if isinstance(a, dict) and a.get("name") == "See-Through"), None)
+        if ability:
             opp_stats = {"VLT": opponent.VLT, "INS": opponent.INS, "SPK": opponent.SPK}
             dominant = max(opp_stats, key=opp_stats.get)
             dominant_val = opp_stats[dominant]
@@ -498,24 +502,24 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 f"(**{dominant} {dominant_val}**) and {counter_label}. "
                 f"+{bonus} {counter_stat} applied before the battle begins."
             )
-            fighter.ability_used = True
+            fighter.ability_used["See-Through"] = True
 
     # ── Zebra passive: randomize opponent's crit multiplier ──
     for fighter, opponent in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
-        ability = fighter.ability
-        if ability and isinstance(ability, dict) and ability.get("name") == "Pattern Break":
+        ability = next((a for a in fighter.abilities if isinstance(a, dict) and a.get("name") == "Pattern Break"), None)
+        if ability:
             new_mult = round(random.uniform(1.5, 3.0), 1)
             opponent.crit_multiplier = new_mult
             log.append(
                 f"🦓 **PATTERN BREAK** — {fighter.display_name}'s chaos bleeds into {opponent.display_name}. "
                 f"Their crit multiplier is now {new_mult}x — they don't know if that's good or bad."
             )
-            fighter.ability_used = True
+            fighter.ability_used["Pattern Break"] = True
 
     # ── Vitiligo passive: balance finder ──
     for fighter, opponent in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
-        ability = fighter.ability
-        if ability and isinstance(ability, dict) and ability.get("name") == "Split Focus":
+        ability = next((a for a in fighter.abilities if isinstance(a, dict) and a.get("name") == "Split Focus"), None)
+        if ability:
             f_stats  = {"VLT": fighter.VLT, "INS": fighter.INS, "SPK": fighter.SPK}
             o_stats  = {"VLT": opponent.VLT, "INS": opponent.INS, "SPK": opponent.SPK}
             opp_sorted = sorted(o_stats, key=o_stats.get)
@@ -533,7 +537,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 f"🌸 **SPLIT FOCUS** — {fighter.display_name} reads the gaps. "
                 f"+{bonus} {weakest_self} applied before battle starts."
             )
-            fighter.ability_used = True
+            fighter.ability_used["Split Focus"] = True
 
     log.append("---PLAY_BY_PLAY_START---")
 
@@ -548,64 +552,69 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         round_msg.append(f"🥊 **Round {round_num}** — {random.choice(ROUND_OPENERS)}")
 
         # Reset per-round interception flags before abilities are evaluated
-        fighter_a.ability_blocked_this_round = False
-        fighter_b.ability_blocked_this_round = False
+        fighter_a.ability_blocked_this_round = {}
+        fighter_b.ability_blocked_this_round = {}
 
-        # Try to trigger abilities (both fighters)
+        # Try to trigger abilities (both fighters) — a fighter may have up to 2
+        # abilities now, so each is checked and resolved independently: Null gets
+        # a separate roll against each one, and Scorch can retaliate per-ability.
         for attacker, defender in [(fighter_a, fighter_b), (fighter_b, fighter_a)]:
-            # ── Null: intercept BEFORE ability applies ──
-            ability = attacker.ability
-            null_cancelled = False
-            if ability and isinstance(ability, dict) and not attacker.ability_used:
-                trigger = ability.get("trigger_round")
-                # Check if ability would fire this round
-                would_fire = (
-                    trigger == round_num or
-                    (trigger == "random" and not attacker.ability_used) or
-                    (trigger == "weighted_1_2" and round_num == _resolve_abduction_round(attacker)) or
-                    (trigger == "every" and not attacker.ability_blocked_this_round) or
-                    (trigger == "passive" and not attacker.ability_used)
-                )
-                if would_fire and defender.spark_type == "null" and defender.spark_tier > 0 and not defender.spark_triggered:
-                    cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[defender.spark_tier]
-                    if random.random() < cancel_chance:
-                        spk_bonus = 15 if defender.spark_tier == 3 else 0
-                        if spk_bonus:
-                            defender.SPK = min(100, defender.SPK + spk_bonus)
+            for ability in list(attacker.abilities):
+                if not ability or not isinstance(ability, dict):
+                    continue
+                ability_name = ability.get("name", "")
+
+                # ── Null: intercept BEFORE ability applies ──
+                null_cancelled = False
+                if not attacker.ability_used.get(ability_name, False):
+                    trigger = ability.get("trigger_round")
+                    # Check if ability would fire this round
+                    would_fire = (
+                        trigger == round_num or
+                        (trigger == "random" and not attacker.ability_used.get(ability_name, False)) or
+                        (trigger == "weighted_1_2" and round_num == _resolve_abduction_round(attacker)) or
+                        (trigger == "every" and not attacker.ability_blocked_this_round.get(ability_name, False)) or
+                        (trigger == "passive" and not attacker.ability_used.get(ability_name, False))
+                    )
+                    if would_fire and defender.spark_type == "null" and defender.spark_tier > 0 and not defender.spark_triggered:
+                        cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[defender.spark_tier]
+                        if random.random() < cancel_chance:
+                            spk_bonus = 15 if defender.spark_tier == 3 else 0
+                            if spk_bonus:
+                                defender.SPK = min(100, defender.SPK + spk_bonus)
+                            defender.spark_triggered = True
+                            if trigger != "every":
+                                attacker.ability_used[ability_name] = True  # Mark used but don't apply effect ("every" abilities stay eligible for future rounds)
+                            attacker.ability_blocked_this_round[ability_name] = True  # Also gate passive side-effects handled outside apply_ability() (e.g. Pack Hunt)
+                            msg = f"\U0001f311 **NULL** intercepts! {defender.display_name}'s companion cancels {attacker.display_name}'s ability before it fires!"
+                            if spk_bonus:
+                                msg += f" {defender.display_name} absorbs the energy. SPK +{spk_bonus}."
+                            round_msg.append(msg)
+                            null_cancelled = True
+
+                if not null_cancelled:
+                    ability_triggered, ability_msg = apply_ability(attacker, defender, round_num, ability)
+                    if ability_triggered and ability_msg:
+                        round_msg.append(ability_msg)
+
+                    # ── Scorch: fires after opponent ability confirmed used ──
+                    if ability_triggered and defender.spark_type == "scorch" and defender.spark_tier > 0 and not defender.spark_triggered:
+                        t = defender.spark_tier
+                        debuff = {1: 10, 2: 15, 3: 20}[t]
+                        spk_debuff = 10 if t == 3 else 0
+                        attacker.VLT = max(10, attacker.VLT - debuff)
+                        if spk_debuff:
+                            attacker.SPK = max(10, attacker.SPK - spk_debuff)
                         defender.spark_triggered = True
-                        if trigger != "every":
-                            attacker.ability_used = True  # Mark used but don't apply effect ("every" abilities stay eligible for future rounds)
-                        attacker.ability_blocked_this_round = True  # Also gate passive side-effects handled outside apply_ability() (e.g. Pack Hunt)
-                        msg = f"\U0001f311 **NULL** intercepts! {defender.display_name}'s companion cancels {attacker.display_name}'s ability before it fires!"
-                        if spk_bonus:
-                            msg += f" {defender.display_name} absorbs the energy. SPK +{spk_bonus}."
-                        round_msg.append(msg)
-                        null_cancelled = True
-
-            if not null_cancelled:
-                ability_triggered, ability_msg = apply_ability(attacker, defender, round_num)
-                if ability_triggered and ability_msg:
-                    round_msg.append(ability_msg)
-
-                # ── Scorch: fires after opponent ability confirmed used ──
-                if ability_triggered and defender.spark_type == "scorch" and defender.spark_tier > 0 and not defender.spark_triggered:
-                    t = defender.spark_tier
-                    debuff = {1: 10, 2: 15, 3: 20}[t]
-                    spk_debuff = 10 if t == 3 else 0
-                    attacker.VLT = max(10, attacker.VLT - debuff)
-                    if spk_debuff:
-                        attacker.SPK = max(10, attacker.SPK - spk_debuff)
-                    defender.spark_triggered = True
-                    msg = f"\U0001f525 **SCORCH** retaliates \u2014 {attacker.display_name} paid a price for that ability. VLT -{debuff}"
-                    if spk_debuff:
-                        msg += f", SPK -{spk_debuff}"
-                    round_msg.append(msg + " for the rest of the battle.")
+                        msg = f"\U0001f525 **SCORCH** retaliates \u2014 {attacker.display_name} paid a price for that ability. VLT -{debuff}"
+                        if spk_debuff:
+                            msg += f", SPK -{spk_debuff}"
+                        round_msg.append(msg + " for the rest of the battle.")
 
         # ── Echolocation pre-strike: if fighter_b is Bat and won this round's
         # first-strike roll, resolve its hit now so a KO can skip fighter_a's turn. ──
         bat_pre_strike_dmg = 0
-        if (fighter_b.ability and isinstance(fighter_b.ability, dict)
-                and fighter_b.ability.get("name") == "Echolocation"
+        if (any(isinstance(a, dict) and a.get("name") == "Echolocation" for a in fighter_b.abilities)
                 and fighter_b.bat_first_strike and fighter_a.hp > 0):
             bat_pre_strike_dmg, bat_pre_crit, _ = calculate_damage(fighter_b, fighter_a, round_num)
             fighter_a.hp -= bat_pre_strike_dmg
@@ -660,8 +669,12 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(f"  **{fighter_a.display_name}** {random.choice(WEAK_HIT)} — {dmg_a} damage.")
             fighter_b.hp -= dmg_a
 
+            # Stampede — flat bonus already baked into dmg_a via calculate_damage; announce it here
+            if any(isinstance(a, dict) and a.get("name") == "Stampede" for a in fighter_a.abilities):
+                round_msg.append(f"  🦬 **STAMPEDE!** {fighter_a.display_name} doesn't stop — +20 bonus damage included in that hit.")
+
             # Feeding Frenzy — bonus scales with how much HP fighter_b has already lost
-            if fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Feeding Frenzy" and fighter_b.hp > 0 and not fighter_a.ability_blocked_this_round:
+            if any(isinstance(a, dict) and a.get("name") == "Feeding Frenzy" for a in fighter_a.abilities) and fighter_b.hp > 0 and not fighter_a.ability_blocked_this_round.get("Feeding Frenzy", False):
                 missing_pct = 1 - (fighter_b.hp / STARTING_HP)
                 frenzy_bonus = int(dmg_a * missing_pct)
                 if frenzy_bonus > 0:
@@ -669,7 +682,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_a.display_name} smells blood — {frenzy_bonus} bonus damage!")
 
             # Pack Hunt — VLT rises every round the fight continues (unless Null cancelled it this round)
-            if fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Pack Hunt" and fighter_b.hp > 0 and not fighter_a.ability_blocked_this_round:
+            if any(isinstance(a, dict) and a.get("name") == "Pack Hunt" for a in fighter_a.abilities) and fighter_b.hp > 0 and not fighter_a.ability_blocked_this_round.get("Pack Hunt", False):
                 fighter_a.pack_hunt_stacks += 1
                 gain = 10
                 fighter_a.VLT = min(100, fighter_a.VLT + gain)
@@ -685,12 +698,12 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         # If fighter_a is Bat and won this round's first-strike roll, and fighter_b
         # was already dropped to 0 by fighter_a's attack above, fighter_b doesn't
         # get a counterattack — Bat's speed denied it entirely.
+        fighter_a_has_echolocation = any(isinstance(a, dict) and a.get("name") == "Echolocation" for a in fighter_a.abilities)
         bat_a_denied_b = (
-            fighter_a.ability and isinstance(fighter_a.ability, dict)
-            and fighter_a.ability.get("name") == "Echolocation"
+            fighter_a_has_echolocation
             and fighter_a.bat_first_strike and fighter_b.hp <= 0
         )
-        if fighter_a.bat_first_strike and fighter_a.ability and isinstance(fighter_a.ability, dict) and fighter_a.ability.get("name") == "Echolocation":
+        if fighter_a.bat_first_strike and fighter_a_has_echolocation:
             fighter_a.bat_first_strike = False  # consumed for this round regardless of outcome
 
         if bat_a_denied_b:
@@ -737,8 +750,12 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(f"  **{fighter_b.display_name}** {random.choice(WEAK_HIT)} — {dmg_b} damage.")
             fighter_a.hp -= dmg_b
 
+            # Stampede — flat bonus already baked into dmg_b via calculate_damage; announce it here
+            if any(isinstance(a, dict) and a.get("name") == "Stampede" for a in fighter_b.abilities):
+                round_msg.append(f"  🦬 **STAMPEDE!** {fighter_b.display_name} doesn't stop — +20 bonus damage included in that hit.")
+
             # Feeding Frenzy — bonus scales with how much HP fighter_a has already lost
-            if fighter_b.ability and isinstance(fighter_b.ability, dict) and fighter_b.ability.get("name") == "Feeding Frenzy" and fighter_a.hp > 0 and not fighter_b.ability_blocked_this_round:
+            if any(isinstance(a, dict) and a.get("name") == "Feeding Frenzy" for a in fighter_b.abilities) and fighter_a.hp > 0 and not fighter_b.ability_blocked_this_round.get("Feeding Frenzy", False):
                 missing_pct = 1 - (fighter_a.hp / STARTING_HP)
                 frenzy_bonus = int(dmg_b * missing_pct)
                 if frenzy_bonus > 0:
@@ -746,7 +763,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_b.display_name} smells blood — {frenzy_bonus} bonus damage!")
 
             # Pack Hunt — VLT rises every round the fight continues (unless Null cancelled it this round)
-            if fighter_b.ability and isinstance(fighter_b.ability, dict) and fighter_b.ability.get("name") == "Pack Hunt" and fighter_a.hp > 0 and not fighter_b.ability_blocked_this_round:
+            if any(isinstance(a, dict) and a.get("name") == "Pack Hunt" for a in fighter_b.abilities) and fighter_a.hp > 0 and not fighter_b.ability_blocked_this_round.get("Pack Hunt", False):
                 fighter_b.pack_hunt_stacks += 1
                 gain = 10
                 fighter_b.VLT = min(100, fighter_b.VLT + gain)
