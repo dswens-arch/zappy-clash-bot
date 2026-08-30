@@ -333,23 +333,23 @@ SKIN_VLT_BONUS = {
 # SPECIAL ASSETS — Heroes and Collab
 # ─────────────────────────────────────────────
 HERO_STATS = {
-    "Bear":       {"VLT": 95, "INS": 90, "SPK": 75, "ability": {"name": "Beardown",   "desc": "Doubles INS for one round. Absorbs all damage that round."}},
-    "Crocodile":  {"VLT": 90, "INS": 75, "SPK": 80, "ability": {"name": "Death Roll", "desc": "Locks opponent -- they cannot benefit from SPK crits this round."}},
-    "Cat":        {"VLT": 75, "INS": 80, "SPK": 95, "ability": {"name": "Nine Lives", "desc": "If HP hits 0, survives at 1 HP once. Only fires once per battle.", "trigger_round": "passive"}},
-    "Rabbit":     {"VLT": 80, "INS": 70, "SPK": 90, "ability": {"name": "Lucky Foot", "desc": "Crit multiplier becomes 3x instead of 2x this battle."}},
-    "Wolf":       {"VLT": 92, "INS": 85, "SPK": 70, "ability": {"name": "Pack Hunt",  "desc": "VLT increases by 10 each round. The longer the fight, the worse it gets for you.",  "trigger_round": "random"}},
-    "Frog":       {"VLT": 75, "INS": 68, "SPK": 94, "ability": {"name": "Patience",   "desc": "Round 1: turtles up, blocking the opponent's attack completely. Round 2: guaranteed crit.", "trigger_round": 1}},
-    "Eagle":      {"VLT": 82, "INS": 58, "SPK": 100, "ability": {"name": "Talon Strike", "desc": "50% chance at the start of round 1 to deal 80% of opponent's current HP as bonus damage, on top of Eagle's normal attack.", "trigger_round": 1}},
-    "Buck":       {"VLT": 88, "INS": 82, "SPK": 65, "ability": {"name": "Antler Clash", "desc": "Reduces opponent's VLT by 15 starting round 1. The longer the fight, the less damage they can deal.", "trigger_round": 1}},
-    "Snake":      {"VLT": 78, "INS": 72, "SPK": 80, "ability": {"name": "Venom Bite", "desc": "Poisons the opponent starting round 1 — they lose 25 HP at the start of every remaining round, regardless of INS.", "trigger_round": 1}},
-    "Shark":      {"VLT": 90, "INS": 65, "SPK": 88, "ability": {"name": "Feeding Frenzy", "desc": "Bonus damage scales with how much HP the opponent has already lost. The lower they are, the harder Shark hits.", "trigger_round": "every"}},
-    "Alien":      {"VLT": 78, "INS": 88, "SPK": 72, "ability": {"name": "Abduction", "desc": "30% chance to strike round 1, 70% chance to wait for round 2. Whenever it fires, beams away the opponent's VLT for that round.", "trigger_round": "weighted_1_2"}},
-    "Bat":        {"VLT": 80, "INS": 78, "SPK": 85, "ability": {"name": "Echolocation", "desc": "Round 1: 50% chance to strike first, and permanently cuts the opponent's SPK by 20. One-time only.", "trigger_round": 1}},
-    "Bison":      {"VLT": 90, "INS": 80, "SPK": 60, "ability": {"name": "Stampede", "desc": "Deals flat bonus damage every round, on top of its normal attack. No conditions, no RNG.", "trigger_round": "every"}},
+    "Bear":       {"VLT": 95, "INS": 90, "SPK": 75, "abilities": [{"name": "Beardown",   "desc": "Doubles INS for one round. Absorbs all damage that round."}]},
+    "Crocodile":  {"VLT": 90, "INS": 75, "SPK": 80, "abilities": [{"name": "Death Roll", "desc": "Locks opponent -- they cannot benefit from SPK crits this round."}]},
+    "Cat":        {"VLT": 75, "INS": 80, "SPK": 95, "abilities": [{"name": "Nine Lives", "desc": "If HP hits 0, survives at 1 HP once. Only fires once per battle.", "trigger_round": "passive"}]},
+    "Rabbit":     {"VLT": 80, "INS": 70, "SPK": 90, "abilities": [{"name": "Lucky Foot", "desc": "Crit multiplier becomes 3x instead of 2x this battle."}]},
+    "Wolf":       {"VLT": 92, "INS": 85, "SPK": 70, "abilities": [{"name": "Pack Hunt",  "desc": "VLT increases by 10 each round. The longer the fight, the worse it gets for you.",  "trigger_round": "random"}]},
+    "Frog":       {"VLT": 75, "INS": 68, "SPK": 94, "abilities": [{"name": "Patience",   "desc": "Round 1: turtles up, blocking the opponent's attack completely. Round 2: guaranteed crit.", "trigger_round": 1}]},
+    "Eagle":      {"VLT": 82, "INS": 58, "SPK": 100, "abilities": [{"name": "Talon Strike", "desc": "50% chance at the start of round 1 to deal 80% of opponent's current HP as bonus damage, on top of Eagle's normal attack.", "trigger_round": 1}]},
+    "Buck":       {"VLT": 88, "INS": 82, "SPK": 65, "abilities": [{"name": "Antler Clash", "desc": "Reduces opponent's VLT by 15 starting round 1. The longer the fight, the less damage they can deal.", "trigger_round": 1}]},
+    "Snake":      {"VLT": 78, "INS": 72, "SPK": 80, "abilities": [{"name": "Venom Bite", "desc": "Poisons the opponent starting round 1 — they lose 25 HP at the start of every remaining round, regardless of INS.", "trigger_round": 1}]},
+    "Shark":      {"VLT": 90, "INS": 65, "SPK": 88, "abilities": [{"name": "Feeding Frenzy", "desc": "Bonus damage scales with how much HP the opponent has already lost. The lower they are, the harder Shark hits.", "trigger_round": "every"}]},
+    "Alien":      {"VLT": 78, "INS": 88, "SPK": 72, "abilities": [{"name": "Abduction", "desc": "30% chance to strike round 1, 70% chance to wait for round 2. Whenever it fires, beams away the opponent's VLT for that round.", "trigger_round": "weighted_1_2"}]},
+    "Bat":        {"VLT": 80, "INS": 78, "SPK": 85, "abilities": [{"name": "Echolocation", "desc": "Round 1: 50% chance to strike first, and permanently cuts the opponent's SPK by 20. One-time only.", "trigger_round": 1}]},
+    "Bison":      {"VLT": 90, "INS": 80, "SPK": 60, "abilities": [{"name": "Stampede", "desc": "Deals flat bonus damage every round, on top of its normal attack. No conditions, no RNG.", "trigger_round": "every"}]},
 }
 
 COLLAB_STATS = {
-    "ShittyKitties": {"VLT": 70, "INS": 70, "SPK": 100, "ability": {"name": "Chaos Mode", "desc": "Random stat gets tripled for one random round. Even the bot doesn't know which."}},
+    "ShittyKitties": {"VLT": 70, "INS": 70, "SPK": 100, "abilities": [{"name": "Chaos Mode", "desc": "Random stat gets tripled for one random round. Even the bot doesn't know which."}]},
 }
 
 
@@ -403,13 +403,13 @@ def calculate_stats(traits: dict) -> dict:
     combo_name = combos.get("combo_name")
 
     # Special ability (from rare traits)
-    ability = get_ability(traits)
+    abilities = get_abilities(traits)
 
     return {
         "VLT": int(vlt),
         "INS": int(ins),
         "SPK": int(spk),
-        "ability": ability,
+        "abilities": abilities,
         "combo": combo_name,
         "traits": traits,
     }
@@ -491,12 +491,20 @@ def check_combos(traits: dict, vlt: float, ins: float, spk: float) -> dict:
             "SPK": max(10, min(100, spk)), "combo_name": combo_name}
 
 
-def get_ability(traits: dict) -> dict | None:
-    """Returns special ability dict if this Zappy has a 1-of ability trigger."""
+def get_abilities(traits: dict) -> list[dict]:
+    """
+    Returns a list of special ability dicts for this Zappy — 0, 1, or 2.
+    A Zappy can independently qualify for a companion-head ability AND a
+    rare-skin ability; both are included if both conditions are met. The
+    "Pure Signal" clean-trait ability is separate again and can stack with
+    either or both of the above.
+    """
     head = traits.get("head", "")
     skin = traits.get("skin", "")
     bg = traits.get("background", "")
     earring = traits.get("earring", "")
+
+    abilities: list[dict] = []
 
     # Companion heads always trigger an ability
     companion_abilities = {
@@ -543,117 +551,117 @@ def get_ability(traits: dict) -> dict | None:
     }
 
     if head in companion_abilities:
-        return companion_abilities[head]
+        abilities.append(companion_abilities[head])
 
     # Rare skin abilities
     if skin == "Chroma":
-        return {
+        abilities.append({
             "name": "Chroma Shift",
             "desc": "Once per battle, Zappy shifts — randomly swaps its highest and lowest stat for one round.",
             "trigger_round": "random",
-        }
+        })
 
     if skin == "Gold":
-        return {
+        abilities.append({
             "name": "Gold Rush",
             "desc": "Win bonus: earns +50 CP instead of +30 CP on victory. Gold pays out.",
             "trigger_round": "passive",
-        }
+        })
 
     if skin == "X-ray":
-        return {
+        abilities.append({
             "name": "See-Through",
             "desc": "Reads the opponent's dominant stat before battle and counters it — gains +18% of that stat in the opposing defense or attack.",
             "trigger_round": "passive",
-        }
+        })
 
     # Zappies earring — brand loyalty ability
     if earring == "Zappies":
-        return {
+        abilities.append({
             "name": "Zappy Spirit",
             "desc": "All stats get +5 flat bonus. Wearing the brand means something.",
             "trigger_round": "passive",
-        }
+        })
 
     # ── New skin abilities ──────────────────────────────────────────────────
 
     if skin == "Zombie":
-        return {
+        abilities.append({
             "name": "Rot Touch",
             "desc": "Applies a poison that drains 5 HP from the opponent at the end of rounds 2 and 3. Slow and relentless.",
             "trigger_round": 1,
-        }
+        })
 
     if skin == "Cloudy":
-        return {
+        abilities.append({
             "name": "Static Veil",
             "desc": "40% chance each round to scramble opponent's signal — reduces their VLT by 20% for that round only.",
             "trigger_round": "random",
-        }
+        })
 
     if skin == "Infected":
-        return {
+        abilities.append({
             "name": "Viral Spread",
             "desc": "Transfers 15 SPK from the opponent to self in round 2. The mutation spreads.",
             "trigger_round": 2,
-        }
+        })
 
     if skin == "Zebra":
-        return {
+        abilities.append({
             "name": "Pattern Break",
             "desc": "Pre-battle: opponent's crit multiplier is randomized (1.5x–3.0x) instead of a flat 2x. You know your pattern; they don't know theirs.",
             "trigger_round": "passive",
-        }
+        })
 
     if skin == "Tattooed":
-        return {
+        abilities.append({
             "name": "Battle Ink",
             "desc": "Gains +12 VLT from round 2 onward. Every scar is a lesson.",
             "trigger_round": 2,
-        }
+        })
 
     if skin == "Vitiligo":
-        return {
+        abilities.append({
             "name": "Split Focus",
             "desc": "Pre-battle: reads opponent's two lowest stats and adds half the gap to your own weakest stat. Finds balance where others are exposed.",
             "trigger_round": "passive",
-        }
+        })
 
     if skin == "Pastel":
-        return {
+        abilities.append({
             "name": "Sweet Spot",
             "desc": "When you land a crit, heal 5 HP in addition to dealing crit damage. Soft but dangerous.",
             "trigger_round": "random",
-        }
+        })
 
     if skin == "Celeste":
-        return {
+        abilities.append({
             "name": "Ice Frame",
             "desc": "Reduces opponent's SPK by 15 in round 1 only. Freezes their crit window before they can open it.",
             "trigger_round": 1,
-        }
+        })
 
-    # ── Clean Zappy (minimal traits) ────────────────────────────────────────
+    # ── Clean Zappy (minimal traits) — independent of head/skin abilities ──
     NON_TRAITS = {"None", "Standard", "", "Naked"}
     trait_count = sum(1 for v in traits.values() if v and v not in NON_TRAITS)
     if trait_count <= 3:
-        return {
+        abilities.append({
             "name": "Pure Signal",
             "desc": "Minimal traits, maximum focus. First attack has no roll variance — hits at exactly full VLT, no luck involved.",
             "trigger_round": 1,
-        }
+        })
 
-    return None
+    return abilities
 
 
 KING_STATS = {
     3562991430: {
         "VLT": 75, "INS": 75, "SPK": 75,
-        "ability": {
+        "abilities": [{
             "name": "Royal Decree",
             "desc": "Forces opponent to skip their round 2 attack. The King decides who swings.",
             "trigger_round": 2,
-        },
+        }],
         "combo": "👑 Royal Command",
     }
 }
@@ -690,7 +698,7 @@ if __name__ == "__main__":
     }
     result = calculate_stats(test_traits)
     print(f"Test Zappy stats: VLT {result['VLT']} | INS {result['INS']} | SPK {result['SPK']}")
-    print(f"Ability: {result['ability']}")
+    print(f"Abilities: {result['abilities']}")
     print(f"Combo: {result['combo']}")
 
     # Test a Chroma Zappy
@@ -706,5 +714,5 @@ if __name__ == "__main__":
     }
     result2 = calculate_stats(chroma_traits)
     print(f"\nChroma Zappy stats: VLT {result2['VLT']} | INS {result2['INS']} | SPK {result2['SPK']}")
-    print(f"Ability: {result2['ability']}")
+    print(f"Abilities: {result2['abilities']}")
     print(f"Combo: {result2['combo']}")
