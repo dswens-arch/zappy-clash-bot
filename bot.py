@@ -688,9 +688,9 @@ async def cmd_clash(interaction: discord.Interaction):
             )
         if stats.get("combo"):
             confirm.add_field(name="Combo", value=stats["combo"], inline=False)
-        if stats.get("ability") and isinstance(stats["ability"], dict):
-            ab = stats["ability"]
-            confirm.add_field(name=f"⚡ {ab.get('name','Ability')}", value=ab.get("desc",""), inline=False)
+        for ab in stats.get("abilities", []) or []:
+            if isinstance(ab, dict):
+                confirm.add_field(name=f"⚡ {ab.get('name','Ability')}", value=ab.get("desc",""), inline=False)
         if zappy.get("image_url"):
             confirm.set_thumbnail(url=zappy["image_url"])
         confirm.set_footer(text=f"Fights start when registration closes · Watch <#{CLASH_CHANNEL}>")
@@ -796,13 +796,13 @@ async def cmd_clash(interaction: discord.Interaction):
         )
         if stats.get("combo"):
             preview.add_field(name="Combo", value=stats["combo"], inline=False)
-        if stats.get("ability") and isinstance(stats["ability"], dict):
-            ab = stats["ability"]
-            preview.add_field(
-                name=f"⚡ Ability: {ab.get('name','?')}",
-                value=ab.get("desc",""),
-                inline=False,
-            )
+        for ab in stats.get("abilities", []) or []:
+            if isinstance(ab, dict):
+                preview.add_field(
+                    name=f"⚡ Ability: {ab.get('name','?')}",
+                    value=ab.get("desc",""),
+                    inline=False,
+                )
         if zappy.get("image_url"):
             preview.set_thumbnail(url=zappy["image_url"])
         preview.set_footer(text=f"ASA {entered_id} · Is this the one?")
@@ -846,9 +846,9 @@ def _build_stats_embed(zappy: dict, chosen_id: int) -> discord.Embed:
     )
     if stats.get("combo"):
         embed.add_field(name="Combo", value=stats["combo"], inline=False)
-    if stats.get("ability") and isinstance(stats["ability"], dict):
-        ab = stats["ability"]
-        embed.add_field(name=f"⚡ Ability: {ab.get('name', 'Ability')}", value=ab.get("desc", ""), inline=False)
+    for ab in stats.get("abilities", []) or []:
+        if isinstance(ab, dict):
+            embed.add_field(name=f"⚡ Ability: {ab.get('name', 'Ability')}", value=ab.get("desc", ""), inline=False)
 
     image_url = zappy.get("image_url", "")
     if image_url:
@@ -3489,9 +3489,9 @@ async def close_and_resolve(channel: discord.TextChannel):
                     val += f"\n✨ **{fighter.combo}**"
                     if descs:
                         val += f" — {' / '.join(descs)}"
-                if fighter.ability and isinstance(fighter.ability, dict):
-                    ab = fighter.ability
-                    val += f"\n⚡ **{ab.get('name','Ability')}** — {ab.get('desc','')}"
+                for ab in fighter.abilities:
+                    if isinstance(ab, dict):
+                        val += f"\n⚡ **{ab.get('name','Ability')}** — {ab.get('desc','')}"
                 if fighter.spark_type and fighter.spark_tier > 0:
                     tier_names = {1: "Spark", 2: "Flare", 3: "Blaze"}
                     spark_ability_map = {
@@ -3521,8 +3521,8 @@ async def close_and_resolve(channel: discord.TextChannel):
 
             # See-Through passive — add to the relevant fighter's embed
             for fighter, opp, embed in [(fighter_a, fighter_b, embed_a), (fighter_b, fighter_a, embed_b)]:
-                ab = fighter.ability
-                if ab and isinstance(ab, dict) and ab.get("name") == "See-Through":
+                ab = next((a for a in fighter.abilities if isinstance(a, dict) and a.get("name") == "See-Through"), None)
+                if ab:
                     opp_stats = {"VLT": opp.VLT, "INS": opp.INS, "SPK": opp.SPK}
                     dominant  = max(opp_stats, key=opp_stats.get)
                     bonus     = int(opp_stats[dominant] * 0.18)
@@ -3541,8 +3541,8 @@ async def close_and_resolve(channel: discord.TextChannel):
             # adds half the gap to fighter's own weakest stat. Shown here since
             # resolve_battle() hasn't run yet — this embed uses pre-bonus stats.
             for fighter, opp, embed in [(fighter_a, fighter_b, embed_a), (fighter_b, fighter_a, embed_b)]:
-                ab = fighter.ability
-                if ab and isinstance(ab, dict) and ab.get("name") == "Split Focus":
+                ab = next((a for a in fighter.abilities if isinstance(a, dict) and a.get("name") == "Split Focus"), None)
+                if ab:
                     opp_stats = {"VLT": opp.VLT, "INS": opp.INS, "SPK": opp.SPK}
                     opp_sorted = sorted(opp_stats, key=opp_stats.get)
                     low1, low2 = opp_sorted[0], opp_sorted[1]
@@ -3564,8 +3564,8 @@ async def close_and_resolve(channel: discord.TextChannel):
             # multiplier before battle starts. Actual roll happens in
             # resolve_battle(), so this just flags that it's coming.
             for fighter, opp, embed in [(fighter_a, fighter_b, embed_a), (fighter_b, fighter_a, embed_b)]:
-                ab = fighter.ability
-                if ab and isinstance(ab, dict) and ab.get("name") == "Pattern Break":
+                ab = next((a for a in fighter.abilities if isinstance(a, dict) and a.get("name") == "Pattern Break"), None)
+                if ab:
                     embed.add_field(
                         name="🦓 Pattern Break",
                         value=(
