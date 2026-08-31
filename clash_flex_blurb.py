@@ -16,6 +16,9 @@ OPENERS = [
     "Introducing",
     "Behold",
     "Presenting",
+    "Feast your eyes on",
+    "Everybody, meet",
+    "Direct your attention to",
 ]
 
 CLOSERS = [
@@ -25,6 +28,10 @@ CLOSERS = [
     "Screenshot this. 📸",
     "Undefeated in my heart, at least. 😌",
     "Try me.",
+    "No notes. 💯",
+    "Certified heater. 🥵",
+    "Built different.",
+    "Yeah, I said what I said.",
 ]
 
 TRAIT_LABELS = {
@@ -37,6 +44,17 @@ TRAIT_LABELS = {
     "mouth": "mouth",
     "skin": "skin",
 }
+
+# Avoid picking the same opener/closer twice in a row across /flex calls —
+# a small fixed pool otherwise repeats surprisingly often (birthday-paradox
+# effect). Tracked in-process; resets on bot restart, which is fine.
+_last_opener = None
+_last_closer = None
+
+
+def _pick_no_repeat(pool: list, last_value: str | None) -> str:
+    choices = [p for p in pool if p != last_value] or pool
+    return random.choice(choices)
 
 # Short "what it does" line per combo, pulled from the actual bonuses in
 # stats_engine.check_combos() — not invented copy. combo_name strings can be
@@ -87,6 +105,8 @@ def build_flex_blurb(zappy: dict) -> str:
     zappy: the dict returned by fetch_zappy_traits() — has name, stats
     (VLT/INS/SPK/abilities/combo), traits, and is_hero/is_collab flags.
     """
+    global _last_opener, _last_closer
+
     name = zappy.get("name", "This Zappy")
     stats = zappy.get("stats", {}) or {}
     traits = zappy.get("traits", {}) or {}
@@ -95,7 +115,8 @@ def build_flex_blurb(zappy: dict) -> str:
     is_hero = zappy.get("is_hero", False)
     is_collab = zappy.get("is_collab", False)
 
-    opener = random.choice(OPENERS)
+    opener = _pick_no_repeat(OPENERS, _last_opener)
+    _last_opener = opener
     lines = [f"{opener} **{name}**."]
 
     if combo:
@@ -115,6 +136,8 @@ def build_flex_blurb(zappy: dict) -> str:
         if flavor:
             lines.append(f"Wearing: {flavor}.")
 
-    lines.append(random.choice(CLOSERS))
+    closer = _pick_no_repeat(CLOSERS, _last_closer)
+    _last_closer = closer
+    lines.append(closer)
 
     return "\n".join(lines)
