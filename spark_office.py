@@ -46,6 +46,9 @@ from database import (
     get_office_seat,
     get_office_seats,
     get_lowest_hitrate_seat,
+    get_sparks_on_duel_cooldown,
+    get_orphaned_in_duel_seats,
+    reactivate_orphaned_seat,
     seat_spark,
     vacate_seat,
     create_office_shift,
@@ -768,6 +771,11 @@ class SparkOfficeCog(commands.Cog):
                     await self._post_promotion_channel(embed=promo_embed, file=promo_file)
                     continue
 
+            duel_cooldown = await asyncio.to_thread(get_sparks_on_duel_cooldown)
+            if asa in duel_cooldown:
+                results.append(f"⏳ **{spark_name}** was just in a duel — needs a bit before challenging again.")
+                continue
+
             target = await asyncio.to_thread(get_lowest_hitrate_seat)
             target = target if (target and target["wallet"] != wallet) else None
             if not target:
@@ -1268,6 +1276,7 @@ class SparkOfficeCog(commands.Cog):
             await self._process_noshow_demotions()
             await self._process_coldstreak_demotions()
             await self._process_expired_duels()
+            await self._process_orphaned_in_duel_seats()
 
         except Exception as e:
             print(f"[spark_office] resolver error: {e}")
@@ -1430,7 +1439,12 @@ class SparkOfficeCog(commands.Cog):
                     continue
 
             # Seats are full — spawn a duel against the current lowest
-            # hit-rate seat. Can't challenge your own seat.
+            # hit-rate seat. Can't challenge your own seat, and can't
+            # challenge again if this Spark was just in a duel.
+            duel_cooldown = await asyncio.to_thread(get_sparks_on_duel_cooldown)
+            if c["asset_id"] in duel_cooldown:
+                continue  # just in a duel — skip this sweep, eligible again next one
+
             target = await asyncio.to_thread(get_lowest_hitrate_seat)
             if not target or target["wallet"] == wallet:
                 continue  # no valid target this pass — try again next sweep
@@ -1751,6 +1765,19 @@ class SparkOfficeCog(commands.Cog):
             desc += "\n\n⚠️ The seat was already gone by the time this resolved — no seat granted this time."
         embed = discord.Embed(title="⚔️ Office Duel Resolved", description=desc, color=0xFFD700)
         await self._post_promotion_channel(embed=embed)
+
+    async def _process_orphaned_in_duel_seats(self):
+        """
+        Safety net — reactivates any seat stuck in 'in_duel' with no
+        matching pending duel. Should be rare now that duel processing is
+        properly guarded, but this makes sure a stuck seat can never
+        permanently eat capacity even if some future edge case causes one.
+        """
+        orphaned = await asyncio.to_thread(get_orphaned_in_duel_seats)
+        for seat in orphaned:
+            await asyncio.to_thread(reactivate_orphaned_seat, seat["spark_asa"])
+            name = seat.get("spark_name") or seat.get("spark_type", "Spark")
+            print(f"[spark_office] reactivated orphaned in_duel seat: {name} (ASA {seat['spark_asa']})")
 
 
 async def setup(bot: commands.Bot):
