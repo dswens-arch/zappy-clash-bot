@@ -548,6 +548,59 @@ def get_abilities(traits: dict) -> list[dict]:
             "desc": "Forces opponent to skip their round 2 attack. The King decides who swings.",
             "trigger_round": 2,
         },
+        "Brain": {
+            "name": "Foresight",
+            "desc": "Reads the opponent's highest stat before battle and cuts it by 15% for round 1 only.",
+            "trigger_round": 1,
+        },
+        "Eyes": {
+            "name": "Third Eye",
+            "desc": "15% chance each round to dodge the opponent's attack completely — 0 damage taken that round.",
+            "trigger_round": "random_per_round",
+            "chance": 0.15,
+        },
+        "Cables": {
+            "name": "Overcharge",
+            "desc": "15% chance each round to overload — VLT +15 for that round only.",
+            "trigger_round": "random_per_round",
+            "chance": 0.15,
+        },
+        "Banana Peel": {
+            "name": "Slip Up",
+            "desc": "10% chance each round the opponent's attack completely fails, regardless of their stats.",
+            "trigger_round": "random_per_round",
+            "chance": 0.10,
+        },
+        "Rubber Ducky": {
+            "name": "Squeak of Destiny",
+            "desc": "8% chance each round for a guaranteed crit — because the duck said so.",
+            "trigger_round": "random_per_round",
+            "chance": 0.08,
+        },
+        "Bear Hat": {
+            "name": "Mini Beardown",
+            "desc": "50% chance, once per battle, to cut one incoming hit's damage in half.",
+            "trigger_round": "chance_once",
+            "chance": 0.50,
+        },
+        "Crocodile Hat": {
+            "name": "Mini Death Roll",
+            "desc": "50% chance, once per battle, to cut the opponent's SPK by 20 for that round.",
+            "trigger_round": "chance_once",
+            "chance": 0.50,
+        },
+        "Rabbit Hat": {
+            "name": "Mini Lucky Foot",
+            "desc": "50% chance, once per battle, for a crit that round to hit at 2.5x instead of 2x.",
+            "trigger_round": "chance_once",
+            "chance": 0.50,
+        },
+        "Cat Hat": {
+            "name": "Mini Nine Lives",
+            "desc": "20% chance, once per battle, to survive a KO at 1 HP.",
+            "trigger_round": "chance_once",
+            "chance": 0.20,
+        },
     }
 
     if head in companion_abilities:
