@@ -897,6 +897,13 @@ OFFICE_EVENT_DURATION_HOURS = 24  # spans a full day so every fixed shift-time a
 # window after ANY demotion (no-show, cold streak, or duel loss).
 OFFICE_DEMOTION_COOLDOWN_HOURS = 72  # 3 days
 
+# A Spark on either side of a duel can't be pulled into another one this
+# soon after — whether it won or lost. Without this, the same defender
+# (barely surviving a duel) could get immediately re-challenged, and a
+# losing challenger could immediately re-challenge again, since losing a
+# duel (unlike losing an actual seat) carries no cooldown of its own.
+OFFICE_DUEL_COOLDOWN_HOURS = 6
+
 
 def get_active_office_event() -> dict | None:
     """Returns the current office-wide event if one is active, else None."""
@@ -951,11 +958,56 @@ def get_office_seat(spark_asa: int) -> dict | None:
     return result.data[0] if result.data else None
 
 
+def get_orphaned_in_duel_seats() -> list:
+    """
+    Seats stuck in status='in_duel' with no matching pending duel — their
+    duel already resolved, so there's nothing left to ever flip them back.
+    Each one permanently eats a slot 'in_duel' counts as occupied. Checked
+    every resolver pass so this can never quietly accumulate.
+    """
+    db = get_supabase()
+    stuck = db.table("spark_office_seats").select("*").eq("status", "in_duel").execute().data or []
+    if not stuck:
+        return []
+
+    pending = db.table("spark_office_duels").select("challenger_asa, defender_asa").eq("status", "pending").execute().data or []
+    in_flight = {d["challenger_asa"] for d in pending} | {d["defender_asa"] for d in pending}
+
+    return [s for s in stuck if s["spark_asa"] not in in_flight]
+
+
+def reactivate_orphaned_seat(spark_asa: int) -> None:
+    db = get_supabase()
+    db.table("spark_office_seats").update({"status": "active"}).eq("spark_asa", spark_asa).execute()
+
+
+def get_sparks_on_duel_cooldown() -> set:
+    """
+    spark_asa's that were on either side of a duel (pending or resolved)
+    within OFFICE_DUEL_COOLDOWN_HOURS — excluded from new duels, on
+    either side, to stop rapid repeat rematches.
+    """
+    db = get_supabase()
+    cutoff_iso = (datetime.now(timezone.utc) - timedelta(hours=OFFICE_DUEL_COOLDOWN_HOURS)).isoformat()
+    rows = (
+        db.table("spark_office_duels")
+        .select("challenger_asa, defender_asa")
+        .gte("created_at", cutoff_iso)
+        .execute()
+        .data or []
+    )
+    on_cooldown = set()
+    for r in rows:
+        on_cooldown.add(r["challenger_asa"])
+        on_cooldown.add(r["defender_asa"])
+    return on_cooldown
+
+
 def get_lowest_hitrate_seat() -> dict | None:
     """
     Duel target: lowest lifetime hit rate among seats with enough Office
     shifts to be judged fairly (OFFICE_MIN_SHIFTS_FOR_DUEL floor). Excludes
-    any seat already mid-duel.
+    any seat already mid-duel, or on cooldown from a recent one.
     """
     db = get_supabase()
     result = (
@@ -966,6 +1018,10 @@ def get_lowest_hitrate_seat() -> dict | None:
         .execute()
     )
     seats = result.data or []
+    if not seats:
+        return None
+    cooldown = get_sparks_on_duel_cooldown()
+    seats = [s for s in seats if s["spark_asa"] not in cooldown]
     if not seats:
         return None
     seats.sort(key=lambda s: s["hits"] / s["shifts_completed"])
