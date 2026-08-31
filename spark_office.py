@@ -768,7 +768,7 @@ class SparkOfficeCog(commands.Cog):
                     results.append(f"🎉 **{spark_name}** promoted into an open seat!")
                     promo_embed = self._promotion_celebration_embed(spark_name, user_id, check["hits_seen"])
                     promo_file = _attach_office_image(promo_embed, "promotion")
-                    await self._post_promotion_channel(embed=promo_embed, file=promo_file)
+                    await self._post_promotion_channel(content=f"<@{user_id}>", embed=promo_embed, file=promo_file)
                     continue
 
             duel_cooldown = await asyncio.to_thread(get_sparks_on_duel_cooldown)
@@ -1258,7 +1258,8 @@ class SparkOfficeCog(commands.Cog):
             ),
             color=0xE67E22,
         )
-        await self._post_promotion_channel(embed=embed)
+        ping = f"<@{duel['challenger_discord_id']}> <@{duel['defender_discord_id']}>"
+        await self._post_promotion_channel(content=ping, embed=embed)
 
     # ──────────────────────────────────────────
     # Resolver — shifts, reminders, no-shows, cold-streak demotions, duel expiry
@@ -1435,7 +1436,8 @@ class SparkOfficeCog(commands.Cog):
                 else:
                     promo_embed = self._promotion_celebration_embed(spark_name, c.get("discord_user_id"), c["hits_seen"])
                     promo_file = _attach_office_image(promo_embed, "promotion")
-                    await self._post_promotion_channel(embed=promo_embed, file=promo_file)
+                    promo_ping = f"<@{c['discord_user_id']}>" if c.get("discord_user_id") else None
+                    await self._post_promotion_channel(content=promo_ping, embed=promo_embed, file=promo_file)
                     continue
 
             # Seats are full — spawn a duel against the current lowest
@@ -1674,7 +1676,8 @@ class SparkOfficeCog(commands.Cog):
                 description=f"**{name}** (<@{seat.get('discord_user_id')}>) didn't clock in in time. A seat just opened up.",
                 color=0xE74C3C,
             )
-            await self._post_promotion_channel(embed=embed)
+            ping = f"<@{seat['discord_user_id']}>" if seat.get("discord_user_id") else None
+            await self._post_promotion_channel(content=ping, embed=embed)
 
     async def _process_coldstreak_demotions(self):
         cold = await asyncio.to_thread(get_seats_for_cold_streak_demotion)
@@ -1689,7 +1692,8 @@ class SparkOfficeCog(commands.Cog):
                 ),
                 color=0xE74C3C,
             )
-            await self._post_promotion_channel(embed=embed)
+            ping = f"<@{seat['discord_user_id']}>" if seat.get("discord_user_id") else None
+            await self._post_promotion_channel(content=ping, embed=embed)
 
     async def _process_expired_duels(self):
         expired = await asyncio.to_thread(get_expired_pending_duels)
@@ -1764,7 +1768,9 @@ class SparkOfficeCog(commands.Cog):
         if seat_grant_failed:
             desc += "\n\n⚠️ The seat was already gone by the time this resolved — no seat granted this time."
         embed = discord.Embed(title="⚔️ Office Duel Resolved", description=desc, color=0xFFD700)
-        await self._post_promotion_channel(embed=embed)
+        ping_ids = {duel["challenger_discord_id"], duel["defender_discord_id"]} - {None}
+        ping = " ".join(f"<@{did}>" for did in ping_ids) or None
+        await self._post_promotion_channel(content=ping, embed=embed)
 
     async def _process_orphaned_in_duel_seats(self):
         """
