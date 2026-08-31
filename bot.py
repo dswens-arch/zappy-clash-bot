@@ -43,7 +43,7 @@ from market_sync import MarketSyncCog
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
 from clash_flex_card  import render_flex_card
-from clash_flex_blurb import build_flex_blurb, combo_effect_text, trait_flavor
+from clash_flex_blurb import build_flex_blurb
 from battle_engine   import build_fighter, resolve_battle
 from token_rewards   import award_win_tokens, award_streak_tokens
 from expedition_engine import (
@@ -947,34 +947,13 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
     )
 
 
-def _flex_badge(zappy: dict) -> str:
-    stats = zappy.get("stats", {}) or {}
-    if stats.get("combo"):
-        return combo_effect_text(stats["combo"])
-    if zappy.get("is_hero"):
-        return f"🦸 {zappy.get('hero_type', 'Hero')} Hero"
-    if zappy.get("is_collab"):
-        return "🎭 Collab"
-    return ""
-
-
 async def _send_flex(interaction: discord.Interaction, zappy: dict):
-    stats = zappy.get("stats", {}) or {}
-    traits = zappy.get("traits", {}) or {}
-    trait_line = "" if (zappy.get("is_hero") or zappy.get("is_collab")) else trait_flavor(traits, limit=4)
-    buf = await render_flex_card(
-        zappy_name=zappy.get("name", "Zappy"),
-        stats=stats,
-        image_url=zappy.get("image_url", ""),
-        badge=_flex_badge(zappy),
-        trait_line=trait_line,
-        abilities=stats.get("abilities", []) or [],
-    )
     blurb = build_flex_blurb(zappy)
-    await interaction.followup.send(
-        content=blurb,
-        file=discord.File(buf, filename="flex.png"),
-    )
+    buf = await render_flex_card(image_url=zappy.get("image_url", ""))
+    if buf:
+        await interaction.followup.send(content=blurb, file=discord.File(buf, filename="flex.png"))
+    else:
+        await interaction.followup.send(content=blurb)
 
 
 @tree.command(name="flex", description="Flex a random Zappy from your wallet, or specify an ASA")
