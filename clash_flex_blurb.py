@@ -10,12 +10,6 @@ battle mechanics.
 
 import random
 
-STAT_LABELS = {
-    "VLT": "attack",
-    "INS": "defense",
-    "SPK": "crit chance",
-}
-
 OPENERS = [
     "Say hello to",
     "Meet",
@@ -73,12 +67,6 @@ def combo_effect_text(combo_name: str | None) -> str:
     return " + ".join(out)
 
 
-def _top_stat_line(stats: dict) -> str:
-    vlt, ins, spk = stats.get("VLT", 0), stats.get("INS", 0), stats.get("SPK", 0)
-    best_key, best_val = max((("VLT", vlt), ("INS", ins), ("SPK", spk)), key=lambda kv: kv[1])
-    return f"**{best_val} {best_key}** ({STAT_LABELS[best_key]}) leads the sheet"
-
-
 def trait_flavor(traits: dict, limit: int = 3) -> str:
     """Pick notable traits to call out for a regular Zappy."""
     notable_order = ["head", "eyewear", "earring", "skin", "background"]
@@ -114,8 +102,6 @@ def build_flex_blurb(zappy: dict) -> str:
         eff = combo_effect_text(combo)
         lines.append(f"Running the **{eff or combo}** combo.")
 
-    lines.append(_top_stat_line(stats) + ".")
-
     for ab in abilities:
         if isinstance(ab, dict) and ab.get("name"):
             lines.append(f"⚡ **{ab['name']}** — {ab.get('desc', '')}")
@@ -125,7 +111,7 @@ def build_flex_blurb(zappy: dict) -> str:
     elif is_collab:
         lines.append("A collab Zappy — rare on top of rare.")
     else:
-        flavor = trait_flavor(traits)
+        flavor = trait_flavor(traits, limit=4)
         if flavor:
             lines.append(f"Wearing: {flavor}.")
 
