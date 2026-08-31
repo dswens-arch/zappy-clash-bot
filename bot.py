@@ -42,6 +42,8 @@ from market_sync import MarketSyncCog
 
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
+from clash_flex_card  import render_flex_card
+from clash_flex_blurb import build_flex_blurb, combo_effect_text, trait_flavor
 from battle_engine   import build_fighter, resolve_battle
 from token_rewards   import award_win_tokens, award_streak_tokens
 from expedition_engine import (
@@ -168,6 +170,11 @@ EXPEDITION_FEES = {
 def check_clash_channel(interaction: discord.Interaction) -> bool:
     """Returns True if the interaction is in the clash channel."""
     return interaction.channel_id == CLASH_CHANNEL
+
+
+def check_holder_channel(interaction: discord.Interaction) -> bool:
+    """Returns True if the interaction is in the holder channel."""
+    return interaction.channel_id == HOLDER_CHANNEL
 
 
 def check_expedition_channel(interaction: discord.Interaction) -> bool:
@@ -938,6 +945,97 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
         "or look up a different ASA (even one you don't own).",
         view=view, ephemeral=True,
     )
+
+
+def _flex_badge(zappy: dict) -> str:
+    stats = zappy.get("stats", {}) or {}
+    if stats.get("combo"):
+        return combo_effect_text(stats["combo"])
+    if zappy.get("is_hero"):
+        return f"🦸 {zappy.get('hero_type', 'Hero')} Hero"
+    if zappy.get("is_collab"):
+        return "🎭 Collab"
+    return ""
+
+
+async def _send_flex(interaction: discord.Interaction, zappy: dict):
+    stats = zappy.get("stats", {}) or {}
+    traits = zappy.get("traits", {}) or {}
+    trait_line = "" if (zappy.get("is_hero") or zappy.get("is_collab")) else trait_flavor(traits, limit=4)
+    buf = await render_flex_card(
+        zappy_name=zappy.get("name", "Zappy"),
+        stats=stats,
+        image_url=zappy.get("image_url", ""),
+        badge=_flex_badge(zappy),
+        trait_line=trait_line,
+        abilities=stats.get("abilities", []) or [],
+    )
+    blurb = build_flex_blurb(zappy)
+    await interaction.followup.send(
+        content=blurb,
+        file=discord.File(buf, filename="flex.png"),
+    )
+
+
+@tree.command(name="flex", description="Flex a random Zappy from your wallet, or specify an ASA")
+@app_commands.describe(asset_id="Flex a specific ASA ID you own (optional — omit to flex a random one)")
+async def cmd_flex(interaction: discord.Interaction, asset_id: int | None = None):
+    """Post a shareable flex card + blurb for one of your Zappies. No args needed."""
+    if not check_holder_channel(interaction):
+        await interaction.response.send_message(
+            f"❌ Use <#{HOLDER_CHANNEL}> for `/flex`.", ephemeral=True
+        )
+        return
+    await interaction.response.defer(ephemeral=False)
+
+    user_id = str(interaction.user.id)
+    wallet  = get_wallet(user_id)
+
+    if not wallet:
+        await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
+        return
+
+    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
+    import time as _t
+    now = _t.monotonic()
+    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
+        ownership = _wallet_cache[wallet]
+    else:
+        ownership = await verify_wallet(user_id, wallet)
+
+    if not ownership["owns"]:
+        await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
+        return
+
+    owned_ids = [z["asset_id"] for z in (ownership["zappies"] + ownership["heroes"] + ownership["collabs"])]
+
+    # Specific ASA requested — must be one you own
+    if asset_id is not None:
+        if asset_id not in owned_ids:
+            await interaction.followup.send("❌ That ASA isn't in your linked wallet.", ephemeral=True)
+            return
+        zappy = await fetch_zappy_traits(asset_id)
+        if not zappy:
+            await interaction.followup.send("❌ Couldn't load that Zappy. Try again.", ephemeral=True)
+            return
+        await _send_flex(interaction, zappy)
+        return
+
+    # No ASA given — pick a random one from the wallet. If it fails to load,
+    # try a few other random picks before giving up.
+    pool = owned_ids.copy()
+    random.shuffle(pool)
+    zappy = None
+    for zid in pool[:5]:
+        zappy = await fetch_zappy_traits(zid)
+        if zappy:
+            break
+
+    if not zappy:
+        await interaction.followup.send("❌ Couldn't load any of your Zappies. Try again.", ephemeral=True)
+        return
+
+    await _send_flex(interaction, zappy)
 
 
 @tree.command(name="rank", description="Check your Clash Points and rank")
