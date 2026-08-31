@@ -60,6 +60,14 @@ class Fighter:
     pack_hunt_stacks:   int   = field(default=0,     init=False)   # Wolf Pack Hunt: cumulative VLT stack count
     no_attack_this_round: bool = field(default=False, init=False)  # Frog Patience: fully sits out round 1's attack
     abduction_fire_round: Optional[int] = field(default=None, init=False)  # Alien Abduction: pre-rolled round (1 or 2), resolved once
+    chance_once_fire_round: dict = field(default_factory=dict, init=False)  # keyed by ability name -> resolved round (or None if it missed), for one-time chance-based companion abilities
+    dodge_active:          bool  = field(default=False, init=False)  # Third Eye: negates next incoming hit entirely
+    opponent_attack_fails: bool  = field(default=False, init=False)  # Slip Up: set on the OPPONENT, zeroes their next attack
+    damage_reduction_pct:  float = field(default=0.0,   init=False)  # Mini Beardown: reduces next incoming hit by this %
+    temp_vlt_bonus:        int   = field(default=0,     init=False)  # Overcharge: flat VLT bonus for the current round only
+    crit_multiplier_override: Optional[float] = field(default=None, init=False)  # Mini Lucky Foot: if a crit lands this round, use this multiplier instead of the default
+    foresight_target:         Optional[str] = field(default=None, init=False)  # Foresight: which opponent stat was reduced, for restoration after round 1
+    foresight_restore_value:  float         = field(default=0.0,  init=False)  # Foresight: original value to restore
     locked_stat:          Optional[str] = field(default=None, init=False)  # Alien Abduction: which stat is zeroed this round
     locked_stat_value:    int           = field(default=0,    init=False)  # Alien Abduction: original value to restore after the round
     ability_blocked_this_round: dict = field(default_factory=dict, init=False)  # keyed by ability name -> bool. Null cancelled this specific ability this round — gates passive side-effects (e.g. Pack Hunt) that live outside apply_ability()
@@ -149,6 +157,21 @@ def _resolve_abduction_round(fighter: Fighter) -> int:
     return fighter.abduction_fire_round
 
 
+def _resolve_chance_once(fighter: Fighter, ability_name: str, chance: float) -> int:
+    """
+    Generic one-time-chance resolver for companion abilities like the mini-hero
+    heads: rolled exactly once per battle, cached by ability name so repeated
+    checks (Null interception, then the real apply_ability call) agree. Returns
+    the round it fires on (1-3) if the roll succeeds, or -1 if it never fires.
+    """
+    if ability_name not in fighter.chance_once_fire_round:
+        if random.random() < chance:
+            fighter.chance_once_fire_round[ability_name] = random.randint(1, ROUNDS)
+        else:
+            fighter.chance_once_fire_round[ability_name] = -1
+    return fighter.chance_once_fire_round[ability_name]
+
+
 def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int, ability: dict) -> tuple[bool, str]:
     """
     Try to trigger ONE specific ability belonging to fighter (fighter may have
@@ -167,6 +190,7 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int, ability: 
         return False, ""
 
     trigger = ability.get("trigger_round")
+    chance = ability.get("chance", 0)
 
     # Determine if this round triggers the ability
     should_trigger = False
@@ -180,6 +204,10 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int, ability: 
         should_trigger = True   # Fires every round — ability_used gate below is bypassed for these (see note)
     elif trigger == "passive":
         should_trigger = True   # Passive abilities always active, handled elsewhere
+    elif trigger == "random_per_round" and random.random() < chance:
+        should_trigger = True   # Independent roll every round (Eyes, Cables, Banana Peel, Rubber Ducky)
+    elif trigger == "chance_once" and round_num == _resolve_chance_once(fighter, ability_name, chance):
+        should_trigger = True   # Resolved once at battle start, fires on that one round if the roll hit (mini-hero heads)
 
     if not should_trigger:
         return False, ""
@@ -259,6 +287,47 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int, ability: 
     elif name == "Royal Decree":
         opponent.skip_next_attack = True
         return True, f"👑 **ROYAL DECREE!** {fighter.display_name} raises a hand. {opponent.display_name}'s next attack is weakened — 60% damage reduction!"
+
+    elif name == "Foresight":
+        highest_stat = max(("VLT", "INS", "SPK"), key=lambda s: getattr(opponent, s))
+        original_val = getattr(opponent, highest_stat)
+        reduced_val = original_val * 0.85
+        setattr(opponent, highest_stat, reduced_val)
+        opponent.foresight_target = highest_stat            # tracked on the OPPONENT — their stat needs restoring, not the caster's
+        opponent.foresight_restore_value = original_val
+        return True, f"🧠 **FORESIGHT!** {fighter.display_name} read {opponent.display_name}'s {highest_stat} coming — cut by 15% for round 1."
+
+    elif name == "Third Eye":
+        fighter.dodge_active = True
+        return True, f"👀 **THIRD EYE!** {fighter.display_name} sees it coming — the next hit won't land."
+
+    elif name == "Overcharge":
+        fighter.temp_vlt_bonus = 15
+        return True, f"🔌 **OVERCHARGE!** {fighter.display_name} surges — VLT +15 this round."
+
+    elif name == "Slip Up":
+        opponent.opponent_attack_fails = True
+        return True, f"🍌 **SLIP UP!** {opponent.display_name} loses their footing — their attack fails completely this round."
+
+    elif name == "Squeak of Destiny":
+        fighter.guaranteed_crit_next = True
+        return True, f"🦆 **SQUEAK OF DESTINY!** The duck has spoken — guaranteed crit this round."
+
+    elif name == "Mini Beardown":
+        fighter.damage_reduction_pct = 0.5
+        return True, f"🐻 **MINI BEARDOWN!** {fighter.display_name} braces — next hit taken is halved."
+
+    elif name == "Mini Death Roll":
+        opponent.SPK = max(10, opponent.SPK - 20)
+        return True, f"🐊 **MINI DEATH ROLL!** {fighter.display_name} locks on — {opponent.display_name}'s SPK -20 this round."
+
+    elif name == "Mini Lucky Foot":
+        fighter.crit_multiplier_override = 2.5
+        return True, f"🐰 **MINI LUCKY FOOT!** {fighter.display_name} feels lucky — any crit this round hits at 2.5x."
+
+    elif name == "Mini Nine Lives":
+        fighter.survived_zero = True
+        return True, f"🐱 **MINI NINE LIVES!** {fighter.display_name} has one more life in reserve."
 
     elif name == "Magic Burst":
         fighter.crit_multiplier = 3.0
@@ -577,13 +646,16 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 null_cancelled = False
                 if not attacker.ability_used.get(ability_name, False):
                     trigger = ability.get("trigger_round")
+                    chance = ability.get("chance", 0)
                     # Check if ability would fire this round
                     would_fire = (
                         trigger == round_num or
                         (trigger == "random" and not attacker.ability_used.get(ability_name, False)) or
                         (trigger == "weighted_1_2" and round_num == _resolve_abduction_round(attacker)) or
                         (trigger == "every" and not attacker.ability_blocked_this_round.get(ability_name, False)) or
-                        (trigger == "passive" and not attacker.ability_used.get(ability_name, False))
+                        (trigger == "passive" and not attacker.ability_used.get(ability_name, False)) or
+                        (trigger == "random_per_round" and random.random() < chance) or
+                        (trigger == "chance_once" and round_num == _resolve_chance_once(attacker, ability_name, chance))
                     )
                     if would_fire and defender.spark_type == "null" and defender.spark_tier > 0 and not defender.spark_triggered:
                         cancel_chance = {1: 0.50, 2: 0.75, 3: 1.0}[defender.spark_tier]
@@ -640,11 +712,19 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         elif fighter_a.no_attack_this_round:
             fighter_a.no_attack_this_round = False
             dmg_a, crit_a = 0, False
+        elif fighter_a.opponent_attack_fails:
+            fighter_a.opponent_attack_fails = False
+            round_msg.append(f"  🍌 **SLIP UP!** {fighter_a.display_name}'s attack fails completely — 0 damage.")
+            dmg_a, crit_a = 0, False
         elif fighter_b.shield_active:
             fighter_b.shield_active = False
             if fighter_a.skip_next_attack:
                 fighter_a.skip_next_attack = False  # still consumed — the attempt happened, just got blocked
             round_msg.append(f"  😇 **{fighter_b.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
+            dmg_a, crit_a = 0, False
+        elif fighter_b.dodge_active:
+            fighter_b.dodge_active = False
+            round_msg.append(f"  👀 **{fighter_b.display_name}**'s Third Eye sees it coming — dodges completely!")
             dmg_a, crit_a = 0, False
         elif fighter_a.skip_next_attack:
             fighter_a.skip_next_attack = False
@@ -653,7 +733,22 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             round_msg.append(f"  👑 **{fighter_a.display_name}** swings weakly under the decree — {dmg_a} damage.")
             crit_a = False
         else:
+            if fighter_a.temp_vlt_bonus:
+                fighter_a.VLT += fighter_a.temp_vlt_bonus
+            if fighter_a.crit_multiplier_override is not None:
+                original_mult = fighter_a.crit_multiplier
+                fighter_a.crit_multiplier = fighter_a.crit_multiplier_override
             dmg_a, crit_a, _ = calculate_damage(fighter_a, fighter_b, round_num)
+            if fighter_a.temp_vlt_bonus:
+                fighter_a.VLT -= fighter_a.temp_vlt_bonus
+                fighter_a.temp_vlt_bonus = 0
+            if fighter_a.crit_multiplier_override is not None:
+                fighter_a.crit_multiplier = original_mult
+                fighter_a.crit_multiplier_override = None
+            if fighter_b.damage_reduction_pct:
+                dmg_a = int(dmg_a * (1 - fighter_b.damage_reduction_pct))
+                round_msg.append(f"  🐻 **{fighter_b.display_name}**'s Mini Beardown halves the blow!")
+                fighter_b.damage_reduction_pct = 0.0
             dmg_a, spark_msg_a = apply_spark(fighter_a, fighter_b, crit_a, dmg_a, round_num)
             if spark_msg_a:
                 round_msg.append(spark_msg_a)
@@ -717,11 +812,19 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
         elif fighter_b.no_attack_this_round:
             fighter_b.no_attack_this_round = False
             dmg_b, crit_b = 0, False
+        elif fighter_b.opponent_attack_fails:
+            fighter_b.opponent_attack_fails = False
+            round_msg.append(f"  🍌 **SLIP UP!** {fighter_b.display_name}'s attack fails completely — 0 damage.")
+            dmg_b, crit_b = 0, False
         elif fighter_a.shield_active:
             fighter_a.shield_active = False
             if fighter_b.skip_next_attack:
                 fighter_b.skip_next_attack = False  # still consumed — the attempt happened, just got blocked
             round_msg.append(f"  😇 **{fighter_a.display_name}**'s Divine Shield absorbs the hit — 0 damage!")
+            dmg_b, crit_b = 0, False
+        elif fighter_a.dodge_active:
+            fighter_a.dodge_active = False
+            round_msg.append(f"  👀 **{fighter_a.display_name}**'s Third Eye sees it coming — dodges completely!")
             dmg_b, crit_b = 0, False
         elif fighter_b.skip_next_attack:
             fighter_b.skip_next_attack = False
@@ -730,7 +833,22 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             round_msg.append(f"  👑 **{fighter_b.display_name}** swings weakly under the decree — {dmg_b} damage.")
             crit_b = False
         else:
+            if fighter_b.temp_vlt_bonus:
+                fighter_b.VLT += fighter_b.temp_vlt_bonus
+            if fighter_b.crit_multiplier_override is not None:
+                original_mult_b = fighter_b.crit_multiplier
+                fighter_b.crit_multiplier = fighter_b.crit_multiplier_override
             dmg_b, crit_b, _ = calculate_damage(fighter_b, fighter_a, round_num)
+            if fighter_b.temp_vlt_bonus:
+                fighter_b.VLT -= fighter_b.temp_vlt_bonus
+                fighter_b.temp_vlt_bonus = 0
+            if fighter_b.crit_multiplier_override is not None:
+                fighter_b.crit_multiplier = original_mult_b
+                fighter_b.crit_multiplier_override = None
+            if fighter_a.damage_reduction_pct:
+                dmg_b = int(dmg_b * (1 - fighter_a.damage_reduction_pct))
+                round_msg.append(f"  🐻 **{fighter_a.display_name}**'s Mini Beardown halves the blow!")
+                fighter_a.damage_reduction_pct = 0.0
             dmg_b, spark_msg_b = apply_spark(fighter_b, fighter_a, crit_b, dmg_b, round_num)
             if spark_msg_b:
                 round_msg.append(spark_msg_b)
@@ -829,6 +947,13 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 setattr(f, f.locked_stat, f.locked_stat_value)
                 f.locked_stat = None
                 f.locked_stat_value = 0
+
+        # Foresight: restore the reduced stat now that round 1 is fully resolved (round-1-only effect)
+        for f in (fighter_a, fighter_b):
+            if f.foresight_target is not None:
+                setattr(f, f.foresight_target, f.foresight_restore_value)
+                f.foresight_target = None
+                f.foresight_restore_value = 0.0
 
         round_logs.append("\n".join(round_msg))
         log.extend(round_msg)
