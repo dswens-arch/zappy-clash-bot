@@ -118,7 +118,9 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     damage = max(1, raw_damage - ins_reduction)
 
     # Stampede — flat bonus damage every round, no conditions, no RNG
-    if any(isinstance(a, dict) and a.get("name") == "Stampede" for a in attacker.abilities):
+    # (unless Null cancelled it this round — see apply_ability's Stampede branch)
+    if (any(isinstance(a, dict) and a.get("name") == "Stampede" for a in attacker.abilities)
+            and not attacker.ability_blocked_this_round.get("Stampede", False)):
         damage += 20
 
     # Crit check — Patience guarantees a crit in round 2
@@ -301,6 +303,13 @@ def apply_ability(fighter: Fighter, opponent: Fighter, round_num: int, ability: 
         if fighter.bat_first_strike:
             msg += f" {fighter.display_name} strikes first this round!"
         return True, msg
+
+    elif name == "Stampede":
+        # No stat effect here — the +20 flat damage is applied directly in
+        # calculate_damage(), gated on ability_blocked_this_round["Stampede"]
+        # so Null can cancel it like any other ability. This branch's only
+        # job is to make Stampede participate in the trigger/Null loop.
+        return True, f"🦬 **STAMPEDE!** {fighter.display_name} doesn't stop — bonus damage loaded into every hit this round."
 
     elif name == "Venom Bite":
         opponent.venom_poisoned = True
@@ -669,10 +678,6 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(f"  **{fighter_a.display_name}** {random.choice(WEAK_HIT)} — {dmg_a} damage.")
             fighter_b.hp -= dmg_a
 
-            # Stampede — flat bonus already baked into dmg_a via calculate_damage; announce it here
-            if any(isinstance(a, dict) and a.get("name") == "Stampede" for a in fighter_a.abilities):
-                round_msg.append(f"  🦬 **STAMPEDE!** {fighter_a.display_name} doesn't stop — +20 bonus damage included in that hit.")
-
             # Feeding Frenzy — bonus scales with how much HP fighter_b has already lost
             if any(isinstance(a, dict) and a.get("name") == "Feeding Frenzy" for a in fighter_a.abilities) and fighter_b.hp > 0 and not fighter_a.ability_blocked_this_round.get("Feeding Frenzy", False):
                 missing_pct = 1 - (fighter_b.hp / STARTING_HP)
@@ -749,10 +754,6 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             else:
                 round_msg.append(f"  **{fighter_b.display_name}** {random.choice(WEAK_HIT)} — {dmg_b} damage.")
             fighter_a.hp -= dmg_b
-
-            # Stampede — flat bonus already baked into dmg_b via calculate_damage; announce it here
-            if any(isinstance(a, dict) and a.get("name") == "Stampede" for a in fighter_b.abilities):
-                round_msg.append(f"  🦬 **STAMPEDE!** {fighter_b.display_name} doesn't stop — +20 bonus damage included in that hit.")
 
             # Feeding Frenzy — bonus scales with how much HP fighter_a has already lost
             if any(isinstance(a, dict) and a.get("name") == "Feeding Frenzy" for a in fighter_b.abilities) and fighter_a.hp > 0 and not fighter_b.ability_blocked_this_round.get("Feeding Frenzy", False):
