@@ -87,7 +87,7 @@ def combo_effect_text(combo_name: str | None) -> str:
 
 def trait_flavor(traits: dict, limit: int = 3) -> str:
     """Pick notable traits to call out for a regular Zappy."""
-    notable_order = ["head", "eyewear", "earring", "skin", "background"]
+    notable_order = ["head", "body", "eyewear", "earring", "skin", "background"]
     picks = []
     for key in notable_order:
         val = traits.get(key)
@@ -132,7 +132,7 @@ def build_flex_blurb(zappy: dict) -> str:
     elif is_collab:
         lines.append("A collab Zappy — rare on top of rare.")
     else:
-        flavor = trait_flavor(traits, limit=4)
+        flavor = trait_flavor(traits, limit=5)
         if flavor:
             lines.append(f"Wearing: {flavor}.")
 
