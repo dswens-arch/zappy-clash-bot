@@ -25,6 +25,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from voltball_engine import resolve_match, HERO_SIGNATURES
 from voltball_recap import build_recap
@@ -51,11 +52,26 @@ from database import get_supabase, get_wallet
 # posted to Discord. Update here if the GitHub Pages URL ever changes.
 SITE_BASE_URL = "https://dswens-arch.github.io/voltball-site/"
 
-# How long after resolution the "kicks off in 5 minutes" post promises --
-# this is a REAL wait, not decorative: it's the same value written to
+# How long after a match's kickoff post it actually starts airing --
+# this is a REAL wait, not decorative: it's the same value used to derive
 # playback_starts_at on the match row, which the site's live playback
 # gates on so every viewer sees the same beats at the same time.
 PLAYBACK_KICKOFF_DELAY_SECONDS = 300
+
+# Matches air one at a time, not all at once. Team count varies week to
+# week (season size isn't locked in yet), so instead of a fixed number of
+# broadcast slots, each week's matches are scheduled back-to-back starting
+# at DAY_START_HOUR_LOCAL: match 1 airs first, match 2 starts only once
+# match 1's estimated playback (see estimate_playback_seconds) has
+# finished plus this gap, and so on -- guaranteed non-overlapping no
+# matter how many matches resolve that week.
+#
+# LEAGUE_TIMEZONE is hardcoded for now since there's no per-guild timezone
+# setting yet -- if this bot ever serves guilds outside this timezone,
+# this needs to become a config value alongside resolution_weekday.
+LEAGUE_TIMEZONE = ZoneInfo("America/Chicago")
+DAY_START_HOUR_LOCAL = 8
+MATCH_SLOT_GAP_SECONDS = 3600  # 1 hour between match slots
 
 # Mirrors results.html's step() pacing constants exactly, so the delayed
 # recap post lands roughly when the site's playback actually finishes.
@@ -115,10 +131,12 @@ class VoltballCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.weekly_resolution.start()
+        self.post_ready_kickoffs.start()
         self.post_ready_recaps.start()
 
     def cog_unload(self):
         self.weekly_resolution.cancel()
+        self.post_ready_kickoffs.cancel()
         self.post_ready_recaps.cancel()
 
     # ─────────────────────────────────────────────
@@ -490,14 +508,14 @@ class VoltballCog(commands.Cog):
     # ─────────────────────────────────────────────
     @tasks.loop(hours=24)
     async def weekly_resolution(self):
-        """Runs daily; only actually resolves on each guild's configured weekly deadline day."""
-        now = datetime.now(timezone.utc)
+        """Runs daily; only actually resolves on each guild's configured weekly deadline day (checked in LEAGUE_TIMEZONE, not UTC)."""
+        now_local = datetime.now(timezone.utc).astimezone(LEAGUE_TIMEZONE)
         db = get_supabase()
         seasons = db.table("voltball_seasons").select("*").in_("status", ["active", "playoffs"]).execute().data or []
 
         for season in seasons:
             config = get_guild_config(season["guild_id"])
-            if now.weekday() != config["resolution_weekday"]:
+            if now_local.weekday() != config["resolution_weekday"]:
                 continue
             await self._resolve_season_week(season, config)
 
@@ -558,6 +576,24 @@ class VoltballCog(commands.Cog):
         ) or []
         already_resolved = {(m["team_a_id"], m["team_b_id"]) for m in already_resolved_rows}
 
+        # Broadcast slot cursor for this week's matches -- see the
+        # LEAGUE_TIMEZONE / DAY_START_HOUR_LOCAL / MATCH_SLOT_GAP_SECONDS
+        # comment above. Anchored to 8am local on the day resolution runs;
+        # if resolution happens to run after 8am (or the very first
+        # match's real "kicks off in 5 min" promise would land later than
+        # 8am), start from whichever is later so nothing is scheduled in
+        # the past or breaks the kickoff post's promised wait.
+        resolution_now = datetime.now(timezone.utc)
+        local_today = resolution_now.astimezone(LEAGUE_TIMEZONE).date()
+        day_start_local = datetime(
+            local_today.year, local_today.month, local_today.day,
+            DAY_START_HOUR_LOCAL, tzinfo=LEAGUE_TIMEZONE,
+        )
+        next_slot_start = max(
+            day_start_local.astimezone(timezone.utc),
+            resolution_now + timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS),
+        )
+
         for pairing in pairings:
             if (pairing["team_a_id"], pairing["team_b_id"]) in already_resolved:
                 print(f"[voltball] Week {week}: {pairing['team_a_id']} vs {pairing['team_b_id']} already has a recorded match this week — skipping (duplicate-match guard, likely an interrupted prior resolution).")
@@ -616,9 +652,14 @@ class VoltballCog(commands.Cog):
             if is_championship_week:
                 champion_name = team_a_row["team_name"] if winner_id == team_a_row["id"] else team_b_row["team_name"]
 
-            now = datetime.now(timezone.utc)
-            playback_starts_at = now + timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS)
+            playback_starts_at = next_slot_start
             recap_post_at = playback_starts_at + timedelta(seconds=estimate_playback_seconds(result))
+            kickoff_post_at = playback_starts_at - timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS)
+            # Advance the cursor so the next match in this week's loop
+            # gets the next open slot -- starts only after this match's
+            # estimated playback is done, plus the gap. Never overlaps,
+            # regardless of how many teams are in the season.
+            next_slot_start = recap_post_at + timedelta(seconds=MATCH_SLOT_GAP_SECONDS)
 
             match_row = db.table("voltball_matches").insert({
                 "season_id": season["id"],
@@ -640,6 +681,8 @@ class VoltballCog(commands.Cog):
                 "playback_starts_at": playback_starts_at.isoformat(),
                 "recap_post_at": recap_post_at.isoformat(),
                 "recap_posted_at": None,
+                "kickoff_post_at": kickoff_post_at.isoformat(),
+                "kickoff_posted_at": None,
             }).execute().data[0]
 
             update_standings_after_match(
@@ -650,24 +693,16 @@ class VoltballCog(commands.Cog):
             record_injuries(team_a_row["id"], season["id"], result["injured_a"], week)
             record_injuries(team_b_row["id"], season["id"], result["injured_b"], week)
 
-            if channel:
-                # Match-specific link, not the shared "?live=current" this
-                # used before. That reuse assumed one game airs at a time;
-                # a real multi-team league resolving several matches in
-                # the same run breaks that immediately -- all the kickoff
-                # posts would share one URL and "current" would resolve
-                # to whichever match happens to have the soonest
-                # playback_starts_at, meaning most of the posts would
-                # link to the WRONG game. Match-specific avoids that
-                # entirely and matches what the "Watch Replay" post
-                # already correctly does below.
-                link = f"{SITE_BASE_URL}results.html?live={match_row['id']}"
-                kickoff_embed = build_kickoff_embed(team_a_row["team_name"], team_b_row["team_name"], week, is_playoff_week, link)
-                await channel.send(embed=kickoff_embed)
-                # The full recap (score, highlights, "watch replay" link)
-                # posts later, once playback would actually be done -- see
-                # post_ready_recaps. Posting it now would spoil the "live"
-                # framing the kickoff message just promised.
+            # The kickoff post ("Watch Live", match-specific link -- not
+            # the shared "?live=current" this used before, since that
+            # assumed one game airs at a time) is NOT sent here anymore.
+            # Now that matches are staggered across the day instead of
+            # all starting ~5 minutes after resolution, posting it
+            # immediately would make its "kicks off in 5 minutes" promise
+            # false for every match after the first. Instead it's posted
+            # by post_ready_kickoffs once kickoff_post_at actually
+            # arrives -- same durable, restart-safe polling pattern as
+            # the recap post below, just one step earlier in the chain.
 
         bye_team_id = get_bye_team(season["id"], week)
         if bye_team_id:
@@ -739,6 +774,69 @@ class VoltballCog(commands.Cog):
 
     @weekly_resolution.before_loop
     async def before_weekly_resolution(self):
+        await self.bot.wait_until_ready()
+
+    # ─────────────────────────────────────────────
+    # Delayed "Watch Live" kickoff post -- one broadcast slot at a time.
+    #
+    # Matches resolve for the whole week in one batch (see
+    # _resolve_season_week's slot cursor), but with team count varying
+    # week to week we don't want every kickoff post to land in Discord
+    # at once, and each one's "kicks off in 5 minutes" promise needs to
+    # actually be true when it posts. So kickoff_post_at is set per
+    # match at resolution time (playback_starts_at minus the 5-minute
+    # promise) and this loop polls for whichever match's turn has come,
+    # same durable DB-driven pattern as post_ready_recaps below --
+    # survives a bot restart without dropping or double-posting a
+    # kickoff, and needs no in-memory timer per match.
+    # ─────────────────────────────────────────────
+    @tasks.loop(seconds=20)
+    async def post_ready_kickoffs(self):
+        db = get_supabase()
+        now_iso = datetime.now(timezone.utc).isoformat()
+
+        due = (
+            db.table("voltball_matches")
+            .select("*")
+            .is_("kickoff_posted_at", "null")
+            .not_.is_("kickoff_post_at", "null")
+            .lte("kickoff_post_at", now_iso)
+            .execute()
+            .data
+        ) or []
+
+        for match in due:
+            try:
+                season_row = db.table("voltball_seasons").select("guild_id").eq("id", match["season_id"]).execute().data
+                if not season_row:
+                    continue
+                config = get_guild_config(season_row[0]["guild_id"])
+                if not config or not config.get("announcement_channel_id"):
+                    continue
+                channel = self.bot.get_channel(int(config["announcement_channel_id"]))
+                if not channel:
+                    continue
+
+                team_a_row = get_team_by_id(match["team_a_id"])
+                team_b_row = get_team_by_id(match["team_b_id"])
+                if not team_a_row or not team_b_row:
+                    continue
+
+                link = f"{SITE_BASE_URL}results.html?live={match['id']}"
+                kickoff_embed = build_kickoff_embed(
+                    team_a_row["team_name"], team_b_row["team_name"],
+                    match["week_number"], match["is_playoff"], link,
+                )
+                await channel.send(embed=kickoff_embed)
+            except Exception as e:
+                # Same rationale as post_ready_recaps below: one bad match
+                # shouldn't wedge the whole batch or get retried forever.
+                print(f"[voltball] Failed to post kickoff for match {match.get('id')}: {e}")
+            finally:
+                db.table("voltball_matches").update({"kickoff_posted_at": now_iso}).eq("id", match["id"]).execute()
+
+    @post_ready_kickoffs.before_loop
+    async def before_post_ready_kickoffs(self):
         await self.bot.wait_until_ready()
 
     # ─────────────────────────────────────────────
