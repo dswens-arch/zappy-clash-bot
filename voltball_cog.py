@@ -647,7 +647,6 @@ class VoltballCog(commands.Cog):
             recap = build_recap(result, team_a, team_b)
 
             winner_id = team_a_row["id"] if result["winner"] == team_a.name else team_b_row["id"]
-            loser_id = team_b_row["id"] if winner_id == team_a_row["id"] else team_a_row["id"]
 
             if is_championship_week:
                 champion_name = team_a_row["team_name"] if winner_id == team_a_row["id"] else team_b_row["team_name"]
@@ -683,15 +682,25 @@ class VoltballCog(commands.Cog):
                 "recap_posted_at": None,
                 "kickoff_post_at": kickoff_post_at.isoformat(),
                 "kickoff_posted_at": None,
+                "standings_applied_at": None,
+                "injuries_applied_at": None,
+                "injured_a": result["injured_a"],
+                "injured_b": result["injured_b"],
             }).execute().data[0]
 
-            update_standings_after_match(
-                season["id"], winner_id, loser_id,
-                max(result["score_a"], result["score_b"]), min(result["score_a"], result["score_b"]),
-            )
-
-            record_injuries(team_a_row["id"], season["id"], result["injured_a"], week)
-            record_injuries(team_b_row["id"], season["id"], result["injured_b"], week)
+            # Standings are NOT updated here anymore -- see post_ready_recaps.
+            # update_standings_after_match() writing here, synchronously at
+            # resolution, was updating voltball_standings hours before any
+            # match actually airs. The site's standings page reads that
+            # table directly with no gating of its own (it can't -- it's
+            # an aggregate, not a per-match row), so the real fix is to
+            # not write the aggregate early in the first place.
+            #
+            # Injuries are gated the same way now, for the same reason --
+            # a roster showing a player OUT before that player's match has
+            # even aired is its own kind of spoiler. injured_a/injured_b
+            # are stored on the row above so post_ready_recaps can apply
+            # them once the match's recap actually posts.
 
             # The kickoff post ("Watch Live", match-specific link -- not
             # the shared "?live=current" this used before, since that
@@ -869,6 +878,29 @@ class VoltballCog(commands.Cog):
 
         for match in due:
             try:
+                # Standings write moved here from resolution time -- this
+                # is the actual moment a match is allowed to affect the
+                # public standings table, since it's the same gate the
+                # recap itself waits on. Guarded by its own
+                # standings_applied_at (written immediately, not in the
+                # shared `finally` below) so a crash between this call and
+                # the rest of the loop can't double-apply the same result
+                # to a team's win/loss and PF/PA on the next poll.
+                if not match.get("standings_applied_at"):
+                    winner_id = match["winner_team_id"]
+                    loser_id = match["team_b_id"] if winner_id == match["team_a_id"] else match["team_a_id"]
+                    update_standings_after_match(
+                        match["season_id"], winner_id, loser_id,
+                        max(match["team_a_score"], match["team_b_score"]),
+                        min(match["team_a_score"], match["team_b_score"]),
+                    )
+                    db.table("voltball_matches").update({"standings_applied_at": now_iso}).eq("id", match["id"]).execute()
+
+                if not match.get("injuries_applied_at"):
+                    record_injuries(match["team_a_id"], match["season_id"], match.get("injured_a") or [], match["week_number"])
+                    record_injuries(match["team_b_id"], match["season_id"], match.get("injured_b") or [], match["week_number"])
+                    db.table("voltball_matches").update({"injuries_applied_at": now_iso}).eq("id", match["id"]).execute()
+
                 season_row = db.table("voltball_seasons").select("guild_id").eq("id", match["season_id"]).execute().data
                 if not season_row:
                     continue
