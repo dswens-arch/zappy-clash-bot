@@ -73,6 +73,18 @@ LEAGUE_TIMEZONE = ZoneInfo("America/Chicago")
 DAY_START_HOUR_LOCAL = 8
 MATCH_SLOT_GAP_SECONDS = 3600  # 1 hour between match slots
 
+
+def _fmt_kickoff_time(iso_str: str | None) -> str | None:
+    """'8:00 AM' in LEAGUE_TIMEZONE from a stored UTC timestamp -- None
+    passes through as None (e.g. a forfeit/bye pairing with no real
+    broadcast slot), so callers can decide how to display "no time"."""
+    if not iso_str:
+        return None
+    dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(LEAGUE_TIMEZONE).strftime("%-I:%M %p")
+
 # Mirrors results.html's step() pacing constants exactly, so the delayed
 # recap post lands roughly when the site's playback actually finishes.
 # If you tune the pacing in results.html, update these too -- same
@@ -550,14 +562,6 @@ class VoltballCog(commands.Cog):
         if config["announcement_channel_id"]:
             channel = self.bot.get_channel(int(config["announcement_channel_id"]))
 
-        if channel and pairings:
-            teams = get_teams_for_season(season["id"])
-            team_lookup = {t["id"]: t for t in teams}
-            week_lineups = get_week_lineups(season["id"], week)
-            lineup_lookup = {e["team_id"]: e["lineup"] for e in week_lineups}
-            preview_embed = build_matchup_preview_embed(season, week, pairings, team_lookup, lineup_lookup, round_label=round_label)
-            await channel.send(embed=preview_embed)
-
         is_championship_week = is_playoff_week and week == week_count + 2
         champion_name = None  # captured below if this is the championship and it resolves cleanly
 
@@ -568,13 +572,18 @@ class VoltballCog(commands.Cog):
         # teams. Fetched once up front rather than once per pairing.
         already_resolved_rows = (
             db.table("voltball_matches")
-            .select("team_a_id, team_b_id")
+            .select("team_a_id, team_b_id, playback_starts_at")
             .eq("season_id", season["id"])
             .eq("week_number", week)
             .execute()
             .data
         ) or []
         already_resolved = {(m["team_a_id"], m["team_b_id"]) for m in already_resolved_rows}
+        # Kickoff time per pairing, for the preview post below -- seeded
+        # from any already-resolved rows (duplicate-match guard case) so
+        # a resumed-after-restart run still shows the real time for
+        # pairings it's about to skip, not a blank.
+        match_times = {(m["team_a_id"], m["team_b_id"]): m["playback_starts_at"] for m in already_resolved_rows if m.get("playback_starts_at")}
 
         # Broadcast slot cursor for this week's matches -- see the
         # LEAGUE_TIMEZONE / DAY_START_HOUR_LOCAL / MATCH_SLOT_GAP_SECONDS
@@ -659,6 +668,7 @@ class VoltballCog(commands.Cog):
             # estimated playback is done, plus the gap. Never overlaps,
             # regardless of how many teams are in the season.
             next_slot_start = recap_post_at + timedelta(seconds=MATCH_SLOT_GAP_SECONDS)
+            match_times[(team_a_row["id"], team_b_row["id"])] = playback_starts_at.isoformat()
 
             match_row = db.table("voltball_matches").insert({
                 "season_id": season["id"],
@@ -712,6 +722,21 @@ class VoltballCog(commands.Cog):
             # by post_ready_kickoffs once kickoff_post_at actually
             # arrives -- same durable, restart-safe polling pattern as
             # the recap post below, just one step earlier in the chain.
+
+        # Matchup preview posts here, AFTER resolving -- not before, like
+        # it used to. Real kickoff times only exist once each match's
+        # slot has actually been assigned above; posting earlier would
+        # mean guessing at times instead of showing the real schedule.
+        # This doesn't leak results: the preview only ever shows who's
+        # playing and when, never a score -- that's still fully gated by
+        # recap_posted_at same as before.
+        if channel and pairings:
+            teams = get_teams_for_season(season["id"])
+            team_lookup = {t["id"]: t for t in teams}
+            standings_lookup = {r["team_id"]: r for r in get_standings(season["id"])}
+            match_time_labels = {k: _fmt_kickoff_time(v) for k, v in match_times.items()}
+            preview_embed = build_matchup_preview_embed(season, week, pairings, team_lookup, match_time_labels, standings_lookup=standings_lookup, round_label=round_label)
+            await channel.send(embed=preview_embed)
 
         bye_team_id = get_bye_team(season["id"], week)
         if bye_team_id:
