@@ -926,10 +926,35 @@ class VoltballCog(commands.Cog):
                     record_injuries(match["team_b_id"], match["season_id"], match.get("injured_b") or [], match["week_number"])
                     db.table("voltball_matches").update({"injuries_applied_at": now_iso}).eq("id", match["id"]).execute()
 
-                season_row = db.table("voltball_seasons").select("guild_id").eq("id", match["season_id"]).execute().data
+                season_row = db.table("voltball_seasons").select("*").eq("id", match["season_id"]).execute().data
                 if not season_row:
                     continue
-                config = get_guild_config(season_row[0]["guild_id"])
+                season_row = season_row[0]
+
+                # Whole-week-done signal for the SITE (lineup.html) --
+                # deliberately unconditional, computed before the
+                # channel-gated Discord logic below, so it works even for
+                # a guild with no announcement channel configured. Without
+                # this, lineup.html had nothing but current_week to know
+                # which week is open, and current_week advances the
+                # instant /voltball_resolve_week runs -- letting next
+                # week's lineup (and injury reports) unlock hours before
+                # this week's matches have actually finished airing.
+                still_pending_for_site = (
+                    db.table("voltball_matches")
+                    .select("id")
+                    .eq("season_id", match["season_id"])
+                    .eq("week_number", match["week_number"])
+                    .is_("recap_posted_at", "null")
+                    .execute()
+                    .data
+                ) or []
+                if len(still_pending_for_site) <= 1 and season_row.get("last_completed_week") != match["week_number"]:
+                    db.table("voltball_seasons").update(
+                        {"last_completed_week": match["week_number"]}
+                    ).eq("id", match["season_id"]).execute()
+
+                config = get_guild_config(season_row["guild_id"])
                 if not config or not config.get("announcement_channel_id"):
                     continue
                 channel = self.bot.get_channel(int(config["announcement_channel_id"]))
