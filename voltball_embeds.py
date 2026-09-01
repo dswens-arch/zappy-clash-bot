@@ -26,22 +26,26 @@ def _tempo_display(lineup: dict) -> str:
 
 def build_kickoff_embed(team_a_name: str, team_b_name: str, week: int, is_playoff: bool, link: str) -> discord.Embed:
     """
-    Posted immediately at resolution time — the match is already fully
-    computed (see resolve_match), this just announces when the site's
-    playback will start and gives the link. The 5-minute wait is real:
-    the site gates on the same `playback_starts_at` timestamp stored on
-    the match row, so everyone who clicks in from here sees the same
-    beats land at the same time, not a private replay per viewer.
+    Posted once this match's broadcast slot actually arrives (see the
+    `post_ready_kickoffs` loop in voltball_cog.py) -- matches are
+    staggered across the day now rather than all starting ~5 minutes
+    after resolution, so this can't fire immediately at resolution time
+    the way it used to; it's timed so the "kicks off in 5 minutes" line
+    below is still true the moment it posts. The site gates on the same
+    `playback_starts_at` timestamp stored on the match row, so everyone
+    who clicks in from here sees the same beats land at the same time,
+    not a private replay per viewer.
     """
     title_prefix = "🏆 PLAYOFF MATCH" if is_playoff else "🏈 Voltball"
     embed = discord.Embed(
-        title=f"{title_prefix} — Week {week}",
+        title=f"{title_prefix}: {team_a_name} vs {team_b_name}",
         description=(
             f"**{team_a_name}** vs **{team_b_name}** kicks off in 5 minutes.\n\n"
             f"[▶ Watch Live]({link})"
         ),
         color=discord.Color.gold() if is_playoff else discord.Color.blue(),
     )
+    embed.set_footer(text=f"Week {week}")
     return embed
 
 
@@ -57,7 +61,7 @@ def build_recap_post_embed(recap: dict, team_a_name: str, team_b_name: str,
     """
     title_prefix = "🏆 PLAYOFF FINAL" if is_playoff else "🏈 Final"
     embed = discord.Embed(
-        title=f"{title_prefix} — Week {week}",
+        title=f"{title_prefix}: {team_a_name} vs {team_b_name}",
         description=(
             f"**{team_a_name} {team_a_score} — {team_b_score} {team_b_name}**\n\n"
             f"{recap['recap_text']}\n\n"
@@ -65,6 +69,7 @@ def build_recap_post_embed(recap: dict, team_a_name: str, team_b_name: str,
         ),
         color=discord.Color.gold() if is_playoff else discord.Color.blue(),
     )
+    embed.set_footer(text=f"Week {week}")
     return embed
 
 
@@ -192,7 +197,18 @@ def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
         color=discord.Color.gold() if round_label else discord.Color.orange(),
     )
 
-    for pairing in pairings:
+    # CPU vs CPU tells you nothing worth reading -- formation/tempo is
+    # freshly randomized at resolution time regardless of what's posted
+    # here, so restating "CPU — random roster/formation/tempo" twice per
+    # pairing, once per matchup field, was mostly noise once a season has
+    # more CPU teams than human ones. Matchups with a real team keep the
+    # full formation/tempo breakdown, since that's the part with actual
+    # stakes; all-CPU pairings get folded into one compact list instead
+    # of a field each.
+    featured_pairings = [p for p in pairings if not (team_lookup[p["team_a_id"]].get("is_cpu") and team_lookup[p["team_b_id"]].get("is_cpu"))]
+    cpu_only_pairings = [p for p in pairings if p not in featured_pairings]
+
+    for pairing in featured_pairings:
         team_a = team_lookup[pairing["team_a_id"]]
         team_b = team_lookup[pairing["team_b_id"]]
         lineup_a = lineup_lookup.get(pairing["team_a_id"])
@@ -211,6 +227,17 @@ def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
         embed.add_field(
             name=f"{team_a['team_name']} vs {team_b['team_name']}",
             value=f"**{team_a['team_name']}** ({_coach_label(team_a['hero_type'])}): {form_a}\n**{team_b['team_name']}** ({_coach_label(team_b['hero_type'])}): {form_b}",
+            inline=False,
+        )
+
+    if cpu_only_pairings:
+        cpu_lines = [
+            f"{team_lookup[p['team_a_id']]['team_name']} vs {team_lookup[p['team_b_id']]['team_name']}"
+            for p in cpu_only_pairings
+        ]
+        embed.add_field(
+            name=f"🤖 CPU Matchups ({len(cpu_only_pairings)})",
+            value="\n".join(cpu_lines),
             inline=False,
         )
 
