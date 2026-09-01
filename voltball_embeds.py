@@ -24,6 +24,15 @@ def _tempo_display(lineup: dict) -> str:
     return f"{t:g} ({tempo_label(t)})"
 
 
+def _record_str(team_id, standings_lookup: dict) -> str:
+    """'(3-1)' next to a team's name -- omitted (not '(0-0)') if this team has no
+    standings row yet, e.g. Week 1 before anything's been played."""
+    row = standings_lookup.get(team_id) if standings_lookup else None
+    if not row:
+        return ""
+    return f" ({row['wins']}-{row['losses']})"
+
+
 def build_kickoff_embed(team_a_name: str, team_b_name: str, week: int, is_playoff: bool, link: str) -> discord.Embed:
     """
     Posted once this match's broadcast slot actually arrives (see the
@@ -177,19 +186,36 @@ def build_lineups_embed(season: dict, week: int, week_lineups: list[dict]) -> di
 
 
 def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
-                                  team_lookup: dict, lineup_lookup: dict, round_label: str | None = None) -> discord.Embed:
+                                  team_lookup: dict, match_time_lookup: dict | None = None,
+                                  standings_lookup: dict | None = None, round_label: str | None = None) -> discord.Embed:
     """
     "This Week's Matchups" — posted automatically once the weekly
     deadline passes and lineups lock, BEFORE match results are resolved.
-    Shows each pairing's formation side by side so the reveal has real
-    stakes, same spirit as a real fantasy league's pre-game matchup card.
+    Just the matchup grid: who's facing who, when, and each team's
+    current record. Formation/tempo used to be shown here too, but
+    that's already on each match's own card on the site (results.html)
+    once it airs — repeating it in the pre-game announcement was
+    duplicate information, and dropping it means this scales past
+    Discord's 25-field embed cap without needing a cutoff, since it's
+    plain text lines now rather than one field per pairing.
 
     team_lookup: {team_id: team_row}
-    lineup_lookup: {team_id: lineup_row or None}
+    match_time_lookup: {(team_a_id, team_b_id): "8:00 AM" or None} --
+    already-formatted local time strings (see _fmt_kickoff_time in
+    voltball_cog.py); this function does no timezone math itself. A
+    pairing missing here or mapped to None (e.g. a forfeit/bye with no
+    real broadcast slot) just omits the time rather than showing a
+    misleading "TBD".
+    standings_lookup: {team_id: standings_row} -- optional; when given,
+    each team's current W-L shows next to their name. None/missing for
+    a team (e.g. Week 1, before anything's been played) just omits it
+    rather than showing a misleading "(0-0)".
     round_label: "Semifinal" / "Championship" for playoff rounds, None
     for a regular-season week — swaps the title so a playoff round reads
     as the occasion it is, not just "Week 17."
     """
+    standings_lookup = standings_lookup or {}
+    match_time_lookup = match_time_lookup or {}
     title = f"🏆 {round_label}" if round_label else f"⚔️ Week {week} Matchups"
     embed = discord.Embed(
         title=title,
@@ -197,50 +223,17 @@ def build_matchup_preview_embed(season: dict, week: int, pairings: list[dict],
         color=discord.Color.gold() if round_label else discord.Color.orange(),
     )
 
-    # CPU vs CPU tells you nothing worth reading -- formation/tempo is
-    # freshly randomized at resolution time regardless of what's posted
-    # here, so restating "CPU — random roster/formation/tempo" twice per
-    # pairing, once per matchup field, was mostly noise once a season has
-    # more CPU teams than human ones. Matchups with a real team keep the
-    # full formation/tempo breakdown, since that's the part with actual
-    # stakes; all-CPU pairings get folded into one compact list instead
-    # of a field each.
-    featured_pairings = [p for p in pairings if not (team_lookup[p["team_a_id"]].get("is_cpu") and team_lookup[p["team_b_id"]].get("is_cpu"))]
-    cpu_only_pairings = [p for p in pairings if p not in featured_pairings]
-
-    for pairing in featured_pairings:
+    lines = []
+    for pairing in pairings:
         team_a = team_lookup[pairing["team_a_id"]]
         team_b = team_lookup[pairing["team_b_id"]]
-        lineup_a = lineup_lookup.get(pairing["team_a_id"])
-        lineup_b = lineup_lookup.get(pairing["team_b_id"])
+        record_a = _record_str(pairing["team_a_id"], standings_lookup)
+        record_b = _record_str(pairing["team_b_id"], standings_lookup)
+        kickoff_time = match_time_lookup.get((pairing["team_a_id"], pairing["team_b_id"]))
+        time_suffix = f"  —  🕒 {kickoff_time}" if kickoff_time else ""
+        lines.append(f"**{team_a['team_name']}**{record_a}  vs  **{team_b['team_name']}**{record_b}{time_suffix}")
 
-        if team_a.get("is_cpu"):
-            form_a = "CPU — random roster/formation/tempo"
-        else:
-            form_a = f"{lineup_a['formation']} / {_tempo_display(lineup_a)}" if lineup_a else "No lineup (auto-fielded, penalized)"
-
-        if team_b.get("is_cpu"):
-            form_b = "CPU — random roster/formation/tempo"
-        else:
-            form_b = f"{lineup_b['formation']} / {_tempo_display(lineup_b)}" if lineup_b else "No lineup (auto-fielded, penalized)"
-
-        embed.add_field(
-            name=f"{team_a['team_name']} vs {team_b['team_name']}",
-            value=f"**{team_a['team_name']}** ({_coach_label(team_a['hero_type'])}): {form_a}\n**{team_b['team_name']}** ({_coach_label(team_b['hero_type'])}): {form_b}",
-            inline=False,
-        )
-
-    if cpu_only_pairings:
-        cpu_lines = [
-            f"{team_lookup[p['team_a_id']]['team_name']} vs {team_lookup[p['team_b_id']]['team_name']}"
-            for p in cpu_only_pairings
-        ]
-        embed.add_field(
-            name=f"🤖 CPU Matchups ({len(cpu_only_pairings)})",
-            value="\n".join(cpu_lines),
-            inline=False,
-        )
-
+    embed.add_field(name="Matchups", value="\n\n".join(lines), inline=False)
     return embed
 
 
