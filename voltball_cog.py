@@ -50,7 +50,7 @@ from database import get_supabase, get_wallet
 
 # Public site root -- used to build the "Watch Live" / "Watch Replay" links
 # posted to Discord. Update here if the GitHub Pages URL ever changes.
-SITE_BASE_URL = "https://dswens-arch.github.io/voltball-site/"  # revert to voltball.xyz once its DNS actually resolves -- see chat
+SITE_BASE_URL = "https://voltball.xyz/"
 
 # How long after a match's kickoff post it actually starts airing --
 # this is a REAL wait, not decorative: it's the same value used to derive
