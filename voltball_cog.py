@@ -50,7 +50,7 @@ from database import get_supabase, get_wallet
 
 # Public site root -- used to build the "Watch Live" / "Watch Replay" links
 # posted to Discord. Update here if the GitHub Pages URL ever changes.
-SITE_BASE_URL = "https://voltball.xyz/"
+SITE_BASE_URL = "https://dswens-arch.github.io/voltball-site/"  # revert to voltball.xyz once its DNS actually resolves -- see chat
 
 # How long after a match's kickoff post it actually starts airing --
 # this is a REAL wait, not decorative: it's the same value used to derive
@@ -663,11 +663,16 @@ class VoltballCog(commands.Cog):
             playback_starts_at = next_slot_start
             recap_post_at = playback_starts_at + timedelta(seconds=estimate_playback_seconds(result))
             kickoff_post_at = playback_starts_at - timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS)
-            # Advance the cursor so the next match in this week's loop
-            # gets the next open slot -- starts only after this match's
-            # estimated playback is done, plus the gap. Never overlaps,
-            # regardless of how many teams are in the season.
-            next_slot_start = recap_post_at + timedelta(seconds=MATCH_SLOT_GAP_SECONDS)
+            # Advance the cursor by a fixed GAP from this match's START,
+            # not from when its playback actually finishes. Chaining off
+            # recap_post_at let each match's real duration (~30-90s)
+            # accumulate as drift -- match 2 landing a bit after the
+            # hour, match 3 a bit more, and so on. Since MATCH_SLOT_GAP_
+            # SECONDS (1hr) is already far larger than any realistic
+            # match duration, there's no overlap risk from using a fixed
+            # grid instead -- and it keeps every kickoff exactly on the
+            # hour, not creeping later as the week's slate goes on.
+            next_slot_start = playback_starts_at + timedelta(seconds=MATCH_SLOT_GAP_SECONDS)
             match_times[(team_a_row["id"], team_b_row["id"])] = playback_starts_at.isoformat()
 
             match_row = db.table("voltball_matches").insert({
