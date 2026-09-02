@@ -69,10 +69,19 @@ def build_recap_post_embed(recap: dict, team_a_name: str, team_b_name: str,
     can never disagree with what the site's own recap panel shows.
     """
     title_prefix = "🏆 PLAYOFF FINAL" if is_playoff else "🏈 Final"
+    # Bold the winner's name+score only, not the loser's -- a plain tie
+    # (both plain) is defensive only; Nine Lives correction means ties
+    # shouldn't actually reach this embed in practice.
+    if team_a_score > team_b_score:
+        score_line = f"**{team_a_name} {team_a_score}** — {team_b_score} {team_b_name}"
+    elif team_b_score > team_a_score:
+        score_line = f"{team_a_name} {team_a_score} — **{team_b_score} {team_b_name}**"
+    else:
+        score_line = f"{team_a_name} {team_a_score} — {team_b_score} {team_b_name}"
     embed = discord.Embed(
         title=f"{title_prefix}: {team_a_name} vs {team_b_name}",
         description=(
-            f"**{team_a_name} {team_a_score} — {team_b_score} {team_b_name}**\n\n"
+            f"{score_line}\n\n"
             f"{recap['recap_text']}\n\n"
             f"[⏮ Watch Replay]({replay_link})"
         ),
@@ -262,12 +271,7 @@ def build_standings_embed(season: dict, rows: list[dict]) -> discord.Embed:
 
     lines = []
     for i, r in enumerate(rows, start=1):
-        streak = r.get("streak", 0)
-        streak_str = f"W{streak}" if streak > 0 else (f"L{abs(streak)}" if streak < 0 else "—")
-        lines.append(
-            f"{i}. **{r['team_name']}** — {r['wins']}-{r['losses']} "
-            f"({round(r['points_for'], 1)} PF / {round(r['points_against'], 1)} PA) [{streak_str}]"
-        )
+        lines.append(f"{i}. **{r['team_name']}** — {r['wins']}-{r['losses']}")
 
     status_label = {"upcoming": "Not Started", "active": "In Progress", "playoffs": "Playoffs", "complete": "Final"}.get(season["status"], season["status"])
     embed = discord.Embed(
