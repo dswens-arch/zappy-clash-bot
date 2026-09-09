@@ -703,11 +703,18 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
             round_msg.append(f"  🦇 **{fighter_b.display_name}** strikes first out of the dark — {bat_pre_strike_dmg} damage{crit_note}!")
             fighter_b.bat_first_strike = False  # consumed for this round
 
+        # Track whether fighter_a was already dead BEFORE its own attack this round
+        # (i.e. specifically from Bat's pre-strike above) — this is the only case
+        # where fighter_a's attack line should be suppressed. If fighter_a instead
+        # dies from fighter_b's hit later in this same round, that's normal combat
+        # and fighter_a's own attack (already resolved) still gets its message.
+        fighter_a_denied_attack = fighter_a.hp <= 0
+
         # ── Fighter A attacks Fighter B ──
         # Shield checked first — it should always fully block, no matter what
         # state the attacker is in (skip_next_attack shouldn't let a hit sneak
         # through underneath it).
-        if fighter_a.hp <= 0:
+        if fighter_a_denied_attack:
             dmg_a, crit_a = 0, False   # Fighter A was knocked out by Bat's first strike — no counterattack
         elif fighter_a.no_attack_this_round:
             fighter_a.no_attack_this_round = False
@@ -754,8 +761,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(spark_msg_a)
 
         # Iron Shell: one-time full absorb, only if fighter_b has the combo
-        if fighter_a.hp <= 0:
-            pass   # Fighter A was already knocked out (e.g. by Bat's first strike) — no attack happened, no message needed
+        if fighter_a_denied_attack:
+            pass   # Fighter A was knocked out by Bat's pre-strike BEFORE its own attack this round — no attack happened, no message needed
         elif fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
             dmg_a = 0
             fighter_b.iron_shell_used = True
@@ -856,8 +863,8 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(spark_msg_b)
 
         # Iron Shell: one-time full absorb, only if fighter_a has the combo
-        if fighter_b.hp <= 0:
-            pass   # Fighter B was already knocked out (e.g. Bat's first-strike denial) — no attack happened, no message needed
+        if bat_a_denied_b:
+            pass   # Fighter B was denied its attack by Bat's pre-strike/speed this round — no attack happened, no message needed
         elif fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
             dmg_b = 0
             fighter_a.iron_shell_used = True
