@@ -754,7 +754,9 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(spark_msg_a)
 
         # Iron Shell: one-time full absorb, only if fighter_b has the combo
-        if fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
+        if fighter_a.hp <= 0:
+            pass   # Fighter A was already knocked out (e.g. by Bat's first strike) — no attack happened, no message needed
+        elif fighter_b.combo == "Iron Shell" and not fighter_b.iron_shell_used and fighter_b.hp <= dmg_a:
             dmg_a = 0
             fighter_b.iron_shell_used = True
             round_msg.append(f"  🛡️ {fighter_b.display_name}'s Iron Shell absorbs everything — survives on 1 HP!")
@@ -854,7 +856,9 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 round_msg.append(spark_msg_b)
 
         # Iron Shell: one-time full absorb, only if fighter_a has the combo
-        if fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
+        if fighter_b.hp <= 0:
+            pass   # Fighter B was already knocked out (e.g. Bat's first-strike denial) — no attack happened, no message needed
+        elif fighter_a.combo == "Iron Shell" and not fighter_a.iron_shell_used and fighter_a.hp <= dmg_b:
             dmg_b = 0
             fighter_a.iron_shell_used = True
             round_msg.append(f"  🛡️ {fighter_a.display_name}'s Iron Shell absorbs everything — survives on 1 HP!")
