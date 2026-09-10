@@ -13,6 +13,12 @@ import time
 from datetime import datetime, timezone, timedelta, time as dt_time
 from supabase import create_client, Client
 
+# Patches postgrest's internal retry logic so transient connection drops
+# (RemoteProtocolError / ConnectionTerminated — "Server disconnected")
+# get retried automatically on every db.table(...).execute() call below,
+# instead of crashing the calling command. See db_resilience.py.
+import db_resilience  # noqa: F401
+
 
 # ─────────────────────────────────────────────
 # Setup — reads from environment variables
