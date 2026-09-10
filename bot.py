@@ -187,6 +187,11 @@ def check_expedition_channel(interaction: discord.Interaction) -> bool:
 active_bracket_id: str | None = None
 registration_open: bool = False
 
+# Tracks the posted entry-card message per (discord_user_id, bracket_id), so a
+# re-entry (switching Zappy/Spark) can delete the old card before posting the
+# new one. Cleared when registration closes for a bracket.
+_entry_card_messages: dict[tuple[str, str], discord.Message] = {}
+
 
 # ---------------------------------------------
 # Helper: get current bracket ID
@@ -440,14 +445,10 @@ async def cmd_clash(interaction: discord.Interaction):
         )
         return
 
-    # Check if already registered
-    if await asyncio.to_thread(is_registered, user_id, active_bracket_id):
-        await interaction.followup.send(
-            "✅ You're already registered for this bracket! Check "
-            f"<#{CLASH_CHANNEL}> when fights start.",
-            ephemeral=True
-        )
-        return
+    # Check if already registered — this is now informational, not a block:
+    # re-running /clash swaps the entry (new Zappy and/or new Spark) instead
+    # of being rejected, as long as registration is still open.
+    is_reentry = await asyncio.to_thread(is_registered, user_id, active_bracket_id)
 
     # Verify ownership
     from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL, HERO_ASSET_IDS, COLLAB_ASSET_IDS
@@ -683,7 +684,7 @@ async def cmd_clash(interaction: discord.Interaction):
         )
 
         confirm = discord.Embed(
-            title=f"✅ {name} is in the bracket!",
+            title=f"✅ {name} is in the bracket!" if not is_reentry else f"🔁 Entry updated — now {name}!",
             description=f"⚡ VLT {stats.get('VLT','?')} · 🛡️ INS {stats.get('INS','?')} · 🎲 SPK {stats.get('SPK','?')}",
             color=0xF5E642,
         )
@@ -732,7 +733,20 @@ async def cmd_clash(interaction: discord.Interaction):
                 spark_tier=spark["tier"] if spark else 0,
                 spark_image_url=spark_img_url,
             )
-            await clash_ch.send(file=discord.File(card_buf, filename="entry.png"))
+
+            # Swapping entries — remove the previously posted card for this
+            # user+bracket before posting the new one, so the channel only
+            # ever shows their current pick, not a trail of old attempts.
+            card_key = (user_id, active_bracket_id)
+            old_card = _entry_card_messages.get(card_key)
+            if old_card is not None:
+                try:
+                    await old_card.delete()
+                except (discord.errors.NotFound, discord.errors.Forbidden):
+                    pass  # already gone, or we lost perms — not worth failing the new post over
+
+            new_card = await clash_ch.send(file=discord.File(card_buf, filename="entry.png"))
+            _entry_card_messages[card_key] = new_card
 
     # ── Confirm/Cancel view shown after manual ASA lookup ─────────────────────
     class ConfirmAsaView(discord.ui.View):
@@ -3292,6 +3306,11 @@ async def close_and_resolve(channel: discord.TextChannel):
 
     registration_open = False
     bracket_id = active_bracket_id
+
+    # Drop stored entry-card message refs for this bracket — no more swaps
+    # possible once registration is closed, so nothing left to track.
+    for key in [k for k in _entry_card_messages if k[1] == bracket_id]:
+        del _entry_card_messages[key]
 
     entries = await asyncio.to_thread(get_bracket_entries, bracket_id)
     n = len(entries)
