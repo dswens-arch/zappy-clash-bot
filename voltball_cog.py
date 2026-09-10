@@ -24,7 +24,7 @@ config for which day + channel to post to — those depend on decisions
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time as dt_time
 from zoneinfo import ZoneInfo
 
 from voltball_engine import resolve_match, HERO_SIGNATURES
@@ -70,7 +70,14 @@ PLAYBACK_KICKOFF_DELAY_SECONDS = 300
 # setting yet -- if this bot ever serves guilds outside this timezone,
 # this needs to become a config value alongside resolution_weekday.
 LEAGUE_TIMEZONE = ZoneInfo("America/Chicago")
-DAY_START_HOUR_LOCAL = 8
+# 9am, not 8am -- deliberately one hour after weekly_resolution's fixed
+# 8am trigger (see that loop's comment). Resolution itself takes real
+# time to process every match before the first slot is even assigned,
+# and the two used to be able to collide (an 8am trigger computing an
+# 8am first slot leaves ~0 margin). A full hour of buffer means the
+# first game reliably airs at a predictable time regardless of how
+# long resolution takes to run for a given week's team count.
+DAY_START_HOUR_LOCAL = 9
 MATCH_SLOT_GAP_SECONDS = 3600  # 1 hour between match slots
 
 
@@ -517,10 +524,22 @@ class VoltballCog(commands.Cog):
     # Weekly resolution job — thin wrapper around _resolve_season_week,
     # which is also callable directly by /voltball_resolve_week for
     # testing (bypasses the weekday gate, resolves right now).
-    # ─────────────────────────────────────────────
-    @tasks.loop(hours=24)
+    #
+    # Anchored to a fixed wall-clock time (8am Chicago), not just
+    # "every 24 hours" -- that distinction matters. hours=24 counts
+    # from whenever the bot process last started, so the actual time
+    # of day this fires drifted with bot restart history: it could
+    # land at 3am or 11am depending on uptime, with no way to predict
+    # which. tasks.loop's time= parameter fixes this properly -- it's
+    # discord.py's built-in support for "run at this wall-clock time
+    # every day," tz-aware (correctly handles DST transitions since
+    # LEAGUE_TIMEZONE is a real zoneinfo, not a fixed UTC offset).
+    # Now resolution reliably starts at 8am Chicago sharp; see
+    # DAY_START_HOUR_LOCAL below for why the first MATCH slot is 9am,
+    # not 8am -- that's a separate, deliberate buffer.
+    @tasks.loop(time=dt_time(hour=8, minute=0, tzinfo=LEAGUE_TIMEZONE))
     async def weekly_resolution(self):
-        """Runs daily; only actually resolves on each guild's configured weekly deadline day (checked in LEAGUE_TIMEZONE, not UTC)."""
+        """Runs daily at 8am Chicago; only actually resolves on each guild's configured weekly deadline day."""
         now_local = datetime.now(timezone.utc).astimezone(LEAGUE_TIMEZONE)
         db = get_supabase()
         seasons = db.table("voltball_seasons").select("*").in_("status", ["active", "playoffs"]).execute().data or []
