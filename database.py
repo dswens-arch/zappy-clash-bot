@@ -1329,13 +1329,14 @@ def complete_office_job(job_id: int, spark_asa: int, outcome: str, amount: float
     consecutive-miss counters in the same call — those counters are what
     duel targeting and cold-streak demotion both read."""
     db = get_supabase()
+    now = datetime.now(timezone.utc)
     db.table("spark_office_log").update({
         "status":      "complete",
         "outcome":     outcome,
         "amount":      amount,
         "nft_asa":     nft_asa,
         "flavor_line": flavor_line,
-        "resolved_at": datetime.now(timezone.utc).isoformat(),
+        "resolved_at": now.isoformat(),
     }).eq("id", job_id).execute()
 
     seat = get_office_seat(spark_asa)
@@ -1349,6 +1350,31 @@ def complete_office_job(job_id: int, spark_asa: int, outcome: str, amount: float
         update["consecutive_misses"] = 0
     else:
         update["consecutive_misses"] = seat["consecutive_misses"] + 1
+
+    # next_shift_due_at is normally set 20+ hours ahead, at clock-in — so
+    # by the time this same shift resolves ~8h later it's nowhere near due.
+    # But if the resolver ever falls behind (downtime, an error loop, a
+    # backlog of due jobs), a shift can sit 'working' long enough that its
+    # OWN next_shift_due_at — set back when it clocked in — has already
+    # slipped into the past by the time it finally resolves. The instant
+    # this 'working' row flips to 'complete', the no-show sweep sees an
+    # active seat with no working shift and a stale due date, and vacates
+    # it — punishing a Spark that did nothing wrong, only had its shift
+    # resolved late by the bot. Refresh the anchor from now whenever that's
+    # the case, using the same fixed-anchor logic as a normal clock-in.
+    due = seat.get("next_shift_due_at")
+    if due and datetime.fromisoformat(due) <= now:
+        shift_time = seat.get("shift_time_utc")
+        if shift_time:
+            if isinstance(shift_time, str):
+                shift_time = dt_time.fromisoformat(shift_time)
+            next_due = now.replace(hour=shift_time.hour, minute=shift_time.minute, second=0, microsecond=0)
+            if next_due <= now:
+                next_due += timedelta(days=1)
+        else:
+            next_due = now + timedelta(hours=OFFICE_DAILY_COOLDOWN_HOURS)
+        update["next_shift_due_at"] = next_due.isoformat()
+
     db.table("spark_office_seats").update(update).eq("spark_asa", spark_asa).execute()
 
 
