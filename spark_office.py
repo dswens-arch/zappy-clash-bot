@@ -537,14 +537,49 @@ class ShiftTimeSelectView(discord.ui.View):
         self.add_item(ShiftTimeSelect(seats))
 
 
-class OfficeClockInButton(discord.ui.Button):
-    """The safe option — always present on a reminder. Bulk-clocks in
-    every due seat the wallet holds."""
+class OfficeClockInButton(
+    discord.ui.DynamicItem[discord.ui.Button],
+    template=r"office_reminder_clock_in:(?P<uid>[0-9]+)",
+):
+    """
+    The safe option — always present on a reminder. Bulk-clocks in every
+    due seat the wallet holds.
 
-    def __init__(self):
-        super().__init__(label="Clock In", emoji="🕐", style=discord.ButtonStyle.primary, custom_id="office_reminder_clock_in")
+    A DynamicItem instead of a plain static-custom_id Button: the old
+    version's custom_id ("office_reminder_clock_in") was identical on
+    every single reminder ever posted, for every user, which meant the
+    button had no idea who it was actually for — anyone who clicked any
+    reminder's button just triggered their OWN due Sparks, regardless of
+    whose name/ping was on that particular card. Embedding the intended
+    recipient's Discord user ID in the custom_id (and checking it in the
+    callback below) is what lets a click be rejected if it's not from
+    the person the reminder was actually sent to. DynamicItem is what
+    makes that survive a bot restart — Discord.py reconstructs this exact
+    button, with the embedded ID intact, by matching the regex `template`
+    against the custom_id on the incoming interaction, no pre-registration
+    of every possible user needed. Requires discord.py 2.4+.
+    """
+
+    def __init__(self, target_user_id: str):
+        super().__init__(
+            discord.ui.Button(
+                label="Clock In", emoji="🕐", style=discord.ButtonStyle.primary,
+                custom_id=f"office_reminder_clock_in:{target_user_id}",
+            )
+        )
+        self.target_user_id = target_user_id
+
+    @classmethod
+    async def from_custom_id(cls, interaction: discord.Interaction, item: discord.ui.Button, match):
+        return cls(match["uid"])
 
     async def callback(self, interaction: discord.Interaction):
+        if str(interaction.user.id) != self.target_user_id:
+            await interaction.response.send_message(
+                "❌ This reminder isn't for your wallet — it only works for the Spark(s) it was sent for.",
+                ephemeral=True,
+            )
+            return
         await interaction.response.defer(ephemeral=True, thinking=True)
         user_id = str(interaction.user.id)
         wallet = await asyncio.to_thread(get_wallet, user_id)
@@ -559,25 +594,44 @@ class OfficeClockInButton(discord.ui.Button):
         await interaction.followup.send(cog._format_clock_in_result(result), ephemeral=True)
 
 
-class OfficeGambleButton(discord.ui.Button):
+class OfficeGambleButton(
+    discord.ui.DynamicItem[discord.ui.Button],
+    template=r"office_gamble_btn_(?P<scenario>[0-9]+):(?P<uid>[0-9]+)",
+):
     """
     The risky option — only shows up ~25% of the time (see
     OFFICE_GAMBLE_OFFER_CHANCE), rotating through 6 scenario names so it
     doesn't read as the same button every time. Bulk-gambles every due
     seat the wallet holds, same "everyone at once" behavior as the safe
-    button, just riskier.
+    button, just riskier — which is exactly why it matters most here:
+    without the same per-recipient check as the Clock In button, anyone
+    could accidentally commit their own Sparks to a real gamble by
+    clicking a red button on a reminder that was never meant for them.
     """
 
-    def __init__(self, scenario_index: int):
+    def __init__(self, scenario_index: int, target_user_id: str):
         scenario = GAMBLE_SCENARIOS[scenario_index]
         super().__init__(
-            label=scenario["name"], emoji=scenario["emoji"],
-            style=discord.ButtonStyle.danger,
-            custom_id=f"office_gamble_btn_{scenario_index}",
+            discord.ui.Button(
+                label=scenario["name"], emoji=scenario["emoji"],
+                style=discord.ButtonStyle.danger,
+                custom_id=f"office_gamble_btn_{scenario_index}:{target_user_id}",
+            )
         )
         self.scenario_index = scenario_index
+        self.target_user_id = target_user_id
+
+    @classmethod
+    async def from_custom_id(cls, interaction: discord.Interaction, item: discord.ui.Button, match):
+        return cls(int(match["scenario"]), match["uid"])
 
     async def callback(self, interaction: discord.Interaction):
+        if str(interaction.user.id) != self.target_user_id:
+            await interaction.response.send_message(
+                "❌ This reminder isn't for your wallet — it only works for the Spark(s) it was sent for.",
+                ephemeral=True,
+            )
+            return
         await interaction.response.defer(ephemeral=True, thinking=True)
         user_id = str(interaction.user.id)
         wallet = await asyncio.to_thread(get_wallet, user_id)
@@ -597,16 +651,18 @@ class OfficeReminderView(discord.ui.View):
     """
     Persistent (timeout=None). Always carries the safe Clock In button;
     when gamble_scenario_index is given, also carries the riskier option
-    for that specific scenario. Registered in cog_load for all 7 possible
-    combinations (safe-only + one per scenario) so buttons keep working
-    across bot restarts regardless of which variant was originally sent.
+    for that specific scenario. Both buttons are DynamicItems keyed to
+    target_user_id (see above) — Discord.py matches them back by regex
+    on custom_id after a restart, so no fixed set of pre-registered
+    combinations is needed anymore (cog_load just registers the two
+    DynamicItem classes once).
     """
 
-    def __init__(self, gamble_scenario_index: int | None = None):
+    def __init__(self, target_user_id: str, gamble_scenario_index: int | None = None):
         super().__init__(timeout=None)
-        self.add_item(OfficeClockInButton())
+        self.add_item(OfficeClockInButton(target_user_id))
         if gamble_scenario_index is not None:
-            self.add_item(OfficeGambleButton(gamble_scenario_index))
+            self.add_item(OfficeGambleButton(gamble_scenario_index, target_user_id))
 
 
 class SparkOfficeCog(commands.Cog):
@@ -619,9 +675,11 @@ class SparkOfficeCog(commands.Cog):
         self.office_event_check.start()
 
     async def cog_load(self):
-        self.bot.add_view(OfficeReminderView())
-        for i in range(len(GAMBLE_SCENARIOS)):
-            self.bot.add_view(OfficeReminderView(gamble_scenario_index=i))
+        # DynamicItems are matched back to a live button by regex on their
+        # custom_id (see the classes above), not by pre-registering a fixed
+        # set of view instances — so this replaces the old loop that had to
+        # register all 7 (recipient-less) user/scenario combinations.
+        self.bot.add_dynamic_items(OfficeClockInButton, OfficeGambleButton)
 
     def cog_unload(self):
         self.resolver.cancel()
@@ -1676,7 +1734,11 @@ class SparkOfficeCog(commands.Cog):
         alarm_file = _attach_office_image(embed, "alarm")
         channel = self._promotion_channel()
         if channel:
-            await channel.send(content=mention, embed=embed, view=OfficeReminderView(gamble_index), file=alarm_file)
+            # No discord_user_id on record means there's no one to scope the
+            # buttons to — send the alarm without them rather than a button
+            # that can never legitimately be clicked by anyone.
+            view = OfficeReminderView(str(discord_id), gamble_index) if discord_id else None
+            await channel.send(content=mention, embed=embed, view=view, file=alarm_file)
 
     async def _process_noshow_demotions(self):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
