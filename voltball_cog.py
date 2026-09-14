@@ -38,7 +38,10 @@ from voltball_db import (
     get_lineup, get_week_lineups, create_cpu_team, get_standings, get_playoff_round_winners, update_standings_after_match, record_injuries,
     get_guild_config, set_guild_config, create_season, list_seasons, wipe_season, save_season_zappy_stats,
 )
-from voltball_schedule import save_schedule, save_playoff_round, get_week_pairings, get_bye_team
+from voltball_schedule import (
+    save_schedule, save_playoff_round, get_week_pairings, get_bye_team,
+    week_is_open, open_week, get_due_pairings, mark_pairing_resolved, count_unresolved_pairings,
+)
 from voltball_season_stats import allocate_season_stats
 from voltball_rarity import get_rarity_tier
 from voltball_embeds import (
@@ -70,15 +73,28 @@ PLAYBACK_KICKOFF_DELAY_SECONDS = 300
 # setting yet -- if this bot ever serves guilds outside this timezone,
 # this needs to become a config value alongside resolution_weekday.
 LEAGUE_TIMEZONE = ZoneInfo("America/Chicago")
-# 9am, not 8am -- deliberately one hour after weekly_resolution's fixed
-# 8am trigger (see that loop's comment). Resolution itself takes real
-# time to process every match before the first slot is even assigned,
-# and the two used to be able to collide (an 8am trigger computing an
-# 8am first slot leaves ~0 margin). A full hour of buffer means the
-# first game reliably airs at a predictable time regardless of how
-# long resolution takes to run for a given week's team count.
+# 9am local on game day -- the first broadcast slot. No longer tied to
+# a same-day resolution trigger (resolution is per-match now, gated by
+# each pairing's own scheduled_kickoff_at -- see resolve_ready_matches),
+# just a fixed, predictable start-of-day time for the first match of
+# the week regardless of team count.
 DAY_START_HOUR_LOCAL = 9
 MATCH_SLOT_GAP_SECONDS = 3600  # 1 hour between match slots
+
+
+def _next_weekday_date(now_local: datetime, target_weekday: int):
+    """
+    The next calendar date (today included) landing on target_weekday
+    (Python's Monday=0..Sunday=6), given now_local already carries the
+    right tzinfo. Used by _open_season_week to find the upcoming game
+    day (resolution_weekday, still Sunday) from whatever day the open
+    step actually runs on (normally the day before, but a manual
+    /voltball_open_week catch-up can run any day of the week). A
+    days_ahead of 0 means today IS the target day -- correct for a
+    same-day catch-up run, not a bug.
+    """
+    days_ahead = (target_weekday - now_local.weekday()) % 7
+    return now_local.date() + timedelta(days=days_ahead)
 
 
 def _fmt_kickoff_time(iso_str: str | None) -> str | None:
@@ -149,12 +165,14 @@ def _lineup_snapshot(team) -> dict:
 class VoltballCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.weekly_resolution.start()
+        self.open_ready_weeks.start()
+        self.resolve_ready_matches.start()
         self.post_ready_kickoffs.start()
         self.post_ready_recaps.start()
 
     def cog_unload(self):
-        self.weekly_resolution.cancel()
+        self.open_ready_weeks.cancel()
+        self.resolve_ready_matches.cancel()
         self.post_ready_kickoffs.cancel()
         self.post_ready_recaps.cancel()
 
@@ -295,11 +313,43 @@ class VoltballCog(commands.Cog):
         )
 
     # ─────────────────────────────────────────────
-    # /voltball_resolve_week (admin) — manual trigger, bypasses the
-    # weekday gate. Same underlying logic as the scheduled job, so a
-    # test season plays out exactly like a real one would, on demand.
+    # /voltball_open_week (admin) — manual trigger for the daily
+    # open_ready_weeks job. Assigns this week's real pairings their
+    # Sunday hourly slots and posts the matchup preview/reminder.
+    # Refuses if the week's already open (same "generated once, not
+    # regenerated" guard /voltball_season_start uses for the schedule
+    # itself) — no force flag; if you genuinely need to redo an already-
+    # open week's times, that's a deliberate enough action to do by hand.
     # ─────────────────────────────────────────────
-    @app_commands.command(name="voltball_resolve_week", description="[Admin] Manually resolve the current week right now (for testing, or to override the schedule).")
+    @app_commands.command(name="voltball_open_week", description="[Admin] Manually open the current week now (assign game times, post the schedule reminder).")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def voltball_open_week(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+
+        season = get_active_or_playoff_season(str(interaction.guild_id))
+        if not season:
+            await interaction.followup.send("No active or playoff season to open — run `/voltball_season_start` first.", ephemeral=True)
+            return
+
+        if week_is_open(season["id"], season["current_week"]):
+            await interaction.followup.send(f"Week {season['current_week']} is already open — game times are already assigned.", ephemeral=True)
+            return
+
+        config = get_guild_config(str(interaction.guild_id))
+        posted = await self._open_season_week(season, config)
+
+        note = "" if posted else " (no announcement channel configured — times saved but nothing posted; set one with `/voltball_config`)"
+        await interaction.followup.send(f"📅 Week {season['current_week']} opened — game times assigned.{note}", ephemeral=True)
+
+    # ─────────────────────────────────────────────
+    # /voltball_resolve_week (admin) — manual override, bypasses BOTH
+    # the open-day gate and each pairing's own scheduled_kickoff_at.
+    # Opens the week first if it isn't already (so posting still
+    # staggers sensibly), then force-resolves every pairing that hasn't
+    # resolved yet, right now. Same role as before: a test season plays
+    # out exactly like a real one would, on demand.
+    # ─────────────────────────────────────────────
+    @app_commands.command(name="voltball_resolve_week", description="[Admin] Force-resolve every remaining match in the current week right now (for testing, or to catch up).")
     @app_commands.checks.has_permissions(administrator=True)
     async def voltball_resolve_week(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -311,10 +361,18 @@ class VoltballCog(commands.Cog):
 
         week_before = season["current_week"]
         config = get_guild_config(str(interaction.guild_id))
-        await self._resolve_season_week(season, config)
+
+        if not week_is_open(season["id"], week_before):
+            await self._open_season_week(season, config)
+
+        pairings = [p for p in get_week_pairings(season["id"], week_before) if not p.get("resolved_at")]
+        resolved_count = 0
+        for pairing in pairings:
+            await self._resolve_one_pairing(pairing)
+            resolved_count += 1
 
         note = "" if config["announcement_channel_id"] else " (no announcement channel configured — results saved but nothing posted; set one with `/voltball_config` if you want to see it play out)"
-        await interaction.followup.send(f"✅ Week {week_before} resolved.{note}", ephemeral=True)
+        await interaction.followup.send(f"✅ Week {week_before}: {resolved_count} match(es) force-resolved.{note}", ephemeral=True)
 
     # ─────────────────────────────────────────────
     # /voltball_season_wipe (admin) — destructive, requires confirmation
@@ -521,52 +579,53 @@ class VoltballCog(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     # ─────────────────────────────────────────────
-    # Weekly resolution job — thin wrapper around _resolve_season_week,
-    # which is also callable directly by /voltball_resolve_week for
-    # testing (bypasses the weekday gate, resolves right now).
+    # Week-open job — assigns this week's real pairings their Sunday
+    # hourly slots and posts the matchup preview (doubling as the
+    # "set your lineup" reminder) as soon as it's known, instead of
+    # waiting until resolution. Runs the day BEFORE game day (one day
+    # before resolution_weekday) so there's a real window for coaches
+    # to see their kickoff time and lock a lineup in before it passes.
     #
-    # Anchored to a fixed wall-clock time (8am Chicago), not just
-    # "every 24 hours" -- that distinction matters. hours=24 counts
-    # from whenever the bot process last started, so the actual time
-    # of day this fires drifted with bot restart history: it could
-    # land at 3am or 11am depending on uptime, with no way to predict
-    # which. tasks.loop's time= parameter fixes this properly -- it's
-    # discord.py's built-in support for "run at this wall-clock time
-    # every day," tz-aware (correctly handles DST transitions since
-    # LEAGUE_TIMEZONE is a real zoneinfo, not a fixed UTC offset).
-    # Now resolution reliably starts at 8am Chicago sharp; see
-    # DAY_START_HOUR_LOCAL below for why the first MATCH slot is 9am,
-    # not 8am -- that's a separate, deliberate buffer.
-    @tasks.loop(time=dt_time(hour=8, minute=0, tzinfo=LEAGUE_TIMEZONE))
-    async def weekly_resolution(self):
-        """Runs daily at 8am Chicago; only actually resolves on each guild's configured weekly deadline day."""
+    # Same fixed-wall-clock-time pattern the old weekly_resolution job
+    # used (see its removed comment, preserved in spirit here): tz-aware,
+    # DST-safe, and immune to bot-restart drift. Checked daily; the
+    # weekday gate below (and week_is_open's own guard) is what makes
+    # it only actually act once a week per guild.
+    # ─────────────────────────────────────────────
+    @tasks.loop(time=dt_time(hour=9, minute=0, tzinfo=LEAGUE_TIMEZONE))
+    async def open_ready_weeks(self):
+        """Runs daily at 9am Chicago; only actually opens a week on each guild's configured open day (the day before resolution_weekday)."""
         now_local = datetime.now(timezone.utc).astimezone(LEAGUE_TIMEZONE)
         db = get_supabase()
         seasons = db.table("voltball_seasons").select("*").in_("status", ["active", "playoffs"]).execute().data or []
 
         for season in seasons:
             config = get_guild_config(season["guild_id"])
-            if now_local.weekday() != config["resolution_weekday"]:
+            open_weekday = (config["resolution_weekday"] - 1) % 7
+            if now_local.weekday() != open_weekday:
                 continue
-            await self._resolve_season_week(season, config)
+            if week_is_open(season["id"], season["current_week"]):
+                continue
+            await self._open_season_week(season, config)
 
-    async def _resolve_season_week(self, season: dict, config: dict):
+    @open_ready_weeks.before_loop
+    async def before_open_ready_weeks(self):
+        await self.bot.wait_until_ready()
+
+    async def _open_season_week(self, season: dict, config: dict) -> bool:
         """
-        Resolves the current week for one season: posts the matchup
-        preview, scores every pairing (auto-fielding no-lineup teams with
-        the penalty, handling true forfeits separately), updates
-        standings, and posts match + standings embeds if a channel is
-        configured. Shared by the scheduled loop and the manual
-        /voltball_resolve_week admin command — same logic either way.
+        Assigns scheduled_kickoff_at to every real pairing in the
+        season's current week (Sunday hourly slots, same cadence
+        _resolve_season_week used to compute at resolution time —
+        just computed here, up to a week earlier) and posts the
+        matchup preview to the announcement channel if one's
+        configured. Returns whether it actually posted, for the
+        manual /voltball_open_week command's confirmation message.
 
-        Also drives the playoff state machine: once the regular season's
-        last week resolves, seeds a top-4 bracket (1v4 / 2v3) from
-        standings; once the semifinal week resolves, seeds the
-        championship from the two winners; once the championship
-        resolves, marks the season complete. See week_count math below
-        — playoff weeks are always week_count+1 (semis) and week_count+2
-        (final), never regenerated, never overlapping regular-season
-        week numbers.
+        Does NOT check week_is_open itself — callers (the daily job
+        above, both admin commands below) are responsible for that
+        guard, since they want different behavior on an already-open
+        week (silently skip vs. tell the admin).
         """
         db = get_supabase()
         week = season["current_week"]
@@ -577,124 +636,178 @@ class VoltballCog(commands.Cog):
             round_label = "Semifinal" if week == week_count + 1 else "Championship"
 
         pairings = get_week_pairings(season["id"], week)
-        channel = None
-        if config["announcement_channel_id"]:
-            channel = self.bot.get_channel(int(config["announcement_channel_id"]))
+        if not pairings:
+            print(f"[voltball] Week {week}: no real pairings to open (season {season['id']}).")
+            return False
 
-        is_championship_week = is_playoff_week and week == week_count + 2
-        champion_name = None  # captured below if this is the championship and it resolves cleanly
-
-        # Duplicate-match guard: if a bot restart (e.g. mid-deploy)
-        # interrupted a previous resolution attempt partway through this
-        # exact week, some pairings may already have a recorded match --
-        # re-resolving them here would double-count standings for both
-        # teams. Fetched once up front rather than once per pairing.
-        already_resolved_rows = (
-            db.table("voltball_matches")
-            .select("team_a_id, team_b_id, playback_starts_at")
-            .eq("season_id", season["id"])
-            .eq("week_number", week)
-            .execute()
-            .data
-        ) or []
-        already_resolved = {(m["team_a_id"], m["team_b_id"]) for m in already_resolved_rows}
-        # Kickoff time per pairing, for the preview post below -- seeded
-        # from any already-resolved rows (duplicate-match guard case) so
-        # a resumed-after-restart run still shows the real time for
-        # pairings it's about to skip, not a blank.
-        match_times = {(m["team_a_id"], m["team_b_id"]): m["playback_starts_at"] for m in already_resolved_rows if m.get("playback_starts_at")}
-
-        # Broadcast slot cursor for this week's matches -- see the
-        # LEAGUE_TIMEZONE / DAY_START_HOUR_LOCAL / MATCH_SLOT_GAP_SECONDS
-        # comment above. Anchored to 8am local on the day resolution runs;
-        # if resolution happens to run after 8am (or the very first
-        # match's real "kicks off in 5 min" promise would land later than
-        # 8am), start from whichever is later so nothing is scheduled in
-        # the past or breaks the kickoff post's promised wait.
-        resolution_now = datetime.now(timezone.utc)
-        local_today = resolution_now.astimezone(LEAGUE_TIMEZONE).date()
+        # Slot cursor for this week's matches -- see LEAGUE_TIMEZONE /
+        # DAY_START_HOUR_LOCAL / MATCH_SLOT_GAP_SECONDS above. Anchored
+        # to 9am local on the upcoming game day (resolution_weekday),
+        # not "today" -- open normally runs the day before. The max()
+        # guard only matters for a very-late manual /voltball_open_week
+        # catch-up (e.g. run mid-Sunday), so the first slot still can't
+        # land in the past.
+        now_utc = datetime.now(timezone.utc)
+        now_local = now_utc.astimezone(LEAGUE_TIMEZONE)
+        game_date = _next_weekday_date(now_local, config["resolution_weekday"])
         day_start_local = datetime(
-            local_today.year, local_today.month, local_today.day,
+            game_date.year, game_date.month, game_date.day,
             DAY_START_HOUR_LOCAL, tzinfo=LEAGUE_TIMEZONE,
         )
         next_slot_start = max(
             day_start_local.astimezone(timezone.utc),
-            resolution_now + timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS),
+            now_utc + timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS),
         )
 
-        for pairing in pairings:
-            if (pairing["team_a_id"], pairing["team_b_id"]) in already_resolved:
-                print(f"[voltball] Week {week}: {pairing['team_a_id']} vs {pairing['team_b_id']} already has a recorded match this week — skipping (duplicate-match guard, likely an interrupted prior resolution).")
-                continue
+        # Sorted for determinism -- Supabase gives no ordering guarantee
+        # otherwise, and a stable order here just makes which team gets
+        # which hour reproducible/debuggable, not that it matters which
+        # pairing airs first.
+        sorted_pairings = sorted(pairings, key=lambda p: (p["team_a_id"], p["team_b_id"]))
 
-            team_a_row = get_team_by_id(pairing["team_a_id"])
-            team_b_row = get_team_by_id(pairing["team_b_id"])
+        kickoff_times = {}
+        match_time_labels = {}
+        for pairing in sorted_pairings:
+            kickoff_times[(pairing["team_a_id"], pairing["team_b_id"])] = next_slot_start.isoformat()
+            match_time_labels[(pairing["team_a_id"], pairing["team_b_id"])] = _fmt_kickoff_time(next_slot_start.isoformat())
+            next_slot_start = next_slot_start + timedelta(seconds=MATCH_SLOT_GAP_SECONDS)
 
-            try:
-                if team_a_row.get("is_cpu"):
-                    team_a = build_cpu_team(team_a_row["hero_type"], season_id=season["id"])
+        open_week(season["id"], week, kickoff_times)
+
+        bye_team_id = get_bye_team(season["id"], week)
+        if bye_team_id:
+            print(f"[voltball] Week {week}: {bye_team_id} has the bye.")
+
+        channel = None
+        if config["announcement_channel_id"]:
+            channel = self.bot.get_channel(int(config["announcement_channel_id"]))
+        if channel:
+            teams = get_teams_for_season(season["id"])
+            team_lookup = {t["id"]: t for t in teams}
+            standings_lookup = {r["team_id"]: r for r in get_standings(season["id"])}
+            preview_embed = build_matchup_preview_embed(season, week, pairings, team_lookup, match_time_labels, standings_lookup=standings_lookup, round_label=round_label)
+            await channel.send(embed=preview_embed)
+            return True
+        return False
+
+    # ─────────────────────────────────────────────
+    # Per-match resolver -- replaces the old weekly batch job. Polls for
+    # pairings whose real lock instant (scheduled_kickoff_at minus
+    # PLAYBACK_KICKOFF_DELAY_SECONDS -- see get_due_pairings) has
+    # arrived, and resolves ONLY that one match: reads and locks in
+    # whatever lineup exists for it right now, same as the old batch
+    # loop did for everyone at once at 8am. This is the actual fix for
+    # "everyone locks at the same time" -- a 2pm game's lineup is read
+    # at 2pm (minus the 5-minute kickoff-post lead), not whenever some
+    # other match's slot happens to be.
+    #
+    # Same durable, restart-safe polling shape as post_ready_kickoffs/
+    # post_ready_recaps below: resolved_at (on voltball_schedule) is
+    # the persisted state, not an in-memory timer, so a bot restart
+    # mid-week just resumes -- already-resolved pairings drop out of
+    # get_due_pairings on their own.
+    # ─────────────────────────────────────────────
+    @tasks.loop(seconds=20)
+    async def resolve_ready_matches(self):
+        cutoff = (datetime.now(timezone.utc) + timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS)).isoformat()
+        due = get_due_pairings(cutoff)
+        for pairing in due:
+            await self._resolve_one_pairing(pairing)
+
+    @resolve_ready_matches.before_loop
+    async def before_resolve_ready_matches(self):
+        await self.bot.wait_until_ready()
+
+    async def _resolve_one_pairing(self, pairing: dict):
+        """
+        Resolves exactly one pairing: builds both teams (locked lineup,
+        auto-fallback, or CPU), simulates the match, writes the
+        voltball_matches row (or applies a forfeit), and marks the
+        pairing resolved on voltball_schedule. Playback/kickoff/recap
+        post timing all key off the pairing's OWN scheduled_kickoff_at
+        -- the time already announced in the matchup preview -- not a
+        freshly-computed slot, so the "kicks off in 5 minutes" promise
+        made days earlier stays true.
+
+        On a LineupValidationError (a locked-in Zappy no longer held --
+        see get_locked_lineup_team's docstring), this pairing is left
+        unresolved and will simply be retried on the next 20s poll.
+        That's intentional, not a bug: this should be vanishingly rare,
+        and silently giving up would need a human to notice and rerun
+        it manually anyway -- retrying costs nothing and self-heals if
+        the underlying data issue gets fixed.
+        """
+        db = get_supabase()
+        now_iso = datetime.now(timezone.utc).isoformat()
+
+        season = db.table("voltball_seasons").select("*").eq("id", pairing["season_id"]).execute().data
+        if not season:
+            mark_pairing_resolved(pairing["id"], now_iso)  # season is gone (wiped?) -- nothing to resolve against
+            return
+        season = season[0]
+        config = get_guild_config(season["guild_id"])
+
+        week = pairing["week_number"]
+        week_count = season["week_count"]
+        is_playoff_week = pairing["is_playoff"]
+        is_championship_week = is_playoff_week and week == week_count + 2
+        champion_name = None
+
+        team_a_row = get_team_by_id(pairing["team_a_id"])
+        team_b_row = get_team_by_id(pairing["team_b_id"])
+
+        try:
+            if team_a_row.get("is_cpu"):
+                team_a = build_cpu_team(team_a_row["hero_type"], season_id=season["id"])
+            else:
+                lineup_a = get_lineup(pairing["team_a_id"], week)
+                if lineup_a:
+                    team_a = await get_locked_lineup_team(lineup_a, team_a_row["hero_type"], team_a_row["wallet_address"], season_id=season["id"])
                 else:
-                    lineup_a = get_lineup(pairing["team_a_id"], week)
-                    if lineup_a:
-                        team_a = await get_locked_lineup_team(lineup_a, team_a_row["hero_type"], team_a_row["wallet_address"], season_id=season["id"])
-                    else:
-                        team_a = await build_fallback_team(team_a_row["wallet_address"], team_a_row["hero_type"], team_id=team_a_row["id"], week_number=week, season_id=season["id"])
+                    team_a = await build_fallback_team(team_a_row["wallet_address"], team_a_row["hero_type"], team_id=team_a_row["id"], week_number=week, season_id=season["id"])
 
-                if team_b_row.get("is_cpu"):
-                    team_b = build_cpu_team(team_b_row["hero_type"], season_id=season["id"])
+            if team_b_row.get("is_cpu"):
+                team_b = build_cpu_team(team_b_row["hero_type"], season_id=season["id"])
+            else:
+                lineup_b = get_lineup(pairing["team_b_id"], week)
+                if lineup_b:
+                    team_b = await get_locked_lineup_team(lineup_b, team_b_row["hero_type"], team_b_row["wallet_address"], season_id=season["id"])
                 else:
-                    lineup_b = get_lineup(pairing["team_b_id"], week)
-                    if lineup_b:
-                        team_b = await get_locked_lineup_team(lineup_b, team_b_row["hero_type"], team_b_row["wallet_address"], season_id=season["id"])
-                    else:
-                        team_b = await build_fallback_team(team_b_row["wallet_address"], team_b_row["hero_type"], team_id=team_b_row["id"], week_number=week, season_id=season["id"])
-            except LineupValidationError as e:
-                print(f"[voltball] Week {week}: error building teams for {team_a_row['team_name']} vs {team_b_row['team_name']}: {e}")
-                continue
+                    team_b = await build_fallback_team(team_b_row["wallet_address"], team_b_row["hero_type"], team_id=team_b_row["id"], week_number=week, season_id=season["id"])
+        except LineupValidationError as e:
+            print(f"[voltball] Week {week}: error building teams for {team_a_row['team_name']} vs {team_b_row['team_name']}: {e}")
+            return
 
-            if team_a is None and team_b is None:
-                print(f"[voltball] Week {week}: {team_a_row['team_name']} vs {team_b_row['team_name']} — both sides forfeit (fewer than 8 Zappies held), no match recorded.")
-                continue
-            if team_a is None:
-                print(f"[voltball] Week {week}: {team_a_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_b_row['team_name']} advances, no match recorded.")
-                update_standings_after_match(season["id"], team_b_row["id"], team_a_row["id"], 0, 0)
-                if is_championship_week:
-                    champion_name = team_b_row["team_name"]
-                continue
-            if team_b is None:
-                print(f"[voltball] Week {week}: {team_b_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_a_row['team_name']} advances, no match recorded.")
-                update_standings_after_match(season["id"], team_a_row["id"], team_b_row["id"], 0, 0)
-                if is_championship_week:
-                    champion_name = team_a_row["team_name"]
-                continue
-
+        if team_a is None and team_b is None:
+            print(f"[voltball] Week {week}: {team_a_row['team_name']} vs {team_b_row['team_name']} — both sides forfeit (fewer than 8 Zappies held), no match recorded.")
+        elif team_a is None:
+            print(f"[voltball] Week {week}: {team_a_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_b_row['team_name']} advances, no match recorded.")
+            update_standings_after_match(season["id"], team_b_row["id"], team_a_row["id"], 0, 0)
+            if is_championship_week:
+                champion_name = team_b_row["team_name"]
+        elif team_b is None:
+            print(f"[voltball] Week {week}: {team_b_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_a_row['team_name']} advances, no match recorded.")
+            update_standings_after_match(season["id"], team_a_row["id"], team_b_row["id"], 0, 0)
+            if is_championship_week:
+                champion_name = team_a_row["team_name"]
+        else:
             team_a.name = team_a_row["team_name"]
             team_b.name = team_b_row["team_name"]
 
             result = resolve_match(team_a, team_b)
             recap = build_recap(result, team_a, team_b)
-
             winner_id = team_a_row["id"] if result["winner"] == team_a.name else team_b_row["id"]
-
             if is_championship_week:
                 champion_name = team_a_row["team_name"] if winner_id == team_a_row["id"] else team_b_row["team_name"]
 
-            playback_starts_at = next_slot_start
+            # Pinned to the pairing's OWN announced time, not "now" --
+            # this is the whole point: what was promised in the
+            # matchup preview days ago is exactly what airs.
+            playback_starts_at = datetime.fromisoformat(pairing["scheduled_kickoff_at"].replace("Z", "+00:00"))
             recap_post_at = playback_starts_at + timedelta(seconds=estimate_playback_seconds(result))
             kickoff_post_at = playback_starts_at - timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS)
-            # Advance the cursor by a fixed GAP from this match's START,
-            # not from when its playback actually finishes. Chaining off
-            # recap_post_at let each match's real duration (~30-90s)
-            # accumulate as drift -- match 2 landing a bit after the
-            # hour, match 3 a bit more, and so on. Since MATCH_SLOT_GAP_
-            # SECONDS (1hr) is already far larger than any realistic
-            # match duration, there's no overlap risk from using a fixed
-            # grid instead -- and it keeps every kickoff exactly on the
-            # hour, not creeping later as the week's slate goes on.
-            next_slot_start = playback_starts_at + timedelta(seconds=MATCH_SLOT_GAP_SECONDS)
-            match_times[(team_a_row["id"], team_b_row["id"])] = playback_starts_at.isoformat()
 
-            match_row = db.table("voltball_matches").insert({
+            db.table("voltball_matches").insert({
                 "season_id": season["id"],
                 "week_number": week,
                 "is_playoff": is_playoff_week,
@@ -720,57 +833,37 @@ class VoltballCog(commands.Cog):
                 "injuries_applied_at": None,
                 "injured_a": result["injured_a"],
                 "injured_b": result["injured_b"],
-            }).execute().data[0]
+            }).execute()
 
-            # Standings are NOT updated here anymore -- see post_ready_recaps.
-            # update_standings_after_match() writing here, synchronously at
-            # resolution, was updating voltball_standings hours before any
-            # match actually airs. The site's standings page reads that
-            # table directly with no gating of its own (it can't -- it's
-            # an aggregate, not a per-match row), so the real fix is to
-            # not write the aggregate early in the first place.
+            # Standings/injuries are deliberately NOT applied here -- see
+            # post_ready_recaps, which applies them once this match's
+            # recap actually airs (same spoiler-prevention reasoning as
+            # before, unchanged by this refactor).
             #
-            # Injuries are gated the same way now, for the same reason --
-            # a roster showing a player OUT before that player's match has
-            # even aired is its own kind of spoiler. injured_a/injured_b
-            # are stored on the row above so post_ready_recaps can apply
-            # them once the match's recap actually posts.
+            # The kickoff post ("Watch Live") is also NOT sent here --
+            # post_ready_kickoffs picks it up once kickoff_post_at
+            # arrives, same as before.
 
-            # The kickoff post ("Watch Live", match-specific link -- not
-            # the shared "?live=current" this used before, since that
-            # assumed one game airs at a time) is NOT sent here anymore.
-            # Now that matches are staggered across the day instead of
-            # all starting ~5 minutes after resolution, posting it
-            # immediately would make its "kicks off in 5 minutes" promise
-            # false for every match after the first. Instead it's posted
-            # by post_ready_kickoffs once kickoff_post_at actually
-            # arrives -- same durable, restart-safe polling pattern as
-            # the recap post below, just one step earlier in the chain.
+        mark_pairing_resolved(pairing["id"], now_iso)
 
-        # Matchup preview posts here, AFTER resolving -- not before, like
-        # it used to. Real kickoff times only exist once each match's
-        # slot has actually been assigned above; posting earlier would
-        # mean guessing at times instead of showing the real schedule.
-        # This doesn't leak results: the preview only ever shows who's
-        # playing and when, never a score -- that's still fully gated by
-        # recap_posted_at same as before.
-        if channel and pairings:
-            teams = get_teams_for_season(season["id"])
-            team_lookup = {t["id"]: t for t in teams}
-            standings_lookup = {r["team_id"]: r for r in get_standings(season["id"])}
-            match_time_labels = {k: _fmt_kickoff_time(v) for k, v in match_times.items()}
-            preview_embed = build_matchup_preview_embed(season, week, pairings, team_lookup, match_time_labels, standings_lookup=standings_lookup, round_label=round_label)
-            await channel.send(embed=preview_embed)
+        if count_unresolved_pairings(season["id"], week) == 0:
+            await self._finalize_season_week(season, week, week_count, is_playoff_week, champion_name)
 
-        bye_team_id = get_bye_team(season["id"], week)
-        if bye_team_id:
-            print(f"[voltball] Week {week}: {bye_team_id} has the bye.")
+    async def _finalize_season_week(self, season: dict, week: int, week_count: int, is_playoff_week: bool, champion_name: str | None):
+        """
+        Runs once, whichever pairing happens to be the LAST one to
+        resolve for this week (spread across the day now instead of
+        all finishing at once) -- advances current_week, seeds the
+        next playoff round or marks the season complete. Extracted
+        unchanged from the old batch job's tail end; only the trigger
+        changed (was "the whole week's loop just finished", now "the
+        count of this week's unresolved pairings just hit zero").
+        """
+        db = get_supabase()
 
-        # ── Playoff bracket state machine ──
         if not is_playoff_week:
             new_week = week + 1
             if new_week > week_count:
-                # Regular season just finished -- seed the top-4 bracket from standings.
                 standings_rows = get_standings(season["id"])
                 if len(standings_rows) < 4:
                     new_status = "complete"
@@ -782,29 +875,18 @@ class VoltballCog(commands.Cog):
             else:
                 new_status = "active"
         elif week == week_count + 1:
-            # Semifinals just resolved -- seed the championship from the two winners.
             winners = get_playoff_round_winners(season["id"], week)
             new_week = week_count + 2
             new_status = "playoffs"
             if len(winners) == 2:
                 save_playoff_round(season["id"], new_week, [(winners[0], winners[1])])
             else:
-                # Shouldn't normally happen (a forfeited semifinal never writes
-                # a voltball_matches row, so it wouldn't produce a winner here)
-                # -- don't generate a broken championship pairing if it does;
-                # leave the season sitting in "playoffs" for manual review.
                 print(f"[voltball] Season {season['id']}: expected 2 semifinal winners, got {len(winners)} — not generating a championship pairing. Needs manual review.")
         else:
-            # This was the championship (week_count + 2) -- season is over.
             new_week = week + 1
             new_status = "complete"
 
         if new_status == "complete" and not champion_name:
-            # The championship pairing was skipped by the duplicate-match
-            # guard above (already resolved in an earlier, interrupted
-            # run) -- champion_name only gets set when a match resolves
-            # DURING this run's loop, so look it up from the actual
-            # recorded match instead of silently dropping the announcement.
             champ_match = (
                 db.table("voltball_matches")
                 .select("winner_team_id")
@@ -821,32 +903,21 @@ class VoltballCog(commands.Cog):
 
         db.table("voltball_seasons").update({"current_week": new_week, "status": new_status}).eq("id", season["id"]).execute()
 
-        # Standings/champion announcement is deliberately NOT sent here.
-        # This function returns as soon as matches are resolved (seconds
-        # after the kickoff posts), but a match's actual outcome isn't
-        # supposed to be visible in Discord until its "watch live" window
-        # has played out. Standings (wins, PF/PA) leak the outcome just as
-        # much as the recap does, so it waits for the same signal the
-        # recap post waits for -- see post_ready_recaps, which posts
-        # standings/champion once every match this week has actually aired.
-
-    @weekly_resolution.before_loop
-    async def before_weekly_resolution(self):
-        await self.bot.wait_until_ready()
+        # Standings/champion announcement still deliberately NOT sent
+        # here -- see post_ready_recaps, unchanged reasoning.
 
     # ─────────────────────────────────────────────
     # Delayed "Watch Live" kickoff post -- one broadcast slot at a time.
     #
-    # Matches resolve for the whole week in one batch (see
-    # _resolve_season_week's slot cursor), but with team count varying
-    # week to week we don't want every kickoff post to land in Discord
-    # at once, and each one's "kicks off in 5 minutes" promise needs to
-    # actually be true when it posts. So kickoff_post_at is set per
-    # match at resolution time (playback_starts_at minus the 5-minute
-    # promise) and this loop polls for whichever match's turn has come,
-    # same durable DB-driven pattern as post_ready_recaps below --
-    # survives a bot restart without dropping or double-posting a
-    # kickoff, and needs no in-memory timer per match.
+    # Each match now resolves individually, right at its own real
+    # kickoff time (see resolve_ready_matches / _resolve_one_pairing),
+    # but the "kicks off in 5 minutes" post still can't be sent at the
+    # exact moment of resolution -- kickoff_post_at is pinned to
+    # playback_starts_at minus the 5-minute promise, same as before,
+    # and this loop polls for whichever match's turn has come, same
+    # durable DB-driven pattern as post_ready_recaps below -- survives
+    # a bot restart without dropping or double-posting a kickoff, and
+    # needs no in-memory timer per match.
     # ─────────────────────────────────────────────
     @tasks.loop(seconds=20)
     async def post_ready_kickoffs(self):
@@ -922,7 +993,7 @@ class VoltballCog(commands.Cog):
     # assume it won't). Instead, timing lives in the DB
     # (recap_post_at, set once at resolution time) and this loop polls
     # for matches whose time has come -- same durable-state pattern as
-    # the duplicate-match guard in _resolve_season_week, and it survives
+    # the resolved_at guard in get_due_pairings, and it survives
     # a restart at any point without double-posting or dropping a post.
     # ─────────────────────────────────────────────
     @tasks.loop(seconds=20)
