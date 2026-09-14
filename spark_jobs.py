@@ -744,7 +744,12 @@ class SparkJobsCog(commands.Cog):
             is_lucky = False
             if algo_hit and amount is not None and random.random() < LUCKY_SHIFT_CHANCE:
                 is_lucky = True
-                amount = round(amount * LUCKY_SHIFT_MULTIPLIER, 3)
+                # _roll_hits already capped `amount` at MAX_SHIFT_PAYOUT, but
+                # that cap was enforced before this multiplier — doubling
+                # afterward could pay out up to 2x the documented hard cap.
+                # Re-apply it here so MAX_SHIFT_PAYOUT actually holds for
+                # every payout, lucky or not.
+                amount = round(min(amount * LUCKY_SHIFT_MULTIPLIER, MAX_SHIFT_PAYOUT), 3)
 
             is_egg = False
             if outcome == "miss" and random.random() < EASTER_EGG_CHANCE:
