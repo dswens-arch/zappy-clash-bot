@@ -37,7 +37,6 @@ from spark_admin import SparkAdminCog
 from spark_jobs  import SparkJobsCog
 from spark_office import SparkOfficeCog
 from voltball_cog import VoltballCog
-from voltball_db import set_guild_config
 from market_sync import MarketSyncCog
 
 # Our modules
@@ -4098,17 +4097,6 @@ async def on_ready():
 
     await bot.add_cog(MarketSyncCog(bot))
     print("⚡ Market sync cog loaded")
-
-    # Pre-set the announcement channel for this guild so /voltball_config
-    # doesn't need to be run manually before testing. Safe to call every
-    # startup — it's an upsert, so re-running it just confirms the same
-    # value rather than duplicating anything. Change or remove this once
-    # you're past the test-channel phase.
-    try:
-        set_guild_config(str(GUILD_ID), announcement_channel_id="1520134630173315244")
-        print("⚡ Voltball announcement channel pre-configured")
-    except Exception as e:
-        print(f"⚠️ Could not pre-configure Voltball channel (run /voltball_config manually instead): {e}")
 
     # Games
     from hue_hunt_cog import HueHuntCog
