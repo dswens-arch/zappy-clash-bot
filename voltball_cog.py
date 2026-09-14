@@ -686,7 +686,22 @@ class VoltballCog(commands.Cog):
             team_lookup = {t["id"]: t for t in teams}
             standings_lookup = {r["team_id"]: r for r in get_standings(season["id"])}
             preview_embed = build_matchup_preview_embed(season, week, pairings, team_lookup, match_time_labels, standings_lookup=standings_lookup, round_label=round_label)
-            await channel.send(embed=preview_embed)
+            # @everyone -- this post is the only heads-up coaches get
+            # that this week's real kickoff times exist before those
+            # times start passing (lineups lock per-match now, not all
+            # at once at a single weekly deadline -- see
+            # resolve_ready_matches), so it's worth the ping rather than
+            # relying on someone happening to scroll past the embed.
+            # allowed_mentions scoped to JUST everyone=True here (not
+            # users/roles) -- deliberately narrower than the kickoff/
+            # recap posts' AllowedMentions(users=True), since this is
+            # the one message that's supposed to reach the whole room.
+            week_label = round_label if round_label else f"Week {week}"
+            await channel.send(
+                content=f"@everyone ⏰ **{week_label} is open** — game times are set, go lock in your lineup before your matchup kicks off!",
+                embed=preview_embed,
+                allowed_mentions=discord.AllowedMentions(everyone=True),
+            )
             return True
         return False
 
