@@ -313,17 +313,22 @@ class VoltballCog(commands.Cog):
         )
 
     # ─────────────────────────────────────────────
+    # ─────────────────────────────────────────────
     # /voltball_open_week (admin) — manual trigger for the daily
     # open_ready_weeks job. Assigns this week's real pairings their
     # Sunday hourly slots and posts the matchup preview/reminder.
     # Refuses if the week's already open (same "generated once, not
     # regenerated" guard /voltball_season_start uses for the schedule
-    # itself) — no force flag; if you genuinely need to redo an already-
-    # open week's times, that's a deliberate enough action to do by hand.
+    # itself) UNLESS repost=True, which re-sends the announcement using
+    # the times that already exist -- no reassignment, so it can't
+    # shuffle a kickoff time that's already been announced. That's the
+    # one legitimate reason to run this on an already-open week: the
+    # original post got deleted, or you just want it re-sent.
     # ─────────────────────────────────────────────
-    @app_commands.command(name="voltball_open_week", description="[Admin] Manually open the current week now (assign game times, post the schedule reminder).")
+    @app_commands.command(name="voltball_open_week", description="[Admin] Open the current week (assign game times, post the reminder).")
+    @app_commands.describe(repost="Already open — just re-send the announcement with the existing times, don't reassign anything.")
     @app_commands.checks.has_permissions(administrator=True)
-    async def voltball_open_week(self, interaction: discord.Interaction):
+    async def voltball_open_week(self, interaction: discord.Interaction, repost: bool = False):
         await interaction.response.defer(ephemeral=True)
 
         season = get_active_or_playoff_season(str(interaction.guild_id))
@@ -331,15 +336,35 @@ class VoltballCog(commands.Cog):
             await interaction.followup.send("No active or playoff season to open — run `/voltball_season_start` first.", ephemeral=True)
             return
 
-        if week_is_open(season["id"], season["current_week"]):
-            await interaction.followup.send(f"Week {season['current_week']} is already open — game times are already assigned.", ephemeral=True)
+        config = get_guild_config(str(interaction.guild_id))
+        week = season["current_week"]
+        is_open = week_is_open(season["id"], week)
+
+        if repost:
+            if not is_open:
+                await interaction.followup.send(f"Week {week} isn't open yet — run `/voltball_open_week` without `repost` first.", ephemeral=True)
+                return
+            week_count = season["week_count"]
+            is_playoff_week = season["status"] == "playoffs"
+            round_label = None
+            if is_playoff_week:
+                round_label = "Semifinal" if week == week_count + 1 else "Championship"
+            pairings = get_week_pairings(season["id"], week)
+            match_time_labels = {
+                (p["team_a_id"], p["team_b_id"]): _fmt_kickoff_time(p["scheduled_kickoff_at"]) for p in pairings
+            }
+            posted = await self._post_week_announcement(season, config, week, pairings, match_time_labels, round_label)
+            note = "" if posted else " (no announcement channel configured — set one with `/voltball_config`)"
+            await interaction.followup.send(f"🔁 Week {week} announcement reposted with its existing times.{note}", ephemeral=True)
             return
 
-        config = get_guild_config(str(interaction.guild_id))
-        posted = await self._open_season_week(season, config)
+        if is_open:
+            await interaction.followup.send(f"Week {week} is already open — game times are already assigned. Use `repost:True` to re-send the announcement without reassigning times.", ephemeral=True)
+            return
 
+        posted = await self._open_season_week(season, config)
         note = "" if posted else " (no announcement channel configured — times saved but nothing posted; set one with `/voltball_config`)"
-        await interaction.followup.send(f"📅 Week {season['current_week']} opened — game times assigned.{note}", ephemeral=True)
+        await interaction.followup.send(f"📅 Week {week} opened — game times assigned.{note}", ephemeral=True)
 
     # ─────────────────────────────────────────────
     # /voltball_resolve_week (admin) — manual override, bypasses BOTH
@@ -678,6 +703,18 @@ class VoltballCog(commands.Cog):
         if bye_team_id:
             print(f"[voltball] Week {week}: {bye_team_id} has the bye.")
 
+        return await self._post_week_announcement(season, config, week, pairings, match_time_labels, round_label)
+
+    async def _post_week_announcement(self, season: dict, config: dict, week: int, pairings: list[dict],
+                                       match_time_labels: dict, round_label: str | None) -> bool:
+        """
+        Posts (or reposts) the matchup-preview embed + @everyone
+        reminder to the announcement channel. Pulled out of
+        _open_season_week so /voltball_open_week's repost option can
+        call it directly with times that already exist, WITHOUT going
+        through open_week() again -- reposting must never reassign or
+        shuffle anyone's already-announced kickoff time.
+        """
         channel = None
         if config["announcement_channel_id"]:
             channel = self.bot.get_channel(int(config["announcement_channel_id"]))
