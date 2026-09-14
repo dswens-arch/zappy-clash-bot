@@ -349,7 +349,7 @@ class VoltballCog(commands.Cog):
     # resolved yet, right now. Same role as before: a test season plays
     # out exactly like a real one would, on demand.
     # ─────────────────────────────────────────────
-    @app_commands.command(name="voltball_resolve_week", description="[Admin] Force-resolve every remaining match in the current week right now (for testing, or to catch up).")
+    @app_commands.command(name="voltball_resolve_week", description="[Admin] Force-resolve every remaining match this week right now (testing/catch-up).")
     @app_commands.checks.has_permissions(administrator=True)
     async def voltball_resolve_week(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
