@@ -885,7 +885,22 @@ class VoltballCog(commands.Cog):
                     team_a_row["team_name"], team_b_row["team_name"],
                     match["week_number"], match["is_playoff"], link,
                 )
-                await channel.send(embed=kickoff_embed)
+                # Tag both coaches so they actually see their kickoff go
+                # live -- CPU teams (is_cpu, no owner_discord_id) are
+                # skipped rather than mentioning "None". AllowedMentions
+                # pinned to users=True so this can never fan out into an
+                # accidental @everyone/@role ping if a bad row ever slips
+                # through.
+                mentions = " ".join(
+                    f"<@{t['owner_discord_id']}>"
+                    for t in (team_a_row, team_b_row)
+                    if not t.get("is_cpu") and t.get("owner_discord_id")
+                )
+                await channel.send(
+                    content=mentions or None,
+                    embed=kickoff_embed,
+                    allowed_mentions=discord.AllowedMentions(users=True, everyone=False, roles=False),
+                )
             except Exception as e:
                 # Same rationale as post_ready_recaps below: one bad match
                 # shouldn't wedge the whole batch or get retried forever.
@@ -997,7 +1012,18 @@ class VoltballCog(commands.Cog):
                     match["team_a_score"], match["team_b_score"],
                     match["week_number"], match["is_playoff"], link,
                 )
-                await channel.send(embed=embed)
+                # Same tagging as the kickoff post above -- coaches get
+                # pinged again when their result actually lands.
+                mentions = " ".join(
+                    f"<@{t['owner_discord_id']}>"
+                    for t in (team_a_row, team_b_row)
+                    if not t.get("is_cpu") and t.get("owner_discord_id")
+                )
+                await channel.send(
+                    content=mentions or None,
+                    embed=embed,
+                    allowed_mentions=discord.AllowedMentions(users=True, everyone=False, roles=False),
+                )
 
                 # Standings (and a champion announcement) reveal the
                 # outcome just as much as the recap does -- wins, PF/PA
