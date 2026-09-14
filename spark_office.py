@@ -1160,11 +1160,23 @@ class SparkOfficeCog(commands.Cog):
         # 1024 chars each, which _chunk_lines' default 1800 could exceed).
         embed = discord.Embed(title="🏢 The Office — Live Board", description="\n".join(board_lines), color=0x5865F2)
 
-        lowest = seats[0]
-        lowest_name = lowest.get("spark_name") or lowest["spark_type"].capitalize()
-        lowest_rate = f"{(lowest['hits'] / lowest['shifts_completed'] * 100):.0f}%" if lowest["shifts_completed"] else "—"
+        # Reuse the same selection logic a real duel spawn uses — seats[0]
+        # here is just "lowest raw hit rate," which a brand-new seat (0/0
+        # defaults to a rate of 0.0) always wins even though it's actually
+        # protected from challenges until OFFICE_MIN_SHIFTS_FOR_DUEL. Showing
+        # that seat as "Duel target" is misleading about who can really be
+        # challenged right now.
+        real_target = await asyncio.to_thread(get_lowest_hitrate_seat)
+        if real_target:
+            target_name = real_target.get("spark_name") or real_target["spark_type"].capitalize()
+            target_rate = (
+                f"{(real_target['hits'] / real_target['shifts_completed'] * 100):.0f}%"
+                if real_target["shifts_completed"] else "—"
+            )
+            footer = f"⚔️ Duel target: {target_name} ({target_rate})"
+        else:
+            footer = "⚔️ No valid duel target right now"
         next_sweep = self._next_sweep_time(now)
-        footer = f"⚔️ Duel target: {lowest_name} ({lowest_rate})"
         if seat_count >= OFFICE_SEAT_CAP:
             footer += f" · Next auto-sweep <t:{int(next_sweep.timestamp())}:R>"
         embed.set_footer(text=footer)
@@ -1669,31 +1681,41 @@ class SparkOfficeCog(commands.Cog):
     async def _process_noshow_demotions(self):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
         for seat in no_shows:
-            await asyncio.to_thread(vacate_seat, seat["spark_asa"], "no_show")
-            name = seat.get("spark_name") or seat["spark_type"]
-            embed = discord.Embed(
-                title="🚪 Seat Vacated — No-Show",
-                description=f"**{name}** (<@{seat.get('discord_user_id')}>) didn't clock in in time. A seat just opened up.",
-                color=0xE74C3C,
-            )
-            ping = f"<@{seat['discord_user_id']}>" if seat.get("discord_user_id") else None
-            await self._post_promotion_channel(content=ping, embed=embed)
+            try:
+                await asyncio.to_thread(vacate_seat, seat["spark_asa"], "no_show")
+                name = seat.get("spark_name") or seat["spark_type"]
+                embed = discord.Embed(
+                    title="🚪 Seat Vacated — No-Show",
+                    description=f"**{name}** (<@{seat.get('discord_user_id')}>) didn't clock in in time. A seat just opened up.",
+                    color=0xE74C3C,
+                )
+                ping = f"<@{seat['discord_user_id']}>" if seat.get("discord_user_id") else None
+                await self._post_promotion_channel(content=ping, embed=embed)
+            except Exception as e:
+                # Don't let one failure (e.g. a Discord hiccup posting the
+                # embed) stop the rest of this batch from being processed —
+                # matches the guarding pattern used for duels elsewhere in
+                # the resolver.
+                print(f"[spark_office] no-show demotion failed for {seat.get('spark_asa')}: {e}")
 
     async def _process_coldstreak_demotions(self):
         cold = await asyncio.to_thread(get_seats_for_cold_streak_demotion)
         for seat in cold:
-            await asyncio.to_thread(vacate_seat, seat["spark_asa"], "cold_streak")
-            name = seat.get("spark_name") or seat["spark_type"]
-            embed = discord.Embed(
-                title="❄️ Seat Vacated — Cold Streak",
-                description=(
-                    f"**{name}** (<@{seat.get('discord_user_id')}>) ran cold — "
-                    f"{seat['consecutive_misses']} shifts with no hit. A seat just opened up."
-                ),
-                color=0xE74C3C,
-            )
-            ping = f"<@{seat['discord_user_id']}>" if seat.get("discord_user_id") else None
-            await self._post_promotion_channel(content=ping, embed=embed)
+            try:
+                await asyncio.to_thread(vacate_seat, seat["spark_asa"], "cold_streak")
+                name = seat.get("spark_name") or seat["spark_type"]
+                embed = discord.Embed(
+                    title="❄️ Seat Vacated — Cold Streak",
+                    description=(
+                        f"**{name}** (<@{seat.get('discord_user_id')}>) ran cold — "
+                        f"{seat['consecutive_misses']} shifts with no hit. A seat just opened up."
+                    ),
+                    color=0xE74C3C,
+                )
+                ping = f"<@{seat['discord_user_id']}>" if seat.get("discord_user_id") else None
+                await self._post_promotion_channel(content=ping, embed=embed)
+            except Exception as e:
+                print(f"[spark_office] cold-streak demotion failed for {seat.get('spark_asa')}: {e}")
 
     async def _process_expired_duels(self):
         expired = await asyncio.to_thread(get_expired_pending_duels)
@@ -1764,7 +1786,16 @@ class SparkOfficeCog(commands.Cog):
         round_lines = _format_duel_rounds(rounds, duel["challenger_name"], duel["defender_name"])
         winner_tag = f"**{winner_name}** (<@{winner_discord_id}>)" if winner_discord_id else f"**{winner_name}**"
         loser_tag  = f"**{loser_name}** (<@{loser_discord_id}>)" if loser_discord_id else f"**{loser_name}**"
-        desc = f"{winner_tag} defeats {loser_tag} and takes the seat!\n\n{round_lines}"
+        # "takes the seat" is only true for a challenger win — the defender
+        # never lost it in the first place. Using that phrasing either way
+        # makes a successful defense (an established seat, still fully
+        # duel-eligible, just fending off the latest challenger) read like
+        # a brand-new promotion, which is misleading about the seat's real
+        # history.
+        if winner_side == "challenger":
+            desc = f"{winner_tag} defeats {loser_tag} and takes the seat!\n\n{round_lines}"
+        else:
+            desc = f"{winner_tag} defends their seat against {loser_tag}!\n\n{round_lines}"
         if seat_grant_failed:
             desc += "\n\n⚠️ The seat was already gone by the time this resolved — no seat granted this time."
         embed = discord.Embed(title="⚔️ Office Duel Resolved", description=desc, color=0xFFD700)
