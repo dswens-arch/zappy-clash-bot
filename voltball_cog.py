@@ -81,6 +81,18 @@ LEAGUE_TIMEZONE = ZoneInfo("America/Chicago")
 DAY_START_HOUR_LOCAL = 9
 MATCH_SLOT_GAP_SECONDS = 3600  # 1 hour between match slots
 
+# A forfeit (opponent couldn't field 8 Zappies) used to record a flat
+# 0-0 into both teams' cumulative points_for/points_against on
+# voltball_standings -- harmless for W-L, but get_standings sorts by
+# points_for as the wins tiebreaker, so a forfeit-heavy team's real
+# ranking was quietly dragged down relative to teams that won for
+# real. These sit well inside the league's actual scoring range
+# (real winning scores have been running ~200-300) rather than at the
+# extremes, and 0 for the loser reflects that they never fielded a
+# team at all -- there's nothing more specific to credit them with.
+FORFEIT_WINNER_SCORE = 200
+FORFEIT_LOSER_SCORE = 0
+
 
 def _next_weekday_date(now_local: datetime, target_weekday: int):
     """
@@ -349,7 +361,7 @@ class VoltballCog(commands.Cog):
             round_label = None
             if is_playoff_week:
                 round_label = "Semifinal" if week == week_count + 1 else "Championship"
-            pairings = get_week_pairings(season["id"], week)
+            pairings = sorted(get_week_pairings(season["id"], week), key=lambda p: p["scheduled_kickoff_at"])
             match_time_labels = {
                 (p["team_a_id"], p["team_b_id"]): _fmt_kickoff_time(p["scheduled_kickoff_at"]) for p in pairings
             }
@@ -684,10 +696,11 @@ class VoltballCog(commands.Cog):
             now_utc + timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS),
         )
 
-        # Sorted for determinism -- Supabase gives no ordering guarantee
-        # otherwise, and a stable order here just makes which team gets
-        # which hour reproducible/debuggable, not that it matters which
-        # pairing airs first.
+        # Sorted for determinism before assigning slots -- Supabase gives
+        # no ordering guarantee otherwise. This ALSO ends up being the
+        # display order passed to _post_week_announcement below, so it
+        # doubles as making the posted matchup list read chronologically
+        # (earliest kickoff first) instead of in arbitrary DB order.
         sorted_pairings = sorted(pairings, key=lambda p: (p["team_a_id"], p["team_b_id"]))
 
         kickoff_times = {}
@@ -703,7 +716,7 @@ class VoltballCog(commands.Cog):
         if bye_team_id:
             print(f"[voltball] Week {week}: {bye_team_id} has the bye.")
 
-        return await self._post_week_announcement(season, config, week, pairings, match_time_labels, round_label)
+        return await self._post_week_announcement(season, config, week, sorted_pairings, match_time_labels, round_label)
 
     async def _post_week_announcement(self, season: dict, config: dict, week: int, pairings: list[dict],
                                        match_time_labels: dict, round_label: str | None) -> bool:
@@ -834,12 +847,12 @@ class VoltballCog(commands.Cog):
             print(f"[voltball] Week {week}: {team_a_row['team_name']} vs {team_b_row['team_name']} — both sides forfeit (fewer than 8 Zappies held), no match recorded.")
         elif team_a is None:
             print(f"[voltball] Week {week}: {team_a_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_b_row['team_name']} advances, no match recorded.")
-            update_standings_after_match(season["id"], team_b_row["id"], team_a_row["id"], 0, 0)
+            update_standings_after_match(season["id"], team_b_row["id"], team_a_row["id"], FORFEIT_WINNER_SCORE, FORFEIT_LOSER_SCORE)
             if is_championship_week:
                 champion_name = team_b_row["team_name"]
         elif team_b is None:
             print(f"[voltball] Week {week}: {team_b_row['team_name']} forfeits (fewer than 8 Zappies held) — {team_a_row['team_name']} advances, no match recorded.")
-            update_standings_after_match(season["id"], team_a_row["id"], team_b_row["id"], 0, 0)
+            update_standings_after_match(season["id"], team_a_row["id"], team_b_row["id"], FORFEIT_WINNER_SCORE, FORFEIT_LOSER_SCORE)
             if is_championship_week:
                 champion_name = team_a_row["team_name"]
         else:
