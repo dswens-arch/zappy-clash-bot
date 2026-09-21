@@ -412,6 +412,76 @@ class VoltballCog(commands.Cog):
         await interaction.followup.send(f"✅ Week {week_before}: {resolved_count} match(es) force-resolved.{note}", ephemeral=True)
 
     # ─────────────────────────────────────────────
+    # /voltball_post_pending (admin) — flushes any due-but-unposted
+    # kickoff/recap right now, instead of waiting for the next 20s poll.
+    # This is a safety valve for exactly the kind of thing we just hit:
+    # the automatic loops missed something (a bug, a restart at the
+    # wrong moment, whatever) and it needs to go out NOW rather than
+    # waiting to see if the poller sorts itself out. Calls the exact
+    # same code the two tasks.loop jobs call every 20 seconds -- not a
+    # separate reimplementation that could drift out of sync with them.
+    # ─────────────────────────────────────────────
+    @app_commands.command(name="voltball_post_pending", description="[Admin] Post any due kickoff/recap right now instead of waiting for the poller.")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def voltball_post_pending(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        kickoffs_posted = await self._post_ready_kickoffs_once()
+        recaps_posted = await self._post_ready_recaps_once()
+        await interaction.followup.send(f"📤 Posted {kickoffs_posted} kickoff(s) and {recaps_posted} recap(s) that were due.", ephemeral=True)
+
+    # ─────────────────────────────────────────────
+    # /voltball_post_standings (admin) — manually posts the current
+    # season's standings (and a champion embed, if the season just
+    # wrapped) to the announcement channel. Refuses by default if this
+    # week's standings already posted (same "generated once, not
+    # regenerated" shape as /voltball_open_week's guard) -- force:True
+    # reposts anyway, e.g. if the automatic post genuinely never fired.
+    # ─────────────────────────────────────────────
+    @app_commands.command(name="voltball_post_standings", description="[Admin] Manually post the season standings to the announcement channel.")
+    @app_commands.describe(force="Already posted for this week — post again anyway.")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def voltball_post_standings(self, interaction: discord.Interaction, force: bool = False):
+        await interaction.response.defer(ephemeral=True)
+
+        season = get_active_or_playoff_season(str(interaction.guild_id))
+        if not season:
+            # Standings can still be worth posting once a season is
+            # fully complete (status no longer active/playoffs), so
+            # fall back to the most recently completed one rather than
+            # refusing outright.
+            db = get_supabase()
+            recent = (
+                db.table("voltball_seasons")
+                .select("*")
+                .eq("guild_id", str(interaction.guild_id))
+                .eq("status", "complete")
+                .order("current_week", desc=True)
+                .limit(1)
+                .execute()
+                .data
+            )
+            season = recent[0] if recent else None
+        if not season:
+            await interaction.followup.send("No season found for this server.", ephemeral=True)
+            return
+
+        config = get_guild_config(str(interaction.guild_id))
+        if not config or not config.get("announcement_channel_id"):
+            await interaction.followup.send("No announcement channel configured — set one with `/voltball_config` first.", ephemeral=True)
+            return
+        channel = self.bot.get_channel(int(config["announcement_channel_id"]))
+        if not channel:
+            await interaction.followup.send("Couldn't find the configured announcement channel — it may have been deleted.", ephemeral=True)
+            return
+
+        week = season["current_week"]
+        posted = await self._post_standings_for_week(season["id"], week, channel, force=force)
+        if posted:
+            await interaction.followup.send(f"✅ Standings posted for week {week}.", ephemeral=True)
+        else:
+            await interaction.followup.send(f"Standings for week {week} were already posted. Use `force:True` to post again anyway.", ephemeral=True)
+
+    # ─────────────────────────────────────────────
     # /voltball_season_wipe (admin) — destructive, requires confirmation
     # ─────────────────────────────────────────────
     @app_commands.command(name="voltball_season_wipe", description="[Admin] Permanently delete a season and everything tied to it (teams, lineups, matches, standings).")
@@ -986,6 +1056,10 @@ class VoltballCog(commands.Cog):
     # ─────────────────────────────────────────────
     @tasks.loop(seconds=20)
     async def post_ready_kickoffs(self):
+        await self._post_ready_kickoffs_once()
+
+    async def _post_ready_kickoffs_once(self) -> int:
+        """Posts every currently-due kickoff. Returns how many it processed, so /voltball_post_pending can report a real count instead of a blind 'done'."""
         db = get_supabase()
         now_iso = datetime.now(timezone.utc).isoformat()
 
@@ -1044,6 +1118,8 @@ class VoltballCog(commands.Cog):
             finally:
                 db.table("voltball_matches").update({"kickoff_posted_at": now_iso}).eq("id", match["id"]).execute()
 
+        return len(due)
+
     @post_ready_kickoffs.before_loop
     async def before_post_ready_kickoffs(self):
         await self.bot.wait_until_ready()
@@ -1063,6 +1139,10 @@ class VoltballCog(commands.Cog):
     # ─────────────────────────────────────────────
     @tasks.loop(seconds=20)
     async def post_ready_recaps(self):
+        await self._post_ready_recaps_once()
+
+    async def _post_ready_recaps_once(self) -> int:
+        """Posts every currently-due recap (and standings/champion once a week fully wraps). Returns how many recaps it processed."""
         db = get_supabase()
         now_iso = datetime.now(timezone.utc).isoformat()
 
@@ -1115,7 +1195,23 @@ class VoltballCog(commands.Cog):
                 # instant /voltball_resolve_week runs -- letting next
                 # week's lineup (and injury reports) unlock hours before
                 # this week's matches have actually finished airing.
-                still_pending_for_site = (
+                #
+                # Counts TWO things, not just voltball_matches rows:
+                # pairings that haven't resolved AT ALL yet (unresolved,
+                # from voltball_schedule -- fixed at week-open time, so
+                # it's accurate even hours before most of the week's
+                # matches have been created), plus real matches that HAVE
+                # resolved but haven't posted their recap yet (including
+                # this one, since its own recap_posted_at isn't set until
+                # the `finally` below). Counting only existing
+                # voltball_matches rows (the old check) broke the moment
+                # resolution stopped happening in one batch -- early in
+                # the day only 1 match exists at all, so "0 still
+                # pending" was true after just the FIRST game, and
+                # last_standings_posted_week then blocked it from ever
+                # firing again later.
+                unresolved_count = count_unresolved_pairings(match["season_id"], match["week_number"])
+                matches_without_recap = (
                     db.table("voltball_matches")
                     .select("id")
                     .eq("season_id", match["season_id"])
@@ -1124,7 +1220,9 @@ class VoltballCog(commands.Cog):
                     .execute()
                     .data
                 ) or []
-                if len(still_pending_for_site) <= 1 and season_row.get("last_completed_week") != match["week_number"]:
+                still_pending_count = unresolved_count + len(matches_without_recap)
+
+                if still_pending_count <= 1 and season_row.get("last_completed_week") != match["week_number"]:
                     db.table("voltball_seasons").update(
                         {"last_completed_week": match["week_number"]}
                     ).eq("id", match["season_id"]).execute()
@@ -1165,46 +1263,16 @@ class VoltballCog(commands.Cog):
                 # outcome just as much as the recap does -- wins, PF/PA
                 # all shift the moment they post. So they wait for the
                 # SAME thing the recap waited for, plus one more
-                # condition: every other match in this same
-                # (season, week) has also finished airing, not just this
-                # one. A week with two simultaneous games shouldn't have
-                # its standings spoiled by whichever game's replay
-                # finishes first.
-                still_pending = (
-                    db.table("voltball_matches")
-                    .select("id")
-                    .eq("season_id", match["season_id"])
-                    .eq("week_number", match["week_number"])
-                    .is_("recap_posted_at", "null")
-                    .execute()
-                    .data
-                ) or []
-                # (`still_pending` includes this match, since we haven't
-                # set its recap_posted_at yet -- that happens in `finally`
-                # below. So "only this one left" means the count is 1.)
-                if len(still_pending) <= 1:
-                    full_season = db.table("voltball_seasons").select("*").eq("id", match["season_id"]).execute().data
-                    if full_season and full_season[0].get("last_standings_posted_week") != match["week_number"]:
-                        full_season = full_season[0]
-                        if full_season["status"] == "complete":
-                            champ_match = (
-                                db.table("voltball_matches")
-                                .select("winner_team_id")
-                                .eq("season_id", match["season_id"])
-                                .eq("is_playoff", True)
-                                .eq("week_number", match["week_number"])
-                                .execute()
-                                .data
-                            )
-                            if champ_match:
-                                champ_team = get_team_by_id(champ_match[0]["winner_team_id"])
-                                if champ_team:
-                                    await channel.send(embed=build_champion_embed(full_season, champ_team["team_name"]))
-                        standings_rows = get_standings(match["season_id"])
-                        await channel.send(embed=build_standings_embed(full_season, standings_rows))
-                        db.table("voltball_seasons").update(
-                            {"last_standings_posted_week": match["week_number"]}
-                        ).eq("id", match["season_id"]).execute()
+                # condition: every other pairing in this same
+                # (season, week) has also fully resolved AND aired, not
+                # just this one. A week with two simultaneous games
+                # shouldn't have its standings spoiled by whichever game's
+                # replay finishes first -- and, per the fix above, "every
+                # other pairing" now correctly includes ones that haven't
+                # even kicked off yet this same day, not just ones
+                # already sitting in voltball_matches.
+                if still_pending_count <= 1:
+                    await self._post_standings_for_week(match["season_id"], match["week_number"], channel)
             except Exception as e:
                 # One bad match shouldn't block the rest of the due batch,
                 # and shouldn't get silently retried forever either -- log
@@ -1212,6 +1280,44 @@ class VoltballCog(commands.Cog):
                 print(f"[voltball] Failed to post delayed recap for match {match.get('id')}: {e}")
             finally:
                 db.table("voltball_matches").update({"recap_posted_at": now_iso}).eq("id", match["id"]).execute()
+
+        return len(due)
+
+    async def _post_standings_for_week(self, season_id: str, week: int, channel, force: bool = False) -> bool:
+        """
+        Posts the standings embed (and a champion embed, if the season
+        just completed) to `channel`, gated by last_standings_posted_week
+        so the automatic post_ready_recaps call and a manual
+        /voltball_post_standings run can't double-post the same week.
+        force=True (manual command only) bypasses that gate -- returns
+        whether it actually posted.
+        """
+        db = get_supabase()
+        full_season = db.table("voltball_seasons").select("*").eq("id", season_id).execute().data
+        if not full_season:
+            return False
+        full_season = full_season[0]
+        if not force and full_season.get("last_standings_posted_week") == week:
+            return False
+
+        if full_season["status"] == "complete":
+            champ_match = (
+                db.table("voltball_matches")
+                .select("winner_team_id")
+                .eq("season_id", season_id)
+                .eq("is_playoff", True)
+                .eq("week_number", week)
+                .execute()
+                .data
+            )
+            if champ_match:
+                champ_team = get_team_by_id(champ_match[0]["winner_team_id"])
+                if champ_team:
+                    await channel.send(embed=build_champion_embed(full_season, champ_team["team_name"]))
+        standings_rows = get_standings(season_id)
+        await channel.send(embed=build_standings_embed(full_season, standings_rows))
+        db.table("voltball_seasons").update({"last_standings_posted_week": week}).eq("id", season_id).execute()
+        return True
 
     @post_ready_recaps.before_loop
     async def before_post_ready_recaps(self):
