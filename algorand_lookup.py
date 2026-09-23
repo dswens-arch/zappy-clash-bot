@@ -217,10 +217,10 @@ def _get_cached_wallet_result(wallet_address: str) -> dict | None:
             db.table("wallet_cache")
             .select("data, is_error, cached_at")
             .eq("wallet_address", wallet_address)
-            .single()
+            .maybe_single()
             .execute()
-            .data
         )
+        row = row.data if row else None
         if not row:
             return None
         cached_at = datetime.fromisoformat(row["cached_at"].replace("Z", "+00:00"))
