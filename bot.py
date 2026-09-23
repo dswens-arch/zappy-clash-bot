@@ -366,10 +366,10 @@ async def cmd_link(interaction: discord.Interaction, wallet: str):
         )
         return
 
-    # Clear cache so /link always does a fresh on-chain check
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts
-    _wallet_cache.pop(wallet, None)
-    _wallet_cache_ts.pop(wallet, None)
+    # Clear cache (both local and Supabase-backed layers) so /link always
+    # does a fresh on-chain check
+    from algorand_lookup import clear_wallet_cache
+    clear_wallet_cache(wallet)
 
     # Verify wallet on-chain
     await interaction.followup.send("🔍 Checking your wallet on Algorand...", ephemeral=True)
@@ -449,17 +449,20 @@ async def cmd_clash(interaction: discord.Interaction):
     # of being rejected, as long as registration is still open.
     is_reentry = await asyncio.to_thread(is_registered, user_id, active_bracket_id)
 
-    # Verify ownership
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL, HERO_ASSET_IDS, COLLAB_ASSET_IDS
+    # Verify ownership — verify_wallet caches internally (local + Supabase),
+    # so this either returns instantly from cache or does one live check.
+    from algorand_lookup import HERO_ASSET_IDS, COLLAB_ASSET_IDS
     from stats_engine import calculate_stats, get_hero_stats, get_collab_stats
     from zappy_collection import ZAPPY_COLLECTION
-    import time as _t
-    _now = _t.monotonic()
-    if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        await interaction.followup.send("⚡ Verifying your Zappies...", ephemeral=True)
-        ownership = await verify_wallet(user_id, wallet)
+    await interaction.followup.send("⚡ Verifying your Zappies...", ephemeral=True)
+    ownership = await verify_wallet(user_id, wallet)
+
+    if ownership.get("error"):
+        await interaction.followup.send(
+            f"❌ Couldn't reach the Algorand network: {ownership['error']}\nTry again in a moment.",
+            ephemeral=True
+        )
+        return
 
     if not ownership["owns"]:
         await interaction.followup.send(
@@ -905,14 +908,16 @@ async def cmd_stats(interaction: discord.Interaction, asset_id: int | None = Non
         await interaction.followup.send(embed=_build_stats_embed(zappy, asset_id), ephemeral=True)
         return
 
-    # No ASA given — pull wallet ownership and let them pick from a dropdown
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    now = _t.monotonic()
-    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        ownership = await verify_wallet(user_id, wallet)
+    # No ASA given — pull wallet ownership and let them pick from a dropdown.
+    # verify_wallet caches internally (local + Supabase).
+    ownership = await verify_wallet(user_id, wallet)
+
+    if ownership.get("error"):
+        await interaction.followup.send(
+            f"❌ Couldn't reach the Algorand network: {ownership['error']}\nTry again in a moment.",
+            ephemeral=True
+        )
+        return
 
     if not ownership["owns"]:
         await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
@@ -987,13 +992,15 @@ async def cmd_flex(interaction: discord.Interaction, asset_id: int | None = None
         await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
         return
 
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    now = _t.monotonic()
-    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        ownership = await verify_wallet(user_id, wallet)
+    # verify_wallet caches internally (local + Supabase).
+    ownership = await verify_wallet(user_id, wallet)
+
+    if ownership.get("error"):
+        await interaction.followup.send(
+            f"❌ Couldn't reach the Algorand network: {ownership['error']}\nTry again in a moment.",
+            ephemeral=True
+        )
+        return
 
     if not ownership["owns"]:
         await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
@@ -1097,10 +1104,9 @@ async def refreshwallet(interaction: discord.Interaction):
         await interaction.followup.send("❌ You haven't linked a wallet yet. Use `/link` first.", ephemeral=True)
         return
 
-    # Force clear cache
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts
-    _wallet_cache.pop(wallet, None)
-    _wallet_cache_ts.pop(wallet, None)
+    # Force clear cache (both local and Supabase-backed layers)
+    from algorand_lookup import clear_wallet_cache
+    clear_wallet_cache(wallet)
 
     await interaction.followup.send("🔍 Refreshing your wallet...", ephemeral=True)
     fresh = await verify_wallet(user_id, wallet)
@@ -1415,13 +1421,15 @@ async def cmd_myzappies(interaction: discord.Interaction):
         await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
         return
 
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    _now = _t.monotonic()
-    if wallet in _wallet_cache and _now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        ownership = await verify_wallet(user_id, wallet)
+    # verify_wallet caches internally (local + Supabase).
+    ownership = await verify_wallet(user_id, wallet)
+
+    if ownership.get("error"):
+        await interaction.followup.send(
+            f"❌ Couldn't reach the Algorand network: {ownership['error']}\nTry again in a moment.",
+            ephemeral=True
+        )
+        return
 
     if not ownership["owns"]:
         await interaction.followup.send("❌ No Zappies found in your linked wallet.", ephemeral=True)
@@ -1939,15 +1947,16 @@ async def cmd_expedition(interaction: discord.Interaction):
         await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
         return
 
-    # Use cached wallet verification - fast, no indexer call
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    now = _t.monotonic()
-    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        # Cache miss - do the indexer call
-        ownership = await verify_wallet(user_id, wallet)
+    # verify_wallet caches internally (local + Supabase) — fast on a cache
+    # hit, one live indexer call on a miss.
+    ownership = await verify_wallet(user_id, wallet)
+
+    if ownership.get("error"):
+        await interaction.followup.send(
+            f"❌ Couldn't reach the Algorand network: {ownership['error']}\nTry again in a moment.",
+            ephemeral=True
+        )
+        return
 
     if not ownership["owns"]:
         await interaction.followup.send(
@@ -4220,14 +4229,16 @@ async def cmd_expedition_test(interaction: discord.Interaction):
         )
         return
 
-    # Mirror the real /expedition wallet verification — uses indexer cache
-    from algorand_lookup import _wallet_cache, _wallet_cache_ts, WALLET_CACHE_TTL
-    import time as _t
-    now = _t.monotonic()
-    if wallet in _wallet_cache and now - _wallet_cache_ts.get(wallet, 0) < WALLET_CACHE_TTL:
-        ownership = _wallet_cache[wallet]
-    else:
-        ownership = await verify_wallet(user_id, wallet)
+    # Mirror the real /expedition wallet verification — verify_wallet
+    # caches internally (local + Supabase).
+    ownership = await verify_wallet(user_id, wallet)
+
+    if ownership.get("error"):
+        await interaction.followup.send(
+            f"❌ Couldn't reach the Algorand network: {ownership['error']}\nTry again in a moment.",
+            ephemeral=True
+        )
+        return
 
     if not ownership["owns"]:
         await interaction.followup.send(
