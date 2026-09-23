@@ -11,6 +11,7 @@ Everything else is instant from the local lookup table.
 import os
 import aiohttp
 import asyncio
+from datetime import datetime, timezone
 from zappy_collection import ZAPPY_COLLECTION, ZAPPY_ASSET_IDS
 from stats_engine import calculate_stats, get_hero_stats, get_collab_stats, get_king_stats
 from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, looks_like_quota_error, record_call
@@ -67,12 +68,31 @@ COLLAB_IMAGES = {
 # In-memory cache (traits are already local, but cache computed stats)
 _zappy_cache: dict = {}
 
-# Wallet ownership cache — avoids re-hitting the indexer on every command
-# Expires after 5 minutes so it stays fresh if someone buys/sells
+# Wallet ownership cache — avoids re-hitting the indexer on every command.
+# Two layers:
+#   1. _wallet_cache (this process, in memory) — near-free, but wiped on
+#      every Railway restart/redeploy, so it can't be the only layer.
+#   2. Supabase (wallet_cache table) — survives restarts/redeploys, shared
+#      across every cog/process, same pattern as algo_quota_state.
+# Successful lookups are cached for WALLET_CACHE_TTL. Errors (network
+# blips, indexer 5xx, etc.) are cached for the much shorter ERROR_CACHE_TTL
+# instead of not at all — long enough to stop a bad patch of indexer
+# flakiness from turning into a retry storm across every command a user
+# touches, short enough that a real fix or retry lands quickly.
+#
+# Setup — run once in Supabase SQL editor:
+#
+#     create table if not exists wallet_cache (
+#         wallet_address text primary key,
+#         data jsonb not null,
+#         is_error boolean not null default false,
+#         cached_at timestamptz not null default now()
+#     );
 import time as _time
 _wallet_cache: dict = {}
 _wallet_cache_ts: dict = {}
-WALLET_CACHE_TTL = 43200  # 12 hours in seconds
+WALLET_CACHE_TTL = 43200   # 12 hours, for successful results
+ERROR_CACHE_TTL  = 90      # 90 seconds, for results that came back as an error
 
 
 # ─────────────────────────────────────────────
@@ -173,19 +193,98 @@ async def fetch_zappy_traits(asset_id: int) -> dict | None:
 
 
 # ─────────────────────────────────────────────
+# Wallet cache — local layer + Supabase, see module notes above
+# ─────────────────────────────────────────────
+
+def _cache_ttl_for(cached: dict) -> int:
+    return ERROR_CACHE_TTL if cached.get("error") else WALLET_CACHE_TTL
+
+
+def _get_cached_wallet_result(wallet_address: str) -> dict | None:
+    """Fresh cached result if one exists, checking the local layer first
+    (cheap) and falling back to Supabase (survives restarts/redeploys)."""
+    now = _time.monotonic()
+
+    if wallet_address in _wallet_cache:
+        cached = _wallet_cache[wallet_address]
+        if now - _wallet_cache_ts.get(wallet_address, 0) < _cache_ttl_for(cached):
+            return cached
+
+    try:
+        from database import get_supabase
+        db = get_supabase()
+        row = (
+            db.table("wallet_cache")
+            .select("data, is_error, cached_at")
+            .eq("wallet_address", wallet_address)
+            .single()
+            .execute()
+            .data
+        )
+        if not row:
+            return None
+        cached_at = datetime.fromisoformat(row["cached_at"].replace("Z", "+00:00"))
+        age = (datetime.now(timezone.utc) - cached_at).total_seconds()
+        ttl = ERROR_CACHE_TTL if row.get("is_error") else WALLET_CACHE_TTL
+        if age >= ttl:
+            return None
+        result = row["data"]
+        # Warm the local layer so the rest of this burst of commands is free
+        _wallet_cache[wallet_address] = result
+        _wallet_cache_ts[wallet_address] = now
+        return result
+    except Exception as e:
+        print(f"[algorand_lookup] wallet cache read failed, treating as a miss: {e}")
+        return None
+
+
+def _store_wallet_result(wallet_address: str, result: dict) -> None:
+    """Write a lookup result to both cache layers. Errors are stored too
+    (with the short TTL applied on read) so a bad patch of indexer
+    flakiness doesn't turn every subsequent command into a fresh live call."""
+    _wallet_cache[wallet_address] = result
+    _wallet_cache_ts[wallet_address] = _time.monotonic()
+
+    try:
+        from database import get_supabase
+        db = get_supabase()
+        db.table("wallet_cache").upsert({
+            "wallet_address": wallet_address,
+            "data":           result,
+            "is_error":       bool(result.get("error")),
+            "cached_at":      datetime.now(timezone.utc).isoformat(),
+        }).execute()
+    except Exception as e:
+        print(f"[algorand_lookup] wallet cache write failed (local cache still set): {e}")
+
+
+def clear_wallet_cache(wallet_address: str) -> None:
+    """Force the next lookup for this wallet to hit the indexer live.
+    Used by /link, which should always re-verify on demand."""
+    _wallet_cache.pop(wallet_address, None)
+    _wallet_cache_ts.pop(wallet_address, None)
+    try:
+        from database import get_supabase
+        db = get_supabase()
+        db.table("wallet_cache").delete().eq("wallet_address", wallet_address).execute()
+    except Exception as e:
+        print(f"[algorand_lookup] wallet cache clear failed (local cache still cleared): {e}")
+
+
+# ─────────────────────────────────────────────
 # Wallet verification — one indexer call only
 # ─────────────────────────────────────────────
 
 async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
     """
-    Verify wallet holdings via Algorand indexer.
-    Results cached for 5 minutes to avoid repeat indexer calls.
+    Verify wallet holdings via Algorand indexer. Successful results are
+    cached for WALLET_CACHE_TTL; errors for the much shorter ERROR_CACHE_TTL.
+    The cache is Supabase-backed so it survives restarts/redeploys.
     """
-    # Return cached result if fresh
-    now = _time.monotonic()
-    if wallet_address in _wallet_cache:
-        if now - _wallet_cache_ts[wallet_address] < WALLET_CACHE_TTL:
-            return _wallet_cache[wallet_address]
+    cached = _get_cached_wallet_result(wallet_address)
+    if cached is not None:
+        return cached
+
     result = {
         "owns":    False,
         "zappies": [],
@@ -196,6 +295,7 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
 
     if is_quota_blocked():
         result["error"] = "Algorand API quota exceeded — try again later."
+        _store_wallet_result(wallet_address, result)
         return result
 
     try:
@@ -212,32 +312,61 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
 
                 headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")}
                 record_call()
-                async with session.get(url, params=params, headers=headers,
-                                       timeout=aiohttp.ClientTimeout(total=15)) as resp:
-                    if resp.status != 200:
-                        if resp.status == 403:
-                            mark_quota_exceeded(detail="algorand_lookup: primary indexer 403")
-                        # Try fallback indexer
-                        fallback_url = f"{INDEXER_URL2}/v2/accounts/{wallet_address}/assets"
-                        record_call()
-                        async with session.get(fallback_url, params=params, headers=headers,
-                                               timeout=aiohttp.ClientTimeout(total=15)) as resp2:
-                            if resp2.status != 200:
-                                if resp2.status == 403:
-                                    mark_quota_exceeded(detail="algorand_lookup: fallback indexer 403")
-                                result["error"] = f"Both indexers failed: {resp.status}, {resp2.status}"
-                                return result
-                            data = await resp2.json()
-                            assets.extend(data.get("assets", []))
-                            next_token = data.get("next-token")
-                            if not next_token:
-                                break
-                            continue
-                    data = await resp.json()
+                status, data = None, None
+                try:
+                    async with session.get(url, params=params, headers=headers,
+                                           timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                        status = resp.status
+                        if status == 200:
+                            data = await resp.json()
+                except (asyncio.TimeoutError, aiohttp.ClientError):
+                    status = None  # treated as a primary failure below
+
+                if status == 403:
+                    mark_quota_exceeded(detail="algorand_lookup: primary indexer 403")
+                    result["error"] = "Algorand API quota exceeded — try again later."
+                    _store_wallet_result(wallet_address, result)
+                    return result
+
+                if data is not None:
                     assets.extend(data.get("assets", []))
                     next_token = data.get("next-token")
                     if not next_token:
                         break
+                    continue
+
+                # Only fall back to the secondary indexer on a real failure
+                # (5xx, timeout, or network error) — not on every non-200,
+                # so an ordinary 4xx doesn't silently double our call volume.
+                if status is not None and status < 500:
+                    result["error"] = f"Indexer returned {status}"
+                    _store_wallet_result(wallet_address, result)
+                    return result
+
+                fallback_url = f"{INDEXER_URL2}/v2/accounts/{wallet_address}/assets"
+                record_call()
+                try:
+                    async with session.get(fallback_url, params=params, headers=headers,
+                                           timeout=aiohttp.ClientTimeout(total=15)) as resp2:
+                        if resp2.status == 403:
+                            mark_quota_exceeded(detail="algorand_lookup: fallback indexer 403")
+                            result["error"] = "Algorand API quota exceeded — try again later."
+                            _store_wallet_result(wallet_address, result)
+                            return result
+                        if resp2.status != 200:
+                            result["error"] = f"Both indexers failed: {status}, {resp2.status}"
+                            _store_wallet_result(wallet_address, result)
+                            return result
+                        data2 = await resp2.json()
+                except (asyncio.TimeoutError, aiohttp.ClientError) as e2:
+                    result["error"] = f"Both indexers failed: {status}, {e2}"
+                    _store_wallet_result(wallet_address, result)
+                    return result
+
+                assets.extend(data2.get("assets", []))
+                next_token = data2.get("next-token")
+                if not next_token:
+                    break
 
         for asset in assets:
             if asset.get("amount", 0) <= 0:
@@ -275,12 +404,10 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
     except Exception as e:
         result["error"] = f"Error: {e}"
 
-    # Only cache successful results — don't cache errors so retries work
-    if not result["error"]:
-        _wallet_cache[wallet_address]    = result
-        _wallet_cache_ts[wallet_address] = _time.monotonic()
-    else:
+    if result["error"]:
         print(f"[algorand_lookup] wallet check error for {wallet_address[:8]}...: {result['error']}")
+
+    _store_wallet_result(wallet_address, result)
     return result
 
 
