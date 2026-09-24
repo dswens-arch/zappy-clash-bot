@@ -146,6 +146,32 @@ def calculate_damage(attacker: Fighter, defender: Fighter, round_num: int) -> tu
     return int(damage), is_crit, flavor_note
 
 
+def _try_scorch_retaliation(attacker: Fighter, defender: Fighter, round_msg: list) -> None:
+    """
+    Scorch punishes an opponent's successful ability activation with a VLT
+    (and, at T3, SPK) debuff. The main ability-trigger loop already calls this
+    for abilities that fire through apply_ability()'s effect branches — but
+    several abilities (Pack Hunt, Feeding Frenzy, Stampede, Echolocation) are
+    implemented as standalone checks directly in the attack blocks instead,
+    so they never set ability_triggered and were invisible to Scorch. Each of
+    those call sites calls this helper directly right after their effect
+    applies, so Scorch punishes them too.
+    """
+    if defender.spark_type != "scorch" or defender.spark_tier <= 0 or defender.spark_triggered:
+        return
+    t = defender.spark_tier
+    debuff = {1: 10, 2: 15, 3: 20}[t]
+    spk_debuff = 10 if t == 3 else 0
+    attacker.VLT = max(10, attacker.VLT - debuff)
+    if spk_debuff:
+        attacker.SPK = max(10, attacker.SPK - spk_debuff)
+    defender.spark_triggered = True
+    msg = f"🔥 **SCORCH** retaliates — {attacker.display_name} paid a price for that ability. VLT -{debuff}"
+    if spk_debuff:
+        msg += f", SPK -{spk_debuff}"
+    round_msg.append(msg + " for the rest of the battle.")
+
+
 def _resolve_abduction_round(fighter: Fighter) -> int:
     """
     Alien's Abduction: 30% chance to fire round 1, 70% chance to fire round 2.
@@ -789,6 +815,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 if frenzy_bonus > 0:
                     fighter_b.hp = max(0, fighter_b.hp - frenzy_bonus)
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_a.display_name} smells blood — {frenzy_bonus} bonus damage!")
+                    _try_scorch_retaliation(fighter_a, fighter_b, round_msg)
 
             # Pack Hunt — VLT rises every round the fight continues (unless Null cancelled it this round)
             if any(isinstance(a, dict) and a.get("name") == "Pack Hunt" for a in fighter_a.abilities) and fighter_b.hp > 0 and not fighter_a.ability_blocked_this_round.get("Pack Hunt", False):
@@ -796,6 +823,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 gain = 10
                 fighter_a.VLT = min(100, fighter_a.VLT + gain)
                 round_msg.append(f"  🐺 **PACK HUNT** — {fighter_a.display_name}'s VLT rises by {gain}. The longer this goes, the worse it gets.")
+                _try_scorch_retaliation(fighter_a, fighter_b, round_msg)
 
             # Patience — round 2 payoff, guaranteed crit (set up in round 1, fires here)
             if fighter_a.patience_guard and not fighter_a.guaranteed_crit_next:
@@ -891,6 +919,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 if frenzy_bonus > 0:
                     fighter_a.hp = max(0, fighter_a.hp - frenzy_bonus)
                     round_msg.append(f"  🦈 **FEEDING FRENZY!** {fighter_b.display_name} smells blood — {frenzy_bonus} bonus damage!")
+                    _try_scorch_retaliation(fighter_b, fighter_a, round_msg)
 
             # Pack Hunt — VLT rises every round the fight continues (unless Null cancelled it this round)
             if any(isinstance(a, dict) and a.get("name") == "Pack Hunt" for a in fighter_b.abilities) and fighter_a.hp > 0 and not fighter_b.ability_blocked_this_round.get("Pack Hunt", False):
@@ -898,6 +927,7 @@ def resolve_battle(fighter_a: Fighter, fighter_b: Fighter) -> dict:
                 gain = 10
                 fighter_b.VLT = min(100, fighter_b.VLT + gain)
                 round_msg.append(f"  🐺 **PACK HUNT** — {fighter_b.display_name}'s VLT rises by {gain}. The longer this goes, the worse it gets.")
+                _try_scorch_retaliation(fighter_b, fighter_a, round_msg)
 
             # Patience — round 2 payoff, guaranteed crit (set up in round 1, fires here)
             if fighter_b.patience_guard and not fighter_b.guaranteed_crit_next:
