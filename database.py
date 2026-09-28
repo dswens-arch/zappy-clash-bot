@@ -1456,7 +1456,11 @@ def get_seats_for_noshow_demotion() -> list:
     )
     no_show = []
     for seat in seats:
-        if seat.get("shifts_completed", 0) == 0 and seat.get("seated_at"):
+        # `or 0` so a NULL shifts_completed on a fresh row still counts as
+        # "first shift" — a plain .get(..., 0) only defaults when the key is
+        # missing, not when it's present but None, which would silently skip
+        # the longer first-shift grace and fall back to the standard 4h.
+        if (seat.get("shifts_completed") or 0) == 0 and seat.get("seated_at"):
             seated_at = datetime.fromisoformat(seat["seated_at"])
             first_shift_cutoff = seated_at + timedelta(hours=OFFICE_FIRST_SHIFT_GRACE_HOURS)
             if now < first_shift_cutoff:
