@@ -86,6 +86,7 @@ from database import (
     OFFICE_HITS_NEEDED,
     OFFICE_DUEL_SUBMIT_HOURS,
     OFFICE_NO_SHOW_GRACE_HOURS,
+    OFFICE_FIRST_SHIFT_GRACE_HOURS,
     OFFICE_DEMOTION_MISS_DAYS,
     OFFICE_GAMBLE_HIT_CHANCE_MULT,
     OFFICE_GAMBLE_NFT_CHANCE_MULT,
@@ -1719,9 +1720,14 @@ class SparkOfficeCog(commands.Cog):
 
         gamble_index = random.randrange(len(GAMBLE_SCENARIOS)) if random.random() < OFFICE_GAMBLE_OFFER_CHANCE else None
 
+        # A brand-new seat's first shift gets the longer grace, so the alarm
+        # should quote that window, not the standard one.
+        first_shift = any((s.get("shifts_completed") or 0) == 0 for s in seats)
+        grace_hours = OFFICE_FIRST_SHIFT_GRACE_HOURS if first_shift else OFFICE_NO_SHOW_GRACE_HOURS
+
         description = (
             f"The following Office shift{'s are' if plural else ' is'} open: {names}.\n"
-            f"Tap below within **{OFFICE_NO_SHOW_GRACE_HOURS}h** or the seat{'s' if plural else ''} open{'s' if not plural else ''} up."
+            f"Tap below within **{grace_hours}h** or the seat{'s' if plural else ''} open{'s' if not plural else ''} up."
         )
         if gamble_index is not None:
             scenario = GAMBLE_SCENARIOS[gamble_index]
@@ -1744,6 +1750,14 @@ class SparkOfficeCog(commands.Cog):
         no_shows = await asyncio.to_thread(get_seats_for_noshow_demotion)
         for seat in no_shows:
             try:
+                # Diagnostic: if a seat ever gets no-showed sooner than
+                # expected, these fields show exactly which grace rule fired.
+                print(
+                    f"[spark_office] no-show vacate: asa={seat['spark_asa']} "
+                    f"seated_at={seat.get('seated_at')} "
+                    f"shifts_completed={seat.get('shifts_completed')} "
+                    f"next_shift_due_at={seat.get('next_shift_due_at')}"
+                )
                 await asyncio.to_thread(vacate_seat, seat["spark_asa"], "no_show")
                 name = seat.get("spark_name") or seat["spark_type"]
                 embed = discord.Embed(
