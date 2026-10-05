@@ -10,6 +10,7 @@ Uses the same `from database import get_supabase` pattern confirmed in
 algo_quota_guard.py — no guessing at client setup here.
 """
 
+import math
 from datetime import datetime, timezone
 from database import get_supabase
 
@@ -312,22 +313,40 @@ def create_team(guild_id: str, owner_discord_id: str, wallet_address: str, team_
 
 def get_standings(season_id: str) -> list[dict]:
     """
-    Returns standings rows joined with team_name, ordered by wins then
-    points_for — matches the ordering the /voltball_standings embed expects.
+    Returns standings rows joined with team_name, ordered by wins, then
+    point differential (points_for - points_against, rounded to one
+    decimal), then points_for as a last tiebreak -- the same ranking
+    standings.html uses. This used to sort by wins then raw points_for,
+    which is why the Discord standings disagreed with the site.
+
+    Sorted in Python, not in the query: the database can't order by a
+    computed column through this client. This also feeds playoff seeding
+    (the top 4 of this list), so seeding follows the ranking players see
+    on the site.
     """
     db = get_supabase()
     result = (
         db.table("voltball_standings")
         .select("*, voltball_teams(team_name)")
         .eq("season_id", season_id)
-        .order("wins", desc=True)
-        .order("points_for", desc=True)
         .execute()
     )
     rows = result.data or []
     # Flatten the joined team_name up a level for easier use in the embed.
     for r in rows:
         r["team_name"] = (r.get("voltball_teams") or {}).get("team_name", "Unknown Team")
+
+    def _diff(r):
+        # Mirrors standings.html's Math.round(x * 10) / 10. JS rounds .5
+        # upward; Python's round() rounds half to even, so floor(x + 0.5)
+        # is used instead to keep the two byte-for-byte identical on ties.
+        raw = (r.get("points_for") or 0) - (r.get("points_against") or 0)
+        return math.floor(raw * 10 + 0.5) / 10
+
+    rows.sort(
+        key=lambda r: (r.get("wins") or 0, _diff(r), r.get("points_for") or 0),
+        reverse=True,
+    )
     return rows
 
 
