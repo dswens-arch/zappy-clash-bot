@@ -984,6 +984,56 @@ class VoltballCog(commands.Cog):
         if count_unresolved_pairings(season["id"], week) == 0:
             await self._finalize_season_week(season, week, week_count, is_playoff_week, champion_name)
 
+        # A forfeit never produces a recap, so if a forfeit pairing is the
+        # LAST thing to resolve in a week (after every real match's recap
+        # has already aired), post_ready_recaps' "week is done" check has
+        # already run and skipped -- nothing would ever re-run it. Re-check
+        # here. If any recap is still pending this is a no-op and the last
+        # recap handles it as before.
+        await self._complete_week_if_done(season["id"], week)
+
+    async def _complete_week_if_done(self, season_id: str, week: int):
+        """
+        Marks the week complete (last_completed_week) and posts standings
+        once EVERY pairing has resolved AND every match's recap has aired.
+        Safe to call any time: does nothing while anything is pending, and
+        the standings post is gated by last_standings_posted_week, so it
+        can't double-post alongside post_ready_recaps.
+        """
+        try:
+            if count_unresolved_pairings(season_id, week) > 0:
+                return
+            db = get_supabase()
+            pending_recaps = (
+                db.table("voltball_matches")
+                .select("id")
+                .eq("season_id", season_id)
+                .eq("week_number", week)
+                .is_("recap_posted_at", "null")
+                .execute()
+                .data
+            ) or []
+            if pending_recaps:
+                return  # the last recap to air will complete the week
+
+            season_rows = db.table("voltball_seasons").select("*").eq("id", season_id).execute().data
+            if not season_rows:
+                return
+            season_row = season_rows[0]
+
+            if season_row.get("last_completed_week") != week:
+                db.table("voltball_seasons").update({"last_completed_week": week}).eq("id", season_id).execute()
+
+            config = get_guild_config(season_row["guild_id"])
+            if not config or not config.get("announcement_channel_id"):
+                return
+            channel = self.bot.get_channel(int(config["announcement_channel_id"]))
+            if not channel:
+                return
+            await self._post_standings_for_week(season_id, week, channel)
+        except Exception as e:
+            print(f"[voltball] _complete_week_if_done failed for season {season_id} week {week}: {e}")
+
     async def _finalize_season_week(self, season: dict, week: int, week_count: int, is_playoff_week: bool, champion_name: str | None):
         """
         Runs once, whichever pairing happens to be the LAST one to
