@@ -264,13 +264,18 @@ class ChainLightningCog(commands.Cog):
         items += [(z["asset_id"], z["name"]) for z in result.get("zappies", [])]
         return items, None
 
-    async def _cache_says_empty(self, wallet: str) -> bool:
-        """True only if the cache positively says this wallet owns nothing."""
+    async def _cache_cannot_play(self, wallet: str, used: set) -> bool:
+        """True only if cached holdings positively show this wallet can't play this
+        chain: it owns nothing, or every Zappy it owns was already used. Reads the
+        cache only (no Algorand calls); unknown wallets are assumed able to play."""
         try:
-            r = await self._run(lambda: _get_cached_wallet_result(wallet))
+            r = await self._run(lambda: get_last_known_wallet_result(wallet))
         except Exception:
             return False
-        return bool(r) and not r.get("error") and not r.get("owns")
+        if not r:
+            return False
+        ids = {h["asset_id"] for h in r.get("heroes", [])} | {z["asset_id"] for z in r.get("zappies", [])}
+        return not (ids - used)
 
     # ── Targeting ──────────────────────────────────────────────────────────────
 
@@ -282,6 +287,7 @@ class ChainLightningCog(commands.Cog):
         pref_by = {p["discord_user_id"]: p for p in prefs}
         catches = run.get("catches") or {}
         cutoff = _now() - timedelta(days=ACTIVE_DAYS)
+        used = set(run.get("used_zappy_ids") or [])
 
         active, lurk = [], []
         for w in wallets:
@@ -304,8 +310,8 @@ class ChainLightningCog(commands.Cog):
             for uid, wallet in pool:
                 if len(out) >= n:
                     break
-                if await self._cache_says_empty(wallet):
-                    continue
+                if await self._cache_cannot_play(wallet, used):
+                    continue          # nothing (unused) to catch with, so don't tag them
                 out.append(uid)
             return out
 
@@ -575,11 +581,17 @@ class ChainLightningCog(commands.Cog):
         if not items:
             return await interaction.followup.send("You need at least one Zappy to catch a bolt.", ephemeral=True)
 
+        run = await self.get_run(bolt["run_id"])
+        used = set(run.get("used_zappy_ids") or [])
+        if not [a for a, _ in items if a not in used]:
+            return await interaction.followup.send(
+                "⚡ Every Zappy you own has already been used in this chain, so you can't catch this bolt. "
+                "It's still open for the other tagged players!", ephemeral=True)
+
         # Re-use the same puzzle if they already opened one (no free rerolls)
         if att:
             puzzle = att["puzzle"]
         else:
-            run = await self.get_run(bolt["run_id"])
             lurker = uid in (bolt.get("lurkers") or [])
             difficulty = "easy" if lurker else ("hard" if run["chain_count"] >= HARD_AFTER_LINK else "medium")
             puzzle = await puzzles.build_puzzle(bolt["puzzle_type"], difficulty, self.db)
