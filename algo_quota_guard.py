@@ -79,8 +79,20 @@ def looks_like_quota_error(e: Exception) -> bool:
     trip the breaker for the specific error we've confirmed AlgoNode sends:
     'Daily free API quota exceeded.'
     """
+    # Algod/indexer clients often surface the 403 as a bare "HTTP Error 403:
+    # Forbidden" with the response body (the "quota exceeded" text) dropped, so
+    # matching on the words alone missed it and the payout loops kept retrying
+    # every pass, each failed request counting against the quota again. The
+    # indexer lookup already treats any 403 as the quota block; do the same
+    # here: check the status code first, then fall back to the message text.
+    for attr in ("code", "status_code", "status"):
+        if getattr(e, attr, None) == 403:
+            return True
     text = _quota_error_text(e)
-    return "quota exceeded" in text or ("403" in text and "quota" in text)
+    return (
+        "quota exceeded" in text
+        or ("403" in text and ("quota" in text or "forbidden" in text))
+    )
 
 
 def is_quota_blocked() -> bool:
