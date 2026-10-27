@@ -4121,6 +4121,11 @@ async def on_ready():
     await bot.add_cog(GamesPanelCog(bot))
     print("⚡ Games cogs loaded")
 
+    # Chain Lightning — community relay (see chain_lightning_setup.sql for tables)
+    from chain_lightning_cog import ChainLightningCog
+    await bot.add_cog(ChainLightningCog(bot, bot.supabase))
+    print("⚡ Chain Lightning cog loaded")
+
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
     await tree.sync()
