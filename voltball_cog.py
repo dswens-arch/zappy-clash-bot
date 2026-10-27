@@ -979,6 +979,28 @@ class VoltballCog(commands.Cog):
             # post_ready_kickoffs picks it up once kickoff_post_at
             # arrives, same as before.
 
+        # A forfeit writes no voltball_matches row at all, so the site had
+        # no way to tell "forfeit" apart from "not played" or who won (the
+        # schedule card on lineup.html just kept showing the kickoff time).
+        # Record it on the schedule row itself. Wrapped in try/except on
+        # purpose: if the is_forfeit / forfeit_winner_team_id columns
+        # haven't been added yet (see voltball_forfeit_migration.sql), a
+        # failure here must NOT stop the pairing from being marked
+        # resolved -- that would make resolve_ready_matches retry it every
+        # 20 seconds forever and double-apply the forfeit to standings.
+        if team_a is None or team_b is None:
+            if team_a is None and team_b is None:
+                forfeit_winner_id = None  # both sides short -- nobody advances
+            else:
+                forfeit_winner_id = team_b_row["id"] if team_a is None else team_a_row["id"]
+            try:
+                db.table("voltball_schedule").update({
+                    "is_forfeit": True,
+                    "forfeit_winner_team_id": forfeit_winner_id,
+                }).eq("id", pairing["id"]).execute()
+            except Exception as e:
+                print(f"[voltball] Week {week}: couldn't record forfeit on schedule row {pairing['id']} (non-fatal): {e}")
+
         mark_pairing_resolved(pairing["id"], now_iso)
 
         if count_unresolved_pairings(season["id"], week) == 0:
