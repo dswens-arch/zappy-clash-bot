@@ -29,18 +29,22 @@ Setup required:
 Migration (run once):
     CREATE TABLE IF NOT EXISTS voltball_market_listings (
       asset_id bigint PRIMARY KEY,
-      price integer NOT NULL,
+      price numeric NOT NULL,
       unit text NOT NULL DEFAULT 'ALGO',
       seller text,
       app_id bigint,
       updated_at timestamptz NOT NULL DEFAULT now()
     );
+    -- If the table already exists with an integer price (Downbad now returns
+    -- decimals such as 28.9), run this once:
+    --   ALTER TABLE voltball_market_listings ALTER COLUMN price TYPE numeric;
     ALTER TABLE voltball_market_listings ENABLE ROW LEVEL SECURITY;
     CREATE POLICY "Public read access" ON voltball_market_listings
       FOR SELECT USING (true);
 """
 
 import os
+from datetime import datetime, timezone
 import aiohttp
 from discord.ext import commands, tasks
 
@@ -104,16 +108,23 @@ class MarketSyncCog(commands.Cog):
 
         db = get_supabase()
         try:
-            # Full replace each sync -- simplest correct way to make sure a
-            # delisted/sold asset actually disappears from the cache, not
-            # just goes stale and keeps showing a dead "Buy" link. ~85 rows,
-            # cheap either way.
-            db.table("voltball_market_listings").delete().neq("asset_id", -1).execute()
+            # Write the fresh rows first, THEN remove anything that wasn't in
+            # this sync (sold/delisted). The old order (delete everything, then
+            # insert) left the table empty whenever the insert failed, which
+            # blanked the site's Free Agents page until the next good sync.
+            # Now a failed write leaves the previous cache in place.
+            sync_ts = datetime.now(timezone.utc).isoformat()
+            for r in rows:
+                r["updated_at"] = sync_ts
             if rows:
-                db.table("voltball_market_listings").insert(rows).execute()
+                db.table("voltball_market_listings").upsert(rows, on_conflict="asset_id").execute()
+                db.table("voltball_market_listings").delete().lt("updated_at", sync_ts).execute()
+            else:
+                # Downbad returned no listings at all: genuinely empty market.
+                db.table("voltball_market_listings").delete().neq("asset_id", -1).execute()
             print(f"[market_sync] Synced {len(rows)} active listings")
         except Exception as e:
-            print(f"[market_sync] Failed to write listings to Supabase: {e}")
+            print(f"[market_sync] Failed to write listings to Supabase (cache left unchanged): {e}")
 
     @sync_market_listings.before_loop
     async def before_sync_market_listings(self):
