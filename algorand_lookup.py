@@ -95,6 +95,18 @@ WALLET_CACHE_TTL = 43200   # 12 hours, for successful results
 ERROR_CACHE_TTL  = 90      # 90 seconds, for results that came back as an error
 
 
+def _describe_403(resp, body: str) -> str:
+    """Short, loggable description of a 403 so we can tell WHICH limit was hit
+    (the body/headers usually say) instead of guessing. Also stored in
+    algo_quota_state.last_error by mark_quota_exceeded."""
+    keep = {k: v for k, v in resp.headers.items()
+            if k.lower().startswith(("x-", "retry-after", "ratelimit", "cf-ray", "server"))}
+    text = " ".join((body or "").split())[:200]
+    msg = f"body={text!r} headers={keep}"
+    print(f"[algorand_lookup] 403 from indexer: {msg}")
+    return msg
+
+
 # ─────────────────────────────────────────────
 # Main Zappy fetch — pure local lookup
 # ─────────────────────────────────────────────
@@ -238,10 +250,55 @@ def _get_cached_wallet_result(wallet_address: str) -> dict | None:
         return None
 
 
+def _last_good_from_entry(entry: dict | None) -> dict | None:
+    """A cache entry's last successful result: the entry itself if it was a
+    success, or the 'stale' copy an error entry carries."""
+    if not entry:
+        return None
+    if not entry.get("error"):
+        return entry
+    stale = entry.get("stale")
+    return stale if stale and not stale.get("error") else None
+
+
+def get_last_known_wallet_result(wallet_address: str) -> dict | None:
+    """
+    The most recent SUCCESSFUL holdings for a wallet, however old. Never calls
+    the indexer. Used by games that would rather act on holdings that are a
+    few hours old than refuse to play while the indexer or quota is down.
+    Returns None if this wallet has never had a successful lookup cached.
+    """
+    good = _last_good_from_entry(_wallet_cache.get(wallet_address))
+    if good:
+        return good
+    try:
+        from database import get_supabase
+        row = (
+            get_supabase().table("wallet_cache")
+            .select("data")
+            .eq("wallet_address", wallet_address)
+            .maybe_single()
+            .execute()
+        )
+        return _last_good_from_entry(row.data["data"]) if row and row.data else None
+    except Exception as e:
+        print(f"[algorand_lookup] last-known read failed: {e}")
+        return None
+
+
 def _store_wallet_result(wallet_address: str, result: dict) -> None:
     """Write a lookup result to both cache layers. Errors are stored too
     (with the short TTL applied on read) so a bad patch of indexer
     flakiness doesn't turn every subsequent command into a fresh live call."""
+    # An error must not wipe out the last good holdings (the old behaviour left
+    # nothing to fall back to during an indexer outage or quota block). Carry
+    # the last good result along inside the error entry as "stale". Readers
+    # that only check result["error"] behave exactly as before.
+    if result.get("error") and "stale" not in result:
+        prev = get_last_known_wallet_result(wallet_address)
+        if prev:
+            result = {**result, "stale": prev}
+
     _wallet_cache[wallet_address] = result
     _wallet_cache_ts[wallet_address] = _time.monotonic()
 
@@ -312,18 +369,20 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
 
                 headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")}
                 record_call()
-                status, data = None, None
+                status, data, body403 = None, None, ""
                 try:
                     async with session.get(url, params=params, headers=headers,
                                            timeout=aiohttp.ClientTimeout(total=15)) as resp:
                         status = resp.status
                         if status == 200:
                             data = await resp.json()
+                        elif status == 403:
+                            body403 = _describe_403(resp, await resp.text())
                 except (asyncio.TimeoutError, aiohttp.ClientError):
                     status = None  # treated as a primary failure below
 
                 if status == 403:
-                    mark_quota_exceeded(detail="algorand_lookup: primary indexer 403")
+                    mark_quota_exceeded(detail=f"algorand_lookup: primary indexer 403 {body403}"[:500])
                     result["error"] = "Algorand API quota exceeded — try again later."
                     _store_wallet_result(wallet_address, result)
                     return result
@@ -349,7 +408,7 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
                     async with session.get(fallback_url, params=params, headers=headers,
                                            timeout=aiohttp.ClientTimeout(total=15)) as resp2:
                         if resp2.status == 403:
-                            mark_quota_exceeded(detail="algorand_lookup: fallback indexer 403")
+                            mark_quota_exceeded(detail=f"algorand_lookup: fallback indexer 403 {_describe_403(resp2, await resp2.text())}"[:500])
                             result["error"] = "Algorand API quota exceeded — try again later."
                             _store_wallet_result(wallet_address, result)
                             return result

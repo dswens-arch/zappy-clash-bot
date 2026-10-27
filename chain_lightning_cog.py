@@ -31,7 +31,7 @@ import chain_puzzles as puzzles
 import gp_accounting
 from algorand_lookup import (
     verify_wallet_owns_zappy, HERO_ASSET_IDS, HERO_IMAGES,
-    _get_cached_wallet_result,
+    _get_cached_wallet_result, get_last_known_wallet_result,
 )
 from database import get_wallet
 from zappy_collection import ZAPPY_COLLECTION
@@ -253,7 +253,13 @@ class ChainLightningCog(commands.Cog):
             return [], "no_wallet"
         result = await verify_wallet_owns_zappy(wallet)
         if result.get("error"):
-            return [], "lookup_error"
+            # Indexer down or quota blocked: use the last holdings we saw for this
+            # wallet rather than refusing to play. Holdings rarely change within
+            # hours, and the pass step re-checks against the same data.
+            last = await self._run(lambda: get_last_known_wallet_result(wallet))
+            if not last:
+                return [], "lookup_error"
+            result = last
         items = [(h["asset_id"], f"{h['hero_type']} Hero") for h in result.get("heroes", [])]
         items += [(z["asset_id"], z["name"]) for z in result.get("zappies", [])]
         return items, None
