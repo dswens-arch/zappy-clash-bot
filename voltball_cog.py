@@ -21,6 +21,7 @@ config for which day + channel to post to — those depend on decisions
 (schedule format, announcement channel ID) I don't have, flagged below.
 """
 
+import asyncio
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
@@ -845,7 +846,7 @@ class VoltballCog(commands.Cog):
     @tasks.loop(seconds=20)
     async def resolve_ready_matches(self):
         cutoff = (datetime.now(timezone.utc) + timedelta(seconds=PLAYBACK_KICKOFF_DELAY_SECONDS)).isoformat()
-        due = get_due_pairings(cutoff)
+        due = await asyncio.to_thread(get_due_pairings, cutoff)
         for pairing in due:
             await self._resolve_one_pairing(pairing)
 
@@ -1135,15 +1136,20 @@ class VoltballCog(commands.Cog):
         db = get_supabase()
         now_iso = datetime.now(timezone.utc).isoformat()
 
-        due = (
-            db.table("voltball_matches")
-            .select("*")
-            .is_("kickoff_posted_at", "null")
-            .not_.is_("kickoff_post_at", "null")
-            .lte("kickoff_post_at", now_iso)
-            .execute()
-            .data
-        ) or []
+        # Polling query runs in a worker thread: a slow Supabase response
+        # here used to freeze the whole bot (Discord heartbeat included).
+        def _fetch_due():
+            return (
+                db.table("voltball_matches")
+                .select("*")
+                .is_("kickoff_posted_at", "null")
+                .not_.is_("kickoff_post_at", "null")
+                .lte("kickoff_post_at", now_iso)
+                .execute()
+                .data
+            ) or []
+
+        due = await asyncio.to_thread(_fetch_due)
 
         for match in due:
             try:
@@ -1218,15 +1224,20 @@ class VoltballCog(commands.Cog):
         db = get_supabase()
         now_iso = datetime.now(timezone.utc).isoformat()
 
-        due = (
-            db.table("voltball_matches")
-            .select("*")
-            .is_("recap_posted_at", "null")
-            .not_.is_("recap_post_at", "null")
-            .lte("recap_post_at", now_iso)
-            .execute()
-            .data
-        ) or []
+        # Polling query runs in a worker thread: a slow Supabase response
+        # here used to freeze the whole bot (Discord heartbeat included).
+        def _fetch_due():
+            return (
+                db.table("voltball_matches")
+                .select("*")
+                .is_("recap_posted_at", "null")
+                .not_.is_("recap_post_at", "null")
+                .lte("recap_post_at", now_iso)
+                .execute()
+                .data
+            ) or []
+
+        due = await asyncio.to_thread(_fetch_due)
 
         for match in due:
             try:
