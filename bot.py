@@ -13,8 +13,8 @@ Commands:
   /streak   - View your daily streak
 
 Scheduled sessions:
-  2:00 PM UTC - Morning Bracket
-  12:00 AM UTC - Night Bracket
+  9:00 AM Central - Morning Bracket
+  7:00 PM Central - Night Bracket
 
 Setup:
   1. Copy .env.example to .env and fill in your keys
@@ -29,6 +29,7 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 from datetime import datetime, timezone, time as dtime
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 from clash_auction import setup_auction_commands, auction_checker
 import grand_prix_cog
@@ -92,14 +93,18 @@ APEX_TEST_CHANNEL  = int(os.environ["APEX_TEST_CHANNEL_ID"])  if os.environ.get(
 HOLDER_CHANNEL     = int(os.environ.get("HOLDER_CHANNEL_ID", "1314066280592052244"))  # All NFT win claim announcements (buddy/clash/zone5/spark jobs)
 PROMOTION_CHANNEL  = int(os.environ["PROMOTION_CHANNEL_ID"]) if os.environ.get("PROMOTION_CHANNEL_ID") else None  # Office seatings/demotions/duels
 
-# Session timing (UTC)
-MORNING_OPEN    = dtime(14,  0, tzinfo=timezone.utc)
-MORNING_CLOSE   = dtime(14, 30, tzinfo=timezone.utc)   # 30 min registration window
-MORNING_RESOLVE = dtime(14, 35, tzinfo=timezone.utc)
+# Session timing -- wall-clock time in US Central (America/Chicago), so the
+# sessions stay at 9 AM / 7 PM through daylight saving changes. (They used to
+# be fixed UTC hours, which drifted an hour earlier in local time each fall.)
+SESSION_TZ      = ZoneInfo("America/Chicago")
 
-EVENING_OPEN    = dtime(0,   0, tzinfo=timezone.utc)
-EVENING_CLOSE   = dtime(0,  30, tzinfo=timezone.utc)
-EVENING_RESOLVE = dtime(0,  35, tzinfo=timezone.utc)
+MORNING_OPEN    = dtime( 9,  0)
+MORNING_CLOSE   = dtime( 9, 30)   # 30 min registration window
+MORNING_RESOLVE = dtime( 9, 35)
+
+EVENING_OPEN    = dtime(19,  0)
+EVENING_CLOSE   = dtime(19, 30)
+EVENING_RESOLVE = dtime(19, 35)
 
 # ---------------------------------------------
 # Bot setup
@@ -3232,7 +3237,8 @@ async def session_scheduler():
     """Checks every minute and triggers session events at the right time."""
     global active_bracket_id, registration_open
 
-    now          = datetime.now(timezone.utc)
+    # Sessions run on Central wall-clock time (DST-aware), not fixed UTC hours.
+    now          = datetime.now(SESSION_TZ)
     current_hour = now.hour
     current_min  = now.minute
     today        = now.date().isoformat()
@@ -3256,23 +3262,23 @@ async def session_scheduler():
         # Clean up old keys
         session_scheduler._fired = {k for k in session_scheduler._fired if k.startswith(today)}
 
-    # Morning open - 3:00 AM UTC
-    if current_hour == 14 and current_min == 0 and not already_fired("morning_open"):
+    # Morning open - 9:00 AM Central
+    if (current_hour, current_min) == (MORNING_OPEN.hour, MORNING_OPEN.minute) and not already_fired("morning_open"):
         mark_fired("morning_open")
         await open_registration("morning", channel)
 
-    # Morning close - 3:30 AM UTC
-    elif current_hour == 14 and current_min == 30 and not already_fired("morning_close"):
+    # Morning close - 9:30 AM Central
+    elif (current_hour, current_min) == (MORNING_CLOSE.hour, MORNING_CLOSE.minute) and not already_fired("morning_close"):
         mark_fired("morning_close")
         await close_and_resolve(channel)
 
-    # Evening open - 3:00 PM UTC (15:00)
-    elif current_hour == 0 and current_min == 0 and not already_fired("evening_open"):
+    # Evening open - 7:00 PM Central
+    elif (current_hour, current_min) == (EVENING_OPEN.hour, EVENING_OPEN.minute) and not already_fired("evening_open"):
         mark_fired("evening_open")
         await open_registration("evening", channel)
 
-    # Evening close - 3:30 PM UTC (15:30)
-    elif current_hour == 0 and current_min == 30 and not already_fired("evening_close"):
+    # Evening close - 7:30 PM Central
+    elif (current_hour, current_min) == (EVENING_CLOSE.hour, EVENING_CLOSE.minute) and not already_fired("evening_close"):
         mark_fired("evening_close")
         await close_and_resolve(channel)
 
@@ -3286,7 +3292,8 @@ async def open_registration(session: str, channel: discord.TextChannel):
     registration_open = True
 
     session_name = "☀️ Morning" if session == "morning" else "🌙 Night"
-    emoji_time = "2:00 PM UTC" if session == "morning" else "12:00 AM UTC"
+    # Discord timestamp tag: each reader sees it in their own timezone.
+    emoji_time = f"<t:{int(datetime.now(timezone.utc).timestamp())}:t>"
 
     if session == "evening":
         await channel.send(
