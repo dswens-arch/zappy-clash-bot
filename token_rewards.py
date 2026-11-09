@@ -57,47 +57,61 @@ def get_bot_account():
     return private_key, address
 
 
+class AlgorandUnavailable(Exception):
+    """The chain lookup couldn't be completed (quota block, 403, indexer error).
+    Distinct from 'not opted in' / 'balance is 0' so callers don't report a
+    lookup failure to players as a fact about their wallet."""
+
+
+_PAUSED_RESULT = {
+    "success": False,
+    "reason":  "algorand_paused",
+    "amount":  0,
+    "message": "⏸️ Token rewards are paused while Algorand lookups are rate-limited. "
+               "Your win still counts; rewards resume once the limit resets.",
+}
+
+
 async def check_opted_in(wallet_address: str, asset_id: int) -> bool:
     """
     Check if a wallet has opted in to the reward token.
-    Returns True if opted in, False if not.
+    Returns True/False; raises AlgorandUnavailable if it couldn't be determined.
     """
+    return await _opt_in_present(wallet_address, asset_id)
+
+
+async def _opt_in_present(wallet_address: str, asset_id: int) -> bool:
+    """Guard-aware presence check (an opted-in wallet with 0 balance still lists the asset)."""
     import aiohttp
+    from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, record_call
+    if is_quota_blocked():
+        raise AlgorandUnavailable("quota_blocked")
+    url = f"{INDEXER_URL}/v2/accounts/{wallet_address}/assets"
+    record_call()
     try:
-        url = f"{INDEXER_URL}/v2/accounts/{wallet_address}/assets"
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params={"asset-id": asset_id},
                                    timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status == 403:
+                    mark_quota_exceeded(detail="token_rewards.opt_in 403")
+                    raise AlgorandUnavailable("quota_blocked")
                 if resp.status != 200:
-                    return False
-                data   = await resp.json()
-                assets = data.get("assets", [])
-                return any(a["asset-id"] == asset_id for a in assets)
-    except Exception as e:
-        print(f"Error checking opt-in for {wallet_address}: {e}")
-        return False
+                    raise AlgorandUnavailable(f"indexer_{resp.status}")
+                data = await resp.json()
+                return any(a["asset-id"] == asset_id for a in data.get("assets", []))
+    except (asyncio.TimeoutError, aiohttp.ClientError) as e:
+        raise AlgorandUnavailable(f"network_error: {e}")
 
 
 async def get_bot_token_balance() -> int:
-    """Return the bot wallet's current token balance."""
-    import aiohttp
-    try:
-        _, bot_address = get_bot_account()
-        url = f"{INDEXER_URL}/v2/accounts/{bot_address}/assets"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, params={"asset-id": REWARD_TOKEN_ID},
-                                   timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                if resp.status != 200:
-                    return 0
-                data   = await resp.json()
-                assets = data.get("assets", [])
-                for a in assets:
-                    if a["asset-id"] == REWARD_TOKEN_ID:
-                        return a.get("amount", 0)
-                return 0
-    except Exception as e:
-        print(f"Error checking bot balance: {e}")
-        return 0
+    """Return the bot wallet's current token balance.
+    Raises AlgorandUnavailable if it couldn't be read (never returns a fake 0)."""
+    from algorand_lookup import get_asset_balance
+    _, bot_address = get_bot_account()
+    balance, err = await get_asset_balance(bot_address, REWARD_TOKEN_ID)
+    if balance is None:
+        raise AlgorandUnavailable(err)
+    return balance
 
 
 def send_token_reward(recipient_address: str, amount: int, note: str = "") -> str | None:
@@ -150,7 +164,11 @@ async def award_win_tokens(
     Checks opt-in status first — returns a result dict with status and amount.
     """
     # Check opt-in
-    opted_in = await check_opted_in(wallet_address, REWARD_TOKEN_ID)
+    try:
+        opted_in = await check_opted_in(wallet_address, REWARD_TOKEN_ID)
+    except AlgorandUnavailable as e:
+        print(f"[token_rewards] win reward skipped, Algorand unavailable: {e}")
+        return dict(_PAUSED_RESULT)
     if not opted_in:
         return {
             "success":  False,
@@ -171,7 +189,11 @@ async def award_win_tokens(
         amount = int(amount * EVENING_MULTIPLIER)
 
     # Check bot has enough balance
-    balance = await get_bot_token_balance()
+    try:
+        balance = await get_bot_token_balance()
+    except AlgorandUnavailable as e:
+        print(f"[token_rewards] win reward skipped, Algorand unavailable: {e}")
+        return dict(_PAUSED_RESULT)
     if balance < amount:
         print(f"Bot wallet low on tokens! Balance: {balance}, needed: {amount}")
         return {
@@ -208,7 +230,11 @@ async def award_streak_tokens(wallet_address: str, streak_days: int) -> dict:
     if not amount:
         return {"success": False, "amount": 0}
 
-    opted_in = await check_opted_in(wallet_address, REWARD_TOKEN_ID)
+    try:
+        opted_in = await check_opted_in(wallet_address, REWARD_TOKEN_ID)
+    except AlgorandUnavailable as e:
+        print(f"[token_rewards] streak reward skipped, Algorand unavailable: {e}")
+        return dict(_PAUSED_RESULT)
     if not opted_in:
         return {
             "success": False,

@@ -340,6 +340,12 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
     """
     cached = _get_cached_wallet_result(wallet_address)
     if cached is not None:
+        # A cached ERROR (e.g. from a quota 403) shouldn't lock a player out of
+        # the games when we still have their last good holdings on file.
+        if cached.get("error") and is_quota_blocked():
+            good = _last_good_from_entry(cached)
+            if good:
+                return {**good, "stale_fallback": True}
         return cached
 
     result = {
@@ -351,6 +357,11 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
     }
 
     if is_quota_blocked():
+        # Quota block active: serve the last known good holdings (NFT ownership
+        # rarely changes within hours) instead of failing every game command.
+        good = get_last_known_wallet_result(wallet_address)
+        if good:
+            return {**good, "stale_fallback": True}
         result["error"] = "Algorand API quota exceeded — try again later."
         _store_wallet_result(wallet_address, result)
         return result
@@ -383,6 +394,9 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
 
                 if status == 403:
                     mark_quota_exceeded(detail=f"algorand_lookup: primary indexer 403 {body403}"[:500])
+                    good = get_last_known_wallet_result(wallet_address)
+                    if good:
+                        return {**good, "stale_fallback": True}
                     result["error"] = "Algorand API quota exceeded — try again later."
                     _store_wallet_result(wallet_address, result)
                     return result
@@ -468,6 +482,56 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
 
     _store_wallet_result(wallet_address, result)
     return result
+
+
+# ─────────────────────────────────────────────
+# Single-asset balance (e.g. ZAPP) — quota-guard aware
+# ─────────────────────────────────────────────
+
+_asset_balance_cache: dict = {}          # (wallet, asset_id) -> (monotonic_ts, amount)
+ASSET_BALANCE_CACHE_TTL = 120            # seconds
+
+
+async def get_asset_balance(wallet_address: str, asset_id: int) -> tuple[int | None, str | None]:
+    """
+    Balance of one ASA for a wallet, via the indexer.
+
+    Returns (balance, None) on success, or (None, reason) when it could NOT be
+    determined (quota block, 403, non-200, timeout). A failed lookup is never
+    reported as a balance of 0, so callers can't tell a holder they're broke.
+    Honors the quota circuit breaker, counts toward record_call(), trips the
+    breaker on a quota 403, and caches successes briefly to avoid repeat hits.
+    """
+    key = (wallet_address, asset_id)
+    hit = _asset_balance_cache.get(key)
+    if hit and _time.monotonic() - hit[0] < ASSET_BALANCE_CACHE_TTL:
+        return hit[1], None
+
+    if is_quota_blocked():
+        return None, "quota_blocked"
+
+    url     = f"{INDEXER_URL}/v2/accounts/{wallet_address}/assets"
+    headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")}
+    record_call()
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params={"asset-id": asset_id}, headers=headers,
+                                   timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status == 403:
+                    mark_quota_exceeded(
+                        detail=f"get_asset_balance 403 {_describe_403(resp, await resp.text())}"[:500]
+                    )
+                    return None, "quota_blocked"
+                if resp.status != 200:
+                    return None, f"indexer_{resp.status}"
+                data = await resp.json()
+    except (asyncio.TimeoutError, aiohttp.ClientError) as e:
+        return None, f"network_error: {e}"
+
+    balance = next((a.get("amount", 0) for a in data.get("assets", [])
+                    if a.get("asset-id") == asset_id), 0)
+    _asset_balance_cache[key] = (_time.monotonic(), balance)
+    return balance, None
 
 
 # ─────────────────────────────────────────────

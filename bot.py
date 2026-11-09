@@ -2012,19 +2012,19 @@ async def _start_expedition_zone_select(
         fee = EXPEDITION_FEES.get(zone_num, 0)
         if fee > 0:
             from token_rewards import REWARD_TOKEN_ID
-            import aiohttp
-            from algorand_lookup import INDEXER_URL
-            try:
-                async with aiohttp.ClientSession() as session:
-                    url = f"{INDEXER_URL}/v2/accounts/{wallet}/assets"
-                    async with session.get(url, params={"asset-id": REWARD_TOKEN_ID},
-                                           timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                        data    = await resp.json() if resp.status == 200 else {}
-                        assets  = data.get("assets", [])
-                        balance = next((a.get("amount", 0) for a in assets
-                                       if a["asset-id"] == REWARD_TOKEN_ID), 0)
-            except Exception:
-                balance = 0
+            from algorand_lookup import get_asset_balance
+            # Quota-guard aware; returns (None, reason) if the balance couldn't
+            # be read, which must never be reported as "You have 0".
+            balance, lookup_err = await get_asset_balance(wallet, REWARD_TOKEN_ID)
+
+            if balance is None:
+                await inter.followup.send(
+                    "⚠️ Couldn't verify your ZAPP balance right now — Algorand lookups are "
+                    "temporarily paused (daily API limit). Your tokens are fine. "
+                    "Try again later, or run **The Static Fields** (free) in the meantime.",
+                    ephemeral=True
+                )
+                return
 
             if balance < fee:
                 await inter.followup.send(
@@ -2352,15 +2352,24 @@ async def _run_expedition_beat(
 
         entry_fee  = updated_run.get("entry_fee", 0)
         net_tokens = max(0, updated_run["total_tokens"] - entry_fee)
+        tokens_paused = False
         if wallet and net_tokens > 0:
             from token_rewards import send_token_reward
+            from algo_quota_guard import is_quota_blocked
             import asyncio
-            note = f"Zappy Expedition reward - Zone {zone_num}"
-            await asyncio.to_thread(send_token_reward, wallet, net_tokens, note)
+            if is_quota_blocked():
+                # Don't fire an algod call into a known quota block (it would just
+                # burn more quota and fail silently while we announce "+N tokens").
+                tokens_paused = True
+                print(f"[expedition] token payout of {net_tokens} to {wallet[:8]}... skipped — quota block active")
+            else:
+                note = f"Zappy Expedition reward - Zone {zone_num}"
+                await asyncio.to_thread(send_token_reward, wallet, net_tokens, note)
 
         exp_channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
         if exp_channel:
-            token_line = f"🪙 +{net_tokens} tokens"
+            token_line = (f"⏸️ {net_tokens} tokens pending (Algorand rate-limited)"
+                          if tokens_paused else f"🪙 +{net_tokens} tokens")
             momentum_line = ""
             if updated_run.get("momentum") is not None:
                 from expedition_events import momentum_label
@@ -3903,6 +3912,8 @@ async def close_and_resolve(channel: discord.TextChannel):
                     token_msg = f"\n{token_result['message']}"
                 elif token_result.get("reason") == "not_opted_in":
                     token_msg = f"\n⚠️ <@{winner_id}>: {token_result['message']}"
+                elif token_result.get("reason") == "algorand_paused":
+                    token_msg = f"\n{token_result['message']}"
 
             # -- Winner embed — large image of winner --
             winner   = result["winner"]
