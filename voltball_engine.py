@@ -365,6 +365,33 @@ HERO_SIGNATURES = {
     "ShittyKitties": {"type": "flat_chance", "label": "Chaos Mode (Coach)",
                "desc": "Even the bot doesn't know which stat is about to triple.",
                "chance": SIGNATURE_CHANCE_STANDARD, "bonus": SIGNATURE_FLAT_BONUS},
+
+    # ── Alien / Bat / Bison ──────────────────────────────────────────────
+    # These three were documented on the site (guide.html, lineup.html) and
+    # registrable from launch, but were never added to this table -- so
+    # Team.signature was None for them and they silently did nothing in
+    # every match. Numbers below are straight from guide.html. "opp_phrase"
+    # is optional flavor for the event text on opponent-targeting plays
+    # (default "wears down {opp}"); voltball_recap matches events on the
+    # team name + label appearing in the text, so any phrase here must keep
+    # both -- _opp_event_text() guarantees that.
+
+    # Flat every quarter, zero randomness. +2.0 x 4 quarters = 8.0.
+    "Bison":  {"type": "flat_each_quarter", "label": "Stampede (Coach)",
+               "desc": "Runs the opponent over, every single quarter.", "bonus": 2.0},
+
+    # Eagle's Talon Strike aimed at the opponent: 50% in Q1 only, -16.0 to them. EV 8.0.
+    "Bat":    {"type": "q1_debuff", "label": "Echolocation (Coach)",
+               "desc": "A precision strike before the opponent even sees it coming.",
+               "chance": 0.50, "penalty": 16.0,
+               "opp_phrase": "strikes {opp} before they see it coming"},
+
+    # Guaranteed exactly once, -8.0 to the opponent: Q1 with 30%, otherwise Q2.
+    # Not a coin flip on WHETHER it fires, only WHEN. EV 8.0.
+    "Alien":  {"type": "once_q1_or_q2", "label": "Abduction (Coach)",
+               "desc": "Beams away the opponent's power when they least expect it.",
+               "q1_chance": 0.30, "penalty": 8.0,
+               "opp_phrase": "beams away {opp}'s power"},
 }
 
 
@@ -392,6 +419,7 @@ class Team:
     momentum_multiplier: float = field(default=1.0, init=False)
     nine_lives_used:      bool = field(default=False, init=False)
     chaos_used:            bool = field(default=False, init=False)
+    once_fire_quarter:     Optional[int] = field(default=None, init=False)  # Alien's Abduction: which quarter (1 or 2) it fires in this match -- rolled fresh at Q1 every match, so a reused Team object can't carry a stale value
     auto_lineup_penalty:   bool = field(default=False, init=False)  # True if this team was auto-fielded from holdings, no lineup submitted
 
     def __post_init__(self):
@@ -539,6 +567,18 @@ def _base_quarter(quarter_num: int, offense_team: "Team", defense_team: "Team",
     }
 
 
+def _opp_event_text(team: "Team", opponent: "Team") -> str:
+    """
+    Event text for a signature play that hits the OPPONENT. Always contains
+    both the team's name and the signature label -- voltball_recap's
+    team_highlight() finds a coach's suppress events by matching on exactly
+    those two strings, so they must stay in the text whatever phrase a
+    Hero uses. Heroes without an "opp_phrase" keep the original wording.
+    """
+    phrase = team.signature.get("opp_phrase", "wears down {opp}").format(opp=opponent.name)
+    return f"{team.name}'s {team.signature['label']} {phrase}."
+
+
 def _apply_signature(quarter_num: int, team: "Team", opponent: "Team",
                       base_result: dict, opp_base_result: dict,
                       own_running_total: float, opp_running_total: float) -> tuple[float, list]:
@@ -618,6 +658,31 @@ def _apply_signature(quarter_num: int, team: "Team", opponent: "Team",
         if quarter_num >= sig["start_quarter"]:
             delta = sig["per_quarter"]
             log.append(f"  🦸 **{label}** — the poison sets in on {opponent.name} (-{round(delta,1)}).")
+            return delta, log, "opponent"
+        return 0.0, [], None
+
+    if sig_type == "flat_each_quarter":
+        delta = sig["bonus"]
+        log.append(f"  🦸 **{label}** — {team.name} stampedes through again (+{round(delta,1)}).")
+        return delta, log, "self"
+
+    if sig_type == "q1_debuff":
+        if quarter_num == 1 and random.random() < sig["chance"]:
+            delta = sig["penalty"]
+            log.append(f"  🦸 **{label}** — {team.name} strikes {opponent.name} before they see it coming (-{round(delta,1)} to {opponent.name}).")
+            return delta, log, "opponent"
+        return 0.0, [], None
+
+    if sig_type == "once_q1_or_q2":
+        # Decide the firing quarter once per match, at Q1 (which always runs
+        # first), and remember it on the Team for Q2. Re-rolling at Q1 every
+        # match means a Team object reused across matches can't carry over a
+        # stale decision.
+        if quarter_num == 1:
+            team.once_fire_quarter = 1 if random.random() < sig["q1_chance"] else 2
+        if quarter_num == team.once_fire_quarter:
+            delta = sig["penalty"]
+            log.append(f"  🦸 **{label}** — {team.name} beams away {opponent.name}'s power (-{round(delta,1)} to {opponent.name}).")
             return delta, log, "opponent"
         return 0.0, [], None
 
@@ -718,13 +783,13 @@ def resolve_match(team_a: Team, team_b: Team) -> dict:
                             "text": f"{team_a.name} — {team_a.signature['label']}.", "delta": round(sig_delta_a, 1)})
         elif sig_delta_a and target_a == "opponent":
             events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "b",
-                            "text": f"{team_a.name}'s {team_a.signature['label']} wears down {team_b.name}.", "delta": round(-sig_delta_a, 1)})
+                            "text": _opp_event_text(team_a, team_b), "delta": round(-sig_delta_a, 1)})
         if sig_delta_b and target_b == "self":
             events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "b",
                             "text": f"{team_b.name} — {team_b.signature['label']}.", "delta": round(sig_delta_b, 1)})
         elif sig_delta_b and target_b == "opponent":
             events.append({"quarter": q, "kind": "signature", "icon": "🦸", "team": "a",
-                            "text": f"{team_b.name}'s {team_b.signature['label']} wears down {team_a.name}.", "delta": round(-sig_delta_b, 1)})
+                            "text": _opp_event_text(team_b, team_a), "delta": round(-sig_delta_b, 1)})
 
         # Death Roll's capitalize-on-lockdown bonus, applied directly since it
         # depends on the deny roll made earlier this quarter, not on _apply_signature.
