@@ -84,6 +84,9 @@ async def _opt_in_present(wallet_address: str, asset_id: int) -> bool:
     """Guard-aware presence check (an opted-in wallet with 0 balance still lists the asset)."""
     import aiohttp
     from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, record_call
+    from algorand_lookup import is_opt_in_cached, cache_opt_in
+    if is_opt_in_cached(wallet_address, asset_id):
+        return True          # opted-in is permanent in practice; never re-look-up
     if is_quota_blocked():
         raise AlgorandUnavailable("quota_blocked")
     url = f"{INDEXER_URL}/v2/accounts/{wallet_address}/assets"
@@ -98,7 +101,10 @@ async def _opt_in_present(wallet_address: str, asset_id: int) -> bool:
                 if resp.status != 200:
                     raise AlgorandUnavailable(f"indexer_{resp.status}")
                 data = await resp.json()
-                return any(a["asset-id"] == asset_id for a in data.get("assets", []))
+                opted = any(a["asset-id"] == asset_id for a in data.get("assets", []))
+                if opted:
+                    cache_opt_in(wallet_address, asset_id)
+                return opted
     except (asyncio.TimeoutError, aiohttp.ClientError) as e:
         raise AlgorandUnavailable(f"network_error: {e}")
 
@@ -108,7 +114,8 @@ async def get_bot_token_balance() -> int:
     Raises AlgorandUnavailable if it couldn't be read (never returns a fake 0)."""
     from algorand_lookup import get_asset_balance
     _, bot_address = get_bot_account()
-    balance, err = await get_asset_balance(bot_address, REWARD_TOKEN_ID)
+    balance, err = await get_asset_balance(bot_address, REWARD_TOKEN_ID,
+                                           max_age=120, allow_stale=False)
     if balance is None:
         raise AlgorandUnavailable(err)
     return balance
@@ -208,6 +215,8 @@ async def award_win_tokens(
     txid = await asyncio.to_thread(send_token_reward, wallet_address, amount, note)
 
     if txid:
+        from algorand_lookup import bump_cached_asset_balance
+        bump_cached_asset_balance(wallet_address, REWARD_TOKEN_ID, amount)
         return {
             "success": True,
             "amount":  amount,
@@ -247,6 +256,8 @@ async def award_streak_tokens(wallet_address: str, streak_days: int) -> dict:
     txid = await asyncio.to_thread(send_token_reward, wallet_address, amount, note)
 
     if txid:
+        from algorand_lookup import bump_cached_asset_balance
+        bump_cached_asset_balance(wallet_address, REWARD_TOKEN_ID, amount)
         return {
             "success": True,
             "amount":  amount,

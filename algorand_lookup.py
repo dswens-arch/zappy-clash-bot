@@ -488,27 +488,136 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
 # Single-asset balance (e.g. ZAPP) — quota-guard aware
 # ─────────────────────────────────────────────
 
-_asset_balance_cache: dict = {}          # (wallet, asset_id) -> (monotonic_ts, amount)
-ASSET_BALANCE_CACHE_TTL = 120            # seconds
+_asset_balance_cache: dict = {}          # key -> (monotonic_ts, amount)
+ASSET_BALANCE_CACHE_TTL = WALLET_CACHE_TTL   # 12h, same as wallet holdings
 
 
-async def get_asset_balance(wallet_address: str, asset_id: int) -> tuple[int | None, str | None]:
-    """
-    Balance of one ASA for a wallet, via the indexer.
+def _asset_key(wallet_address: str, asset_id: int) -> str:
+    # Stored in the existing wallet_cache table under a namespaced key, so no
+    # new table is needed.
+    return f"{wallet_address}:asset:{asset_id}"
 
-    Returns (balance, None) on success, or (None, reason) when it could NOT be
-    determined (quota block, 403, non-200, timeout). A failed lookup is never
-    reported as a balance of 0, so callers can't tell a holder they're broke.
-    Honors the quota circuit breaker, counts toward record_call(), trips the
-    breaker on a quota 403, and caches successes briefly to avoid repeat hits.
-    """
-    key = (wallet_address, asset_id)
+
+def _read_asset_balance_cache(wallet_address: str, asset_id: int) -> tuple[int | None, float | None]:
+    """(balance, age_seconds) from memory, then Supabase. (None, None) if never cached.
+    No TTL applied here, so callers decide how old is too old."""
+    key = _asset_key(wallet_address, asset_id)
     hit = _asset_balance_cache.get(key)
-    if hit and _time.monotonic() - hit[0] < ASSET_BALANCE_CACHE_TTL:
-        return hit[1], None
+    if hit:
+        return hit[1], _time.monotonic() - hit[0]
+    try:
+        from database import get_supabase
+        row = (
+            get_supabase().table("wallet_cache")
+            .select("data, cached_at")
+            .eq("wallet_address", key)
+            .maybe_single()
+            .execute()
+        )
+        row = row.data if row else None
+        if not row or "balance" not in row["data"]:
+            return None, None
+        cached_at = datetime.fromisoformat(row["cached_at"].replace("Z", "+00:00"))
+        age = (datetime.now(timezone.utc) - cached_at).total_seconds()
+        _asset_balance_cache[key] = (_time.monotonic() - age, row["data"]["balance"])
+        return row["data"]["balance"], age
+    except Exception as e:
+        print(f"[algorand_lookup] asset balance cache read failed: {e}")
+        return None, None
+
+
+def _write_asset_balance_cache(wallet_address: str, asset_id: int, balance: int) -> None:
+    key = _asset_key(wallet_address, asset_id)
+    _asset_balance_cache[key] = (_time.monotonic(), balance)
+    try:
+        from database import get_supabase
+        get_supabase().table("wallet_cache").upsert({
+            "wallet_address": key,
+            "data":           {"balance": balance},
+            "is_error":       False,
+            "cached_at":      datetime.now(timezone.utc).isoformat(),
+        }).execute()
+    except Exception as e:
+        print(f"[algorand_lookup] asset balance cache write failed (local cache still set): {e}")
+
+
+def bump_cached_asset_balance(wallet_address: str, asset_id: int, delta: int) -> None:
+    """After the bot pays a wallet, add the payout to its cached balance (if one
+    exists) so the cache stays right without a chain lookup."""
+    balance, _ = _read_asset_balance_cache(wallet_address, asset_id)
+    if balance is not None:
+        _write_asset_balance_cache(wallet_address, asset_id, max(0, balance + delta))
+
+
+def is_opt_in_cached(wallet_address: str, asset_id: int) -> bool:
+    """True if we've already seen this wallet opted in to the asset. Opt-ins
+    don't get undone in practice, so a positive result is cached permanently."""
+    key = f"{wallet_address}:optin:{asset_id}"
+    if key in _asset_balance_cache:
+        return True
+    try:
+        from database import get_supabase
+        row = (
+            get_supabase().table("wallet_cache")
+            .select("wallet_address")
+            .eq("wallet_address", key)
+            .maybe_single()
+            .execute()
+        )
+        if row and row.data:
+            _asset_balance_cache[key] = (_time.monotonic(), 1)
+            return True
+    except Exception as e:
+        print(f"[algorand_lookup] opt-in cache read failed: {e}")
+    return False
+
+
+def cache_opt_in(wallet_address: str, asset_id: int) -> None:
+    key = f"{wallet_address}:optin:{asset_id}"
+    _asset_balance_cache[key] = (_time.monotonic(), 1)
+    try:
+        from database import get_supabase
+        get_supabase().table("wallet_cache").upsert({
+            "wallet_address": key,
+            "data":           {"opted_in": True},
+            "is_error":       False,
+            "cached_at":      datetime.now(timezone.utc).isoformat(),
+        }).execute()
+    except Exception as e:
+        print(f"[algorand_lookup] opt-in cache write failed (local cache still set): {e}")
+
+
+async def get_asset_balance(
+    wallet_address: str,
+    asset_id: int,
+    max_age: int = ASSET_BALANCE_CACHE_TTL,
+    allow_stale: bool = True,
+) -> tuple[int | None, str | None]:
+    """
+    Balance of one ASA for a wallet.
+
+    Cache-first (memory, then Supabase, so it survives redeploys). Only goes to
+    the indexer when there's no cached value younger than `max_age`. If that
+    live lookup can't happen (quota block, 403, indexer error, timeout) the
+    last cached value is returned however old when `allow_stale`, since a gate
+    like the expedition entry fee doesn't need chain-fresh numbers.
+
+    Returns (balance, None), or (None, reason) when it couldn't be determined
+    at all. A failed lookup is never reported as a balance of 0. Honors the
+    quota circuit breaker, counts toward record_call(), and trips the breaker
+    on a quota 403.
+    """
+    cached, age = _read_asset_balance_cache(wallet_address, asset_id)
+    if cached is not None and age is not None and age < max_age:
+        return cached, None
+
+    def _fallback(reason: str):
+        if allow_stale and cached is not None:
+            return cached, None
+        return None, reason
 
     if is_quota_blocked():
-        return None, "quota_blocked"
+        return _fallback("quota_blocked")
 
     url     = f"{INDEXER_URL}/v2/accounts/{wallet_address}/assets"
     headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")}
@@ -521,16 +630,16 @@ async def get_asset_balance(wallet_address: str, asset_id: int) -> tuple[int | N
                     mark_quota_exceeded(
                         detail=f"get_asset_balance 403 {_describe_403(resp, await resp.text())}"[:500]
                     )
-                    return None, "quota_blocked"
+                    return _fallback("quota_blocked")
                 if resp.status != 200:
-                    return None, f"indexer_{resp.status}"
+                    return _fallback(f"indexer_{resp.status}")
                 data = await resp.json()
     except (asyncio.TimeoutError, aiohttp.ClientError) as e:
-        return None, f"network_error: {e}"
+        return _fallback(f"network_error: {e}")
 
     balance = next((a.get("amount", 0) for a in data.get("assets", [])
                     if a.get("asset-id") == asset_id), 0)
-    _asset_balance_cache[key] = (_time.monotonic(), balance)
+    _write_asset_balance_cache(wallet_address, asset_id, balance)
     return balance, None
 
 
