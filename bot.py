@@ -2015,7 +2015,15 @@ async def _start_expedition_zone_select(
             from algorand_lookup import get_asset_balance
             # Quota-guard aware; returns (None, reason) if the balance couldn't
             # be read, which must never be reported as "You have 0".
+            # Cache-first (12h, persisted in Supabase, bumped after every payout).
             balance, lookup_err = await get_asset_balance(wallet, REWARD_TOKEN_ID)
+            if balance is not None and balance < fee:
+                # Looks short on a cached number: re-check live, but at most once
+                # per 10 min per wallet (falls back to the cached value if the
+                # chain is unreachable / quota-blocked).
+                fresh, _ = await get_asset_balance(wallet, REWARD_TOKEN_ID, max_age=600)
+                if fresh is not None:
+                    balance = fresh
 
             if balance is None:
                 await inter.followup.send(
@@ -2364,7 +2372,11 @@ async def _run_expedition_beat(
                 print(f"[expedition] token payout of {net_tokens} to {wallet[:8]}... skipped — quota block active")
             else:
                 note = f"Zappy Expedition reward - Zone {zone_num}"
-                await asyncio.to_thread(send_token_reward, wallet, net_tokens, note)
+                exp_txid = await asyncio.to_thread(send_token_reward, wallet, net_tokens, note)
+                if exp_txid:
+                    from algorand_lookup import bump_cached_asset_balance
+                    from token_rewards import REWARD_TOKEN_ID as _RTID
+                    bump_cached_asset_balance(wallet, _RTID, net_tokens)
 
         exp_channel = bot.get_channel(EXPEDITION_CHANNEL) if EXPEDITION_CHANNEL else bot.get_channel(CLASH_CHANNEL)
         if exp_channel:
