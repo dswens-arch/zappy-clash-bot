@@ -142,7 +142,23 @@ def mark_quota_exceeded(hours: int = DEFAULT_BLOCK_HOURS, detail: str = ""):
     skipping AlgoNode immediately (within _LOCAL_CACHE_TTL_SECONDS) instead
     of piling on more failed requests.
     """
-    blocked_until = datetime.now(timezone.utc) + timedelta(hours=hours)
+    now = datetime.now(timezone.utc)
+    # Nodely's free quota is counted per external IP and refreshes at 00:00 UTC
+    # ("all requests are rejected until 00:00 UTC", nodely.io/docs/free/policy).
+    # A fixed 6h block set mid-morning expires BEFORE the reset, so the bot
+    # re-tests, re-trips, and stays down for another 6h (and failed requests
+    # still count against the quota). Block until the real reset instead.
+    next_reset = (now + timedelta(days=1)).replace(hour=0, minute=1, second=0, microsecond=0)
+    if "daily free api quota" in (detail or "").lower():
+        blocked_until = next_reset
+    else:
+        blocked_until = min(now + timedelta(hours=hours), next_reset)
+
+    try:
+        import algo_call_audit
+        algo_call_audit.print_summary("quota block tripped")
+    except Exception:
+        pass
 
     _local_cache["blocked_until"] = blocked_until
     _local_cache["checked_at"] = datetime.now(timezone.utc)

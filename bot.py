@@ -40,6 +40,10 @@ from spark_office import SparkOfficeCog
 from voltball_cog import VoltballCog
 from market_sync import MarketSyncCog
 
+# Count every request to AlgoNode/Nodely by caller (diagnostic; see algo_call_audit.py)
+import algo_call_audit
+algo_call_audit.install()
+
 # Our modules
 from algorand_lookup import link_wallet as verify_wallet, fetch_zappy_traits
 from clash_flex_card  import render_flex_card
@@ -159,6 +163,12 @@ CP_ROLES = [
     (5000,  ROLE_CP_5000),
     (10000, ROLE_CP_10000),
 ]
+
+# When a wallet's ZAPP balance can't be verified (Algorand quota block / indexer down) and
+# nothing trustworthy is cached, let the player in anyway. The entry fee is deducted from
+# the run's rewards regardless, so this can't be used to avoid paying it. Set False to
+# block Zones 2-5 instead whenever the balance is unknowable.
+EXPEDITION_FAIL_OPEN = True
 
 # Expedition entry fees by zone (Zone 1 is free)
 EXPEDITION_FEES = {
@@ -2012,35 +2022,39 @@ async def _start_expedition_zone_select(
         fee = EXPEDITION_FEES.get(zone_num, 0)
         if fee > 0:
             from token_rewards import REWARD_TOKEN_ID
-            from algorand_lookup import get_asset_balance
-            # Quota-guard aware; returns (None, reason) if the balance couldn't
-            # be read, which must never be reported as "You have 0".
-            # Cache-first (12h, persisted in Supabase, bumped after every payout).
-            balance, lookup_err = await get_asset_balance(wallet, REWARD_TOKEN_ID)
-            if balance is not None and balance < fee:
-                # Looks short on a cached number: re-check live, but at most once
-                # per 10 min per wallet (falls back to the cached value if the
-                # chain is unreachable / quota-blocked).
-                fresh, _ = await get_asset_balance(wallet, REWARD_TOKEN_ID, max_age=600)
-                if fresh is not None:
-                    balance = fresh
+            from algorand_lookup import get_asset_balance_info
+            # Cache-first: balance cache (12h, bumped on every payout) -> ZAPP figure
+            # from the wallet lookup -> live read. Never reports a failed lookup as 0.
+            info = await get_asset_balance_info(wallet, REWARD_TOKEN_ID)
+            if info["balance"] is None or info["balance"] < fee:
+                # Missing or looks short: take one fresh read (at most once per
+                # 10 min per wallet; skipped automatically while quota-blocked).
+                info = await get_asset_balance_info(wallet, REWARD_TOKEN_ID, max_age=600)
 
-            if balance is None:
-                await inter.followup.send(
-                    "⚠️ Couldn't verify your ZAPP balance right now — Algorand lookups are "
-                    "temporarily paused (daily API limit). Your tokens are fine. "
-                    "Try again later, or run **The Static Fields** (free) in the meantime.",
-                    ephemeral=True
-                )
-                return
-
-            if balance < fee:
+            balance = info["balance"]
+            if info["fresh"] and balance is not None and balance < fee:
+                # Verified shortfall -> enforce the entry requirement.
                 await inter.followup.send(
                     f"❌ You need **{fee:,} ZAPP tokens** to enter {ZONES[zone_num]['name']}. "
                     f"You have {balance:,}. Play Clash or Zone 1 to earn more!",
                     ephemeral=True
                 )
                 return
+            if not info["fresh"] and (balance is None or balance < fee):
+                # Can't verify (Algorand rate-limited and nothing trustworthy cached).
+                # The entry fee is taken out of the run's rewards (net = max(0, won - fee)),
+                # so letting the player in costs the bot nothing extra and can't be used
+                # to dodge the fee. Fail open instead of locking everyone out of Zones 2-5.
+                if EXPEDITION_FAIL_OPEN:
+                    print(f"[expedition] balance unverifiable for {wallet[:8]}... "
+                          f"({info['reason']}), allowing Zone {zone_num} entry; fee {fee} comes out of rewards")
+                else:
+                    await inter.followup.send(
+                        "⚠️ Couldn't verify your ZAPP balance right now — Algorand lookups are "
+                        "temporarily paused. Try again later, or run **The Static Fields** (free).",
+                        ephemeral=True
+                    )
+                    return
 
         # Show smart Zappy picker for this zone
         await _show_smart_zappy_select(inter, user_id, zone_num, all_zappies, zappy_count, wallet, fee)

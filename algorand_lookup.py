@@ -441,6 +441,17 @@ async def verify_wallet_owns_zappy(wallet_address: str) -> dict:
                 if not next_token:
                     break
 
+        # Free byproduct of the call we just made: the wallet's ZAPP balance.
+        # Riding along in the (12h-cached, last-known-fallback) wallet result and
+        # the balance cache means the expedition gate rarely needs its own lookup.
+        try:
+            from token_rewards import REWARD_TOKEN_ID as _ZAPP_ID
+            _zapp = next((a.get("amount", 0) for a in assets if a.get("asset-id") == _ZAPP_ID), 0)
+            result["zapp_balance"] = _zapp
+            _write_asset_balance_cache(wallet_address, _ZAPP_ID, _zapp)
+        except Exception as e:
+            print(f"[algorand_lookup] couldn't seed ZAPP balance from wallet lookup: {e}")
+
         for asset in assets:
             if asset.get("amount", 0) <= 0:
                 continue
@@ -541,10 +552,27 @@ def _write_asset_balance_cache(wallet_address: str, asset_id: int, balance: int)
         print(f"[algorand_lookup] asset balance cache write failed (local cache still set): {e}")
 
 
+def _zapp_from_wallet_result(wallet_address: str, asset_id: int) -> int | None:
+    """ZAPP balance carried in the last-known wallet lookup (any age), if present.
+    Never calls the indexer."""
+    try:
+        from token_rewards import REWARD_TOKEN_ID
+    except Exception:
+        return None
+    if asset_id != REWARD_TOKEN_ID:
+        return None
+    good = get_last_known_wallet_result(wallet_address)
+    val = good.get("zapp_balance") if good else None
+    return val if isinstance(val, int) else None
+
+
 def bump_cached_asset_balance(wallet_address: str, asset_id: int, delta: int) -> None:
-    """After the bot pays a wallet, add the payout to its cached balance (if one
-    exists) so the cache stays right without a chain lookup."""
+    """After the bot pays a wallet, add the payout to its cached balance so the
+    cache stays right without a chain lookup. Seeds from the wallet lookup's ZAPP
+    figure when there's no balance cache entry yet."""
     balance, _ = _read_asset_balance_cache(wallet_address, asset_id)
+    if balance is None:
+        balance = _zapp_from_wallet_result(wallet_address, asset_id)
     if balance is not None:
         _write_asset_balance_cache(wallet_address, asset_id, max(0, balance + delta))
 
@@ -587,37 +615,36 @@ def cache_opt_in(wallet_address: str, asset_id: int) -> None:
         print(f"[algorand_lookup] opt-in cache write failed (local cache still set): {e}")
 
 
-async def get_asset_balance(
+async def get_asset_balance_info(
     wallet_address: str,
     asset_id: int,
     max_age: int = ASSET_BALANCE_CACHE_TTL,
-    allow_stale: bool = True,
-) -> tuple[int | None, str | None]:
+) -> dict:
     """
-    Balance of one ASA for a wallet.
+    Cache-first balance lookup that also says how trustworthy the number is.
 
-    Cache-first (memory, then Supabase, so it survives redeploys). Only goes to
-    the indexer when there's no cached value younger than `max_age`. If that
-    live lookup can't happen (quota block, 403, indexer error, timeout) the
-    last cached value is returned however old when `allow_stale`, since a gate
-    like the expedition entry fee doesn't need chain-fresh numbers.
+    Returns {"balance": int | None, "fresh": bool, "reason": str | None}
+      fresh=True   balance is younger than max_age, or was just read live
+      fresh=False  balance is an older cached / wallet-lookup figure because a
+                   live read wasn't possible (reason says why)
+      balance=None nothing cached anywhere AND a live read wasn't possible
 
-    Returns (balance, None), or (None, reason) when it couldn't be determined
-    at all. A failed lookup is never reported as a balance of 0. Honors the
-    quota circuit breaker, counts toward record_call(), and trips the breaker
-    on a quota 403.
+    Order: balance cache (memory, Supabase) -> ZAPP figure from the last wallet
+    lookup -> live indexer (skipped while the quota breaker is open). A failed
+    lookup is never reported as 0.
     """
     cached, age = _read_asset_balance_cache(wallet_address, asset_id)
     if cached is not None and age is not None and age < max_age:
-        return cached, None
+        return {"balance": cached, "fresh": True, "reason": None}
 
-    def _fallback(reason: str):
-        if allow_stale and cached is not None:
-            return cached, None
-        return None, reason
+    if cached is None:
+        cached = _zapp_from_wallet_result(wallet_address, asset_id)   # age unknown -> stale
+
+    def _stale(reason: str) -> dict:
+        return {"balance": cached, "fresh": False, "reason": reason}
 
     if is_quota_blocked():
-        return _fallback("quota_blocked")
+        return _stale("quota_blocked")
 
     url     = f"{INDEXER_URL}/v2/accounts/{wallet_address}/assets"
     headers = {"X-Indexer-API-Token": os.getenv("INDEXER_TOKEN", "")}
@@ -630,17 +657,32 @@ async def get_asset_balance(
                     mark_quota_exceeded(
                         detail=f"get_asset_balance 403 {_describe_403(resp, await resp.text())}"[:500]
                     )
-                    return _fallback("quota_blocked")
+                    return _stale("quota_blocked")
                 if resp.status != 200:
-                    return _fallback(f"indexer_{resp.status}")
+                    return _stale(f"indexer_{resp.status}")
                 data = await resp.json()
     except (asyncio.TimeoutError, aiohttp.ClientError) as e:
-        return _fallback(f"network_error: {e}")
+        return _stale(f"network_error: {e}")
 
     balance = next((a.get("amount", 0) for a in data.get("assets", [])
                     if a.get("asset-id") == asset_id), 0)
     _write_asset_balance_cache(wallet_address, asset_id, balance)
-    return balance, None
+    return {"balance": balance, "fresh": True, "reason": None}
+
+
+async def get_asset_balance(
+    wallet_address: str,
+    asset_id: int,
+    max_age: int = ASSET_BALANCE_CACHE_TTL,
+    allow_stale: bool = True,
+) -> tuple[int | None, str | None]:
+    """(balance, None), or (None, reason) when it couldn't be determined.
+    allow_stale=False refuses anything older than max_age (used for the bot's
+    own reward wallet, where a stale number could approve a payout it can't cover)."""
+    info = await get_asset_balance_info(wallet_address, asset_id, max_age)
+    if info["balance"] is not None and (info["fresh"] or allow_stale):
+        return info["balance"], None
+    return None, info["reason"] or "unavailable"
 
 
 # ─────────────────────────────────────────────
