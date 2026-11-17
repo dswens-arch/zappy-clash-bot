@@ -69,8 +69,8 @@ BREAKING_GAP_MIN = int(os.environ.get("NEWS_BREAKING_GAP_MIN", 20))
 BREAKING_UPSET_ROUND = int(os.environ.get("NEWS_BREAKING_UPSET_ROUND", 3))
 BREAKING_LOOKBACK_H  = 3          # never report events older than this
 BREAKING_POLL_MIN    = 3
-STARTUP_DELAY_MIN    = (8, 30)    # first scheduled broadcast after a (re)start
-BREAKING_BOOT_QUIET_MIN = 5       # breaking poller stays silent this long after a (re)start
+STARTUP_DELAY_MIN    = (1, 3)     # first scheduled broadcast after a (re)start (when nothing was posted recently)
+BREAKING_BOOT_QUIET_MIN = 2       # breaking poller stays silent this long after a (re)start
 
 # segment -> (weight, min minutes between two posts of that segment)
 SEGMENTS: dict[str, tuple[int, int]] = {
@@ -170,12 +170,23 @@ class ZappyNewsCog(commands.Cog):
 
     async def cog_load(self):
         await self._load_state()
-        lo, hi = STARTUP_DELAY_MIN
-        self.next_post_at = _now() + timedelta(minutes=random.randint(lo, hi))
+        self.next_post_at = self._first_post_time()
         if not self.scheduler.is_running():
             self.scheduler.start()
         if not self.breaking_watch.is_running():
             self.breaking_watch.start()
+
+    def _first_post_time(self) -> datetime:
+        """Start almost immediately after a deploy, but never spam on restarts:
+        if a scheduled broadcast already went out recently, keep the normal
+        drip spacing measured from that post instead of starting a fresh clock."""
+        lo, hi = STARTUP_DELAY_MIN
+        soonest = _now() + timedelta(minutes=random.randint(lo, hi))
+        if self.last_posted:
+            latest = max(self.last_posted.values())
+            spaced = latest + timedelta(minutes=random.randint(MIN_MINUTES, MAX_MINUTES))
+            return max(soonest, spaced)
+        return soonest
 
     async def cog_unload(self):
         self.scheduler.cancel()
