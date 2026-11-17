@@ -16,10 +16,13 @@ Env vars required (same as token_rewards.py):
 """
 
 import os
+import time
 import asyncio
 from algosdk import account, mnemonic
 from algosdk.v2client import algod
 from algosdk import transaction
+
+from algo_quota_guard import is_quota_blocked, mark_quota_exceeded, record_call
 
 ALGOD_URL   = os.getenv("ALGOD_URL", "https://mainnet-api.algonode.cloud")
 ALGOD_TOKEN = os.getenv("ALGOD_TOKEN", "")
@@ -45,54 +48,114 @@ def get_bot_account():
     return private_key, address
 
 
+# ── Prize-inventory cache ──────────────────────────────────────────────────────
+# get_available_nfts() used to cost 1 indexer request for the wallet PLUS one per
+# asset in it (name + supply lookup), every single time an NFT prize rolled, with
+# no cache, no quota-guard check and no record_call(). After a restart the backlog
+# of due Spark Job / Office shifts resolves in one pass, so a burst of NFT hits
+# meant a burst of N x (1 + wallet size) requests — invisible to the daily
+# counter. Now:
+#   * asset name/supply is cached for the life of the process (it doesn't change),
+#   * the whole inventory is cached for INVENTORY_CACHE_TTL seconds,
+#   * nothing is fetched while the quota breaker is open,
+#   * every request goes through record_call(), and a 403 trips the breaker.
+INVENTORY_CACHE_TTL = int(os.environ.get("NFT_INVENTORY_TTL", "300"))   # 5 min
+
+_asset_meta: dict[int, dict] = {}                 # asset_id -> {"name": str, "total": int}
+_inventory: dict = {"ts": None, "nfts": []}        # ts = time.monotonic() of last complete scan
+_inventory_lock: asyncio.Lock | None = None
+
+
+def _get_inventory_lock() -> asyncio.Lock:
+    global _inventory_lock
+    if _inventory_lock is None:
+        _inventory_lock = asyncio.Lock()
+    return _inventory_lock
+
+
+def invalidate_nft_inventory(asset_id: int | None = None) -> None:
+    """Drop one asset from the cached inventory (after it's been sent), or force
+    a full re-scan on the next call when asset_id is None."""
+    if asset_id is None:
+        _inventory["ts"] = None
+    else:
+        _inventory["nfts"] = [n for n in _inventory["nfts"] if n["asset_id"] != asset_id]
+
+
 async def get_available_nfts() -> list:
     """
     Query the bot wallet for all NFTs available as prizes.
     Returns list of dicts: { asset_id, name, amount }
     Excludes ZAPP token and any asset with amount < 1.
+    Cached for INVENTORY_CACHE_TTL seconds; returns [] (as before) if the lookup
+    can't be completed, including while the AlgoNode quota breaker is open.
     """
+    async with _get_inventory_lock():
+        ts = _inventory["ts"]
+        if ts is not None and time.monotonic() - ts < INVENTORY_CACHE_TTL:
+            return [dict(n) for n in _inventory["nfts"]]
+
+        if is_quota_blocked():
+            print("[nft_rewards] quota block active — skipping prize inventory scan.")
+            return []
+
+        nfts = await _scan_inventory()
+        if nfts is None:                      # incomplete / failed scan: don't cache it
+            return []
+        _inventory["nfts"] = nfts
+        _inventory["ts"] = time.monotonic()
+        return [dict(n) for n in nfts]
+
+
+async def _scan_inventory() -> list | None:
+    """One live scan. Returns the NFT list, or None if the scan didn't complete."""
     import aiohttp
     try:
         _, bot_address = get_bot_account()
         url = f"{INDEXER_URL}/v2/accounts/{bot_address}/assets"
         async with aiohttp.ClientSession() as session:
+            record_call()
             async with session.get(url, params={"limit": 1000},
                                    timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                if resp.status == 403:
+                    mark_quota_exceeded(detail=f"nft_rewards inventory 403 {(await resp.text())[:300]}")
+                    return None
                 if resp.status != 200:
-                    return []
+                    return None
                 data   = await resp.json()
                 assets = data.get("assets", [])
 
-        nfts = []
-        for a in assets:
-            asset_id = a["asset-id"]
-            amount   = a.get("amount", 0)
-            if amount < 1:
-                continue
-            if asset_id in EXCLUDED_ASSET_IDS:
-                continue
-            # Fetch asset info to get name
-            async with aiohttp.ClientSession() as session:
-                info_url = f"{INDEXER_URL}/v2/assets/{asset_id}"
-                async with session.get(info_url,
-                                       timeout=aiohttp.ClientTimeout(total=8)) as resp:
-                    if resp.status == 200:
+            nfts = []
+            for a in assets:
+                asset_id = a["asset-id"]
+                amount   = a.get("amount", 0)
+                if amount < 1:
+                    continue
+                if asset_id in EXCLUDED_ASSET_IDS:
+                    continue
+                meta = _asset_meta.get(asset_id)
+                if meta is None:
+                    # Fetch asset info to get name (once per asset per process)
+                    record_call()
+                    async with session.get(f"{INDEXER_URL}/v2/assets/{asset_id}",
+                                           timeout=aiohttp.ClientTimeout(total=8)) as resp:
+                        if resp.status == 403:
+                            mark_quota_exceeded(detail=f"nft_rewards asset-info 403 {(await resp.text())[:300]}")
+                            return None
+                        if resp.status != 200:
+                            continue      # skip this asset this round, try again next scan
                         info   = await resp.json()
                         params = info.get("asset", {}).get("params", {})
-                        name   = params.get("name", f"ASA {asset_id}")
-                        total  = params.get("total", 0)
-                        # Only include NFTs (total supply = 1) not fungible tokens
-                        if total == 1:
-                            nfts.append({
-                                "asset_id": asset_id,
-                                "name":     name,
-                                "amount":   amount,
-                            })
+                        meta = {"name": params.get("name", f"ASA {asset_id}"), "total": params.get("total", 0)}
+                        _asset_meta[asset_id] = meta
+                # Only include NFTs (total supply = 1) not fungible tokens
+                if meta["total"] == 1:
+                    nfts.append({"asset_id": asset_id, "name": meta["name"], "amount": amount})
         return nfts
 
     except Exception as e:
         print(f"Error fetching available NFTs: {e}")
-        return []
+        return None
 
 
 async def pick_random_nft() -> dict | None:
@@ -146,6 +209,7 @@ def send_nft(recipient_address: str, asset_id: int, note: str = "") -> str | Non
         txid   = client.send_transaction(signed)
         transaction.wait_for_confirmation(client, txid, 4)
         print(f"NFT {asset_id} sent to {recipient_address[:8]}... txid={txid}")
+        invalidate_nft_inventory(asset_id)     # it's no longer in the prize wallet
         return txid
 
     except Exception as e:
