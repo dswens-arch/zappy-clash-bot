@@ -671,6 +671,12 @@ class SparkJobsCog(commands.Cog):
     @resolver.before_loop
     async def before_resolver(self):
         await self.bot.wait_until_ready()
+        # Don't resolve the post-restart backlog the instant the bot connects.
+        # Every deploy leaves due shifts waiting; resolving them at t=0 stacked
+        # their payout / NFT-prize / wallet lookups on top of the other boot-time
+        # work. Spark Office waits 150s, so wait a different 60s here and the two
+        # resolvers never fire together.
+        await asyncio.sleep(60)
 
     # ──────────────────────────────────────────
     # Weekly shoutout — luckiest Spark(s) over the trailing 7 days.
