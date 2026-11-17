@@ -4170,6 +4170,11 @@ async def on_ready():
     await bot.add_cog(ChainLightningCog(bot, bot.supabase))
     print("⚡ Chain Lightning cog loaded")
 
+    # Zappy Agent Wire — autonomous Zappy agents file reports (see zappy_news_setup.sql for tables)
+    from zappy_news_cog import ZappyNewsCog
+    await bot.add_cog(ZappyNewsCog(bot, bot.supabase))
+    print("⚡ Zappy Agent Wire cog loaded")
+
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
     await tree.sync()
