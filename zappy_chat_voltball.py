@@ -26,6 +26,10 @@ from typing import Optional
 import voltball_engine as E
 
 N_SIMS = 1500
+ROSTER_SIMS = 800
+# QB SPK only nudges the whole team's offense by a small multiplier: ~QB_MULT_RATE x ~50 base offense per SPK point,
+# vs 0.1+ per point for a primary-position stat, so a QB slot is worth far less per point than a Striker/Mid/Guard slot.
+QB_VALUE_PER_SPK = E.QB_MULT_RATE * 50
 CACHE_TTL = 120
 
 KEYWORDS = re.compile(
@@ -71,10 +75,11 @@ def _stats_for(season_id: str, asset_ids: list[int]) -> dict[int, dict]:
     from voltball_position_fit import _collection
     _collection._build()
     alloc = {}
-    try:
-        alloc = get_season_zappy_stats(season_id, asset_ids=asset_ids) or {}
-    except Exception:
-        pass
+    for i in range(0, len(asset_ids), 100):
+        try:
+            alloc.update(get_season_zappy_stats(season_id, asset_ids=asset_ids[i:i + 100]) or {})
+        except Exception:
+            pass
     out = {}
     for aid in asset_ids:
         base = _collection.by_asset_id.get(aid)
@@ -153,7 +158,7 @@ def _best_assignment(players: list[E.ZappyPlayer], formation: str) -> dict:
                 total = (sum(_composite_value("Striker", z.VLT, z.INS, z.SPK) for z in strikers)
                          + sum(_composite_value("Mid", z.VLT, z.INS, z.SPK) for z in mids)
                          + sum(_composite_value("Guard", z.VLT, z.INS, z.SPK) for z in guards)
-                         + qb.SPK * 0.5)
+                         + qb.SPK * QB_VALUE_PER_SPK)
                 if total > best_total:
                     best_total = total
                     best = {"QB": [qb], "Striker": list(strikers), "Mid": list(mids), "Guard": guards}
@@ -184,6 +189,122 @@ def _what_ifs(mine: Side, opp: Side) -> list[str]:
 def _rename(team: E.Team, name: str) -> E.Team:
     team.name = name
     return team
+
+
+# ── roster-wide optimiser ─────────────────────────────────────────────────────
+
+def _slot_value(pos: str, z: E.ZappyPlayer) -> float:
+    from voltball_position_fit import _composite_value
+    if pos == "QB":
+        return z.SPK * QB_VALUE_PER_SPK
+    return _composite_value(pos, z.VLT, z.INS, z.SPK)
+
+
+def optimise_lineup(pool: list[E.ZappyPlayer], formation: str) -> dict:
+    """Best 8-of-N assignment into a formation by the engine's own position weights.
+    Greedy fill, then swap-improve (in-lineup swaps and bench swaps) until stable."""
+    slots = [p for p in E.POSITIONS for _ in range(E.FORMATIONS[formation][p])]
+    cand = sorted(pool, key=lambda z: -max(_slot_value(p, z) for p in E.POSITIONS))[:28]
+    chosen: list[Optional[E.ZappyPlayer]] = [None] * len(slots)
+    used = set()
+    # fill the most demanding slots first (primary-stat positions), QB last
+    for i in sorted(range(len(slots)), key=lambda i: slots[i] == "QB"):
+        best = max((z for z in cand if z.asset_id not in used), key=lambda z: _slot_value(slots[i], z))
+        chosen[i] = best
+        used.add(best.asset_id)
+    improved = True
+    while improved:
+        improved = False
+        for i in range(len(slots)):
+            for j in range(i + 1, len(slots)):
+                if slots[i] == slots[j]:
+                    continue
+                cur = _slot_value(slots[i], chosen[i]) + _slot_value(slots[j], chosen[j])
+                new = _slot_value(slots[i], chosen[j]) + _slot_value(slots[j], chosen[i])
+                if new > cur + 1e-9:
+                    chosen[i], chosen[j] = chosen[j], chosen[i]
+                    improved = True
+            for z in cand:
+                if z.asset_id in {c.asset_id for c in chosen}:
+                    continue
+                if _slot_value(slots[i], z) > _slot_value(slots[i], chosen[i]) + 1e-9:
+                    chosen[i] = z
+                    improved = True
+    out = {p: [] for p in E.POSITIONS}
+    for slot, z in zip(slots, chosen):
+        out[slot].append(z)
+    return out
+
+
+def _roster_pool(mine_row: dict, season_id: str, week: int) -> list[E.ZappyPlayer]:
+    """Everything the coach could field this week: cached wallet holdings (never a live
+    indexer call), main collection only, minus Zappies injured for this week."""
+    from algorand_lookup import get_last_known_wallet_result
+    from voltball_db import get_injured_asset_ids
+    hold = get_last_known_wallet_result(mine_row["wallet_address"]) or {}
+    ids = [int(z["asset_id"]) for z in hold.get("zappies", [])]
+    if not ids:
+        return []
+    try:
+        injured = get_injured_asset_ids(mine_row["id"], week)
+    except Exception:
+        injured = set()
+    ids = [i for i in ids if i not in injured]
+    st = _stats_for(season_id, ids)
+    return [E.ZappyPlayer(a, v["name"], v["VLT"], v["INS"], v["SPK"]) for a, v in st.items()]
+
+
+def _diff_vs(submitted: Optional[Side], best: dict) -> str:
+    if not submitted:
+        return ""
+    old = {z.asset_id: z for z in submitted.all_players()}
+    new = {z.asset_id: z for p in E.POSITIONS for z in best[p]}
+    out_ = [old[a].name for a in old if a not in new]
+    in_ = [new[a].name for a in new if a not in old]
+    if not out_ and not in_:
+        return "same 8 Zappies"
+    return f"swap out {', '.join(out_) or 'nobody'} for {', '.join(in_) or 'nobody'}"
+
+
+def roster_advice(mine_row: dict, mine: Optional[Side], opp: Optional[Side], season_id: str, week: int) -> list[str]:
+    pool = _roster_pool(mine_row, season_id, week)
+    if len(pool) < E.ROSTER_SIZE:
+        return ["Roster-wide advice unavailable: the asker's cached holdings show fewer than 8 eligible Zappies "
+                "(or no holdings check on file yet)."]
+    tempo = mine.tempo if mine else E.TEMPO_DEFAULT
+    hero = mine_row.get("hero_type")
+    lines = [f"BEST LINEUPS from the asker's whole roster ({len(pool)} eligible Zappies, this week's injured excluded), "
+             f"coach {hero}, tempo {tempo:g}:"]
+    results = []
+    for form in E.FORMATIONS:
+        best = optimise_lineup(pool, form)
+        def mk(best=best, form=form):
+            return _rename(E.Team(name="A", coach_hero_type=hero, formation=form,
+                                  assignments={p: list(best[p]) for p in E.POSITIONS}, tempo=tempo), "A")
+        sim = None
+        if opp:
+            sim = _simulate(mk, lambda: _rename(opp.team(), "B"), ROSTER_SIMS)["win"]
+        total = sum(_slot_value(p, z) for p in E.POSITIONS for z in best[p])
+        results.append((sim if sim is not None else 0, form, best, total))
+    results.sort(key=lambda r: (-r[0], -r[3]))
+    results = [r[:3] for r in results]
+    names = {"QB": "QB", "Striker": "Surge Back", "Mid": "Conductor", "Guard": "Guard"}
+    for sim, form, best in results[:2]:
+        arr = "; ".join(f"{names[p]}: " + ", ".join(f"{z.name} ({z.VLT}/{z.INS}/{z.SPK})" for z in best[p])
+                        for p in E.POSITIONS if best[p])
+        vs = f" -> {sim}% win vs the opponent's lineup" if opp else ""
+        lines.append(f"  {form}{vs}. {arr}. Compared with the submitted lineup: {_diff_vs(mine, best)}.")
+    if opp:
+        form, best = results[0][1], results[0][2]
+        for t in (2.0, 5.5, 9.0):
+            if abs(t - tempo) < 1.0:
+                continue
+            r = _simulate(lambda: _rename(E.Team(name="A", coach_hero_type=hero, formation=form,
+                                                 assignments={p: list(best[p]) for p in E.POSITIONS}, tempo=t), "A"),
+                          lambda: _rename(opp.team(), "B"), ROSTER_SIMS)
+            lines.append(f"  best {form} lineup at tempo {t:g}: {r['win']}% win")
+    lines.append("(Lineups are optimised with the engine's own position weights, then simulated; the QB slot matters least.)")
+    return lines
 
 
 def build_voltball_block(guild_id: str, asker_id: int, mentioned_ids: list[int], question: str) -> Optional[str]:
@@ -275,5 +396,9 @@ def build_voltball_block(guild_id: str, asker_id: int, mentioned_ids: list[int],
         out.append(f"SIMULATION of the real engine, {N_SIMS} matches, submitted lineups: asker's team wins {res['win']}% "
                    f"(average score {res['avg_a']} to {res['avg_b']}). Luck matters, so even a big favorite can lose.")
         out.append("What-ifs with the asker's same 8 Zappies against the opponent's actual lineup:\n" + "\n".join(_what_ifs(mine, opp)))
-        out.append("Advice is limited to the 8 Zappies already in the submitted lineup; the bot hasn't looked at the rest of the asker's roster.")
+    if mine_row:
+        try:
+            out.extend(roster_advice(mine_row, mine, opp, season["id"], week))
+        except Exception as e:
+            print(f"[zappy_chat_voltball] roster advice failed: {e}")
     return "\n".join(out)
