@@ -4180,6 +4180,11 @@ async def on_ready():
     await bot.add_cog(ZappyChatCog(bot, bot.supabase))
     print("⚡ Zappy Chat cog loaded")
 
+    # Zappy Trivia Night — weekly live trivia hosted by a Zappy agent (see zappy_trivia_setup.sql)
+    from zappy_trivia_cog import ZappyTriviaCog
+    await bot.add_cog(ZappyTriviaCog(bot, bot.supabase))
+    print("⚡ Zappy Trivia cog loaded")
+
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
     await tree.sync()
