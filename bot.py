@@ -4175,6 +4175,11 @@ async def on_ready():
     await bot.add_cog(ZappyNewsCog(bot, bot.supabase))
     print("⚡ Zappy Agent Wire cog loaded")
 
+    # Zappy Chat — @mention the bot and a Zappy agent answers (cheap model, capped; no Algorand calls)
+    from zappy_chat_cog import ZappyChatCog
+    await bot.add_cog(ZappyChatCog(bot, bot.supabase))
+    print("⚡ Zappy Chat cog loaded")
+
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
     await tree.sync()

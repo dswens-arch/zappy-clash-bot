@@ -8,6 +8,8 @@ import base64
 import os
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+# Cheap + fast is plenty for a 4-6 sentence recap. Override with RECAP_MODEL if wanted.
+RECAP_MODEL = os.environ.get("RECAP_MODEL", "claude-haiku-5-5")
 
 RECAP_SYSTEM_PROMPT = """You are the official announcer for Zappies Reborn — a high-energy NFT battle league on Algorand.
 You write punchy, hype bracket champion recaps based on the winner's NFT image and their stats.
@@ -72,7 +74,7 @@ async def generate_champion_recap(
         )
 
         payload = {
-            "model": "claude-opus-4-5",
+            "model": RECAP_MODEL,
             "max_tokens": 300,
             "system": RECAP_SYSTEM_PROMPT,
             "messages": [{
