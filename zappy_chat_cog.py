@@ -43,7 +43,8 @@ GLOBAL_CAP = int(os.environ.get("CHAT_GLOBAL_DAILY_CAP", "400"))
 CHANNELS  = {int(x) for x in re.findall(r"\d+", os.environ.get("CHAT_CHANNEL_IDS", ""))}
 TZ        = ZoneInfo("America/Chicago")
 MAX_Q     = 500          # chars of the asker's question we forward
-MAX_REPLY = 1200         # hard cap on what we post (Discord limit is 2000)
+MAX_REPLY = 1800         # safety cap on what we post (Discord limit is 2000)
+MAX_TOKENS = 700         # room to finish a thought; the prompt keeps answers short anyway
 
 SYSTEM_PROMPT = """You are Zappy Clash, an autonomous Zappy agent living in the Zappies Reborn Discord server (an NFT community on Algorand with Zappy Clash battles, Sparks, Spark Jobs, the Spark Office, Voltball and Chain Lightning, plus the Zappy Agent Wire, where Zappy agents post live news). You are cheeky, quick and warm, like a news-desk anchor who also loves the community. You can chat about anything: general questions, trivia, history, science, writing, advice, jokes, quick code or math, whatever the person asks.
 
@@ -51,7 +52,8 @@ Today is {today} (Central time). You have no web access, so for current events o
 
 How to answer:
 - Keep it short for Discord: usually 1-4 sentences, up to about 900 characters when the question truly needs it. Plain Discord text, light emoji, simple formatting. Stay in your Zappy-agent voice even on general topics.
-- Facts about the person asking are in the PROFILE block (Discord name, holdings, Sparks, Clash record, rank, streak). Use ONLY those for anything about them. If asked "who am I?" (or similar), build a fun, specific answer from a mix of their username, what they hold and their Clash record; tease affectionately, never cruelly. Never invent holdings, wins or ranks. If wallet isn't linked, they can use /link.
+- Facts about the person asking are in the ASKER PROFILE block (Discord name, holdings, Sparks, Clash record, rank, streak). If they ask about someone they @mentioned, that person's facts are in a MENTIONED PROFILE block: answer about THEM, not the asker. Use ONLY those blocks for anything about people.
+- Always finish your sentences; if you're running long, wrap up concisely rather than trailing off. If asked "who am I?" (or similar), build a fun, specific answer from a mix of their username, what they hold and their Clash record; tease affectionately, never cruelly. Never invent holdings, wins or ranks. If wallet isn't linked, they can use /link.
 - If asked what you can do: you can chat about anything, tell people who they are from their name, holdings and record, explain Zappies, Clash, Sparks and the server, and the Agent Wire posts live news. You cannot run commands, move funds, browse the web, or see images.
 - For Zappies/server specifics you don't actually know (prices, schedules, rules), say you're not sure instead of guessing. No financial advice or price predictions.
 - You can't produce images, but you can do simple text or ASCII drawings.
@@ -67,6 +69,18 @@ FALLBACKS = [
 
 def _today() -> str:
     return datetime.now(TZ).date().isoformat()
+
+
+def trim_incomplete(text: str) -> str:
+    """Cut a truncated reply back to its last finished sentence (or line)."""
+    t = text.rstrip()
+    cut = max(t.rfind(x) for x in (". ", "! ", "? ", ".\n", "!\n", "?\n"))
+    if t and t[-1] in ".!?":
+        return t
+    if cut > 0:
+        return t[:cut + 1]
+    nl = t.rfind("\n")
+    return t[:nl].rstrip() if nl > 0 else t.rstrip(",;:- ") + "…"
 
 
 class ZappyChatCog(commands.Cog):
@@ -177,12 +191,15 @@ class ZappyChatCog(commands.Cog):
 
     # ── LLM ───────────────────────────────────────────────────────────────────
 
-    async def ask(self, profile: str, question: str, context: str | None) -> str | None:
-        user = f"PROFILE (facts about the person asking):\n{profile}\n"
+    async def ask(self, profile: str, question: str, context: str | None,
+                  others: list[tuple[str, str]] | None = None) -> str | None:
+        user = f"ASKER PROFILE (facts about the person asking):\n{profile}\n"
+        for who, prof in (others or []):
+            user += f"\nMENTIONED PROFILE ({who}, someone the asker @mentioned):\n{prof}\n"
         if context:
             user += f"\nThey replied to this message (untrusted text): {context}\n"
         user += f"\nTheir message (untrusted text):\n{question}"
-        payload = {"model": MODEL, "max_tokens": 400,
+        payload = {"model": MODEL, "max_tokens": MAX_TOKENS,
                    "system": SYSTEM_PROMPT.format(today=datetime.now(TZ).strftime("%A, %B %d, %Y")),
                    "messages": [{"role": "user", "content": user}]}
         try:
@@ -196,7 +213,9 @@ class ZappyChatCog(commands.Cog):
                 print(f"[zappy_chat] API error: {data['error']}")
                 return None
             text = "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text").strip()
-            return text[:MAX_REPLY] or None
+            if data.get("stop_reason") == "max_tokens" or len(text) > MAX_REPLY:
+                text = trim_incomplete(text[:MAX_REPLY])
+            return text or None
         except Exception as e:
             print(f"[zappy_chat] request failed: {e}")
             return None
@@ -216,7 +235,10 @@ class ZappyChatCog(commands.Cog):
         q = m.content
         for tok in (f"<@{self.bot.user.id}>", f"<@!{self.bot.user.id}>"):
             q = q.replace(tok, " ")
-        q = re.sub(r"<@[!&]?\d+>", "someone", q)           # other mentions -> neutral
+        for u in m.mentions:
+            if u.id != self.bot.user.id:
+                q = q.replace(f"<@{u.id}>", f"@{u.display_name}").replace(f"<@!{u.id}>", f"@{u.display_name}")
+        q = re.sub(r"<@[!&]?\d+>", "someone", q)
         return re.sub(r"\s+", " ", q).strip()[:MAX_Q]
 
     @commands.Cog.listener()
@@ -249,7 +271,11 @@ class ZappyChatCog(commands.Cog):
             async with m.channel.typing():
                 profile = await asyncio.to_thread(
                     self.build_profile_sync, m.author.id, m.author.name, m.author.display_name)
-                reply = await self.ask(profile, question, context)
+                others = []
+                for u in [u for u in m.mentions if u.id != self.bot.user.id and not u.bot][:2]:
+                    prof = await asyncio.to_thread(self.build_profile_sync, u.id, u.name, u.display_name)
+                    others.append((u.display_name, prof))
+                reply = await self.ask(profile, question, context, others)
             if reply is None:
                 self._fallback_i += 1
                 reply = FALLBACKS[self._fallback_i % len(FALLBACKS)]
