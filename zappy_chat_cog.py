@@ -45,11 +45,15 @@ TZ        = ZoneInfo("America/Chicago")
 MAX_Q     = 500          # chars of the asker's question we forward
 MAX_REPLY = 1800         # safety cap on what we post (Discord limit is 2000)
 FACTS_TTL = 120          # seconds the server-wide facts block is cached
+SEARCH_ENABLED = os.environ.get("CHAT_WEB_SEARCH", "1") not in ("0", "false", "False", "")
+SEARCH_MAX_USES = int(os.environ.get("CHAT_SEARCH_MAX_USES", "2"))        # searches per reply
+SEARCH_DAILY_CAP = int(os.environ.get("CHAT_SEARCH_DAILY_CAP", "150"))    # searches per day, all users (~$10 per 1,000)
+SEARCH_RETRY_AFTER = 600                                                  # seconds to skip search after it errors
 MAX_TOKENS = 700         # room to finish a thought; the prompt keeps answers short anyway
 
 SYSTEM_PROMPT = """You are Zappy Clash, an autonomous Zappy agent living in the Zappies Reborn Discord server (an NFT community on Algorand with Zappy Clash battles, Sparks, Spark Jobs, the Spark Office, Voltball and Chain Lightning, plus the Zappy Agent Wire, where Zappy agents post live news). You are cheeky, quick and warm, like a news-desk anchor who also loves the community. You can chat about anything: general questions, trivia, history, science, writing, advice, jokes, quick code or math, whatever the person asks.
 
-Today is {today} (Central time). You have no web access, so for current events or anything recent, say what you know and that it may be out of date.
+Today is {today} (Central time). You have a web search tool: use it for anything that may have changed or that you can't be sure of (current events, news, schedules, launch times, prices, scores, "today", "tonight", "latest", "current"). For stable facts, answer directly without searching. When you used search, answer from what you found, say which source it came from in a few words (not a pasted link list), and if sources disagree or you couldn't find it, say so plainly. If you include a link, wrap it in <angle brackets> so Discord doesn't expand a big preview.
 
 How to answer:
 - Keep it short for Discord: usually 1-4 sentences, up to about 900 characters when the question truly needs it. Plain Discord text, light emoji, simple formatting. Stay in your Zappy-agent voice even on general topics.
@@ -57,7 +61,7 @@ How to answer:
 - Server-wide facts (leaderboard, streak leaders, top fighters, latest battles) are in the SERVER FACTS block. Use it for questions like "who's #1?", "who's on a streak?" or "who won last?". If the answer isn't in it, say you don't have that detail rather than guessing.
 - Voltball: when a VOLTBALL block is present, use it. It has the real engine rules, the asker's and opponent's public lineups, and a simulation of the real engine. Give concrete, specific advice (formation, tempo, who should play where, the coach's signature play) and quote the simulated win chance, noting luck still matters. Lineups are public via /voltball_lineups, so using the opponent's lineup is fair. If a lineup isn't submitted, say so and give general strategy.
 - Always finish your sentences; if you're running long, wrap up concisely rather than trailing off. If asked "who am I?" (or similar), build a fun, specific answer from a mix of their username, what they hold and their Clash record; tease affectionately, never cruelly. Never invent holdings, wins or ranks. If wallet isn't linked, they can use /link.
-- If asked what you can do: you can chat about anything, tell people who they are from their name, holdings and record, explain Zappies, Clash, Sparks and the server, and the Agent Wire posts live news. You cannot run commands, move funds, browse the web, or see images.
+- If asked what you can do: you can chat about anything, tell people who they are from their name, holdings and record, explain Zappies, Clash, Sparks and the server, and the Agent Wire posts live news. You can look things up on the web. You cannot run commands, move funds, or see images.
 - For Zappies/server specifics you don't actually know (prices, schedules, rules), say you're not sure instead of guessing. No financial advice or price predictions.
 - You can't produce images, but you can do simple text or ASCII drawings.
 - Answer general questions directly and substantively, like a knowledgeable assistant who happens to have a Zappy-agent personality. Don't deflect, don't lecture, and don't steer back to Zappies or Clash unless the question is about them. Never tack the asker's own stats or leaderboard rank onto an unrelated answer.
@@ -97,6 +101,8 @@ class ZappyChatCog(commands.Cog):
         self._per_user: dict[int, int] = {}
         self._last: dict[int, float] = {}
         self._fallback_i = 0
+        self._searches_today = 0
+        self._search_off_until = 0.0
         self._facts_text: str | None = None
         self._facts_at = -1e9
 
@@ -105,7 +111,7 @@ class ZappyChatCog(commands.Cog):
     def _roll_day(self):
         d = _today()
         if d != self._day:
-            self._day, self._global, self._per_user = d, 0, {}
+            self._day, self._global, self._per_user, self._searches_today = d, 0, {}, 0
 
     def check_limits(self, user_id: int) -> str | None:
         """None = allowed, else 'cooldown' | 'user_cap' | 'global_cap'."""
@@ -281,26 +287,59 @@ class ZappyChatCog(commands.Cog):
         if context:
             user += f"\nThey replied to this message (untrusted text): {context}\n"
         user += f"\nTheir message (untrusted text):\n{question}"
-        payload = {"model": MODEL, "max_tokens": MAX_TOKENS,
-                   "system": SYSTEM_PROMPT.format(today=datetime.now(TZ).strftime("%A, %B %d, %Y")),
-                   "messages": [{"role": "user", "content": user}]}
+        system = SYSTEM_PROMPT.format(today=datetime.now(TZ).strftime("%A, %B %d, %Y"))
+        messages = [{"role": "user", "content": user}]
+        use_search = (SEARCH_ENABLED and self._searches_today < SEARCH_DAILY_CAP
+                      and time.monotonic() >= self._search_off_until)
         try:
-            async with aiohttp.ClientSession() as s:
-                async with s.post(API_URL, json=payload, headers={
-                    "x-api-key": self.api_key, "anthropic-version": "2023-06-01",
-                    "content-type": "application/json"},
-                    timeout=aiohttp.ClientTimeout(total=25)) as r:
-                    data = await r.json()
-            if "error" in data:
-                print(f"[zappy_chat] API error: {data['error']}")
+            data = await self._call(system, messages, use_search)
+            if data is None and use_search:
+                # Search may not be enabled for this API key's org (or is rate limited): answer without it
+                self._search_off_until = time.monotonic() + SEARCH_RETRY_AFTER
+                print("[zappy_chat] web search unavailable, answering without it for a while. "
+                      "(An org admin must enable web search in the Anthropic Console.)")
+                data = await self._call(system, messages, False)
+            if data is None:
                 return None
-            text = "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text").strip()
+            # The API can pause a long server-side search turn; resume it as-is (docs: pause_turn).
+            for _ in range(2):
+                if data.get("stop_reason") != "pause_turn":
+                    break
+                messages = messages + [{"role": "assistant", "content": data["content"]}]
+                nxt = await self._call(system, messages, True)
+                if nxt is None:
+                    break
+                data = nxt
+            blocks = data.get("content", [])
+            self._searches_today += int(((data.get("usage") or {}).get("server_tool_use") or {}).get("web_search_requests", 0) or 0)
+            # With search, earlier text blocks are narration ("let me look that up"): keep only the final answer.
+            last_tool = max((i for i, b in enumerate(blocks) if b.get("type") in ("web_search_tool_result", "server_tool_use")), default=-1)
+            texts = [b.get("text", "") for b in blocks[last_tool + 1:] if b.get("type") == "text"] \
+                or [b.get("text", "") for b in blocks if b.get("type") == "text"]
+            text = "".join(texts).strip()
             if data.get("stop_reason") == "max_tokens" or len(text) > MAX_REPLY:
                 text = trim_incomplete(text[:MAX_REPLY])
             return text or None
         except Exception as e:
             print(f"[zappy_chat] request failed: {e}")
             return None
+
+    async def _call(self, system: str, messages: list, search: bool) -> dict | None:
+        """One Messages API call. Returns the response dict, or None on an API error."""
+        payload = {"model": MODEL, "max_tokens": 1000 if search else MAX_TOKENS,
+                   "system": system, "messages": messages}
+        if search:
+            payload["tools"] = [{"type": "web_search_20250305", "name": "web_search", "max_uses": SEARCH_MAX_USES}]
+        async with aiohttp.ClientSession() as s:
+            async with s.post(API_URL, json=payload, headers={
+                "x-api-key": self.api_key, "anthropic-version": "2023-06-01",
+                "content-type": "application/json"},
+                timeout=aiohttp.ClientTimeout(total=45 if search else 25)) as r:
+                data = await r.json()
+        if "error" in data:
+            print(f"[zappy_chat] API error{' (with web search)' if search else ''}: {data['error']}")
+            return None
+        return data
 
     # ── listener ──────────────────────────────────────────────────────────────
 
