@@ -10,6 +10,8 @@ import os
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 # Cheap + fast is plenty for a 4-6 sentence recap. Override with RECAP_MODEL if wanted.
 RECAP_MODEL = os.environ.get("RECAP_MODEL", "claude-haiku-5-5")
+# Used once if the primary model returns no text block (e.g. only a thinking block).
+RECAP_FALLBACK_MODEL = os.environ.get("RECAP_FALLBACK_MODEL", "claude-sonnet-5-5")
 
 RECAP_SYSTEM_PROMPT = """You are the official announcer for Zappies Reborn — a high-energy NFT battle league on Algorand.
 You write punchy, hype bracket champion recaps based on the winner's NFT image and their stats.
@@ -75,7 +77,7 @@ async def generate_champion_recap(
 
         payload = {
             "model": RECAP_MODEL,
-            "max_tokens": 300,
+            "max_tokens": 800,      # headroom: some models spend tokens on a thinking block before the text
             "system": RECAP_SYSTEM_PROMPT,
             "messages": [{
                 "role": "user",
@@ -96,24 +98,33 @@ async def generate_champion_recap(
             }],
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "https://api.anthropic.com/v1/messages",
-                json=payload,
-                headers={
-                    "x-api-key": ANTHROPIC_API_KEY,
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json",
-                },
-                timeout=aiohttp.ClientTimeout(total=30),
-            ) as resp:
-                data = await resp.json()
+        for model in (RECAP_MODEL, RECAP_FALLBACK_MODEL):
+            payload["model"] = model
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://api.anthropic.com/v1/messages",
+                    json=payload,
+                    headers={
+                        "x-api-key": ANTHROPIC_API_KEY,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json",
+                    },
+                    timeout=aiohttp.ClientTimeout(total=30),
+                ) as resp:
+                    data = await resp.json()
 
-        if "error" in data:
-            print(f"[recap_generator] API error: {data['error']}")
-            return None
+            if "error" in data:
+                print(f"[recap_generator] API error ({model}): {data['error']}")
+                continue
 
-        return data["content"][0]["text"]
+            # Take the text block(s) wherever they are; the first block isn't always text.
+            blocks = data.get("content") or []
+            text = "".join(b.get("text", "") for b in blocks if b.get("type") == "text").strip()
+            if text:
+                return text
+            print(f"[recap_generator] no text block from {model}: "
+                  f"types={[b.get('type') for b in blocks]} stop_reason={data.get('stop_reason')}")
+        return None
 
     except Exception as e:
         print(f"[recap_generator] failed: {e}")
