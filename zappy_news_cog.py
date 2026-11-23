@@ -25,8 +25,8 @@ tries another):
 
 Drip: every NEWS_MIN_MINUTES..NEWS_MAX_MINUTES (random, default 2.5-5 h), skipping
 quiet hours, capped per day (default 4). Only the server-data segments are in the
-rotation by default (clash_recap, winners_circle, office_gossip, hall_of_records);
-headlines / market / chain / Voltball stay available via /news_now or
+rotation by default (clash_recap, winners_circle, office_gossip, hall_of_records,
+chain_report, voltball_scores); headlines / market stay available via /news_now or
 NEWS_ACTIVE_SEGMENTS. Breaking posts default to upsets, NFT drops and chain records. Agents come from a persistent shuffle bag, so every Zappy
 takes a shift before anyone repeats.
 
@@ -90,10 +90,10 @@ SEGMENTS: dict[str, tuple[int, int]] = {
 HEADLINE_KIND_WEIGHTS = {"tech": 4, "ai": 4, "sports": 3}
 
 # Which segments are in the scheduled rotation. Default = the server-data ones people like
-# (Clash facts, Spark Office, NFT prizes, Hall of Records). The outside-world feeds (headlines,
-# market) and the chain / Voltball roundups stay available for /news_now but are off the drip.
+# (Clash facts, Spark Office, NFT prizes, Hall of Records, Chain Lightning, Voltball scores).
+# The outside-world feeds (headlines, market) stay available for /news_now but are off the drip.
 # Override with NEWS_ACTIVE_SEGMENTS="clash_recap,winners_circle,..." (or "all").
-_DEFAULT_ACTIVE = "clash_recap,winners_circle,office_gossip,hall_of_records"
+_DEFAULT_ACTIVE = "clash_recap,winners_circle,office_gossip,hall_of_records,chain_report,voltball_scores"
 _raw_active = os.environ.get("NEWS_ACTIVE_SEGMENTS", _DEFAULT_ACTIVE).strip().lower()
 ACTIVE_SEGMENTS: set[str] = (set(SEGMENTS) if _raw_active == "all"
                              else {x.strip() for x in _raw_active.split(",") if x.strip() in SEGMENTS}
