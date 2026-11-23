@@ -23,8 +23,11 @@ tries another):
     breaking         event-triggered (not scheduled): big upsets, chain records /
                      milestones, fresh NFT drops
 
-Drip: every NEWS_MIN_MINUTES..NEWS_MAX_MINUTES (random), skipping quiet hours,
-capped per day. Agents come from a persistent shuffle bag, so every Zappy
+Drip: every NEWS_MIN_MINUTES..NEWS_MAX_MINUTES (random, default 2.5-5 h), skipping
+quiet hours, capped per day (default 4). Only the server-data segments are in the
+rotation by default (clash_recap, winners_circle, office_gossip, hall_of_records);
+headlines / market / chain / Voltball stay available via /news_now or
+NEWS_ACTIVE_SEGMENTS. Breaking posts default to upsets, NFT drops and chain records. Agents come from a persistent shuffle bag, so every Zappy
 takes a shift before anyone repeats.
 
 Tables: see zappy_news_setup.sql. Loaded from bot.py like the other cogs.
@@ -61,11 +64,12 @@ NEWS_ENABLED_DEFAULT = os.environ.get("NEWS_ENABLED", "1") not in ("0", "false",
 NEWS_TZ        = ZoneInfo(os.environ.get("NEWS_TZ", "America/Chicago"))
 QUIET_START    = int(os.environ.get("NEWS_QUIET_START", 23))     # local hour, inclusive
 QUIET_END      = int(os.environ.get("NEWS_QUIET_END", 7))        # local hour, exclusive
-MIN_MINUTES    = int(os.environ.get("NEWS_MIN_MINUTES", 45))
-MAX_MINUTES    = int(os.environ.get("NEWS_MAX_MINUTES", 150))
-DAILY_CAP      = int(os.environ.get("NEWS_DAILY_CAP", 9))        # scheduled broadcasts / local day
-BREAKING_CAP   = int(os.environ.get("NEWS_BREAKING_CAP", 5))     # breaking / local day
-BREAKING_GAP_MIN = int(os.environ.get("NEWS_BREAKING_GAP_MIN", 20))
+# Quieter by default (was 45-150 min / 9 per day / 5 breaking): a few posts a day, not a ticker.
+MIN_MINUTES    = int(os.environ.get("NEWS_MIN_MINUTES", 150))
+MAX_MINUTES    = int(os.environ.get("NEWS_MAX_MINUTES", 300))
+DAILY_CAP      = int(os.environ.get("NEWS_DAILY_CAP", 4))        # scheduled broadcasts / local day
+BREAKING_CAP   = int(os.environ.get("NEWS_BREAKING_CAP", 2))     # breaking / local day
+BREAKING_GAP_MIN = int(os.environ.get("NEWS_BREAKING_GAP_MIN", 90))
 BREAKING_UPSET_ROUND = int(os.environ.get("NEWS_BREAKING_UPSET_ROUND", 3))
 BREAKING_LOOKBACK_H  = 3          # never report events older than this
 BREAKING_POLL_MIN    = 3
@@ -84,6 +88,22 @@ SEGMENTS: dict[str, tuple[int, int]] = {
     "hall_of_records": (8,  300),
 }
 HEADLINE_KIND_WEIGHTS = {"tech": 4, "ai": 4, "sports": 3}
+
+# Which segments are in the scheduled rotation. Default = the server-data ones people like
+# (Clash facts, Spark Office, NFT prizes, Hall of Records). The outside-world feeds (headlines,
+# market) and the chain / Voltball roundups stay available for /news_now but are off the drip.
+# Override with NEWS_ACTIVE_SEGMENTS="clash_recap,winners_circle,..." (or "all").
+_DEFAULT_ACTIVE = "clash_recap,winners_circle,office_gossip,hall_of_records"
+_raw_active = os.environ.get("NEWS_ACTIVE_SEGMENTS", _DEFAULT_ACTIVE).strip().lower()
+ACTIVE_SEGMENTS: set[str] = (set(SEGMENTS) if _raw_active == "all"
+                             else {x.strip() for x in _raw_active.split(",") if x.strip() in SEGMENTS}
+                             or set(_DEFAULT_ACTIVE.split(",")))
+
+# Event-triggered "breaking" kinds that may fire: upset (late-round Clash upsets),
+# drop (NFT prizes won), chain_record (a chain ending as a new record / 10+ links),
+# chain_milestone (live 10/25/50/100 link pings - noisy, off by default).
+BREAKING_KINDS: set[str] = {x.strip() for x in os.environ.get(
+    "NEWS_BREAKING_KINDS", "upset,drop,chain_record").lower().split(",") if x.strip()}
 
 
 def _now() -> datetime:
@@ -378,12 +398,14 @@ class ZappyNewsCog(commands.Cog):
         now = _now()
         ok = []
         for key, (weight, gap_min) in SEGMENTS.items():
+            if key not in ACTIVE_SEGMENTS:
+                continue
             last = self.last_posted.get(key)
             if last and now - last < timedelta(minutes=gap_min):
                 continue
             ok.append((key, weight))
         if not ok:
-            ok = [(k, w) for k, (w, _) in SEGMENTS.items()]
+            ok = [(k, w) for k, (w, _) in SEGMENTS.items() if k in ACTIVE_SEGMENTS]
         # weighted random order (Efraimidis–Spirakis)
         ordered = sorted(ok, key=lambda kw: random.random() ** (1.0 / kw[1]), reverse=True)
         keys = [k for k, _ in ordered]
@@ -721,73 +743,77 @@ class ZappyNewsCog(commands.Cog):
         candidates: list[dict] = []
 
         # 1. big upsets (late-round)
-        try:
-            ups = (await self._q(lambda: self.db.table("battles").select("*")
-                                 .eq("is_upset", True).gte("bracket_round", BREAKING_UPSET_ROUND)
-                                 .gte("played_at", since).order("played_at", desc=True)
-                                 .limit(10).execute())).data or []
-            for r in ups:
-                key = f"brk:upset:{r.get('id')}"
-                if key not in self.seen:
-                    hero = HERO_ASSET_IDS.get(r["winner_asset_id"])
-                    body = [f"Round {r.get('bracket_round')} shocker"]
-                    if hero in T.HERO_SIGNATURE:
-                        body.append(f"{hero}'s {T.HERO_SIGNATURE[hero]} was in the toolkit")
-                    candidates.append({"headline": f"UPSET! {self.zname(r['winner_asset_id'])} stuns "
-                                                   f"{self.zname(r['loser_asset_id'])}",
-                                       "body": body, "seen": [key],
-                                       "art": r["winner_asset_id"], "art_caption": "UPSET WINNER"})
-        except Exception as e:
-            print(f"[news] breaking/upset query failed: {e}")
+        if "upset" in BREAKING_KINDS:
+            try:
+                ups = (await self._q(lambda: self.db.table("battles").select("*")
+                                     .eq("is_upset", True).gte("bracket_round", BREAKING_UPSET_ROUND)
+                                     .gte("played_at", since).order("played_at", desc=True)
+                                     .limit(10).execute())).data or []
+                for r in ups:
+                    key = f"brk:upset:{r.get('id')}"
+                    if key not in self.seen:
+                        hero = HERO_ASSET_IDS.get(r["winner_asset_id"])
+                        body = [f"Round {r.get('bracket_round')} shocker"]
+                        if hero in T.HERO_SIGNATURE:
+                            body.append(f"{hero}'s {T.HERO_SIGNATURE[hero]} was in the toolkit")
+                        candidates.append({"headline": f"UPSET! {self.zname(r['winner_asset_id'])} stuns "
+                                                       f"{self.zname(r['loser_asset_id'])}",
+                                           "body": body, "seen": [key],
+                                           "art": r["winner_asset_id"], "art_caption": "UPSET WINNER"})
+            except Exception as e:
+                print(f"[news] breaking/upset query failed: {e}")
 
         # 2. chain records + live milestones
         try:
-            ended = (await self._q(lambda: self.db.table("chain_runs").select("*")
-                                   .eq("status", "ended").gte("ended_at", since)
-                                   .order("chain_count", desc=True).limit(3).execute())).data or []
-            for r in ended:
-                key = f"brk:chainend:{r['id']}"
-                if key in self.seen or (r.get("chain_count") or 0) < 10:
-                    continue
-                prev = (await self._q(lambda: self.db.table("chain_runs").select("chain_count")
-                                      .eq("status", "ended").neq("id", r["id"])
-                                      .order("chain_count", desc=True)
-                                      .limit(1).execute())).data
-                prev_best = prev[0]["chain_count"] if prev else 0
-                record = r["chain_count"] > (prev_best or 0)
-                candidates.append({"headline": ("NEW CHAIN RECORD: " if record else "Epic chain ends at ")
-                                               + f"{r['chain_count']} links",
-                                   "body": ([f"Previous best was {prev_best}"] if record and prev_best else []),
-                                   "seen": [key]})
-            live = (await self._q(lambda: self.db.table("chain_runs").select("*")
-                                  .eq("status", "live").limit(1).execute())).data
-            if live:
-                r = live[0]
-                for ms in (100, 50, 25, 10):
-                    if (r.get("chain_count") or 0) >= ms:
-                        key = f"brk:chainms:{r['id']}:{ms}"
-                        if key not in self.seen:
-                            candidates.append({"headline": f"The chain just hit {ms} links!",
-                                               "body": [f"{r.get('grounds_left', '?')} Grounds left"],
-                                               "seen": [key]})
-                        break
+            if "chain_record" in BREAKING_KINDS:
+                ended = (await self._q(lambda: self.db.table("chain_runs").select("*")
+                                       .eq("status", "ended").gte("ended_at", since)
+                                       .order("chain_count", desc=True).limit(3).execute())).data or []
+                for r in ended:
+                    key = f"brk:chainend:{r['id']}"
+                    if key in self.seen or (r.get("chain_count") or 0) < 10:
+                        continue
+                    prev = (await self._q(lambda: self.db.table("chain_runs").select("chain_count")
+                                          .eq("status", "ended").neq("id", r["id"])
+                                          .order("chain_count", desc=True)
+                                          .limit(1).execute())).data
+                    prev_best = prev[0]["chain_count"] if prev else 0
+                    record = r["chain_count"] > (prev_best or 0)
+                    candidates.append({"headline": ("NEW CHAIN RECORD: " if record else "Epic chain ends at ")
+                                                   + f"{r['chain_count']} links",
+                                       "body": ([f"Previous best was {prev_best}"] if record and prev_best else []),
+                                       "seen": [key]})
+            if "chain_milestone" in BREAKING_KINDS:
+                live = (await self._q(lambda: self.db.table("chain_runs").select("*")
+                                      .eq("status", "live").limit(1).execute())).data
+                if live:
+                    r = live[0]
+                    for ms in (100, 50, 25, 10):
+                        if (r.get("chain_count") or 0) >= ms:
+                            key = f"brk:chainms:{r['id']}:{ms}"
+                            if key not in self.seen:
+                                candidates.append({"headline": f"The chain just hit {ms} links!",
+                                                   "body": [f"{r.get('grounds_left', '?')} Grounds left"],
+                                                   "seen": [key]})
+                            break
         except Exception as e:
             print(f"[news] breaking/chain query failed: {e}")
 
         # 3. fresh NFT drops
-        try:
-            drops = (await self._q(lambda: self.db.table("nft_prizes").select("*")
-                                   .gte("awarded_at", since).order("awarded_at", desc=True)
-                                   .limit(10).execute())).data or []
-            for r in drops:
-                key = f"brk:drop:{r.get('id', r.get('asset_id'))}"
-                if key not in self.seen:
-                    candidates.append({"headline": f"NFT DROP: {r.get('asset_name') or 'a prize'} has a new owner-to-be",
-                                       "body": [f"Earned through {T.SOURCE_LABELS.get(r.get('source'), 'play')}"],
-                                       "say": [f"Congrats {_mention(r.get('discord_user_id'))}"],
-                                       "seen": [key], "art": r.get("asset_id"), "art_caption": "PRIZE"})
-        except Exception as e:
-            print(f"[news] breaking/drop query failed: {e}")
+        if "drop" in BREAKING_KINDS:
+            try:
+                drops = (await self._q(lambda: self.db.table("nft_prizes").select("*")
+                                       .gte("awarded_at", since).order("awarded_at", desc=True)
+                                       .limit(10).execute())).data or []
+                for r in drops:
+                    key = f"brk:drop:{r.get('id', r.get('asset_id'))}"
+                    if key not in self.seen:
+                        candidates.append({"headline": f"NFT DROP: {r.get('asset_name') or 'a prize'} has a new owner-to-be",
+                                           "body": [f"Earned through {T.SOURCE_LABELS.get(r.get('source'), 'play')}"],
+                                           "say": [f"Congrats {_mention(r.get('discord_user_id'))}"],
+                                           "seen": [key], "art": r.get("asset_id"), "art_caption": "PRIZE"})
+            except Exception as e:
+                print(f"[news] breaking/drop query failed: {e}")
 
         if not candidates:
             return None
@@ -833,6 +859,8 @@ class ZappyNewsCog(commands.Cog):
             f"**Zappy Agent Wire** — {'🟢 on' if self.enabled else '⏸️ paused'}\n"
             f"Next broadcast: {nxt} (quiet hours {QUIET_START}:00–{QUIET_END}:00 {NEWS_TZ.key})\n"
             f"Today: {today}/{DAILY_CAP} scheduled · {brk}/{BREAKING_CAP} breaking\n"
+            f"In rotation: {', '.join(sorted(ACTIVE_SEGMENTS))}\n"
+            f"Breaking kinds: {', '.join(sorted(BREAKING_KINDS)) or 'none'}\n"
             f"Agent rotation: {len(self.bag_used)}/{len(self.pool)} Zappies have taken a shift\n"
             f"Cached headlines — {feeds}",
             ephemeral=True)
