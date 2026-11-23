@@ -61,21 +61,22 @@ RECENT_KEEP = 14
 MARKER = "Zappy Question of the Day"                      # footer prefix; the chat cog looks for it too
 
 ANGLES: list[tuple[str, int]] = [
-    ("Firsts and memories: first Zappy, first win, first moment you got hooked", 3),
-    ("Risk vs safety: the bold play or the safe one (Clash, Voltball formations and tempo)", 3),
-    ("Underdogs, upsets and what makes a win feel earned", 2),
-    ("Streaks and consistency: showing up every day vs one lucky moment", 2),
-    ("What a Zappy thinks about when nobody is battling; their secret inner life", 3),
-    ("Life in the Spark Office or out on an expedition: what it is really like for a Zappy", 2),
-    ("Collecting and ownership: what makes one favorite, what you'd never let go", 2),
-    ("A quirky thought experiment starring Zappies (PG-13)", 2),
-    ("Turn ONE stat from the SERVER FACTS into a musing (only if facts are provided)", 2),
+    # about half are Zappies / server flavored, half are just good things to ponder
+    ("Firsts and memories: first Zappy, first win, first moment you got hooked", 2),
+    ("Risk vs safety: the bold play or the safe one (Clash, Voltball formations and tempo)", 2),
+    ("What a Zappy thinks about when nobody is battling; their secret inner life", 2),
+    ("Life in the Spark Office or out on an expedition: what it is really like for a Zappy", 1),
+    ("Turn ONE stat from the SERVER FACTS into a musing (only if facts are provided)", 1),
+    ("A quirky thought experiment (PG-13): would you rather, last-meal, time travel, tiny superpowers", 3),
+    ("Everyday life and small habits: mornings, food, sleep, music, the thing you do that nobody else does", 3),
+    ("Tech, games and the internet: a take people can argue with, nostalgia, the worst or best of it", 3),
+    ("Big-small questions: luck vs skill, comfort vs adventure, what makes something feel earned", 2),
     ("The community: what you'd tell a brand-new member, what you'd change, what you'd keep", 1),
 ]
 
 SYSTEM_PROMPT = """You write the "Question of the Day" for the Zappies Discord, a friendly community around the Zappies Reborn NFT collection (Algorand), the Zappy Clash battle bot, Voltball and the Spark Office.
 
-Write exactly ONE pondering question: reflective, a little whimsical or thought-provoking, the kind of thing people stop and think about for a second and then want to answer. It should invite a personal answer in a sentence or two, not a yes/no and not a trivia fact. Today is {today}.
+Write exactly ONE pondering question: reflective, a little whimsical or funny, the kind of thing people stop and think about for a second and then want to answer. It does NOT have to be about Zappies; follow the ANGLE, and general life, tech, games and thought-experiment questions are welcome. It should invite a personal answer in a sentence or two, not a yes/no and not a trivia fact. Today is {today}.
 
 Rules:
 - Output ONLY a JSON object, no prose, no code fences: {{"question": "..."}}
@@ -107,6 +108,13 @@ FALLBACKS: list[str] = [
     "What's the most underrated thing about this server?",
     "If the Zappies ran the server for a day, what would be the first thing they'd change?",
     "What would you want a Zappy to say about you after a long season together?",
+    "What's a tiny superpower you'd actually use every single day?",
+    "What's the most underrated food combo you'd defend in public?",
+    "If you could relive one ordinary day from your life, which one?",
+    "What's something that was better before everyone had a smartphone?",
+    "What's the one thing you'd put in a time capsule to confuse people in 100 years?",
+    "Do you think luck or skill decides more games, and has that changed your mind lately?",
+    "What's a habit you've kept for years that makes no sense to anyone else?",
 ]
 
 
