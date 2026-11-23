@@ -1071,19 +1071,20 @@ class SparkOfficeCog(commands.Cog):
     # ──────────────────────────────────────────
     @app_commands.command(name="office-duel-respond", description="Submit your picks for a pending Office duel")
     async def office_duel_respond(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)   # DB lookups below can exceed Discord's 3 s ack window
         user_id = str(interaction.user.id)
         wallet = await asyncio.to_thread(get_wallet, user_id)
         if not wallet:
-            await interaction.response.send_message("❌ Link your wallet first with `/link`.", ephemeral=True)
+            await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
             return
 
         duels = await asyncio.to_thread(get_pending_duels_for_wallet, wallet)
         if not duels:
-            await interaction.response.send_message("❌ No pending duel found for your Sparks.", ephemeral=True)
+            await interaction.followup.send("❌ No pending duel found for your Sparks.", ephemeral=True)
             return
 
         if len(duels) > 1:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "You've got more than one duel going — pick which one:",
                 view=DuelChoiceView(wallet, duels),
                 ephemeral=True,
@@ -1097,11 +1098,11 @@ class SparkOfficeCog(commands.Cog):
             side, name, already = "defender", duel["defender_name"], duel.get("defender_picks")
 
         if already:
-            await interaction.response.send_message("✅ You've already submitted picks for this duel.", ephemeral=True)
+            await interaction.followup.send("✅ You've already submitted picks for this duel.", ephemeral=True)
             return
 
         view = DuelPickView(duel["id"], side, name)
-        await interaction.response.send_message(view._progress_text(), view=view, ephemeral=True)
+        await interaction.followup.send(view._progress_text(), view=view, ephemeral=True)
 
     # ──────────────────────────────────────────
     # /office-set-shift-time — pick/change a seat's fixed daily anchor.
@@ -1111,20 +1112,21 @@ class SparkOfficeCog(commands.Cog):
     # ──────────────────────────────────────────
     @app_commands.command(name="office-set-shift-time", description="Choose your daily Office clock-in time for all your seated Sparks")
     async def office_set_shift_time(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)   # DB lookups below can exceed Discord's 3 s ack window
         user_id = str(interaction.user.id)
         wallet = await asyncio.to_thread(get_wallet, user_id)
         if not wallet:
-            await interaction.response.send_message("❌ Link your wallet first with `/link`.", ephemeral=True)
+            await interaction.followup.send("❌ Link your wallet first with `/link`.", ephemeral=True)
             return
 
         seats = await asyncio.to_thread(get_office_seats_for_wallet, wallet)
         seats = [s for s in seats if s.get("status") == "active"]
         if not seats:
-            await interaction.response.send_message("❌ You don't hold any Office seats.", ephemeral=True)
+            await interaction.followup.send("❌ You don't hold any Office seats.", ephemeral=True)
             return
 
         seat_list = [(s["spark_asa"], s.get("spark_name") or s["spark_type"].capitalize()) for s in seats]
-        await interaction.response.send_message(
+        await interaction.followup.send(
             self._shift_time_picker_message(seat_list),
             view=ShiftTimeSelectView(seat_list),
             ephemeral=True,
