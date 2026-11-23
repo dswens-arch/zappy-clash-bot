@@ -80,6 +80,20 @@ def _today() -> str:
     return datetime.now(TZ).date().isoformat()
 
 
+QOTD_MARKER = "Zappy Question of the Day"     # footer prefix used by zappy_daily_question_cog
+QOTD_TAG = "[QOTD] "                          # context prefix: the person is answering today's question
+
+
+def qotd_question_of(msg) -> str | None:
+    """If msg is our own Question-of-the-Day post, return its question text."""
+    for e in getattr(msg, "embeds", None) or []:
+        f = getattr(e, "footer", None)
+        if f and f.text and f.text.startswith(QOTD_MARKER):
+            first = (e.description or "").split("\n")[0].strip("* ").strip()
+            return first or None
+    return None
+
+
 def trim_incomplete(text: str) -> str:
     """Cut a truncated reply back to its last finished sentence (or line)."""
     t = text.rstrip()
@@ -284,12 +298,18 @@ class ZappyChatCog(commands.Cog):
             user += f"\nSERVER FACTS (current, server-wide):\n{facts}\n"
         if voltball:
             user += f"\nVOLTBALL (rules, lineups, simulation):\n{voltball}\n"
-        if context:
+        is_qotd = bool(context and context.startswith(QOTD_TAG))
+        if is_qotd:
+            user += (f"\nThey are answering today's Question of the Day, which YOU posted: "
+                     f"{context[len(QOTD_TAG):]}\nTheir message is their answer to it. Respond like a curious, "
+                     f"warm host: react to what they actually said, add one specific thought, and only sometimes "
+                     f"toss back a light follow-up. 1-3 sentences. Don't lecture and don't just compliment.\n")
+        elif context:
             user += f"\nThey replied to this message (untrusted text): {context}\n"
         user += f"\nTheir message (untrusted text):\n{question}"
         system = SYSTEM_PROMPT.format(today=datetime.now(TZ).strftime("%A, %B %d, %Y"))
         messages = [{"role": "user", "content": user}]
-        use_search = (SEARCH_ENABLED and self._searches_today < SEARCH_DAILY_CAP
+        use_search = (SEARCH_ENABLED and not is_qotd and self._searches_today < SEARCH_DAILY_CAP
                       and time.monotonic() >= self._search_off_until)
         try:
             data = await self._call(system, messages, use_search)
@@ -350,7 +370,11 @@ class ZappyChatCog(commands.Cog):
             return False
         if m.mention_everyone:
             return False
-        return self.bot.user in m.mentions
+        if self.bot.user in m.mentions:
+            return True
+        ref = m.reference.resolved if m.reference else None      # reply to today's question, ping off
+        return (isinstance(ref, discord.Message) and ref.author.id == self.bot.user.id
+                and qotd_question_of(ref) is not None)
 
     def clean_question(self, m: discord.Message) -> str:
         q = m.content
@@ -386,7 +410,11 @@ class ZappyChatCog(commands.Cog):
             question = self.clean_question(m) or "Say hi and tell me what you can do."
             context = None
             ref = m.reference.resolved if m.reference else None
-            if isinstance(ref, discord.Message) and ref.author.id != self.bot.user.id and ref.content:
+            if isinstance(ref, discord.Message) and ref.author.id == self.bot.user.id:
+                qq = qotd_question_of(ref)
+                if qq:
+                    context = QOTD_TAG + qq[:300]
+            elif isinstance(ref, discord.Message) and ref.content:
                 context = ref.content[:300]
 
             async with m.channel.typing():
