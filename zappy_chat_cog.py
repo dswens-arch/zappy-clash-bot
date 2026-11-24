@@ -25,7 +25,9 @@ import asyncio
 import os
 import re
 import time
+import random
 from datetime import datetime
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 import aiohttp
@@ -68,7 +70,7 @@ How to answer:
 - Server-wide facts (leaderboard, streak leaders, top fighters, latest battles) are in the SERVER FACTS block. Use it for questions like "who's #1?", "who's on a streak?" or "who won last?". If the answer isn't in it, say you don't have that detail rather than guessing.
 - Voltball: when a VOLTBALL block is present, use it. It has the real engine rules, the asker's and opponent's public lineups, and a simulation of the real engine. Give concrete, specific advice (formation, tempo, who should play where, the coach's signature play) and quote the simulated win chance, noting luck still matters. Lineups are public via /voltball_lineups, so using the opponent's lineup is fair. If a lineup isn't submitted, say so and give general strategy.
 - Always finish your sentences; if you're running long, wrap up concisely rather than trailing off. If asked "who am I?" (or similar), build a fun, specific answer from a mix of their username, what they hold and their Clash record; tease affectionately, never cruelly. Never invent holdings, wins or ranks. If wallet isn't linked, they can use /link.
-- If asked what you can do: you can chat about anything, tell people who they are from their name, holdings and record, explain Zappies, Clash, Sparks and the server, and the Agent Wire posts live news. You can look things up on the web. You cannot run commands, move funds, or see images.
+- If asked what you can do: you can chat about anything, tell people who they are from their name, holdings and record, explain Zappies, Clash, Sparks and the server, and the Agent Wire posts live news. You can look things up on the web. You cannot run commands or move funds. You can't see images or GIFs, only any title text that comes with them, and you never make a point of saying so or guess at what a picture shows.
 - For Zappies/server specifics you don't actually know (prices, schedules, rules), say you're not sure instead of guessing. No financial advice or price predictions.
 - You can't produce images, but you can do simple text or ASCII drawings.
 - Answer general questions directly and substantively, like a smart friend who knows a lot and has a sense of humor. Don't deflect, don't lecture, and don't steer back to Zappies or Clash unless the question is about them. Never tack the asker's own stats or leaderboard rank onto an unrelated answer.
@@ -100,6 +102,112 @@ def qotd_question_of(msg) -> str | None:
             first = (e.description or "").split("\n")[0].strip("* ").strip()
             return first or None
     return None
+
+
+# ── GIFs / images / stickers ───────────────────────────────────────────────────
+# The bot can't see media. A reply that is only a GIF used to reach the model as a bare link,
+# and it answered "I can't see GIFs, but it looks like..." and drifted into Zappies. Now we pull
+# whatever text hint exists (Tenor/Giphy link title, sticker name, a real filename) and the
+# model reacts to the vibe of the post being replied to; with no hint at all the bot just reacts
+# with an emoji (free, no chat quota).
+
+_URL_RE = re.compile(r"https?://[^\s<>]+", re.I)
+_GIF_HOSTS = ("tenor.com", "giphy.com", "gfycat.com", "klipy.com", "imgur.com",
+              "media.discordapp.net", "cdn.discordapp.com")
+_GIF_ONLY_HOSTS = ("tenor.com", "giphy.com", "gfycat.com", "klipy.com")
+_MEDIA_EXT = (".gif", ".png", ".jpg", ".jpeg", ".webp", ".mp4", ".mov", ".webm")
+_GENERIC_NAMES = {"image", "img", "unknown", "screenshot", "screen shot", "photo", "video", "file", "untitled",
+                  "attachment", "giphy", "tenor", "animation", "gif", "sticker", "download", "media"}
+REACT_EMOJI = ("😂", "👀", "🔥", "⚡", "🙌")
+
+
+def _good_hint(words: list[str]) -> str | None:
+    words = [w for w in words if w and not w.isdigit()]
+    if not words:
+        return None
+    if len(words) == 1 and re.search(r"\d", words[0]) and len(words[0]) > 8:     # an id/hash, not a word
+        return None
+    hint = re.sub(r"[^A-Za-z0-9' ]+", " ", " ".join(words))
+    hint = re.sub(r"\s+", " ", hint).strip()[:80]
+    if not re.search(r"[A-Za-z]{3}", hint) or hint.lower() in _GENERIC_NAMES:
+        return None
+    return hint
+
+
+def _slug_hint(url: str) -> str | None:
+    """Tenor / Giphy page links carry a readable slug: tenor.com/view/dancing-cat-gif-1234 -> 'dancing cat'."""
+    try:
+        u = urlparse(url)
+    except Exception:
+        return None
+    host, last = u.netloc.lower(), u.path.strip("/").split("/")[-1]
+    last = re.sub(r"\.(gif|png|jpe?g|webp|mp4|webm|mov)$", "", last, flags=re.I)
+    if host.startswith("media") or not last:
+        return None                                                # media CDN names are hashes
+    if "tenor.com" in host or "klipy.com" in host:
+        m = re.match(r"(.+?)-gifs?(?:-\w+)?$", last, re.I)
+        return _good_hint(re.split(r"[-_+]+", m.group(1) if m else last))
+    if "giphy.com" in host:
+        parts = last.split("-")
+        if len(parts) > 1 and re.search(r"\d", parts[-1]) and len(parts[-1]) >= 8:
+            parts = parts[:-1]                                      # trailing id
+        return _good_hint(re.split(r"[-_+]+", "-".join(parts)))
+    return None
+
+
+def _name_hint(filename: str | None) -> str | None:
+    stem = re.sub(r"\.[A-Za-z0-9]{2,4}$", "", filename or "")
+    if re.match(r"^(img|image|screenshot|screen shot|photo|pxl|dsc|vid|video|mvimg)[ _-]?\d", stem, re.I):
+        return None
+    return _good_hint(re.split(r"[-_+\s]+", stem))
+
+
+def analyze_media(m, bot_id: int) -> tuple[list[dict], str]:
+    """-> (media items [{'kind','hint'}], the message text with the bot mention and media links removed)."""
+    items: list[dict] = []
+    text = m.content or ""
+    for tok in (f"<@{bot_id}>", f"<@!{bot_id}>"):
+        text = text.replace(tok, " ")
+
+    def _strip(match):
+        url = match.group(0).rstrip(").,!?")
+        try:
+            u = urlparse(url)
+        except Exception:
+            return match.group(0)
+        host, path = u.netloc.lower(), u.path.lower()
+        if any(h in host for h in _GIF_HOSTS) or path.endswith(_MEDIA_EXT):
+            kind = "gif" if (any(h in host for h in _GIF_ONLY_HOSTS) or path.endswith(".gif")) else "image"
+            items.append({"kind": kind, "hint": _slug_hint(url)})
+            return " "
+        return match.group(0)
+
+    text = _URL_RE.sub(_strip, text)
+    for a in getattr(m, "attachments", None) or []:
+        ct, fn = (getattr(a, "content_type", "") or "").lower(), (getattr(a, "filename", "") or "")
+        if ct.startswith(("image", "video")) or fn.lower().endswith(_MEDIA_EXT):
+            kind = "gif" if (ct == "image/gif" or fn.lower().endswith(".gif")) else \
+                   "video" if (ct.startswith("video") or fn.lower().endswith((".mp4", ".mov", ".webm"))) else "image"
+            items.append({"kind": kind, "hint": _name_hint(fn)})
+    for st in getattr(m, "stickers", None) or []:
+        items.append({"kind": "sticker", "hint": _good_hint(re.split(r"[-_+\s]+", getattr(st, "name", "") or ""))})
+    if items and not any(i["hint"] for i in items):                  # Discord's own unfurl title, if it arrived
+        for e in getattr(m, "embeds", None) or []:
+            h = _good_hint(re.split(r"\s+", (getattr(e, "title", None) or "").strip()))
+            if h:
+                items[0]["hint"] = h
+                break
+    return items, re.sub(r"\s+", " ", text).strip()
+
+
+def describe_media(items: list[dict]) -> str:
+    """'a GIF (its link title says: "dancing cat")' for the model."""
+    first = items[0]
+    kind = {"gif": "a GIF", "image": "an image", "video": "a video clip", "sticker": "a sticker"}[first["kind"]]
+    if len(items) > 1:
+        kind += f" (plus {len(items) - 1} more)"
+    hint = next((i["hint"] for i in items if i["hint"]), None)
+    return f'{kind} (its title/name says: "{hint}")' if hint else kind
 
 
 def trim_incomplete(text: str) -> str:
@@ -298,7 +406,7 @@ class ZappyChatCog(commands.Cog):
 
     async def ask(self, profile: str, question: str, context: str | None,
                   others: list[tuple[str, str]] | None = None, facts: str | None = None,
-                  voltball: str | None = None) -> str | None:
+                  voltball: str | None = None, media: str | None = None) -> str | None:
         user = f"ASKER PROFILE (facts about the person asking):\n{profile}\n"
         for who, prof in (others or []):
             user += f"\nMENTIONED PROFILE ({who}, someone the asker @mentioned):\n{prof}\n"
@@ -319,10 +427,16 @@ class ZappyChatCog(commands.Cog):
                      f"messages):\n{context[len(CONV_TAG):]}\nTheir message below is the next turn.\n")
         elif context:
             user += f"\nThey replied to this message (untrusted text): {context}\n"
+        if media:
+            user += (f"\nTHEY SENT NO WORDS, only {media}. You can't see it and must not pretend to, and never say "
+                     f"you can't see GIFs or images. Treat it as a reaction to the conversation above (the post they "
+                     f"replied to) and use any title as the vibe. Answer with ONE short, funny line in your voice "
+                     f"(under 20 words): no explanations, no questions, and don't bring up Zappies, Clash or Sparks "
+                     f"unless the post above is about them.\n")
         user += f"\nTheir message (untrusted text):\n{question}"
         system = SYSTEM_PROMPT.format(today=datetime.now(TZ).strftime("%A, %B %d, %Y"))
         messages = [{"role": "user", "content": user}]
-        use_search = (SEARCH_ENABLED and not is_qotd and self._searches_today < SEARCH_DAILY_CAP
+        use_search = (SEARCH_ENABLED and not is_qotd and not media and self._searches_today < SEARCH_DAILY_CAP
                       and time.monotonic() >= self._search_off_until)
         try:
             data = await self._call(system, messages, use_search)
@@ -391,13 +505,16 @@ class ZappyChatCog(commands.Cog):
 
     @staticmethod
     def _msg_text(msg) -> str:
-        t = (getattr(msg, "content", "") or "").strip()
-        if not t:
-            for e in getattr(msg, "embeds", None) or []:
-                t = " ".join(x for x in (getattr(e, "title", None), getattr(e, "description", None)) if x).strip()
-                if t:
-                    break
-        return re.sub(r"\s+", " ", t)[:300]
+        """What a message says, including embed cards (job wins, news posts, recaps)."""
+        parts = [(getattr(msg, "content", "") or "").strip()]
+        for e in getattr(msg, "embeds", None) or []:
+            parts += [getattr(e, "title", None), getattr(e, "description", None)]
+            for f in (getattr(e, "fields", None) or [])[:4]:
+                parts.append(f"{getattr(f, 'name', '')} {getattr(f, 'value', '')}")
+            ft = getattr(e, "footer", None)
+            if ft is not None and getattr(ft, "text", None):
+                parts.append(ft.text)
+        return re.sub(r"\s+", " ", " ".join(str(x) for x in parts if x)).strip()[:400]
 
     async def reply_context(self, m: discord.Message, depth: int = 4) -> str | None:
         """Earlier turns of the reply chain the message belongs to, oldest first.
@@ -435,9 +552,7 @@ class ZappyChatCog(commands.Cog):
         return (QOTD_TAG if qotd else CONV_TAG) + "\n".join(lines)
 
     def clean_question(self, m: discord.Message) -> str:
-        q = m.content
-        for tok in (f"<@{self.bot.user.id}>", f"<@!{self.bot.user.id}>"):
-            q = q.replace(tok, " ")
+        _, q = analyze_media(m, self.bot.user.id)       # bot mention and GIF/image links removed
         for u in m.mentions:
             if u.id != self.bot.user.id:
                 q = q.replace(f"<@{u.id}>", f"@{u.display_name}").replace(f"<@!{u.id}>", f"@{u.display_name}")
@@ -448,6 +563,14 @@ class ZappyChatCog(commands.Cog):
     async def on_message(self, m: discord.Message):
         try:
             if not self._wants(m):
+                return
+            items, text_only = analyze_media(m, self.bot.user.id)
+            media_only = bool(items) and not text_only
+            if media_only and not any(i["hint"] for i in items):
+                try:                                       # nothing to go on: just react, no words, no quota
+                    await m.add_reaction(random.choice(REACT_EMOJI))
+                except Exception:
+                    pass
                 return
             limit = self.check_limits(m.author.id)
             if limit == "cooldown":
@@ -465,8 +588,22 @@ class ZappyChatCog(commands.Cog):
                               allowed_mentions=discord.AllowedMentions.none())
                 return
 
-            question = self.clean_question(m) or "Say hi and tell me what you can do."
+            media = describe_media(items) if media_only else None
+            question = "(no text)" if media_only else (self.clean_question(m) or "Say hi and tell me what you can do.")
+            if items and not media_only:
+                question += f" [they also sent {describe_media(items)}]"
             context = await self.reply_context(m)
+
+            if media_only:                                  # a reaction, not a Q&A: no stats to tempt a tangent
+                async with m.channel.typing():
+                    reply = await self.ask(f"Discord name: {m.author.display_name}", question, context, media=media)
+                if reply:
+                    self._charge(m.author.id)
+                    await m.reply(reply, mention_author=False, allowed_mentions=discord.AllowedMentions.none())
+                else:
+                    try: await m.add_reaction(random.choice(REACT_EMOJI))
+                    except Exception: pass
+                return
 
             async with m.channel.typing():
                 profile = await asyncio.to_thread(
